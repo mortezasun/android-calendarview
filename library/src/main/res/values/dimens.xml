@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="default_height">400dp</dimen>
+    <dimen name="default_height_row">50dp</dimen>
+    <dimen name="default_height_margin">5dp</dimen>
+</resources>
