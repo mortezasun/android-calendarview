@@ -1,13 +1,13 @@
 [versions]
 agp = "8.9.1"
 kotlin = "2.1.10"
-coreKtx = "1.15.0"
+coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
 
-guava = "33.4.6-android"
+
 constraintlayout = "2.2.1"
 navigationFragmentKtx = "2.8.9"
 navigationUiKtx = "2.8.9"
@@ -28,7 +28,7 @@ androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation
 google-material = { group = "com.google.android.material", name = "material", version.ref = "google-material" }
 jalali-calendar-converter= { group = 'com.github.eloyzone', name= 'jalali-calendar',  version.ref= 'jalali'}
 
-guava= { group = 'com.google.guava', name= 'guava',  version.ref= 'guava'}
+
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
