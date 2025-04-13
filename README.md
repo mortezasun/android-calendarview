@@ -1,6 +1,6 @@
 # 📅 Custom CalendarView for Android
 
-A powerful and flexible calendar widget for Android applications. Supports multiple views, events, date range selection, custom styling, and much more.
+A powerful and flexible calendar widget for Android applications. Supports multiple views, date range selection, custom styling using ViewBinding, and much more.
 
 
 ---
@@ -13,6 +13,6 @@ A powerful and flexible calendar widget for Android applications. Supports multi
 - Localization & custom first day of week
 - Click listeners support
 - Dark mode compatible
-- JitPack ready ✅
+
 
 ---
