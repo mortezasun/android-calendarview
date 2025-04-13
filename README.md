@@ -1,3 +1,5 @@
+![Jitpack](https://jitpack.io/#mortezasun/calendarview/1.0.0-alpha)
+
 # 📅 Custom CalendarView for Android
 
 A powerful and flexible calendar widget for Android applications. Supports multiple views, date range selection, custom styling using ViewBinding, and much more.
