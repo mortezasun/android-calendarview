@@ -160,10 +160,13 @@ open class MultiMonthView<Date,T: DayStatus<Date>,D:ViewBinding,W: ViewBinding,M
     }
     open  fun scrollToMonth(position:Int){
         recyclerViewCalendarList.scrollToPosition(position)
+        callMonthActivating(position)
+
+    }
+    open fun callMonthActivating(position:Int){
         if (inDayCellViewAdapter.calendarStatus.getShowRowMonthName()) {
             inDayCellViewAdapter.onMonthViewActive(yearMonthList[position],monthViewBinding)
         }
-
     }
     private fun  initRecyclerView(){
         multiMonthDataAdapter = MultiMonthDataAdapter(inDayCellViewAdapter, yearMonthList )
@@ -222,7 +225,8 @@ open class MultiMonthView<Date,T: DayStatus<Date>,D:ViewBinding,W: ViewBinding,M
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 val inPosition =getPosition(recyclerView,newState)
                 if ( inPosition!=-1){
-                    inDayCellViewAdapter.onMonthViewActive(yearMonthList[ inPosition],monthViewBinding)
+                    callMonthActivating(inPosition)
+
                 }
 
 
