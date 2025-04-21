@@ -20,7 +20,7 @@ import com.develotter.calendarview.status.MonthStatus
 import java.time.YearMonth
 
 @Suppress("UNCHECKED_CAST")
-open class MultiMonthView<Date,T: DayStatus<Date>,D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverloads constructor(
+open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
@@ -29,16 +29,16 @@ open class MultiMonthView<Date,T: DayStatus<Date>,D:ViewBinding,W: ViewBinding,M
     private lateinit var  monthViewBinding: M
 
     private var snapHelper = PagerSnapHelper()
-    private lateinit var inDayCellViewAdapter: BaseCalendarAdapter<Date,T,D, W,M>
-    private lateinit var multiMonthDataAdapter: MultiMonthDataAdapter<Date,T,D, W,M>
-    private lateinit var yearMonthList :MutableList<MonthStatus<*,T>>
+    private lateinit var inDayCellViewAdapter: BaseCalendarAdapter<D, W,M>
+    private lateinit var multiMonthDataAdapter: MultiMonthDataAdapter<D, W,M>
+    private lateinit var yearMonthList :MutableList<MonthStatus<*,DayStatus>>
     private var defaultHeightList= context.resources.getDimensionPixelSize(
     R.dimen.default_height)
 
     init {
         orientation =VERTICAL
     }
-    fun  addMonths( fromInDayCellViewAdapter: BaseCalendarAdapter<Date,T,D, W,M>) {
+    fun  addMonths( fromInDayCellViewAdapter: BaseCalendarAdapter<D, W,M>) {
         removeAllViews()
         inDayCellViewAdapter = fromInDayCellViewAdapter
 
@@ -67,7 +67,7 @@ open class MultiMonthView<Date,T: DayStatus<Date>,D:ViewBinding,W: ViewBinding,M
                         if (startMonth is YearMonth)
                             ys.yearMonth = startMonth.plusMonths(i.toLong())
                         ys
-                        //    yearMonthList.add(ys as MonthStatus<*, T>)
+                        //    yearMonthList.add(ys as MonthStatus<*, DayStatus<*>>)
                     }
 
                     TypeArtCalender.JALALI -> {
@@ -76,10 +76,10 @@ open class MultiMonthView<Date,T: DayStatus<Date>,D:ViewBinding,W: ViewBinding,M
                         if (startMonth is JalaliStatus)
                             ys.jalaliDateRow = startMonth.plusMonths(i).getNow()
                         ys
-                        //    yearMonthList.add(ys as MonthStatus<*, T>)
+                        //    yearMonthList.add(ys as MonthStatus<*, DayStatus<*>>)
                     }
                 }
-                yearMonthList.add(ys as MonthStatus<*, T>)
+                yearMonthList.add(ys as MonthStatus<*, DayStatus>)
 
 
             }

@@ -14,7 +14,7 @@ import kotlin.math.abs
 import kotlin.math.min
 
 
-class MonthView<Day, T : DayStatus<Day>, D : ViewBinding, W : ViewBinding, M : ViewBinding> @JvmOverloads constructor(
+class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding> @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs) {
@@ -24,11 +24,11 @@ class MonthView<Day, T : DayStatus<Day>, D : ViewBinding, W : ViewBinding, M : V
 
 
 
-    private lateinit var inDayCellViewAdapter: BaseCalendarAdapter<Day, T, D, W, M>
+    private lateinit var inDayCellViewAdapter: BaseCalendarAdapter< D, W, M>
 
-    private var dayPreStatusList: MutableList<T> = mutableListOf()
-    private var dayNextStatusList: MutableList<T> = mutableListOf()
-    private var dayStatusList: MutableList<T> = mutableListOf()
+    private var dayPreStatusList: MutableList<DayStatus> = mutableListOf()
+    private var dayNextStatusList: MutableList<DayStatus> = mutableListOf()
+    private var dayStatusList: MutableList<DayStatus> = mutableListOf()
 
 
     init {
@@ -52,8 +52,8 @@ class MonthView<Day, T : DayStatus<Day>, D : ViewBinding, W : ViewBinding, M : V
 
 
     fun setUp(
-        thisInDayCellViewAdapter: BaseCalendarAdapter<Day, T, D, W, M>,
-        monthStatus: MonthStatus<*, T>
+        thisInDayCellViewAdapter: BaseCalendarAdapter< D, W, M>,
+        monthStatus: MonthStatus<*, DayStatus>
     ) {
 
         if (dayStatusList.isEmpty()) {

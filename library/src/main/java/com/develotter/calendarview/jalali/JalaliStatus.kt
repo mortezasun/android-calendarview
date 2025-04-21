@@ -11,7 +11,7 @@ import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.floor
 
-open class JalaliStatus() : MonthStatus<JalaliDate, DayStatus<JalaliDate>>() {
+open class JalaliStatus() : MonthStatus<JalaliDate, DayStatus>() {
     var jalaliDateRow: JalaliDate
 
     override fun setLocaleInUse(lc: Locale) {
@@ -70,12 +70,12 @@ open class JalaliStatus() : MonthStatus<JalaliDate, DayStatus<JalaliDate>>() {
         return 1
     }
 
-    override fun minusMonths(count: Int): MonthStatus<JalaliDate, DayStatus<JalaliDate>> {
+    override fun minusMonths(count: Int): MonthStatus<JalaliDate, DayStatus> {
 
         return plusMonths(-count)
     }
 
-    override fun plusMonths(count: Int): MonthStatus<JalaliDate, DayStatus<JalaliDate>> {
+    override fun plusMonths(count: Int): MonthStatus<JalaliDate, DayStatus> {
         var status = JalaliStatus()
 
         val floors = if (count > 0) {
@@ -103,7 +103,7 @@ open class JalaliStatus() : MonthStatus<JalaliDate, DayStatus<JalaliDate>>() {
         return status
     }
 
-    override fun setOnCreateDayStatus(day: Int): DayStatus<JalaliDate> {
+    override fun setOnCreateDayStatus(day: Int): DayStatus {
         val dayStatus = JalaliDayStatus()
         dayStatus.localDate = atDay(day)
         var month = jalaliDateRow.monthPersian.value

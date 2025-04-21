@@ -12,9 +12,9 @@ import com.develotter.calendarview.R
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
 @Suppress("UNCHECKED_CAST")
-class MultiMonthDataAdapter<Day,T: DayStatus<Day>,D: ViewBinding,W: ViewBinding,M: ViewBinding>(
-    private val inDayCellViewAdapterThis : BaseCalendarAdapter<Day,T,D, W,M>
-    ,private val yearMonthListThis: MutableList<MonthStatus<*,T>>) :
+class MultiMonthDataAdapter<D: ViewBinding,W: ViewBinding,M: ViewBinding>(
+    private val inDayCellViewAdapterThis : BaseCalendarAdapter<D, W,M>
+    ,private val yearMonthListThis: MutableList<MonthStatus<*, DayStatus>>) :
     Adapter<RecyclerView.ViewHolder>() {
     init {
         inDayCellViewAdapterThis.onReset()
@@ -28,15 +28,15 @@ class MultiMonthDataAdapter<Day,T: DayStatus<Day>,D: ViewBinding,W: ViewBinding,
                 R.dimen.default_height))
             orientation = LinearLayout.VERTICAL
         }
-        val monthView = MonthView<Day,T,D, W,M>(parent.context)
+        val monthView = MonthView<D, W,M>(parent.context)
         linearLayout.addView(monthView)
 
-        return MultiMonthViewHolder<Day,T,D, W,M>(monthView,linearLayout)
+        return MultiMonthViewHolder<D, W,M>(monthView,linearLayout)
     }
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            (holder as MultiMonthViewHolder<Day,T,D, W,M>).monthView.setUp(  inDayCellViewAdapterThis,yearMonthListThis[position] )
+            (holder as MultiMonthViewHolder<D, W,M>).monthView.setUp(  inDayCellViewAdapterThis,yearMonthListThis[position] )
     }
     override fun getItemCount() = yearMonthListThis.size
 
 }
-class MultiMonthViewHolder<Day,T: DayStatus<Day>,D:ViewBinding,W: ViewBinding,M: ViewBinding>(var monthView:MonthView<Day,T,D, W,M>,  itemView: View) : RecyclerView.ViewHolder(itemView)
+class MultiMonthViewHolder<D:ViewBinding,W: ViewBinding,M: ViewBinding>(var monthView:MonthView<D, W,M>,  itemView: View) : RecyclerView.ViewHolder(itemView)

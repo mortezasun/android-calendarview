@@ -8,7 +8,7 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-open class GeorgianStatus: MonthStatus<YearMonth, DayStatus<LocalDate>>() {
+open class GeorgianStatus: MonthStatus<YearMonth, DayStatus>() {
     var yearMonth: YearMonth = getNow()
     override fun setLocaleInUse(lc: Locale) {
         lcInUse = lc
@@ -45,13 +45,13 @@ open class GeorgianStatus: MonthStatus<YearMonth, DayStatus<LocalDate>>() {
         return yearMonth.atDay(1).dayOfMonth
     }
 
-    override fun minusMonths(count: Int): MonthStatus<YearMonth, DayStatus<LocalDate>> {
+    override fun minusMonths(count: Int): MonthStatus<YearMonth, DayStatus> {
         var georgianStatus = GeorgianStatus()
         georgianStatus.yearMonth =  yearMonth.minusMonths(count.toLong())
         return georgianStatus
     }
 
-    override fun plusMonths(count: Int): MonthStatus<YearMonth, DayStatus<LocalDate>> {
+    override fun plusMonths(count: Int): MonthStatus<YearMonth, DayStatus> {
         var georgianStatus = GeorgianStatus()
         georgianStatus.yearMonth =  yearMonth.plusMonths(count.toLong())
         return georgianStatus
@@ -61,7 +61,7 @@ open class GeorgianStatus: MonthStatus<YearMonth, DayStatus<LocalDate>>() {
        return yearMonth.atDay(day)
     }
 
-    override fun setOnCreateDayStatus(day: Int): DayStatus<LocalDate> {
+    override fun setOnCreateDayStatus(day: Int): DayStatus {
         val dayStatus = GeorgianDayStatus()
         dayStatus.localDate=atDay(day)
         return dayStatus

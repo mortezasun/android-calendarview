@@ -12,7 +12,7 @@ import java.time.LocalDate
  *
  * @property jalaliDate The [JalaliDate] object representing the date for which the status is being determined.  Must be initialized before use.
  */
-class JalaliDayStatus : DayStatus<JalaliDate>() {
+class JalaliDayStatus : DayStatus() {
     lateinit var jalaliDate: JalaliDate
 
 
@@ -29,10 +29,11 @@ class JalaliDayStatus : DayStatus<JalaliDate>() {
     }
 
     override fun setDateSelect(year: Int, month: Int, day: Int) {
+
         jalaliDate = JalaliDate(year, month, day)
         localDate = atDayLocalDate(year, month, day)
-
     }
+
     fun atDayLocalDate(year: Int, month: Int, day: Int): LocalDate {
         val dateConverter = DateConverter()
         return dateConverter.jalaliToGregorian(JalaliDate(year, month, day))

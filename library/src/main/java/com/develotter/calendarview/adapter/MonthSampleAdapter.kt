@@ -6,19 +6,19 @@ import com.develotter.calendarview.status.CalendarStatus
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.SelectRangeDayStatus
 
-abstract class MonthSampleAdapter<Date, T : DayStatus<Date>, Day : ViewBinding, Week : ViewBinding, Month : ViewBinding>(
-      calendarStatus: CalendarStatus,
-       dayStatusListAdapter:  MutableMap<String, T> = mutableMapOf(),
-       dayStatusListSelectedByMultipleSelect: MutableList<T>  = mutableListOf(),
-       dayStatusListSelectedBySingleSelect: MutableList<T> = mutableListOf() ,
-       dayStatusListSelectedRange: MutableList<T> = mutableListOf(),
-       dayStatusListSelectedViewBinding: MutableMap<String, Day> = mutableMapOf()
+abstract class MonthSampleAdapter< Day : ViewBinding, Week : ViewBinding, Month : ViewBinding>(
+    calendarStatus: CalendarStatus,
+    dayStatusListAdapter:  MutableMap<String, DayStatus> = mutableMapOf(),
+    dayStatusListSelectedByMultipleSelect: MutableList<DayStatus>  = mutableListOf(),
+    dayStatusListSelectedBySingleSelect: MutableList<DayStatus> = mutableListOf(),
+    dayStatusListSelectedRange: MutableList<DayStatus> = mutableListOf(),
+    dayStatusListSelectedViewBinding: MutableMap<String, Day> = mutableMapOf()
     ) :
-    BaseCalendarAdapter<Date, T, Day, Week, Month>(calendarStatus, dayStatusListAdapter, dayStatusListSelectedByMultipleSelect, dayStatusListSelectedBySingleSelect, dayStatusListSelectedRange, dayStatusListSelectedViewBinding) {
+    BaseCalendarAdapter<Day, Week, Month>(calendarStatus, dayStatusListAdapter, dayStatusListSelectedByMultipleSelect, dayStatusListSelectedBySingleSelect, dayStatusListSelectedRange, dayStatusListSelectedViewBinding) {
 
     override fun onReset() {}
 
-    override fun onCreateDayView(dayStatus: T, day: Int): Day {
+    override fun onCreateDayView(dayStatus: DayStatus, day: Int): Day {
 
         dayStatusListAdapter[getKeyStringForViewBinding(dayStatus)] = (dayStatus)
         val rows = onBindDayView(dayStatus)
@@ -33,7 +33,7 @@ abstract class MonthSampleAdapter<Date, T : DayStatus<Date>, Day : ViewBinding, 
         }
         return rows
     }
-     fun getKeyStringForViewBinding(dayStatus: T): String {
+     fun getKeyStringForViewBinding(dayStatus: DayStatus): String {
          var  monthString= ""
          var  dayString= ""
          var  yearString=dayStatus.onGetYearInt()
@@ -52,11 +52,11 @@ abstract class MonthSampleAdapter<Date, T : DayStatus<Date>, Day : ViewBinding, 
       return  "${yearString}${monthString}${dayString}"
     }
 
-    override fun onNoneClickRowDay(dayStatus: T, viewbinding: Day, isLong: Boolean) {
+    override fun onNoneClickRowDay(dayStatus: DayStatus, viewbinding: Day, isLong: Boolean) {
 
     }
 
-    override fun onSingleClickRowDay(dayStatus: T, viewbinding: Day, isLong: Boolean) {
+    override fun onSingleClickRowDay(dayStatus: DayStatus, viewbinding: Day, isLong: Boolean) {
         if( dayStatusListSelectedBySingleSelect.count()>0  ){
             var another  = getKeyStringForViewBinding( dayStatusListSelectedBySingleSelect[0])
             var now = getKeyStringForViewBinding(dayStatus)
@@ -71,7 +71,7 @@ abstract class MonthSampleAdapter<Date, T : DayStatus<Date>, Day : ViewBinding, 
         onDayItemClick(dayStatus, viewbinding)
     }
 
-    override fun onMultipleClickRowDay(dayStatus: T, viewbinding: Day, isLong: Boolean) {
+    override fun onMultipleClickRowDay(dayStatus: DayStatus, viewbinding: Day, isLong: Boolean) {
 
         clickSingleDay( dayStatusListSelectedBySingleSelect, dayStatus)
         onDayItemClick(dayStatus, viewbinding)
@@ -79,7 +79,7 @@ abstract class MonthSampleAdapter<Date, T : DayStatus<Date>, Day : ViewBinding, 
     fun sortRangeListBase(){
          dayStatusListSelectedRange.sortWith(compareBy { getKeyStringForViewBinding(it).toInt()})
     }
-    override fun onRangeClickRowDay(dayStatus: T, viewbinding: Day, isLong: Boolean) {
+    override fun onRangeClickRowDay(dayStatus: DayStatus, viewbinding: Day, isLong: Boolean) {
         sortRangeListBase()
 
         if ( dayStatusListSelectedRange.count() == 0) {
@@ -276,7 +276,7 @@ abstract class MonthSampleAdapter<Date, T : DayStatus<Date>, Day : ViewBinding, 
 
     }
 
-    override fun onHandleClickRowDay(dayStatus: T, viewbinding: Day, isLong: Boolean) {
+    override fun onHandleClickRowDay(dayStatus: DayStatus, viewbinding: Day, isLong: Boolean) {
         when (calendarStatus.getTypeSelectDay()) {
             TypeSelectDay.None -> {
                 onNoneClickRowDay(dayStatus, viewbinding, isLong)
@@ -296,7 +296,7 @@ abstract class MonthSampleAdapter<Date, T : DayStatus<Date>, Day : ViewBinding, 
 
     }
 
-    fun getPeriodByRange(action: (startDay: T, endDay: T) -> Unit) {
+    fun getPeriodByRange(action: (startDay: DayStatus, endDay: DayStatus) -> Unit) {
         sortRangeListBase()
            dayStatusListSelectedRange[0].selectRangeDayStatus = SelectRangeDayStatus.AsStart
            dayStatusListSelectedRange[1].selectRangeDayStatus = SelectRangeDayStatus.AsEnd
@@ -327,7 +327,7 @@ abstract class MonthSampleAdapter<Date, T : DayStatus<Date>, Day : ViewBinding, 
         }
     }
 
-    private fun clickSingleDay(dayStatusListInner: MutableList<T>, dayStatus: T) {
+    private fun clickSingleDay(dayStatusListInner: MutableList<DayStatus>, dayStatus: DayStatus) {
         if (dayStatusListInner.contains(dayStatus)) {
             dayStatus.selectRangeDayStatus = SelectRangeDayStatus.Nothing
             dayStatus.isChecked = false

@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.util.Locale
 
 
-abstract class DayStatus<T> {
+abstract class DayStatus {
     var isChecked: Boolean = false
 
     var selectRangeDayStatus:SelectRangeDayStatus = SelectRangeDayStatus.Nothing
@@ -18,12 +18,22 @@ abstract class DayStatus<T> {
         return formatNumberToArabicDigits(onGetDayInt())
     }
 
-    abstract fun onGetDayInt(): Int
-    abstract fun onGetMonthInt(): Int
-    abstract fun onGetYearInt(): Int
 
+     open fun onGetDayInt(): Int {
+        return localDate.dayOfMonth
+    }
 
-    abstract fun setDateSelect(year:Int,month:Int,day:Int)
+     open fun onGetMonthInt(): Int {
+        return localDate.monthValue
+    }
+
+     open fun onGetYearInt(): Int {
+        return localDate.year
+    }
+
+     open fun setDateSelect(year:Int, month:Int, day:Int){
+         localDate = LocalDate.of(year,month,day)
+     }
 
     fun formatNumberToArabicDigits(number: Int): String {
 

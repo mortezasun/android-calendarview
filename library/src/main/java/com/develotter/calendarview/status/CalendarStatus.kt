@@ -79,7 +79,7 @@ class CalendarStatus {
         this.showNextMonth = showNextMonth
         return this
     }
-    fun <Date,T: DayStatus<Date>>getListCustomCalendar(): MutableList<MonthStatus<*,T>> {
+    fun getListCustomCalendar(): MutableList<MonthStatus<*, DayStatus>> {
         return mutableListOf()
     }
 }

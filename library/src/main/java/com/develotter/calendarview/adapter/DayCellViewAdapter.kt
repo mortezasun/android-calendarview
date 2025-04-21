@@ -5,26 +5,26 @@ import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
 import java.time.DayOfWeek
 
-interface DayCellViewAdapter<Date,T:DayStatus<Date>,Day: ViewBinding,Week: ViewBinding>
+interface DayCellViewAdapter<Day: ViewBinding,Week: ViewBinding>
      {
 
     fun onReset()
-    fun onBindDayView( dayStatus: T)   : Day
+    fun onBindDayView( dayStatus: DayStatus)   : Day
     fun onBindWeekView( dayStatus: DayOfWeek)   : Week
 
-    fun onBindLastMonthDayView( dayStatus: T)   : Day
-    fun onBindNextMonthDayView( dayStatus: T)   : Day
+    fun onBindLastMonthDayView( dayStatus: DayStatus)   : Day
+    fun onBindNextMonthDayView( dayStatus: DayStatus)   : Day
 
 
-    fun onCreateDayView(dayStatus: T,day:Int): Day
-    fun onHandleClickRowDay(dayStatus: T, viewbinding:Day,isLong: Boolean)
-    fun onNoneClickRowDay(dayStatus: T, viewbinding:Day,isLong: Boolean)
-    fun onSingleClickRowDay(dayStatus: T, viewbinding:Day,isLong: Boolean)
-    fun onMultipleClickRowDay(dayStatus: T, viewbinding:Day,isLong: Boolean)
-    fun onRangeClickRowDay(dayStatus: T, viewbinding:Day,isLong: Boolean)
+    fun onCreateDayView(dayStatus: DayStatus, day:Int): Day
+    fun onHandleClickRowDay(dayStatus: DayStatus, viewbinding:Day, isLong: Boolean)
+    fun onNoneClickRowDay(dayStatus: DayStatus, viewbinding:Day, isLong: Boolean)
+    fun onSingleClickRowDay(dayStatus: DayStatus, viewbinding:Day, isLong: Boolean)
+    fun onMultipleClickRowDay(dayStatus: DayStatus, viewbinding:Day, isLong: Boolean)
+    fun onRangeClickRowDay(dayStatus: DayStatus, viewbinding:Day, isLong: Boolean)
 
-    fun onDayFocused(status: MonthStatus<*, T>)
-    fun onDayItemClick(dayStatus: T, viewbinding:Day)
+    fun onDayFocused(status: MonthStatus<*, DayStatus>)
+    fun onDayItemClick(dayStatus: DayStatus, viewbinding:Day)
 
 
 
