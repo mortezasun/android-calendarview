@@ -18,3 +18,34 @@ A powerful and flexible calendar widget for Android applications. Supports multi
 
 
 ---
+
+
+## 📦 Installation
+
+This library is available on **JitPack**. Add it to your project in a few simple steps:
+
+### Step 1: Add JitPack to your root `build.gradle` (or `settings.gradle` for newer Gradle versions)
+
+```gradle
+// For old versions
+allprojects {
+    repositories {
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+// For Gradle 7.0 and above (settings.gradle.kts)
+	dependencyResolutionManagement {
+		repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+		repositories {
+			mavenCentral()
+			maven { url = uri("https://jitpack.io") }
+		}
+	}
+```
+### Step 2: Add the dependency
+
+```gradle
+dependencies {
+    implementation 'com.github.mortezasun:calendarview:1.0.0-alpha3'
+}
