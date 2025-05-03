@@ -22,6 +22,9 @@
     <string name="show_month_name">Show Month Name</string>
     <string name="No">No</string>
     <string name="Yes">Yes</string>
+    <string name="change_text_style">Change Text Style</string>
+    <string name="From">From</string>
+    <string name="To">To</string>
 
 
 </resources>

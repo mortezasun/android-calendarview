@@ -15,12 +15,13 @@ class CalendarStatus {
     private  var customCalendar : Boolean  = false
     private  var localInUse : Locale = Locale.getDefault()
     private  var countsMonthAfterAndBefore: Int = 50
-    private  var typeSelectDay: TypeSelectDay = TypeSelectDay.Single
+    private  var typeSelectDay: TypeSelectDay = TypeSelectDay.Range
     private  var showLastMonth: Boolean = true
     private  var showNextMonth: Boolean = true
     private  var showRowWeekName : TypeWeekShow = TypeWeekShow.Fix
     private  var showRowMonthName : Boolean = false
     private  var showCalendarController : Boolean = true
+    private  var showSelectedDayController : Boolean = true
 
     fun getViewTypeSelected(): TypeViewCalender = viewTypeSelected
     fun getArtSelected(): TypeArtCalender = artSelected
@@ -31,6 +32,7 @@ class CalendarStatus {
     fun getShowRowMonthName(): Boolean = showRowMonthName
     fun getTypeSelectDay(): TypeSelectDay = typeSelectDay
     fun getShowCalendarController(): Boolean = showCalendarController
+    fun getShowSelectedDayController(): Boolean = showSelectedDayController
 
     fun getLocalInUse(): Locale = localInUse
     fun getCountsMonthAfterAndBefore(): Int = countsMonthAfterAndBefore
@@ -77,6 +79,16 @@ class CalendarStatus {
     }
     fun setShowNextMonth(showNextMonth: Boolean): CalendarStatus {
         this.showNextMonth = showNextMonth
+        return this
+    }
+
+    fun setShowSelectedDayController(showSelectedDayController: Boolean): CalendarStatus {
+        this.showSelectedDayController = showSelectedDayController
+        return this
+    }
+
+    fun setShowCalendarController(showCalendarController: Boolean): CalendarStatus {
+        this.showCalendarController = showCalendarController
         return this
     }
     fun getListCustomCalendar(): MutableList<MonthStatus<*, DayStatus>> {

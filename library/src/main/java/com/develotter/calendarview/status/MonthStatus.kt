@@ -4,11 +4,11 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.Locale
 
-abstract class MonthStatus<Month,Day> {
+abstract class MonthStatus<Month,Day>(   val lcInUse: Locale) {
 
-   lateinit var lcInUse: Locale
 
-   abstract fun setLocaleInUse(lc: Locale)
+
+
    abstract fun getThisMonthCaption():String
    abstract fun lengthOfMonth(): Int
    abstract fun getMonthName(): String

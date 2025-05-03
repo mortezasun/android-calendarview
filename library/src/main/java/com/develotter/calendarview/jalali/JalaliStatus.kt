@@ -2,63 +2,45 @@ package com.develotter.calendarview.jalali
 
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
-import com.github.eloyzone.jalalicalendar.DateConverter
-import com.github.eloyzone.jalalicalendar.JalaliDate
-import com.github.eloyzone.jalalicalendar.MonthPersian
+
+import com.develotter.calendarview.toJalali
+import com.develotter.calendarview.toLocalDate
+import ir.huri.jcal.JalaliCalendar
+
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.floor
 
-open class JalaliStatus() : MonthStatus<JalaliDate, DayStatus>() {
-    var jalaliDateRow: JalaliDate
+open class JalaliStatus(localInUse: Locale) : MonthStatus<JalaliDayStatus, DayStatus>(localInUse) {
+    var jalaliDateRow: JalaliDayStatus
 
-    override fun setLocaleInUse(lc: Locale) {
-        lcInUse = lc
-    }
+
 
     override fun getThisMonthCaption(): String {
         return getMonthName() + " : " + getYearName()
     }
 
     init {
-        val dateConverter = DateConverter()
-        val localDate = LocalDate.now()
-        jalaliDateRow = dateConverter.gregorianToJalali(localDate.year, localDate.month, localDate.dayOfMonth)
+        jalaliDateRow = JalaliDayStatus(LocalDate.now().toJalali(),lcInUse)
     }
 
     override fun lengthOfMonth(): Int {
-        return when (jalaliDateRow.monthPersian) {
-            MonthPersian.FARVARDIN -> 31
-            MonthPersian.ORDIBEHESHT -> 31
-            MonthPersian.KHORDAD -> 31
-            MonthPersian.TIR -> 31
-            MonthPersian.MORDAD -> 31
-            MonthPersian.SHAHRIVAR -> 31
-            MonthPersian.MEHR -> 30
-            MonthPersian.ABAN -> 30
-            MonthPersian.AZAR -> 30
-            MonthPersian.DAY -> 30
-            MonthPersian.BAHMAN -> 30
-            MonthPersian.ESFAND -> (if (jalaliDateRow.isLeapYear) 30 else 29)
-        }
+        return jalaliDateRow.jalaliDate.monthLength
+
     }
 
     override fun getMonthName(): String {
 
-        return if (lcInUse.language == "fa") {
-            jalaliDateRow.monthPersian.stringInPersian
-        } else {
-            jalaliDateRow.monthPersian.stringInEnglish
-        }
+        return  jalaliDateRow.getMonthString(lcInUse)
     }
 
     override fun getYearName(): String {
-        return jalaliDateRow.year.toString()
+        return jalaliDateRow.jalaliDate.year.toString()
     }
 
-    override fun getNow(): JalaliDate {
+    override fun getNow(): JalaliDayStatus {
         return jalaliDateRow
     }
 
@@ -70,13 +52,13 @@ open class JalaliStatus() : MonthStatus<JalaliDate, DayStatus>() {
         return 1
     }
 
-    override fun minusMonths(count: Int): MonthStatus<JalaliDate, DayStatus> {
+    override fun minusMonths(count: Int): MonthStatus<JalaliDayStatus, DayStatus> {
 
         return plusMonths(-count)
     }
 
-    override fun plusMonths(count: Int): MonthStatus<JalaliDate, DayStatus> {
-        var status = JalaliStatus()
+    override fun plusMonths(count: Int): MonthStatus<JalaliDayStatus, DayStatus> {
+        var status = JalaliStatus(lcInUse)
 
         val floors = if (count > 0) {
             floor(count / 12.0).toInt()
@@ -88,8 +70,8 @@ open class JalaliStatus() : MonthStatus<JalaliDate, DayStatus>() {
         } else {
             floor((count % 12.0))
         }
-        var newYear = jalaliDateRow.year + floors
-        var newMonth = jalaliDateRow.monthPersian.value + (rest).toInt()
+        var newYear = jalaliDateRow.jalaliDate.year + floors
+        var newMonth = jalaliDateRow.jalaliDate.month + (rest).toInt()
         if (newMonth > 12) {
             newYear++
             newMonth -= 12
@@ -99,28 +81,25 @@ open class JalaliStatus() : MonthStatus<JalaliDate, DayStatus>() {
         }
 
 
-        status.jalaliDateRow = JalaliDate(newYear, newMonth, 1)
+        status.jalaliDateRow = JalaliDayStatus(JalaliCalendar(newYear, newMonth, 1),lcInUse)
         return status
     }
 
     override fun setOnCreateDayStatus(day: Int): DayStatus {
-        val dayStatus = JalaliDayStatus()
-        dayStatus.localDate = atDay(day)
-        var month = jalaliDateRow.monthPersian.value
+        var month = jalaliDateRow.jalaliDate.month
         if (month == 0) {
             month = 1
         }
-        dayStatus.jalaliDate = JalaliDate(jalaliDateRow.year, month, day)
-        return dayStatus
+        return JalaliDayStatus(JalaliCalendar(jalaliDateRow.jalaliDate.year, month, day),lcInUse)
     }
 
     override fun atDay(day: Int): LocalDate {
-        val dateConverter = DateConverter()
-        var month = jalaliDateRow.monthPersian.value
+
+        var month = jalaliDateRow.jalaliDate.month
         if (month == 0) {
             month = 1
         }
-        return dateConverter.jalaliToGregorian(JalaliDate(jalaliDateRow.year, month, day))
+        return JalaliCalendar(jalaliDateRow.jalaliDate.year, month, day).toLocalDate()
     }
 
 

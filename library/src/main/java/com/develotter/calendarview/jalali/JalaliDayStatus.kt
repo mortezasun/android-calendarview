@@ -1,19 +1,24 @@
 package com.develotter.calendarview.jalali
 
 import com.develotter.calendarview.status.DayStatus
-import com.github.eloyzone.jalalicalendar.DateConverter
-import com.github.eloyzone.jalalicalendar.JalaliDate
+import com.develotter.calendarview.toJalali
+
+import com.develotter.calendarview.toLocalDate
+
+import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 /**
- * Represents the status of a day in the Jalali (Persian) calendar.  Extends the generic [DayStatus] class for [JalaliDate].
+ * Represents the status of a day in the Jalali (Persian) calendar.  Extends the generic [DayStatus] class for [JalaliCalendar].
  *
  * This class provides information about a specific day, such as its day of the month and whether it is the current day.
  *
- * @property jalaliDate The [JalaliDate] object representing the date for which the status is being determined.  Must be initialized before use.
+ * @property jalaliDate The [JalaliCalendar] object representing the date for which the status is being determined.  Must be initialized before use.
  */
-class JalaliDayStatus : DayStatus() {
-    lateinit var jalaliDate: JalaliDate
+class JalaliDayStatus(val  jalaliDate: JalaliCalendar,lcInUse: Locale) : DayStatus(jalaliDate.toLocalDate(),lcInUse) {
+
 
 
     override fun onGetDayInt(): Int {
@@ -21,30 +26,79 @@ class JalaliDayStatus : DayStatus() {
     }
 
     override fun onGetMonthInt(): Int {
-        return jalaliDate.monthPersian.value
+        return jalaliDate.month
     }
 
     override fun onGetYearInt(): Int {
         return jalaliDate.year
     }
 
-    override fun setDateSelect(year: Int, month: Int, day: Int) {
+    fun getJalaliTextStyle(txtStyle: TextStyle, lcLocale: Locale): String {
+        return when (txtStyle) {
 
-        jalaliDate = JalaliDate(year, month, day)
-        localDate = atDayLocalDate(year, month, day)
+
+            TextStyle.SHORT -> {
+                jalaliDate.day.toString() + "/" + jalaliDate.month + "/" + jalaliDate.year
+            }
+            else
+                -> {
+                getDayOfWeekString(txtStyle,lcLocale) + ", " + jalaliDate.day + " " + getMonthString(lcLocale) + ", " + jalaliDate.year
+            }
+
+        }
+    }
+    fun getDayOfWeekString(txtStyle: TextStyle, lcLocale: Locale): String {
+        return when (lcLocale.language) {
+            "fa" -> {
+                jalaliDate.dayOfWeekString
+            }
+            else -> {
+                jalaliDate.toLocalDate().dayOfWeek.getDisplayName(txtStyle, lcLocale)
+            }
+        }
+    }
+    fun getMonthString(lcLocale: Locale): String {
+        return when (lcLocale.language) {
+            "fa" -> {
+                jalaliDate.monthString
+            }
+            else -> {
+                getMonthStringEnglish()
+            }
+        }
+    }
+    private fun getMonthStringEnglish(): String {
+        return when ( jalaliDate.month) {
+            1 -> "Farvardin"
+            2 -> "Ordibehesht"
+            3 -> "Khordad"
+            4 -> "Tir"
+            5 -> "Mordad"
+            6 -> "Shahrivar"
+            7 -> "Mehr"
+            8 -> "Aban"
+            9 -> "Azar"
+            10 -> "Dey"
+            11 -> "Bahman"
+            12 -> "Esfand"
+            else -> "Unknown"
+        }
     }
 
-    fun atDayLocalDate(year: Int, month: Int, day: Int): LocalDate {
-        val dateConverter = DateConverter()
-        return dateConverter.jalaliToGregorian(JalaliDate(year, month, day))
+    override fun getDisplayName(txtStyle: TextStyle): String {
+        return getJalaliTextStyle(txtStyle,lcInUse)
     }
+
+
+
+
+
     override fun isToday(): Boolean {
-        val dateConverter = DateConverter()
-        val today = LocalDate.now()
-        val todayInJalali =
-            dateConverter.gregorianToJalali(today.year, today.month, today.dayOfMonth)
 
-        return jalaliDate.year == todayInJalali.year && jalaliDate.monthPersian.value == todayInJalali.monthPersian.value && jalaliDate.day == todayInJalali.day
+        val todayInJalali = LocalDate.now().toJalali()
+
+
+        return jalaliDate.year == todayInJalali.year && jalaliDate.month == todayInJalali.month && jalaliDate.day == todayInJalali.day
 
     }
 }

@@ -3,19 +3,25 @@ package com.develotter.calendarviewsample
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.app.AlertDialog
+import android.app.LocaleManager
 import android.content.DialogInterface
+import android.icu.util.ULocale
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.LocaleManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import androidx.viewbinding.ViewBinding
 import com.develotter.calendarview.adapter.MonthSampleAdapter
 import com.develotter.calendarview.enums.TypeArtCalender
 import com.develotter.calendarview.enums.TypeSelectDay
 import com.develotter.calendarview.enums.TypeViewCalender
 import com.develotter.calendarview.enums.TypeWeekShow
+import com.develotter.calendarview.getCalendarBase
+import com.develotter.calendarview.jalali.JalaliDayStatus
 import com.develotter.calendarview.status.CalendarStatus
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
@@ -25,8 +31,15 @@ import com.develotter.calendarviewsample.databinding.DialogMultiBinding
 import com.develotter.calendarviewsample.databinding.RowCalendarBinding
 import com.develotter.calendarviewsample.databinding.RowCalendarControllerBinding
 import com.develotter.calendarviewsample.databinding.RowMonthBinding
+import com.develotter.calendarviewsample.databinding.RowShowSelectedDayBinding
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
+import ir.huri.jcal.JalaliCalendar
 import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.format.DateTimeFormatterBuilder
 import java.time.format.TextStyle
+import java.time.temporal.ChronoField.EPOCH_DAY
 import java.util.Locale
 
 @Suppress("UNCHECKED_CAST")
@@ -35,6 +48,7 @@ class CalendarViewActivity : AppCompatActivity() {
     var noOrYes = arrayOf("")
     private lateinit var binding: ActivityMainBinding
     private lateinit var thisCalendarStatus: CalendarStatus
+    private  var textStyle: TextStyle = TextStyle.FULL
 
     private lateinit var lcInUse: Locale
 
@@ -74,7 +88,7 @@ class CalendarViewActivity : AppCompatActivity() {
             }
 
         thisCalendarStatus = CalendarStatus().setLocalInUse(lcInUse)
-        thisCalendarStatus.setArtSelected(TypeArtCalender.JALALI)
+
         setUpCalendar()
 
         binding.showDialogChangeCalendarType.setOnClickListener {
@@ -103,6 +117,9 @@ class CalendarViewActivity : AppCompatActivity() {
         }
         binding.showWeekName.setOnClickListener {
             changeWeekNameShowing()
+        }
+        binding.changeTextStyle.setOnClickListener {
+            changeTextStyle()
         }
 
         binding.goThisMonth.setOnClickListener {
@@ -136,6 +153,7 @@ class CalendarViewActivity : AppCompatActivity() {
             noOrYes[if (thisCalendarStatus.getShowNextMonth()) 1 else 0]
         binding.showLastMonthText.text =
             noOrYes[if (thisCalendarStatus.getShowLastMonth()) 1 else 0]
+        binding.changeTextStyleText.text = textStyle.toString()
         binding.toolbar.post {
             binding.toolbar.title = binding.calendar.getThisMonthCaption()
         }
@@ -145,24 +163,28 @@ class CalendarViewActivity : AppCompatActivity() {
     fun setUpCalendar() {
 
         var dayStatusListSelectedBySingleSelect: MutableList<DayStatus> = mutableListOf()
-        val dayStatus = object : DayStatus(){
 
-        }
-        dayStatus.setDateSelect(2025, 4, 25)
-        dayStatusListSelectedBySingleSelect.add(0, dayStatus)
+        val jal = JalaliDayStatus(JalaliCalendar(1404, 2, 7), lcInUse)
+        val jal1 = JalaliDayStatus(JalaliCalendar(1404, 2, 14), lcInUse)
+        val jal2 = JalaliDayStatus(JalaliCalendar(1404, 2, 21), lcInUse)
+        dayStatusListSelectedBySingleSelect.add(0, jal)
         binding.calendar.addMonths(object :
-            MonthSampleAdapter<RowCalendarBinding, RowCalendarBinding, RowMonthBinding>
+            MonthSampleAdapter<RowCalendarBinding, RowCalendarBinding, RowMonthBinding, RowShowSelectedDayBinding>
                 (
-                thisCalendarStatus,
-                dayStatusListSelectedBySingleSelect = dayStatusListSelectedBySingleSelect
+                thisCalendarStatus
             ) {
             override fun onBindWeekView(dayStatus: DayOfWeek): RowCalendarBinding {
                 val binding = RowCalendarBinding.inflate(layoutInflater)
                 binding.textRow.text =
-                    dayStatus.getDisplayName(TextStyle.SHORT, thisCalendarStatus.getLocalInUse())
+                    dayStatus.getDisplayName(textStyle, thisCalendarStatus.getLocalInUse())
+
+
 
                 return binding
             }
+
+            override val select: RowShowSelectedDayBinding
+                get() = RowShowSelectedDayBinding.inflate(layoutInflater)
 
 
             override fun onBindDayView(dayStatus: DayStatus): RowCalendarBinding {
@@ -230,20 +252,83 @@ class CalendarViewActivity : AppCompatActivity() {
                 viewbinding: RowCalendarBinding
             ) {
                 animateDaySelection(dayStatus, viewbinding)
+
+                var list = getSelectedList()
+
+                val group =
+                    binding.calendar.findViewById<ChipGroup>(select.ChipGroupLayout.id) as (ChipGroup)
+                if(thisCalendarStatus.getTypeSelectDay()==TypeSelectDay.Range){
+                    if(list.isNotEmpty()) {
+
+                        var chip = group.findViewWithTag<Chip>(
+                            "-100"
+                        )
+                        if(chip==null){
+                            chip= Chip(this@CalendarViewActivity)
+                            group.addView(chip)
+                        }
+
+                        var title = if (list.size == 1) {
+                            getString(R.string.From) + "  " + list[0].getDisplayName(textStyle)
+                        }else{
+                            getString(R.string.From) + "  " + list[0].getDisplayName(textStyle) + " , " + getString(R.string.To)+ " " + list[1].getDisplayName(textStyle)
+                        }
+                        chip.text =title
+                        chip.tag ="-100"
+
+                        if (list.size>1){
+                            binding.toolbar.title = binding.calendar.getMonthInPosition().getThisMonthCaption() + ": (${list[0].localDate.until(list[1].localDate).days+1}) "
+                        }
+
+                    }else
+                    {
+                        group.removeAllViews()
+                        binding.toolbar.title = binding.calendar.getMonthInPosition().getThisMonthCaption()
+                    }
+
+                }else {
+                    binding.toolbar.title = binding.calendar.getMonthInPosition().getThisMonthCaption() + ": (${list.size}) "
+                    list.forEach { it ->
+
+                        createChip(group,getKeyStringForViewBinding(it), it.getDisplayName(textStyle))
+                    }
+                    val oldList = group.children.toList()
+                    oldList.forEach {
+                        var chip = list.find { d -> getKeyStringForViewBinding(d) == it.tag }
+                        if (chip == null) {
+                            group.removeView(it)
+                        }
+                    }
+                }
+
             }
 
+            override fun onUpdateMonthView(   monthStatus: MonthStatus<*, *>,headerPager: RowMonthBinding) {
+                headerPager.textRowMonth.text = monthStatus.getThisMonthCaption()
+            }
 
             override fun onMonthViewActive(
-                monthStatus: MonthStatus<*, *>,
-                headerPager: RowMonthBinding
+                monthStatus: MonthStatus<*, *>
             ) {
-                headerPager.textRowMonth.text = monthStatus.getThisMonthCaption()
-                binding.toolbar.title = monthStatus.getThisMonthCaption()
+
+                binding.toolbar.title = monthStatus.getThisMonthCaption() + ": (${getSelectedList().size}) "
             }
         })
         updateTitle()
     }
+    private fun createChip(group: ChipGroup,key: String,title:String){
+        var chip = group.findViewWithTag<Chip>(
+            key
+        )
+        if (chip == null) {
+            var ch = Chip(this@CalendarViewActivity)
 
+            ch.text = title
+            ch.tag =key
+
+            group.addView(ch)
+        }
+    }
 
     private fun animateDaySelection(dayStatus: DayStatus, viewbinding: RowCalendarBinding) {
         if (dayStatus.isToday()) {
@@ -440,6 +525,26 @@ class CalendarViewActivity : AppCompatActivity() {
                 DialogInterface.OnClickListener { dialog, which ->
 
                     thisCalendarStatus.setTypeSelectDay(TypeSelectDay.entries[which])
+                    dialog.dismiss()
+                    setUpCalendar()
+                })
+
+            .show()
+    }
+    fun changeTextStyle() {
+        val bindingDialog = DialogMultiBinding.inflate(layoutInflater)
+
+
+        val fe = TextStyle.entries.map { it.toString() }
+        AlertDialog.Builder(this)
+            .setTitle("Please Select Language of Calendar")
+            .setView(bindingDialog.root)
+            .setSingleChoiceItems(
+                fe.toTypedArray(),
+                textStyle.ordinal,
+                DialogInterface.OnClickListener { dialog, which ->
+
+                    textStyle =(TextStyle.entries[which])
                     dialog.dismiss()
                     setUpCalendar()
                 })

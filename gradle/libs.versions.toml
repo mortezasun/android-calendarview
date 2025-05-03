@@ -1,6 +1,6 @@
 [versions]
-agp = "8.9.1"
-kotlin = "2.1.10"
+agp = "8.9.2"
+kotlin = "2.1.20"
 coreKtx = "1.16.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -12,7 +12,8 @@ constraintlayout = "2.2.1"
 navigationFragmentKtx = "2.8.9"
 navigationUiKtx = "2.8.9"
 jalali = "1.0.0"
-google-material = "1.13.0-alpha12"
+jalali-huri = "2.0.0"
+google-material = "1.13.0-alpha13"
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -27,6 +28,7 @@ androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation
 
 google-material = { group = "com.google.android.material", name = "material", version.ref = "google-material" }
 jalali-calendar-converter= { group = 'com.github.eloyzone', name= 'jalali-calendar',  version.ref= 'jalali'}
+jalali-calendar-huri= { group = 'ir.huri', name= 'jalalicalendar',  version.ref= 'jalali-huri'}
 
 
 

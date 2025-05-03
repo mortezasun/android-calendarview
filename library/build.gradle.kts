@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.develotter.calendarview"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
 
@@ -42,7 +42,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
-    api(libs.jalali.calendar.converter)
+    //api(libs.jalali.calendar.converter)
+    api(libs.jalali.calendar.huri)
 
 
     testImplementation(libs.junit)

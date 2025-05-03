@@ -14,7 +14,7 @@ import kotlin.math.abs
 import kotlin.math.min
 
 
-class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding> @JvmOverloads constructor(
+class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding,SelectController : ViewBinding> @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : FrameLayout(context, attrs) {
@@ -24,7 +24,7 @@ class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding> @JvmOverloads
 
 
 
-    private lateinit var inDayCellViewAdapter: BaseCalendarAdapter< D, W, M>
+    private lateinit var inDayCellViewAdapter: BaseCalendarAdapter< D, W, M,SelectController>
 
     private var dayPreStatusList: MutableList<DayStatus> = mutableListOf()
     private var dayNextStatusList: MutableList<DayStatus> = mutableListOf()
@@ -52,7 +52,7 @@ class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding> @JvmOverloads
 
 
     fun setUp(
-        thisInDayCellViewAdapter: BaseCalendarAdapter< D, W, M>,
+        thisInDayCellViewAdapter: BaseCalendarAdapter< D, W, M,SelectController>,
         monthStatus: MonthStatus<*, DayStatus>
     ) {
 
@@ -72,7 +72,7 @@ class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding> @JvmOverloads
             for (day in 1..monthStatus.atEndOfMonth()) {
 
                 val dayStatus = monthStatus.setOnCreateDayStatus(day)
-                dayStatus.lcInUse = monthStatus.lcInUse
+
                 inDayCellViewAdapter.dayStatusListSelectedBySingleSelect.find { it.localDate == dayStatus.localDate }.let {
                     if (it != null) {
                         dayStatus.isChecked = true
@@ -91,7 +91,7 @@ class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding> @JvmOverloads
                     for (week in lastWeek until atEndOfMonth) {
                         if (thisInDayCellViewAdapter.calendarStatus.getShowLastMonth()) {
                             val dayStatusLastMonth = lastMonth.setOnCreateDayStatus(week)
-                            dayStatusLastMonth.lcInUse = monthStatus.lcInUse
+
                             dayPreStatusList.add(dayStatusLastMonth)
                             val rowsPre =
                                 inDayCellViewAdapter.onBindLastMonthDayView(dayStatusLastMonth)
@@ -105,7 +105,7 @@ class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding> @JvmOverloads
                     }
                 }
                 addView(rows.root)
-                if (day == monthStatus.lengthOfMonth() && dayStatus.localDate.dayOfWeek != monthStatus.getEndDayOfWeek()) {
+                if (day == monthStatus.atEndOfMonth() && dayStatus.localDate.dayOfWeek != monthStatus.getEndDayOfWeek()) {
                     val nextMonth = monthStatus.plusMonths(1)
 
                     val trueIntDayOfWeekThis =
@@ -117,7 +117,7 @@ class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding> @JvmOverloads
                     for (week in 1..nextWeek) {
                         if (thisInDayCellViewAdapter.calendarStatus.getShowNextMonth()) {
                             val dayStatusNextMonth = nextMonth.setOnCreateDayStatus(week)
-                            dayStatusNextMonth.lcInUse = monthStatus.lcInUse
+
                             dayNextStatusList.add(dayStatusNextMonth)
                             val rowsPre =
                                 inDayCellViewAdapter.onBindNextMonthDayView(dayStatusNextMonth)

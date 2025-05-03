@@ -5,14 +5,14 @@ plugins {
 
 android {
     namespace = "com.develotter.calendarviewsample"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.develotter.calendarviewsample"
         minSdk = 27
-        targetSdk = 35
+
         versionCode = 1
-        versionName = "1.0.0-alpha3"
+        versionName = "1.0.0-alpha4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

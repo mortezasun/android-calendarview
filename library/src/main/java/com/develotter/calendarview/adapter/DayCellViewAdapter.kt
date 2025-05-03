@@ -5,9 +5,9 @@ import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
 import java.time.DayOfWeek
 
-interface DayCellViewAdapter<Day: ViewBinding,Week: ViewBinding>
+interface DayCellViewAdapter<Day: ViewBinding,Week: ViewBinding,SelectController: ViewBinding>
      {
-
+    val  select :SelectController
     fun onReset()
     fun onBindDayView( dayStatus: DayStatus)   : Day
     fun onBindWeekView( dayStatus: DayOfWeek)   : Week
@@ -24,7 +24,7 @@ interface DayCellViewAdapter<Day: ViewBinding,Week: ViewBinding>
     fun onRangeClickRowDay(dayStatus: DayStatus, viewbinding:Day, isLong: Boolean)
 
     fun onDayFocused(status: MonthStatus<*, DayStatus>)
-    fun onDayItemClick(dayStatus: DayStatus, viewbinding:Day)
+    fun onDayItemClick(dayStatus: DayStatus, viewbinding: Day)
 
 
 

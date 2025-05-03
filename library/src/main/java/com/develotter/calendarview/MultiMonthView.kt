@@ -20,7 +20,7 @@ import com.develotter.calendarview.status.MonthStatus
 import java.time.YearMonth
 
 @Suppress("UNCHECKED_CAST")
-open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverloads constructor(
+open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding,SelectController:ViewBinding> @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : LinearLayout(context, attrs) {
@@ -29,16 +29,17 @@ open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverl
     private lateinit var  monthViewBinding: M
 
     private var snapHelper = PagerSnapHelper()
-    private lateinit var inDayCellViewAdapter: BaseCalendarAdapter<D, W,M>
-    private lateinit var multiMonthDataAdapter: MultiMonthDataAdapter<D, W,M>
+    private lateinit var inDayCellViewAdapter: BaseCalendarAdapter<D, W,M,SelectController>
+    private lateinit var multiMonthDataAdapter: MultiMonthDataAdapter<D, W,M,SelectController>
     private lateinit var yearMonthList :MutableList<MonthStatus<*,DayStatus>>
     private var defaultHeightList= context.resources.getDimensionPixelSize(
     R.dimen.default_height)
+     var inPosition=-1
 
     init {
         orientation =VERTICAL
     }
-    fun  addMonths( fromInDayCellViewAdapter: BaseCalendarAdapter<D, W,M>) {
+    fun  addMonths( fromInDayCellViewAdapter: BaseCalendarAdapter<D, W,M,SelectController>) {
         removeAllViews()
         inDayCellViewAdapter = fromInDayCellViewAdapter
 
@@ -54,7 +55,7 @@ open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverl
                 }
 
                 TypeArtCalender.JALALI -> {
-                    JalaliStatus().minusMonths(   inDayCellViewAdapter. calendarStatus.getCountsMonthAfterAndBefore())
+                    JalaliStatus(inDayCellViewAdapter. calendarStatus.getLocalInUse()).minusMonths(   inDayCellViewAdapter. calendarStatus.getCountsMonthAfterAndBefore())
                 }
             }
 
@@ -62,21 +63,21 @@ open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverl
             for (i in 1..endMonth) {
                 val ys = when (   inDayCellViewAdapter. calendarStatus.getArtSelected()) {
                     TypeArtCalender.Georgian -> {
-                        val ys = GeorgianStatus()
-                        ys.setLocaleInUse(   inDayCellViewAdapter. calendarStatus.getLocalInUse())
+                        val ys = GeorgianStatus(  inDayCellViewAdapter. calendarStatus.getLocalInUse())
+
                         if (startMonth is YearMonth)
                             ys.yearMonth = startMonth.plusMonths(i.toLong())
                         ys
-                        //    yearMonthList.add(ys as MonthStatus<*, DayStatus<*>>)
+
                     }
 
                     TypeArtCalender.JALALI -> {
-                        val ys = JalaliStatus()
-                        ys.setLocaleInUse(   inDayCellViewAdapter. calendarStatus.getLocalInUse())
+                        val ys = JalaliStatus(   inDayCellViewAdapter. calendarStatus.getLocalInUse())
+
                         if (startMonth is JalaliStatus)
                             ys.jalaliDateRow = startMonth.plusMonths(i).getNow()
                         ys
-                        //    yearMonthList.add(ys as MonthStatus<*, DayStatus<*>>)
+
                     }
                 }
                 yearMonthList.add(ys as MonthStatus<*, DayStatus>)
@@ -123,10 +124,17 @@ open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverl
         if(inDayCellViewAdapter.calendarStatus.getShowCalendarController()){
             addView(inDayCellViewAdapter.onBindControllerCalendar().root)
         }
+        if(inDayCellViewAdapter.calendarStatus.getShowSelectedDayController()){
 
+            addView(  inDayCellViewAdapter.select.root)
+        }
+        setAdapter()
 //        layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, defaultHeightList+context.resources.getDimensionPixelSize(
 //            R.dimen.default_height_row)*2)
         scrollToThisMonth()
+    }
+    open  fun getMonthInPosition(): MonthStatus<*, DayStatus> {
+        return  yearMonthList[inPosition]
     }
 
     open  fun getThisMonthCaption():String {
@@ -152,7 +160,8 @@ open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverl
         }
     }
     open  fun scrollToThisMonth(){
-        scrollToMonth(getThisMonthPosition())
+        inPosition =getThisMonthPosition()
+        scrollToMonth(inPosition)
     }
     open  fun scrollToToday(){
         scrollToThisMonth()
@@ -164,8 +173,9 @@ open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverl
 
     }
     open fun callMonthActivating(position:Int){
+        inDayCellViewAdapter.onMonthViewActive(yearMonthList[position])
         if (inDayCellViewAdapter.calendarStatus.getShowRowMonthName()) {
-            inDayCellViewAdapter.onMonthViewActive(yearMonthList[position],monthViewBinding)
+            inDayCellViewAdapter.onUpdateMonthView(yearMonthList[position],monthViewBinding)
         }
     }
     private fun  initRecyclerView(){
@@ -194,9 +204,18 @@ open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverl
 
 
 
+
+
+
+    }
+    fun getMultiAdapter():MultiMonthDataAdapter<D, W,M,SelectController>{
+        return multiMonthDataAdapter
+    }
+    fun getMonthViewAdapter():BaseCalendarAdapter<D, W,M,SelectController>{
+        return inDayCellViewAdapter
+    }
+    private  fun setAdapter(){
         recyclerViewCalendarList.adapter =multiMonthDataAdapter
-
-
     }
     open  fun getThisMonthPosition():Int{
         return yearMonthList.count().minus(1).div(2)
@@ -223,7 +242,7 @@ open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding> @JvmOverl
         snapHelper.attachToRecyclerView(recyclerViewCalendarList)
         recyclerViewCalendarList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                val inPosition =getPosition(recyclerView,newState)
+                inPosition =getPosition(recyclerView,newState)
                 if ( inPosition!=-1){
                     callMonthActivating(inPosition)
 
