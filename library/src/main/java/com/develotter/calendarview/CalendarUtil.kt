@@ -6,6 +6,8 @@ import com.develotter.calendarview.jalali.JalaliDayStatus
 import com.develotter.calendarview.status.DayStatus
 import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Locale
 
 fun LocalDate.getCalendarBase(typeArtCalendar: TypeArtCalender, locale: Locale): DayStatus {
@@ -63,8 +65,30 @@ fun LocalDate.toJalaliArrayInt(): Array<Int> {
     }
     return arrayOf(jy, jm, jd)
 }
+fun LocalDate.calendarformat(textStyle: TextStyle,lcInUse: Locale): String {
+    val formatter=  when(textStyle){
+        TextStyle.SHORT,
+        TextStyle.SHORT_STANDALONE ->
+        {
+            "EEE, MMM dd, yyyy"
+        }
+        TextStyle.FULL,
+        TextStyle.FULL_STANDALONE ->
+        {
+            "EEEE, MMMM dd, yyyy"
+        }
+        TextStyle.NARROW,
+        TextStyle.NARROW_STANDALONE ->
+        {
+            "dd/MM/yyyy"
+        }
+    }
+    return this.baseFormat(formatter, lcInUse)
+}
+fun LocalDate.baseFormat(formatter: String,lcInUse: Locale): String {
 
-
+    return this.format(DateTimeFormatter.ofPattern(formatter, lcInUse))
+}
 fun toLocalDate( jy:Int, jm:Int, jd:Int): LocalDate {
 
     var jy1: Int = jy + 1595
