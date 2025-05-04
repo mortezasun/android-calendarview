@@ -79,11 +79,9 @@ dependencies {
 ## for Activating Day before show Calendar
 ```Kotlin
   var dayStatusListSelectedBySingleSelect: MutableList<DayStatus> = mutableListOf()
-        dayStatusListSelectedBySingleSelect.add(0, object :DayStatus(LocalDate.now(), lcInUse){})
-        binding.calendar.addMonths(object :
+  dayStatusListSelectedBySingleSelect.add(0, object :DayStatus(LocalDate.now(), lcInUse){})
+  binding.calendar.addMonths(object :
             MonthSampleAdapter<RowCalendarBinding, RowCalendarBinding, RowMonthBinding, RowShowSelectedDayBinding>
-                (
-                thisCalendarStatus,dayStatusListSelectedBySingleSelect=dayStatusListSelectedBySingleSelect
-            )
+                    (thisCalendarStatus,dayStatusListSelectedBySingleSelect=dayStatusListSelectedBySingleSelect ))
 ```
 
