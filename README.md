@@ -23,7 +23,7 @@ A powerful and flexible calendar widget for Android applications. Supports multi
 
 | Calendar        | Support  |  Source  |
 |-----------------|-------------|-------------|
-| Georgian        | ✅          | [java.time.LocalDate](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html) <br> [java.time.YearMonth](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/YearMonth.html ) |
+| Gregorian        | ✅          | [java.time.LocalDate](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html) <br> [java.time.YearMonth](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/YearMonth.html ) |
 | Jalali (Persian)| ✅          | [Jalali Calendar from Mohammad Razeghi](https://github.com/razeghi71/JalaliCalendar)              | 
 
 
@@ -57,7 +57,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.mortezasun:calendarview:1.0.0-alpha6'
+    implementation 'com.github.mortezasun:calendarview:1.0.0-alpha7'
 }
 ```
 
@@ -79,11 +79,9 @@ dependencies {
 ## for Activating Day before show Calendar
 ```Kotlin
   var dayStatusListSelectedBySingleSelect: MutableList<DayStatus> = mutableListOf()
-        dayStatusListSelectedBySingleSelect.add(0, object :DayStatus(LocalDate.now(), lcInUse){})
-        binding.calendar.addMonths(object :
+  dayStatusListSelectedBySingleSelect.add(0, object :DayStatus(LocalDate.now(), lcInUse){})
+  binding.calendar.addMonths(object :
             MonthSampleAdapter<RowCalendarBinding, RowCalendarBinding, RowMonthBinding, RowShowSelectedDayBinding>
-                (
-                thisCalendarStatus,dayStatusListSelectedBySingleSelect=dayStatusListSelectedBySingleSelect
-            )
+                    (thisCalendarStatus,dayStatusListSelectedBySingleSelect=dayStatusListSelectedBySingleSelect ))
 ```
 
