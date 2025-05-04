@@ -13,6 +13,10 @@ import com.develotter.calendarviewsample.MyApp.Companion.CALENDAR_LANGUAGE
 import com.develotter.calendarviewsample.MyApp.Companion.DEFAULT_LANGUAGE
 import com.develotter.calendarviewsample.MyApp.Companion.DEFAULT_LANGUAGE_CALENDAR
 import com.develotter.calendarviewsample.MyApp.Companion.SHARED_SETTING
+import com.develotter.calendarviewsample.getCalendarLanguageEnumsWithBaseLanguage
+import com.develotter.calendarviewsample.getCalendarLanguageLocale
+import com.develotter.calendarviewsample.getLanguageEnumsWithBaseLanguage
+import com.develotter.calendarviewsample.getLanguageLocale
 import java.util.Locale
 import kotlin.system.exitProcess
 
@@ -97,4 +101,30 @@ fun Context.restartApp() {
 fun Resources.getDeviceDefaultLocale(): Locale {
     val configuration: Configuration = configuration
     return configuration.locales[0] // Erste Locale in der Liste
+}
+fun Context.getSuperLocale():Locale{
+
+    return  if (getCalendarLanguageEnumsWithBaseLanguage() == LanguageEnums.DefaultDevice) {
+            when (getLanguageEnumsWithBaseLanguage()) {
+                LanguageEnums.DefaultDevice -> {
+                    resources.getDeviceDefaultLocale()
+                }
+
+                else -> {
+                    getLanguageLocale()
+                }
+
+            }
+        } else {
+            when (getCalendarLanguageEnumsWithBaseLanguage()) {
+                LanguageEnums.DefaultDevice -> {
+                    resources.getDeviceDefaultLocale()
+                }
+
+                else -> {
+                    getCalendarLanguageLocale()
+                }
+
+            }
+        }
 }

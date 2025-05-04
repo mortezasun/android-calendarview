@@ -62,30 +62,7 @@ class CalendarViewActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        lcInUse =
-            if (getCalendarLanguageEnumsWithBaseLanguage() == LanguageEnums.DefaultDevice) {
-                when (getLanguageEnumsWithBaseLanguage()) {
-                    LanguageEnums.DefaultDevice -> {
-                        resources.getDeviceDefaultLocale()
-                    }
-
-                    else -> {
-                        getLanguageLocale()
-                    }
-
-                }
-            } else {
-                when (getCalendarLanguageEnumsWithBaseLanguage()) {
-                    LanguageEnums.DefaultDevice -> {
-                        resources.getDeviceDefaultLocale()
-                    }
-
-                    else -> {
-                        getCalendarLanguageLocale()
-                    }
-
-                }
-            }
+        lcInUse =getSuperLocale()
 
         thisCalendarStatus = CalendarStatus().setLocalInUse(lcInUse)
 
