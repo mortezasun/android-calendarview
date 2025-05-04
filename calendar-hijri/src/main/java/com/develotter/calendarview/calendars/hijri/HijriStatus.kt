@@ -1,31 +1,16 @@
-package com.develotter.calendarview.calendars.solarHijri
+package com.develotter.calendarview.calendars.hijri
 
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
-
-import com.develotter.calendarview.toJalali
-import com.develotter.calendarview.toLocalDate
-import ir.huri.jcal.JalaliCalendar
-
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.chrono.HijrahDate
 import java.util.Locale
 import kotlin.math.ceil
 import kotlin.math.floor
 
-/**
- * Represents the status of a month in the Solar Hijri calendar system.
- *
- * This class extends [MonthStatus] and provides specific implementations for handling
- * Solar Hijri dates, including calculating the length of the month, getting the month
- * and year names, navigating between months, and determining the day of the week.
- *
- * @property solarHijriDateRow The [SolarHijriDayStatus] representing the current date.
- * @constructor Creates a new [SolarHijriStatus] instance.
- * @param localInUse The [Locale] to use for formatting and displaying date-related information.
- */
-open class SolarHijriStatus(localInUse: Locale) : MonthStatus<SolarHijriDayStatus, DayStatus>(localInUse) {
-    var solarHijriDateRow: SolarHijriDayStatus
+class HijriStatus(localInUse: Locale) : MonthStatus<HijriDayStatus, DayStatus>(localInUse) {
+    var hijriDateRow: HijriDayStatus
 
 
 
@@ -34,27 +19,30 @@ open class SolarHijriStatus(localInUse: Locale) : MonthStatus<SolarHijriDayStatu
     }
 
     init {
-        solarHijriDateRow = SolarHijriDayStatus(LocalDate.now().toJalali(),lcInUse)
+        hijriDateRow = HijriDayStatus(LocalDate.now().toHijri(),lcInUse)
     }
 
     override fun lengthOfMonth(): Int {
-        return solarHijriDateRow.solarHijriDate.monthLength
+        return hijriDateRow.hijriDate.lengthOfMonth()
 
     }
 
     override fun getMonthName(): String {
 
-        return  solarHijriDateRow.getMonthString(lcInUse)
+        return  hijriDateRow.getMonthName()
     }
 
     override fun getYearName(): String {
-        return solarHijriDateRow.solarHijriDate.year.toString()
+        return hijriDateRow.hijriDate.year().toString()
     }
 
-    override fun getNow(): SolarHijriDayStatus {
-        return solarHijriDateRow
+    override fun getInstanceDay(): HijriDayStatus {
+        return hijriDateRow
     }
 
+    override fun setInstanceDay(monthInstance: HijriDayStatus) {
+        hijriDateRow = monthInstance
+    }
     override fun atEndOfMonth(): Int {
         return lengthOfMonth()
     }
@@ -63,13 +51,13 @@ open class SolarHijriStatus(localInUse: Locale) : MonthStatus<SolarHijriDayStatu
         return 1
     }
 
-    override fun minusMonths(count: Int): MonthStatus<SolarHijriDayStatus, DayStatus> {
+    override fun minusMonths(count: Int): MonthStatus<HijriDayStatus, DayStatus> {
 
         return plusMonths(-count)
     }
 
-    override fun plusMonths(count: Int): MonthStatus<SolarHijriDayStatus, DayStatus> {
-        var status = SolarHijriStatus(lcInUse)
+    override fun plusMonths(count: Int): MonthStatus<HijriDayStatus, DayStatus> {
+        var status = HijriStatus(lcInUse)
 
         val floors = if (count > 0) {
             floor(count / 12.0).toInt()
@@ -81,8 +69,8 @@ open class SolarHijriStatus(localInUse: Locale) : MonthStatus<SolarHijriDayStatu
         } else {
             floor((count % 12.0))
         }
-        var newYear = solarHijriDateRow.solarHijriDate.year + floors
-        var newMonth = solarHijriDateRow.solarHijriDate.month + (rest).toInt()
+        var newYear = hijriDateRow.hijriDate.year() + floors
+        var newMonth = hijriDateRow.hijriDate.month() + (rest).toInt()
         if (newMonth > 12) {
             newYear++
             newMonth -= 12
@@ -92,25 +80,25 @@ open class SolarHijriStatus(localInUse: Locale) : MonthStatus<SolarHijriDayStatu
         }
 
 
-        status.solarHijriDateRow = SolarHijriDayStatus(JalaliCalendar(newYear, newMonth, 1),lcInUse)
+        status.hijriDateRow = HijriDayStatus(HijrahDate.of(newYear, newMonth, 1),lcInUse)
         return status
     }
 
     override fun setOnCreateDayStatus(day: Int): DayStatus {
-        var month = solarHijriDateRow.solarHijriDate.month
+        var month = hijriDateRow.hijriDate.month()
         if (month == 0) {
             month = 1
         }
-        return SolarHijriDayStatus(JalaliCalendar(solarHijriDateRow.solarHijriDate.year, month, day),lcInUse)
+        return HijriDayStatus(HijrahDate.of(hijriDateRow.hijriDate.year(), month, day),lcInUse)
     }
 
     override fun atDay(day: Int): LocalDate {
 
-        var month = solarHijriDateRow.solarHijriDate.month
+        var month = hijriDateRow.hijriDate.month()
         if (month == 0) {
             month = 1
         }
-        return JalaliCalendar(solarHijriDateRow.solarHijriDate.year, month, day).toLocalDate()
+        return HijrahDate.of(hijriDateRow.hijriDate.year(), month, day).toLocalDate()
     }
 
 

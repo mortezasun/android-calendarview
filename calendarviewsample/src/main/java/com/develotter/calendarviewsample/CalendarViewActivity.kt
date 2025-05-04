@@ -13,7 +13,9 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.viewbinding.ViewBinding
 import com.develotter.calendarview.adapter.MonthSampleAdapter
-import com.develotter.calendarview.enums.TypeArtCalender
+import com.develotter.calendarview.calendars.gregorian.GregorianStatus
+import com.develotter.calendarview.calendars.hijri.HijriStatus
+import com.develotter.calendarview.calendars.solarHijri.SolarHijriStatus
 import com.develotter.calendarview.enums.TypeSelectDay
 import com.develotter.calendarview.enums.TypeViewCalender
 import com.develotter.calendarview.enums.TypeWeekShow
@@ -40,8 +42,8 @@ class CalendarViewActivity : AppCompatActivity() {
     var noOrYes = arrayOf("")
     private lateinit var binding: ActivityMainBinding
     private lateinit var thisCalendarStatus: CalendarStatus
-    private  var textStyle: TextStyle = TextStyle.SHORT_STANDALONE
-
+    private var textStyle: TextStyle = TextStyle.SHORT_STANDALONE
+    private var artSelected: TypeArtCalender = TypeArtCalender.Gregorian
     private lateinit var lcInUse: Locale
 
 
@@ -54,7 +56,7 @@ class CalendarViewActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        lcInUse =getSuperLocale()
+        lcInUse = getSuperLocale()
 
         thisCalendarStatus = CalendarStatus().setLocalInUse(lcInUse)
 
@@ -104,7 +106,7 @@ class CalendarViewActivity : AppCompatActivity() {
         binding.showDialogChangeCalendarViewTypeText.text =
             thisCalendarStatus.getViewTypeSelected().title.toString()
         binding.showDialogChangeCalendarTypeText.text =
-            thisCalendarStatus.getArtSelected().title.toString()
+            artSelected.title.toString()
         val t =
             getLanguageEnumsWithBaseLanguage().title + " / " + resources.getDeviceDefaultLocale()
                 .toLanguageTag()
@@ -128,15 +130,36 @@ class CalendarViewActivity : AppCompatActivity() {
         }
     }
 
+    fun getSelectClass(): Class<*> {
+        return when (artSelected) {
+            TypeArtCalender.Gregorian -> {
+                GregorianStatus::class.java
+            }
+
+            TypeArtCalender.SolarHijri ->
+                SolarHijriStatus::class.java
+
+            TypeArtCalender.Hijri -> {
+
+                HijriStatus::class.java
+            }
+        }
+    }
 
     fun setUpCalendar() {
 
         var dayStatusListSelectedBySingleSelect: MutableList<DayStatus> = mutableListOf()
-        dayStatusListSelectedBySingleSelect.add(0, object :DayStatus(LocalDate.of(LocalDate.now().year, LocalDate.now().monthValue,2), lcInUse){})
-        binding.calendar.addMonths(object :
+        dayStatusListSelectedBySingleSelect.add(
+            0,
+            object : DayStatus(
+                LocalDate.of(LocalDate.now().year, LocalDate.now().monthValue, 2),
+                lcInUse
+            ) {})
+        binding.calendar.addMonths(getSelectClass(), object :
             MonthSampleAdapter<RowCalendarBinding, RowCalendarBinding, RowMonthBinding, RowShowSelectedDayBinding>
                 (
-                thisCalendarStatus,dayStatusListSelectedBySingleSelect=dayStatusListSelectedBySingleSelect
+                thisCalendarStatus,
+                dayStatusListSelectedBySingleSelect = dayStatusListSelectedBySingleSelect
             ) {
             override fun onBindWeekView(dayStatus: DayOfWeek): RowCalendarBinding {
                 val binding = RowCalendarBinding.inflate(layoutInflater)
@@ -222,40 +245,48 @@ class CalendarViewActivity : AppCompatActivity() {
 
                 val group =
                     binding.calendar.findViewById<ChipGroup>(select.ChipGroupLayout.id) as (ChipGroup)
-                if(thisCalendarStatus.getTypeSelectDay()==TypeSelectDay.Range){
-                    if(list.isNotEmpty()) {
+                if (thisCalendarStatus.getTypeSelectDay() == TypeSelectDay.Range) {
+                    if (list.isNotEmpty()) {
 
                         var chip = group.findViewWithTag<Chip>(
                             "-100"
                         )
-                        if(chip==null){
-                            chip= Chip(this@CalendarViewActivity)
+                        if (chip == null) {
+                            chip = Chip(this@CalendarViewActivity)
                             group.addView(chip)
                         }
 
                         var title = if (list.size == 1) {
                             getString(R.string.From) + "  " + list[0].getDisplayName(textStyle)
-                        }else{
-                            getString(R.string.From) + "  " + list[0].getDisplayName(textStyle) + " , " + getString(R.string.To)+ " " + list[1].getDisplayName(textStyle)
+                        } else {
+                            getString(R.string.From) + "  " + list[0].getDisplayName(textStyle) + " , " + getString(
+                                R.string.To
+                            ) + " " + list[1].getDisplayName(textStyle)
                         }
-                        chip.text =title
-                        chip.tag ="-100"
+                        chip.text = title
+                        chip.tag = "-100"
 
-                        if (list.size>1){
-                            binding.toolbar.title = binding.calendar.getMonthInPosition().getThisMonthCaption() + ": (${list[0].localDate.until(list[1].localDate).days+1}) "
+                        if (list.size > 1) {
+                            binding.toolbar.title = binding.calendar.getMonthInPosition()
+                                .getThisMonthCaption() + ": (${list[0].localDate.until(list[1].localDate).days + 1}) "
                         }
 
-                    }else
-                    {
+                    } else {
                         group.removeAllViews()
-                        binding.toolbar.title = binding.calendar.getMonthInPosition().getThisMonthCaption()
+                        binding.toolbar.title =
+                            binding.calendar.getMonthInPosition().getThisMonthCaption()
                     }
 
-                }else {
-                    binding.toolbar.title = binding.calendar.getMonthInPosition().getThisMonthCaption() + ": (${list.size}) "
+                } else {
+                    binding.toolbar.title = binding.calendar.getMonthInPosition()
+                        .getThisMonthCaption() + ": (${list.size}) "
                     list.forEach { it ->
 
-                        createChip(group,getKeyStringForViewBinding(it), it.getDisplayName(textStyle))
+                        createChip(
+                            group,
+                            getKeyStringForViewBinding(it),
+                            it.getDisplayName(textStyle)
+                        )
                     }
                     val oldList = group.children.toList()
                     oldList.forEach {
@@ -268,7 +299,10 @@ class CalendarViewActivity : AppCompatActivity() {
 
             }
 
-            override fun onUpdateMonthView(   monthStatus: MonthStatus<*, *>,headerPager: RowMonthBinding) {
+            override fun onUpdateMonthView(
+                monthStatus: MonthStatus<*, *>,
+                headerPager: RowMonthBinding
+            ) {
                 headerPager.textRowMonth.text = monthStatus.getThisMonthCaption()
             }
 
@@ -276,12 +310,14 @@ class CalendarViewActivity : AppCompatActivity() {
                 monthStatus: MonthStatus<*, *>
             ) {
 
-                binding.toolbar.title = monthStatus.getThisMonthCaption() + ": (${getSelectedList().size}) "
+                binding.toolbar.title =
+                    monthStatus.getThisMonthCaption() + ": (${getSelectedList().size}) "
             }
         })
         updateTitle()
     }
-    private fun createChip(group: ChipGroup,key: String,title:String){
+
+    private fun createChip(group: ChipGroup, key: String, title: String) {
         var chip = group.findViewWithTag<Chip>(
             key
         )
@@ -289,7 +325,7 @@ class CalendarViewActivity : AppCompatActivity() {
             var ch = Chip(this@CalendarViewActivity)
 
             ch.text = title
-            ch.tag =key
+            ch.tag = key
 
             group.addView(ch)
         }
@@ -414,10 +450,10 @@ class CalendarViewActivity : AppCompatActivity() {
             .setView(bindingDialog.root)
             .setSingleChoiceItems(
                 fe.toTypedArray(),
-                thisCalendarStatus.getArtSelected().ordinal,
+                artSelected.ordinal,
                 DialogInterface.OnClickListener { dialog, which ->
 
-                    thisCalendarStatus.setArtSelected(TypeArtCalender.entries[which])
+                    artSelected = (TypeArtCalender.entries[which])
                     dialog.dismiss()
                     setUpCalendar()
                 })
@@ -496,6 +532,7 @@ class CalendarViewActivity : AppCompatActivity() {
 
             .show()
     }
+
     fun changeTextStyle() {
         val bindingDialog = DialogMultiBinding.inflate(layoutInflater)
 
@@ -509,7 +546,7 @@ class CalendarViewActivity : AppCompatActivity() {
                 textStyle.ordinal,
                 DialogInterface.OnClickListener { dialog, which ->
 
-                    textStyle =(TextStyle.entries[which])
+                    textStyle = (TextStyle.entries[which])
                     dialog.dismiss()
                     setUpCalendar()
                 })

@@ -1,9 +1,7 @@
 package com.develotter.calendarview.calendars.solarHijri
 
 import com.develotter.calendarview.status.DayStatus
-import com.develotter.calendarview.toJalali
 
-import com.develotter.calendarview.toLocalDate
 
 import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
@@ -23,7 +21,7 @@ import java.util.Locale
  * @property lcInUse The [Locale] currently in use for text formatting.
  * @constructor Creates a [SolarHijriDayStatus] instance.
  */
-class SolarHijriDayStatus(val  solarHijriDate: JalaliCalendar, lcInUse: Locale) : DayStatus(solarHijriDate.toLocalDate(),lcInUse) {
+class SolarHijriDayStatus(val  solarHijriDate: JalaliCalendar, lcInUse: Locale) : DayStatus(solarHijriDate.fromSolarHijriToLocalDate(),lcInUse) {
 
 
 
@@ -59,7 +57,7 @@ class SolarHijriDayStatus(val  solarHijriDate: JalaliCalendar, lcInUse: Locale) 
                 solarHijriDate.dayOfWeekString
             }
             else -> {
-                solarHijriDate.toLocalDate().dayOfWeek.getDisplayName(txtStyle, lcLocale)
+                solarHijriDate.fromSolarHijriToLocalDate().dayOfWeek.getDisplayName(txtStyle, lcLocale)
             }
         }
     }

@@ -24,3 +24,6 @@ rootProject.name = "calendarview"
 include(":library")
 
 include(":calendarviewsample")
+include(":calendar-gregorian")
+include(":calendar-solarHijri")
+include(":calendar-hijri")

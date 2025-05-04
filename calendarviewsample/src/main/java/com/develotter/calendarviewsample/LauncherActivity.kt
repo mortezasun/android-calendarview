@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.develotter.calendarview.adapter.MonthSampleAdapter
+import com.develotter.calendarview.calendars.gregorian.GregorianStatus
 import com.develotter.calendarview.enums.TypeSelectDay
 import com.develotter.calendarview.calendars.solarHijri.SolarHijriDayStatus
 import com.develotter.calendarview.status.CalendarStatus
@@ -64,7 +65,7 @@ class LauncherActivity: AppCompatActivity()  {
         val data = Vector<MyData>()
         data.add(MyData(1,"Calendar View", R.drawable.baseline_calendar_month_24))
         data.add(MyData(2,"Calendar View in Dialog", R.drawable.baseline_calendar_month_24))
-        data.add(MyData(3,"Heatmap Calendar", R.drawable.baseline_map_24))
+        data.add(MyData(4,"Heatmap Calendar", R.drawable.baseline_map_24))
 
 
         return data
@@ -91,7 +92,8 @@ class LauncherActivity: AppCompatActivity()  {
                     2->{
                         showCalendarDialog()
                     }
-                    3->{
+
+                    4->{
                         val intent = Intent(this@LauncherActivity, HeatMapViewActivity::class.java)
                         startActivity(intent)
                     }
@@ -135,7 +137,7 @@ class LauncherActivity: AppCompatActivity()  {
         val jal1 = SolarHijriDayStatus(JalaliCalendar(1404, 2, 14), lcInUse)
         val jal2 = SolarHijriDayStatus(JalaliCalendar(1404, 2, 21), lcInUse)
         dayStatusListSelectedBySingleSelect.add(0, jal)
-        binding.calendar.addMonths(object :
+        binding.calendar.addMonths(GregorianStatus::class.java,object :
             MonthSampleAdapter<RowCalendarBinding, RowCalendarBinding, RowMonthBinding, RowShowSelectedDayBinding>
                 (
                 thisCalendarStatus

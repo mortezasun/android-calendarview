@@ -1,6 +1,5 @@
 package com.develotter.calendarview.status
 
-import com.develotter.calendarview.enums.TypeArtCalender
 import com.develotter.calendarview.enums.TypeSelectDay
 import com.develotter.calendarview.enums.TypeViewCalender
 import com.develotter.calendarview.enums.TypeWeekShow
@@ -11,8 +10,8 @@ class CalendarStatus {
 
 
     private  var viewTypeSelected :TypeViewCalender  = TypeViewCalender.HORIZONTAL_PAGER
-    private  var artSelected :TypeArtCalender  = TypeArtCalender.Gregorian
-    private  var customCalendar : Boolean  = false
+
+
     private  var localInUse : Locale = Locale.getDefault()
     private  var countsMonthAfterAndBefore: Int = 50
     private  var typeSelectDay: TypeSelectDay = TypeSelectDay.Single
@@ -24,8 +23,8 @@ class CalendarStatus {
     private  var showSelectedDayController : Boolean = true
 
     fun getViewTypeSelected(): TypeViewCalender = viewTypeSelected
-    fun getArtSelected(): TypeArtCalender = artSelected
-    fun getCustomCalendar(): Boolean = customCalendar
+
+
     fun getShowLastMonth(): Boolean = showLastMonth
     fun getShowNextMonth(): Boolean = showNextMonth
     fun getShowRowWeekName(): TypeWeekShow = showRowWeekName
@@ -44,19 +43,13 @@ class CalendarStatus {
         return this
     }
 
-    fun setArtSelected(artType: TypeArtCalender): CalendarStatus {
-        if (this.artSelected != artType) {
-            this.artSelected = artType
-        }
-        return this
-    }
+
     fun setLocalInUse(localInUse: Locale): CalendarStatus {
         if (this.localInUse != localInUse) {
             this.localInUse = localInUse
         }
         return this
     }
-
 
 
     fun setTypeSelectDay(typeSelectDay: TypeSelectDay): CalendarStatus {
@@ -91,7 +84,5 @@ class CalendarStatus {
         this.showCalendarController = showCalendarController
         return this
     }
-    fun getListCustomCalendar(): MutableList<MonthStatus<*, DayStatus>> {
-        return mutableListOf()
-    }
+
 }

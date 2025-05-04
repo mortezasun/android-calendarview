@@ -13,7 +13,8 @@ abstract class MonthStatus<Month,Day>(   val lcInUse: Locale) {
    abstract fun lengthOfMonth(): Int
    abstract fun getMonthName(): String
    abstract fun getYearName(): String
-   abstract fun getNow(): Month
+   abstract fun getInstanceDay(): Month
+   abstract fun setInstanceDay( monthInstance: Month)
    abstract fun atEndOfMonth():Int
    abstract fun atStartOfMonth():Int
    abstract fun minusMonths(count:Int): MonthStatus<Month,Day>

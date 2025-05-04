@@ -10,6 +10,9 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/calendar-gregorian" />
+            <option value="$PROJECT_DIR$/calendar-hijri" />
+            <option value="$PROJECT_DIR$/calendar-solarHijri" />
             <option value="$PROJECT_DIR$/calendarviewsample" />
             <option value="$PROJECT_DIR$/library" />
           </set>

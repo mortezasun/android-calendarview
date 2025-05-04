@@ -18,16 +18,13 @@ import java.util.Locale
  * @param localInUse The [Locale] to be used for formatting month and year names.
  */
 open class GregorianStatus(localInUse: Locale) : MonthStatus<YearMonth, DayStatus>(localInUse) {
-    var yearMonth: YearMonth = getNow()
+    var yearMonth: YearMonth = YearMonth.now()
 
 
     override fun getThisMonthCaption(): String {
         return getMonthName() + " : " + getYearName()
     }
 
-    init {
-        yearMonth = YearMonth.now()
-    }
 
     override fun lengthOfMonth(): Int {
         return yearMonth.lengthOfMonth()
@@ -41,8 +38,12 @@ open class GregorianStatus(localInUse: Locale) : MonthStatus<YearMonth, DayStatu
         return yearMonth.year.toString()
     }
 
-    override fun getNow(): YearMonth {
+    override fun getInstanceDay(): YearMonth {
         return yearMonth
+    }
+
+    override fun setInstanceDay(monthInstance: YearMonth) {
+        yearMonth =monthInstance
     }
 
     override fun atEndOfMonth(): Int {

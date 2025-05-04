@@ -11,8 +11,8 @@ android {
         applicationId = "com.develotter.calendarviewsample"
         minSdk = 27
 
-        versionCode = 1
-        versionName = "1.0.0-alpha8"
+        versionCode = 2
+        versionName = "1.1.0-alpha1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -50,4 +50,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     implementation(project(":library"))
+    implementation(project(":calendar-gregorian"))
+    implementation(project(":calendar-solarHijri"))
+    implementation(project(":calendar-hijri"))
 }

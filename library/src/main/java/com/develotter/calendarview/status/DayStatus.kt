@@ -1,11 +1,10 @@
 package com.develotter.calendarview.status
 
-import com.develotter.calendarview.calendarformat
+import com.develotter.calendarview.calendarFormat
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -21,7 +20,7 @@ abstract class DayStatus(val localDate: LocalDate,val lcInUse: Locale) {
     }
 
     open fun getDisplayName(txtStyle: TextStyle): String {
-        return localDate.calendarformat(txtStyle,lcInUse)
+        return localDate.calendarFormat(txtStyle,lcInUse)
 
     }
 
