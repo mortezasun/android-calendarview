@@ -1,4 +1,4 @@
-package com.develotter.calendarview.georgian
+package com.develotter.calendarview.calendars.gregorian
 
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
@@ -8,7 +8,16 @@ import java.time.YearMonth
 import java.time.format.TextStyle
 import java.util.Locale
 
-open class GeorgianStatus(localInUse: Locale) : MonthStatus<YearMonth, DayStatus>(localInUse) {
+/**
+ * Represents the status of a Gregorian calendar month, providing information about the current month and year,
+ * as well as operations for navigating between months and accessing specific days.
+ *
+ * This class extends [MonthStatus] and provides a concrete implementation for the Gregorian calendar system.
+ * It uses [YearMonth] to represent the current month and year.
+ *
+ * @param localInUse The [Locale] to be used for formatting month and year names.
+ */
+open class GregorianStatus(localInUse: Locale) : MonthStatus<YearMonth, DayStatus>(localInUse) {
     var yearMonth: YearMonth = getNow()
 
 
@@ -45,15 +54,15 @@ open class GeorgianStatus(localInUse: Locale) : MonthStatus<YearMonth, DayStatus
     }
 
     override fun minusMonths(count: Int): MonthStatus<YearMonth, DayStatus> {
-        var georgianStatus = GeorgianStatus(lcInUse)
-        georgianStatus.yearMonth = yearMonth.minusMonths(count.toLong())
-        return georgianStatus
+        var gregorianStatus = GregorianStatus(lcInUse)
+        gregorianStatus.yearMonth = yearMonth.minusMonths(count.toLong())
+        return gregorianStatus
     }
 
     override fun plusMonths(count: Int): MonthStatus<YearMonth, DayStatus> {
-        var georgianStatus = GeorgianStatus(lcInUse)
-        georgianStatus.yearMonth = yearMonth.plusMonths(count.toLong())
-        return georgianStatus
+        var gregorianStatus = GregorianStatus(lcInUse)
+        gregorianStatus.yearMonth = yearMonth.plusMonths(count.toLong())
+        return gregorianStatus
     }
 
     override fun atDay(day: Int): LocalDate {
@@ -61,7 +70,7 @@ open class GeorgianStatus(localInUse: Locale) : MonthStatus<YearMonth, DayStatus
     }
 
     override fun setOnCreateDayStatus(day: Int): DayStatus {
-        return GeorgianDayStatus(LocalDate.of(yearMonth.year, yearMonth.month, day),lcInUse)
+        return GregorianDayStatus(LocalDate.of(yearMonth.year, yearMonth.month, day),lcInUse)
     }
 
     override fun getStartDayOfWeek(): DayOfWeek {

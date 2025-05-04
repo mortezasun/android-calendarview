@@ -1,4 +1,4 @@
-package com.develotter.calendarview.jalali
+package com.develotter.calendarview.calendars.solarHijri
 
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.toJalali
@@ -10,27 +10,33 @@ import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 
+
 /**
- * Represents the status of a day in the Jalali (Persian) calendar.  Extends the generic [DayStatus] class for [JalaliCalendar].
+ * Represents the status of a specific day in the Solar Hijri calendar.
  *
- * This class provides information about a specific day, such as its day of the month and whether it is the current day.
+ * This class extends [DayStatus] and provides methods to retrieve information about a day
+ * in the Solar Hijri (Jalali) calendar, including day, month, and year, as well as formatted
+ * representations of the date and day of the week. It also handles localization for Persian (fa)
+ * and other locales.
  *
- * @property jalaliDate The [JalaliCalendar] object representing the date for which the status is being determined.  Must be initialized before use.
+ * @property solarHijriDate The [JalaliCalendar] instance representing the date.
+ * @property lcInUse The [Locale] currently in use for text formatting.
+ * @constructor Creates a [SolarHijriDayStatus] instance.
  */
-class JalaliDayStatus(val  jalaliDate: JalaliCalendar,lcInUse: Locale) : DayStatus(jalaliDate.toLocalDate(),lcInUse) {
+class SolarHijriDayStatus(val  solarHijriDate: JalaliCalendar, lcInUse: Locale) : DayStatus(solarHijriDate.toLocalDate(),lcInUse) {
 
 
 
     override fun onGetDayInt(): Int {
-        return jalaliDate.day
+        return solarHijriDate.day
     }
 
     override fun onGetMonthInt(): Int {
-        return jalaliDate.month
+        return solarHijriDate.month
     }
 
     override fun onGetYearInt(): Int {
-        return jalaliDate.year
+        return solarHijriDate.year
     }
 
     fun getJalaliTextStyle(txtStyle: TextStyle, lcLocale: Locale): String {
@@ -38,11 +44,11 @@ class JalaliDayStatus(val  jalaliDate: JalaliCalendar,lcInUse: Locale) : DayStat
 
 
             TextStyle.SHORT -> {
-                jalaliDate.day.toString() + "/" + jalaliDate.month + "/" + jalaliDate.year
+                solarHijriDate.day.toString() + "/" + solarHijriDate.month + "/" + solarHijriDate.year
             }
             else
                 -> {
-                getDayOfWeekString(txtStyle,lcLocale) + ", " + jalaliDate.day + " " + getMonthString(lcLocale) + ", " + jalaliDate.year
+                getDayOfWeekString(txtStyle,lcLocale) + ", " + solarHijriDate.day + " " + getMonthString(lcLocale) + ", " + solarHijriDate.year
             }
 
         }
@@ -50,17 +56,17 @@ class JalaliDayStatus(val  jalaliDate: JalaliCalendar,lcInUse: Locale) : DayStat
     fun getDayOfWeekString(txtStyle: TextStyle, lcLocale: Locale): String {
         return when (lcLocale.language) {
             "fa" -> {
-                jalaliDate.dayOfWeekString
+                solarHijriDate.dayOfWeekString
             }
             else -> {
-                jalaliDate.toLocalDate().dayOfWeek.getDisplayName(txtStyle, lcLocale)
+                solarHijriDate.toLocalDate().dayOfWeek.getDisplayName(txtStyle, lcLocale)
             }
         }
     }
     fun getMonthString(lcLocale: Locale): String {
         return when (lcLocale.language) {
             "fa" -> {
-                jalaliDate.monthString
+                solarHijriDate.monthString
             }
             else -> {
                 getMonthStringEnglish()
@@ -68,7 +74,7 @@ class JalaliDayStatus(val  jalaliDate: JalaliCalendar,lcInUse: Locale) : DayStat
         }
     }
     private fun getMonthStringEnglish(): String {
-        return when ( jalaliDate.month) {
+        return when ( solarHijriDate.month) {
             1 -> "Farvardin"
             2 -> "Ordibehesht"
             3 -> "Khordad"
@@ -98,7 +104,7 @@ class JalaliDayStatus(val  jalaliDate: JalaliCalendar,lcInUse: Locale) : DayStat
         val todayInJalali = LocalDate.now().toJalali()
 
 
-        return jalaliDate.year == todayInJalali.year && jalaliDate.month == todayInJalali.month && jalaliDate.day == todayInJalali.day
+        return solarHijriDate.year == todayInJalali.year && solarHijriDate.month == todayInJalali.month && solarHijriDate.day == todayInJalali.day
 
     }
 }

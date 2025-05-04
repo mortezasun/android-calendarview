@@ -11,7 +11,7 @@ class CalendarStatus {
 
 
     private  var viewTypeSelected :TypeViewCalender  = TypeViewCalender.HORIZONTAL_PAGER
-    private  var artSelected :TypeArtCalender  = TypeArtCalender.Georgian
+    private  var artSelected :TypeArtCalender  = TypeArtCalender.Gregorian
     private  var customCalendar : Boolean  = false
     private  var localInUse : Locale = Locale.getDefault()
     private  var countsMonthAfterAndBefore: Int = 50

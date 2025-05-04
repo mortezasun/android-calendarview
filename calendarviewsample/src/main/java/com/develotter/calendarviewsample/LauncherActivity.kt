@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.develotter.calendarview.adapter.MonthSampleAdapter
 import com.develotter.calendarview.enums.TypeSelectDay
-import com.develotter.calendarview.jalali.JalaliDayStatus
+import com.develotter.calendarview.calendars.solarHijri.SolarHijriDayStatus
 import com.develotter.calendarview.status.CalendarStatus
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
@@ -131,9 +131,9 @@ class LauncherActivity: AppCompatActivity()  {
 
         var dayStatusListSelectedBySingleSelect: MutableList<DayStatus> = mutableListOf()
 
-        val jal = JalaliDayStatus(JalaliCalendar(1404, 2, 7), lcInUse)
-        val jal1 = JalaliDayStatus(JalaliCalendar(1404, 2, 14), lcInUse)
-        val jal2 = JalaliDayStatus(JalaliCalendar(1404, 2, 21), lcInUse)
+        val jal = SolarHijriDayStatus(JalaliCalendar(1404, 2, 7), lcInUse)
+        val jal1 = SolarHijriDayStatus(JalaliCalendar(1404, 2, 14), lcInUse)
+        val jal2 = SolarHijriDayStatus(JalaliCalendar(1404, 2, 21), lcInUse)
         dayStatusListSelectedBySingleSelect.add(0, jal)
         binding.calendar.addMonths(object :
             MonthSampleAdapter<RowCalendarBinding, RowCalendarBinding, RowMonthBinding, RowShowSelectedDayBinding>

@@ -1,8 +1,8 @@
 package com.develotter.calendarview
 
 import com.develotter.calendarview.enums.TypeArtCalender
-import com.develotter.calendarview.georgian.GeorgianDayStatus
-import com.develotter.calendarview.jalali.JalaliDayStatus
+import com.develotter.calendarview.calendars.gregorian.GregorianDayStatus
+import com.develotter.calendarview.calendars.solarHijri.SolarHijriDayStatus
 import com.develotter.calendarview.status.DayStatus
 import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
@@ -12,8 +12,8 @@ import java.util.Locale
 
 fun LocalDate.getCalendarBase(typeArtCalendar: TypeArtCalender, locale: Locale): DayStatus {
     return when (typeArtCalendar) {
-        TypeArtCalender.JALALI -> { JalaliDayStatus(this.toJalali(), locale); }
-        else -> { GeorgianDayStatus(this, locale) }
+        TypeArtCalender.SolarHijri -> { SolarHijriDayStatus(this.toJalali(), locale); }
+        else -> { GregorianDayStatus(this, locale) }
     }
 }
 

@@ -3,15 +3,12 @@ package com.develotter.calendarviewsample
 import android.animation.ArgbEvaluator
 import android.animation.ValueAnimator
 import android.app.AlertDialog
-import android.app.LocaleManager
 import android.content.DialogInterface
-import android.icu.util.ULocale
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.LocaleManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.children
 import androidx.viewbinding.ViewBinding
@@ -20,8 +17,6 @@ import com.develotter.calendarview.enums.TypeArtCalender
 import com.develotter.calendarview.enums.TypeSelectDay
 import com.develotter.calendarview.enums.TypeViewCalender
 import com.develotter.calendarview.enums.TypeWeekShow
-import com.develotter.calendarview.getCalendarBase
-import com.develotter.calendarview.jalali.JalaliDayStatus
 import com.develotter.calendarview.status.CalendarStatus
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
@@ -34,12 +29,9 @@ import com.develotter.calendarviewsample.databinding.RowMonthBinding
 import com.develotter.calendarviewsample.databinding.RowShowSelectedDayBinding
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import ir.huri.jcal.JalaliCalendar
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.format.DateTimeFormatterBuilder
 import java.time.format.TextStyle
-import java.time.temporal.ChronoField.EPOCH_DAY
 import java.util.Locale
 
 @Suppress("UNCHECKED_CAST")

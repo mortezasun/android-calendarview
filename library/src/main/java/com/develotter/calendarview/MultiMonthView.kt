@@ -13,8 +13,8 @@ import com.develotter.calendarview.adapter.MultiMonthDataAdapter
 import com.develotter.calendarview.enums.TypeArtCalender
 import com.develotter.calendarview.enums.TypeViewCalender
 import com.develotter.calendarview.enums.TypeWeekShow
-import com.develotter.calendarview.georgian.GeorgianStatus
-import com.develotter.calendarview.jalali.JalaliStatus
+import com.develotter.calendarview.calendars.gregorian.GregorianStatus
+import com.develotter.calendarview.calendars.solarHijri.SolarHijriStatus
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
 import java.time.YearMonth
@@ -50,20 +50,20 @@ open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding,SelectCont
 
 
             val startMonth = when (   inDayCellViewAdapter. calendarStatus.getArtSelected()) {
-                TypeArtCalender.Georgian -> {
+                TypeArtCalender.Gregorian -> {
                     YearMonth.now().minusMonths(   inDayCellViewAdapter. calendarStatus.getCountsMonthAfterAndBefore().toLong())
                 }
 
-                TypeArtCalender.JALALI -> {
-                    JalaliStatus(inDayCellViewAdapter. calendarStatus.getLocalInUse()).minusMonths(   inDayCellViewAdapter. calendarStatus.getCountsMonthAfterAndBefore())
+                TypeArtCalender.SolarHijri -> {
+                    SolarHijriStatus(inDayCellViewAdapter. calendarStatus.getLocalInUse()).minusMonths(   inDayCellViewAdapter. calendarStatus.getCountsMonthAfterAndBefore())
                 }
             }
 
             val endMonth =    inDayCellViewAdapter. calendarStatus.getCountsMonthAfterAndBefore() * 2
             for (i in 1..endMonth) {
                 val ys = when (   inDayCellViewAdapter. calendarStatus.getArtSelected()) {
-                    TypeArtCalender.Georgian -> {
-                        val ys = GeorgianStatus(  inDayCellViewAdapter. calendarStatus.getLocalInUse())
+                    TypeArtCalender.Gregorian -> {
+                        val ys = GregorianStatus(  inDayCellViewAdapter. calendarStatus.getLocalInUse())
 
                         if (startMonth is YearMonth)
                             ys.yearMonth = startMonth.plusMonths(i.toLong())
@@ -71,11 +71,11 @@ open class MultiMonthView<D:ViewBinding,W: ViewBinding,M: ViewBinding,SelectCont
 
                     }
 
-                    TypeArtCalender.JALALI -> {
-                        val ys = JalaliStatus(   inDayCellViewAdapter. calendarStatus.getLocalInUse())
+                    TypeArtCalender.SolarHijri -> {
+                        val ys = SolarHijriStatus(   inDayCellViewAdapter. calendarStatus.getLocalInUse())
 
-                        if (startMonth is JalaliStatus)
-                            ys.jalaliDateRow = startMonth.plusMonths(i).getNow()
+                        if (startMonth is SolarHijriStatus)
+                            ys.solarHijriDateRow = startMonth.plusMonths(i).getNow()
                         ys
 
                     }
