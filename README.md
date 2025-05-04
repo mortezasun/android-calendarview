@@ -1,4 +1,4 @@
-![https://jitpack.io/#mortezasun/calendarview/1.0.0-alpha](https://jitpack.io/v/mortezasun/calendarview.svg)
+![https://jitpack.io/#mortezasun/android-calendarview/1.0.0-alpha](https://jitpack.io/v/mortezasun/calendarview.svg)
 
 # 📅 Custom CalendarView for Android (ViewBinding)
 
