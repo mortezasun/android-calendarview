@@ -23,8 +23,8 @@ A powerful and flexible calendar widget for Android applications. Supports multi
 
 | Calendar        | Support  |  Source  |
 |-----------------|-------------|-------------|
-| Gregorian        | ✅          | [java.time.LocalDate](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html) <br> [java.time.YearMonth](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/YearMonth.html ) |
-| Jalali (Persian)| ✅          | [Jalali Calendar from Mohammad Razeghi](https://github.com/razeghi71/JalaliCalendar)              | 
+| Gregorian (Julian)      | ✅          | [java.time.LocalDate](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html) <br> [java.time.YearMonth](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/YearMonth.html ) |
+| Solar Hijri <br> Jalali (Persian)| ✅          | [Jalali Calendar from Mohammad Razeghi](https://github.com/razeghi71/JalaliCalendar)              | 
 
 
 ---
@@ -71,6 +71,8 @@ dependencies {
 ```
 ```Kotlin
  var thisCalendarStatus = CalendarStatus()
+ thisCalendarStatus.setArtSelected(TypeArtCalender.Gregorian)  //Default
+ thisCalendarStatus.setArtSelected(TypeArtCalender.SolarHijri)  //Optional
  binding.calendar.addMonths(object :
             MonthSampleAdapter<RowDayBinding, RowWeekBinding, RowMonthBinding, RowShowSelectedDayBinding>(thisCalendarStatus){}
 ```
