@@ -2,7 +2,8 @@
 
 # 📅 Custom CalendarView for Android (ViewBinding)
 
-A powerful and flexible calendar widget for Android applications. Supports multiple views, date range selection, custom styling using ViewBinding, and much more.
+A powerful and flexible calendar widget for Android applications. Supports multiple views, date range selection, custom styling using ViewBinding, and much more.<br>
+**You can create any type of calendar you want with this view.**
 
 ![image](https://github.com/user-attachments/assets/d1acc817-a80c-423b-824f-58bc39eff198)<br> 
 ![image](https://github.com/user-attachments/assets/16d427bc-1878-4625-852e-08bbe3d1416b)
@@ -24,7 +25,8 @@ A powerful and flexible calendar widget for Android applications. Supports multi
 | Calendar        | Support  |  Source  |
 |-----------------|-------------|-------------|
 | Gregorian (Julian)      | ✅          | [java.time.LocalDate](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html) <br> [java.time.YearMonth](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/YearMonth.html ) |
-| Solar Hijri <br> Jalali (Persian)| ✅          | [Jalali Calendar from Mohammad Razeghi](https://github.com/razeghi71/JalaliCalendar)              | 
+|  Hijri (Islamic)| ✅          | [java.time.chrono.HijrahDate](https://docs.oracle.com/en/java/javase/17/docs/api//java.base/java/time/chrono/HijrahDate.html)             | 
+| Solar Hijri <br> Jalali (Persian)| ✅          | [Jalali Calendar from Mohammad Razeghi](https://github.com/razeghi71/JalaliCalendar)              |
 
 
 ---
@@ -57,7 +59,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.mortezasun:calendarview:1.0.0-alpha7'
+    implementation 'com.github.mortezasun:calendarview:1.1.0-alpha1'
 }
 ```
 
@@ -71,9 +73,7 @@ dependencies {
 ```
 ```Kotlin
  var thisCalendarStatus = CalendarStatus()
- thisCalendarStatus.setArtSelected(TypeArtCalender.Gregorian)  //Default
- thisCalendarStatus.setArtSelected(TypeArtCalender.SolarHijri)  //Optional
- binding.calendar.addMonths(object :
+ binding.calendar.addMonths(GregorianStatus::class.java,object,object :
             MonthSampleAdapter<RowDayBinding, RowWeekBinding, RowMonthBinding, RowShowSelectedDayBinding>(thisCalendarStatus){}
 ```
 
@@ -82,7 +82,7 @@ dependencies {
 ```Kotlin
   var dayStatusListSelectedBySingleSelect: MutableList<DayStatus> = mutableListOf()
   dayStatusListSelectedBySingleSelect.add(0, object :DayStatus(LocalDate.now(), lcInUse){})
-  binding.calendar.addMonths(object :
+  binding.calendar.addMonths(GregorianStatus::class.java,object,object :
             MonthSampleAdapter<RowCalendarBinding, RowCalendarBinding, RowMonthBinding, RowShowSelectedDayBinding>
                     (thisCalendarStatus,dayStatusListSelectedBySingleSelect=dayStatusListSelectedBySingleSelect ))
 ```
