@@ -85,7 +85,7 @@ class LauncherActivity: AppCompatActivity()  {
             holder.itemView.setOnClickListener {
                 when(data[position].index){
                     1->{
-                        val intent = Intent(this@LauncherActivity, LauncherActivity::class.java)
+                        val intent = Intent(this@LauncherActivity, CalendarViewActivity::class.java)
                         startActivity(intent)
                     }
                     2->{

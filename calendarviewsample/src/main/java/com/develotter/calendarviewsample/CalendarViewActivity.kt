@@ -48,7 +48,7 @@ class CalendarViewActivity : AppCompatActivity() {
     var noOrYes = arrayOf("")
     private lateinit var binding: ActivityMainBinding
     private lateinit var thisCalendarStatus: CalendarStatus
-    private  var textStyle: TextStyle = TextStyle.FULL
+    private  var textStyle: TextStyle = TextStyle.SHORT_STANDALONE
 
     private lateinit var lcInUse: Locale
 
@@ -140,15 +140,11 @@ class CalendarViewActivity : AppCompatActivity() {
     fun setUpCalendar() {
 
         var dayStatusListSelectedBySingleSelect: MutableList<DayStatus> = mutableListOf()
-
-        val jal = JalaliDayStatus(JalaliCalendar(1404, 2, 7), lcInUse)
-        val jal1 = JalaliDayStatus(JalaliCalendar(1404, 2, 14), lcInUse)
-        val jal2 = JalaliDayStatus(JalaliCalendar(1404, 2, 21), lcInUse)
-        dayStatusListSelectedBySingleSelect.add(0, jal)
+        dayStatusListSelectedBySingleSelect.add(0, object :DayStatus(LocalDate.of(LocalDate.now().year, LocalDate.now().monthValue,2), lcInUse){})
         binding.calendar.addMonths(object :
             MonthSampleAdapter<RowCalendarBinding, RowCalendarBinding, RowMonthBinding, RowShowSelectedDayBinding>
                 (
-                thisCalendarStatus
+                thisCalendarStatus,dayStatusListSelectedBySingleSelect=dayStatusListSelectedBySingleSelect
             ) {
             override fun onBindWeekView(dayStatus: DayOfWeek): RowCalendarBinding {
                 val binding = RowCalendarBinding.inflate(layoutInflater)

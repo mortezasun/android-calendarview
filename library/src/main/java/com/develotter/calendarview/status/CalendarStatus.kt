@@ -15,7 +15,7 @@ class CalendarStatus {
     private  var customCalendar : Boolean  = false
     private  var localInUse : Locale = Locale.getDefault()
     private  var countsMonthAfterAndBefore: Int = 50
-    private  var typeSelectDay: TypeSelectDay = TypeSelectDay.Range
+    private  var typeSelectDay: TypeSelectDay = TypeSelectDay.Single
     private  var showLastMonth: Boolean = true
     private  var showNextMonth: Boolean = true
     private  var showRowWeekName : TypeWeekShow = TypeWeekShow.Fix
