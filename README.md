@@ -57,7 +57,7 @@ allprojects {
 
 ```gradle
 dependencies {
-    implementation 'com.github.mortezasun:calendarview:1.0.0-alpha6'
+    implementation 'com.github.mortezasun:calendarview:1.0.0-alpha7'
 }
 ```
 
