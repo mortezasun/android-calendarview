@@ -23,7 +23,7 @@ A powerful and flexible calendar widget for Android applications. Supports multi
 
 | Calendar        | Support  |  Source  |
 |-----------------|-------------|-------------|
-| Georgian        | ✅          | [java.time.LocalDate](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html) <br> [java.time.YearMonth](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/YearMonth.html ) |
+| Gregorian        | ✅          | [java.time.LocalDate](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/LocalDate.html) <br> [java.time.YearMonth](https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/YearMonth.html ) |
 | Jalali (Persian)| ✅          | [Jalali Calendar from Mohammad Razeghi](https://github.com/razeghi71/JalaliCalendar)              | 
 
 
