@@ -1,11 +1,14 @@
+import com.android.build.api.dsl.LibraryExtension
+import org.gradle.kotlin.dsl.configure
+
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
+
 }
 
-android {
+extensions.configure<LibraryExtension> {
     namespace = "com.develotter.calendarview.calendars.hijri"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 27

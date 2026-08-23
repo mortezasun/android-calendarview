@@ -1,15 +1,16 @@
+import com.android.build.api.dsl.ApplicationExtension
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+
 }
 
-android {
+extensions.configure<ApplicationExtension> {
     namespace = "com.develotter.calendarviewsample"
-    compileSdk = 36
-
+    compileSdk = 37
     defaultConfig {
         applicationId = "com.develotter.calendarviewsample"
         minSdk = 27
+        targetSdk = 37
 
         versionCode = 2
         versionName = "1.1.0-alpha1"

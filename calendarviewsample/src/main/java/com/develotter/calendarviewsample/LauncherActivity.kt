@@ -177,9 +177,9 @@ class LauncherActivity: AppCompatActivity()  {
                 return bindings
             }
 
-            override fun onBindMonthView(dayStatus: MonthStatus<*, *>): RowMonthBinding {
+            override fun onBindMonthView(monthStatus: MonthStatus<*, *>): RowMonthBinding {
                 val binding = RowMonthBinding.inflate(layoutInflater)
-                binding.textRowMonth.text = dayStatus.getThisMonthCaption()
+                binding.textRowMonth.text = monthStatus.getThisMonthCaption()
 
 
                 return binding
@@ -310,7 +310,7 @@ class LauncherActivity: AppCompatActivity()  {
             viewbinding.textRow.setTextColor(
                 ContextCompat.getColor(
                     this@LauncherActivity,
-                    com.develotter.calendarview.R.color.purple_200
+                    R.color.purple_200
                 )
             )
         } else {
@@ -323,17 +323,17 @@ class LauncherActivity: AppCompatActivity()  {
             viewbinding.textRow.setTextColor(
                 ContextCompat.getColor(
                     this@LauncherActivity,
-                    com.develotter.calendarview.R.color.purple_500
+                    R.color.purple_500
                 )
             )
         }
         val startBackgroundColor = ContextCompat.getColor(
             this@LauncherActivity,
-            if (dayStatus.isChecked) R.color.white else com.develotter.calendarview.R.color.teal_200
+            if (dayStatus.isChecked) R.color.white else R.color.teal_200
         )
         val endBackgroundColor = ContextCompat.getColor(
             this@LauncherActivity,
-            if (dayStatus.isChecked) com.develotter.calendarview.R.color.teal_200 else R.color.white
+            if (dayStatus.isChecked) R.color.teal_200 else R.color.white
         )
         val backgroundColorAnimator =
             ValueAnimator.ofObject(ArgbEvaluator(), startBackgroundColor, endBackgroundColor)

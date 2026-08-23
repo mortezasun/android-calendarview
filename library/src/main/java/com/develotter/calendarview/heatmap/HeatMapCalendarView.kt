@@ -78,7 +78,7 @@ class HeatMapCalendarView(context: Context, attrs: AttributeSet?) : ViewGroup(co
 
         for (month in 1..12) {
             val tv = TextView(context).apply {
-                text = Month.of(month).getDisplayName(TextStyle.SHORT, Locale("en","US"))
+                text = Month.of(month).getDisplayName(TextStyle.SHORT,Locale.getDefault())
                 textSize = 5f
                 gravity = Gravity.CENTER
             }

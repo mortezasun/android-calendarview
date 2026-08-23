@@ -56,7 +56,7 @@ fun Context.getLanguage(): String {
 fun Context.getLanguageLocale(): Locale {
 
 
-    return Locale(getLanguage())
+    return Locale.forLanguageTag(getLanguage())
 }
 fun Context.getCalendarLanguage(): String {
 
@@ -66,7 +66,7 @@ fun Context.getCalendarLanguage(): String {
 fun Context.getCalendarLanguageLocale(): Locale {
 
 
-    return Locale(getCalendarLanguage())
+    return Locale.forLanguageTag(getCalendarLanguage())
 }
 fun Context.setLanguage(locale:String) {
 
@@ -79,7 +79,7 @@ fun Context.setCalendarLanguage(locale:String) {
     sharedPreferences.edit { putString(CALENDAR_LANGUAGE, locale) }
 }
  fun Context.updateLocale( languageCode: String): Context {
-    val locale = Locale(languageCode)
+    val locale = Locale.forLanguageTag(languageCode)
     Locale.setDefault(locale)
     val config = this.resources.configuration
     config.setLocale(locale)

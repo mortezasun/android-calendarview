@@ -104,9 +104,9 @@ class CalendarViewActivity : AppCompatActivity() {
     fun updateTitle() {
 
         binding.showDialogChangeCalendarViewTypeText.text =
-            thisCalendarStatus.getViewTypeSelected().title.toString()
+            thisCalendarStatus.getViewTypeSelected().title
         binding.showDialogChangeCalendarTypeText.text =
-            artSelected.title.toString()
+            artSelected.title
         val t =
             getLanguageEnumsWithBaseLanguage().title + " / " + resources.getDeviceDefaultLocale()
                 .toLanguageTag()
@@ -116,8 +116,8 @@ class CalendarViewActivity : AppCompatActivity() {
                 .toString()
         binding.changeLocaleCalendarText.text = t2
         binding.changeSelectDayTypeText.text =
-            thisCalendarStatus.getTypeSelectDay().title.toString()
-        binding.showWeekNameText.text = thisCalendarStatus.getShowRowWeekName().title.toString()
+            thisCalendarStatus.getTypeSelectDay().title
+        binding.showWeekNameText.text = thisCalendarStatus.getShowRowWeekName().title
         binding.showMonthNameText.text =
             noOrYes[if (thisCalendarStatus.getShowRowMonthName()) 1 else 0]
         binding.showNextMonthText.text =
@@ -196,9 +196,9 @@ class CalendarViewActivity : AppCompatActivity() {
                 return bindings
             }
 
-            override fun onBindMonthView(dayStatus: MonthStatus<*, *>): RowMonthBinding {
+            override fun onBindMonthView(monthStatus: MonthStatus<*, *>): RowMonthBinding {
                 val binding = RowMonthBinding.inflate(layoutInflater)
-                binding.textRowMonth.text = dayStatus.getThisMonthCaption()
+                binding.textRowMonth.text = monthStatus.getThisMonthCaption()
 
 
                 return binding
@@ -342,7 +342,7 @@ class CalendarViewActivity : AppCompatActivity() {
             viewbinding.textRow.setTextColor(
                 ContextCompat.getColor(
                     this@CalendarViewActivity,
-                    com.develotter.calendarview.R.color.purple_200
+                    R.color.purple_200
                 )
             )
         } else {
@@ -355,17 +355,17 @@ class CalendarViewActivity : AppCompatActivity() {
             viewbinding.textRow.setTextColor(
                 ContextCompat.getColor(
                     this@CalendarViewActivity,
-                    com.develotter.calendarview.R.color.purple_500
+                    R.color.purple_500
                 )
             )
         }
         val startBackgroundColor = ContextCompat.getColor(
             this@CalendarViewActivity,
-            if (dayStatus.isChecked) R.color.white else com.develotter.calendarview.R.color.teal_200
+            if (dayStatus.isChecked) R.color.white else R.color.teal_200
         )
         val endBackgroundColor = ContextCompat.getColor(
             this@CalendarViewActivity,
-            if (dayStatus.isChecked) com.develotter.calendarview.R.color.teal_200 else R.color.white
+            if (dayStatus.isChecked) R.color.teal_200 else R.color.white
         )
         val backgroundColorAnimator =
             ValueAnimator.ofObject(ArgbEvaluator(), startBackgroundColor, endBackgroundColor)
