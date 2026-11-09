@@ -4,39 +4,34 @@ Date: 2026-11-09
 Branch: update
 Architecture: decisions/0002-compose-v2-shared-core.md
 
-## Current source/configuration
+## Current source
 
-Shared selection engine/versioned snapshots/saveable ownership; native Gregorian, Hijri
-and Jalali month APIs; quarter/year heatmaps; shared lists/pagers; five bounded sample
-display modes; calendar/selection/locale/RTL controls, navigation and dialogs.
-41 new JVM tests and four new Compose instrumented tests have been added.
+Shared selection/snapshot/saveable state; three calendar month APIs/builders; native
+heatmaps; list/pager APIs and five sample display modes; sample controls/navigation/dialogs;
+build/test/lint and emulator workflows; corrected manifest, test-host assertion and KVM setup.
 
-The missing CustomCalendarViewActivity manifest declaration was removed in commit
-31fbc8773ce7c0da5816372d900a01eee7a652b6. See CI_FAILURES.md for the reported lint error.
+The shared month grid now supports independently visible previous/next dates via a
+calendar-specific provider. isCurrentMonth is exposed to slots. Six pure grid tests added.
+Existing calendar entry points/sample still use blank padding until providers are wired.
+See ADJACENT_MONTH_DAYS.md for that precise scope and the remaining integration.
 
-## Priority 0 verification
+## Evidence and verification
 
-User reported run 42630675110 as 'alles ok' after the manifest correction:
-https://github.com/mortezasun/android-calendarview/actions/runs/42630675110
+The supplied screenshot shows Android instrumentation #3 for the KVM correction green.
+It does not expose per-test counts. Earlier uploaded HTML showed four Compose tests passing
+and the old smoke test failing; the smoke test and KVM setup were subsequently corrected.
+Build/JVM-test/lint success was previously reported by the user. These results establish
+a baseline for earlier code, not proof of the newly prepared grid changes.
 
-Record this as user-reported successful verification, not independently observed results.
-The assistant's fetch of that run failed; exact job conclusions/test counts were not
-retrieved. Do not claim that the four Compose tests ran in the original JVM-test workflow.
-
-A separate Android instrumentation workflow is now configured to compile the core test
-APK then run all core connected tests on an API 29 google_apis x86_64 emulator, using an
-explicit ubuntu-24.04 runner. Reports, test APK and diagnostic logs are collected when
-available. No emulator startup/test outcome has been observed. See COMPOSE_TESTS.md.
-
-The original android-verification.yml remains unchanged and checks assembly, JVM tests
-and all-module lint. Adding this second workflow can trigger additional Actions usage.
-Historical PROJECT_STATUS.md results still concern pre-migration code.
+47 new JVM tests and four new instrumented tests exist after this change; the six new JVM
+tests have no observed result yet. Re-run both CI workflows for the new commit. Actual
+activity/process recreation, RTL, font scaling, accessibility, gesture/state coverage and
+additional runtime API levels remain open even when current CI is green.
 
 ## Remaining work
 
-Confirm emulator results and fix actual failures; expand UI/restoration/API-level coverage.
-Then continue adjacent-month cells and full legacy parity, synchronized swiped-month
-navigation, legacy CalendarViewActivity/views/XML cleanup, Jalali dependency isolation,
-version-catalog consolidation and main documentation/agent-rule migration. The missing
-manifest declaration is fixed at source level and no longer an outstanding code change.
-Sample version remains 1.1.0-alpha1; no 2.0.0 release/tag created.
+Wire adjacent-date providers into all calendar entry points and sample controls; complete
+legacy API parity; synchronize swiped-month navigation/dialog/mode switching; migrate
+legacy CalendarViewActivity; remove old views/XML and core Jalali dependency after replacement;
+consolidate catalog; update main documentation/agent rules and release metadata.
+Version remains 1.1.0-alpha1; no 2.0.0 release/tag created. Migration is not complete.

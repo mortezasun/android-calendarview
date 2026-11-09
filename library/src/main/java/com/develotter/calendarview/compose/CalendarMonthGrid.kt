@@ -19,24 +19,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.selection.CalendarSelection
 
-/** Display label plus a calendar-independent absolute-day identity. */
-data class CalendarDayCell(
-    val epochDay: Long,
-    val label: String,
-    val accessibilityLabel: String,
-    val enabled: Boolean = true,
-)
-
 /**
- * Native stateless month renderer; no AndroidView, XML or ViewBinding is used.
- *
- * Supply days in chronological order and weekday labels in the intended first-weekday order.
- * firstDayOffset counts blank cells before day one in that same order. Row placement follows
- * the ambient Compose layout direction, including RTL. The caller owns calendar arithmetic,
- * localization, navigation and selection state. Adjacent-month days are not rendered yet.
- *
- * Day slots receive selected/endpoint flags; click handling and accessibility stay on the
- * outer cell. Custom content should not install a competing click handler.
+ * Native stateless calendar grid with optional independently visible adjacent-month days.
+ * Supply chronological current-month cells, ordered weekday labels and a matching offset.
+ * Adjacent formatting/availability comes from the caller's calendar-specific provider.
+ * All dates share selection and click handling; clicks do not automatically navigate.
+ * Slots receive cells with isCurrentMonth plus selection/endpoint flags. Do not install
+ * competing click handlers in slots. Layout follows ambient direction, including RTL.
  */
 @Composable
 fun CalendarMonthGrid(
@@ -50,12 +39,14 @@ fun CalendarMonthGrid(
     header: @Composable (String) -> Unit = { Text(it, style = MaterialTheme.typography.titleMedium) },
     weekdayContent: @Composable (String) -> Unit = { Text(it) },
     dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    adjacentDayProvider: ((Long) -> CalendarDayCell)? = null,
 ) {
     require(weekdayLabels.size == 7) { "Exactly seven weekday labels are required" }
-    require(firstDayOffset in 0..6) { "firstDayOffset must be in 0..6" }
-    require(days.size in 1..31) { "A month must contain 1..31 days" }
-    require(days.map { it.epochDay }.distinct().size == days.size) { "Day identities must be unique" }
-
+    val cells = buildCalendarMonthCells(
+        days, firstDayOffset, showPreviousMonthDays, showNextMonthDays, adjacentDayProvider,
+    )
     Column(modifier) {
         header(title)
         Row(Modifier.fillMaxWidth()) {
@@ -65,11 +56,9 @@ fun CalendarMonthGrid(
                 }
             }
         }
-        val rowCount = (firstDayOffset + days.size + 6) / 7
-        repeat(rowCount) { row ->
+        cells.chunked(7).forEach { week ->
             Row(Modifier.fillMaxWidth()) {
-                repeat(7) { column ->
-                    val day = days.getOrNull(row * 7 + column - firstDayOffset)
+                week.forEach { day ->
                     val cellModifier = Modifier.weight(1f).heightIn(min = 48.dp)
                     if (day == null) {
                         Box(cellModifier)
@@ -79,13 +68,15 @@ fun CalendarMonthGrid(
                             modifier = cellModifier
                                 .semantics { contentDescription = day.accessibilityLabel }
                                 .selectable(
-                                    selected = selected,
-                                    enabled = day.enabled,
-                                    role = Role.Button,
+                                    selected = selected, enabled = day.enabled, role = Role.Button,
                                     onClick = { onDayClick(day.epochDay) },
                                 ),
-                            color = if (selected) MaterialTheme.colorScheme.primaryContainer
-                                else MaterialTheme.colorScheme.surface,
+                            color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+                            contentColor = when {
+                                selected -> MaterialTheme.colorScheme.onPrimaryContainer
+                                !day.isCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant
+                                else -> MaterialTheme.colorScheme.onSurface
+                            },
                         ) {
                             Box(Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
                                 dayContent(day, selected, selection.isRangeEndpoint(day.epochDay))
