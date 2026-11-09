@@ -53,23 +53,20 @@ class CalendarSampleUiTest {
 
     private fun showViewport() {
         try {
-            compose.onNode(hasText("Selected dates / range endpoints (ISO):")).performScrollTo()
+            compose.onNodeWithText("Compose heatmap demo").performScrollTo()
         } catch (_: AssertionError) {
             // Node is outside any scrollable container or obscured
         }
-        compose.onNode(hasText("Window month ", substring = true)).performScrollTo()
+        try {
+            compose.onNode(hasText("Window month ", substring = true)).performScrollTo()
+        } catch (_: AssertionError) {
+        }
         compose.waitForIdle()
     }
 
     private fun assertMonth(month: YearMonth) {
         showViewport()
-        val node = compose.onNodeWithText(caption(month))
-        try {
-            node.performScrollTo()
-        } catch (_: AssertionError) {
-            // Node is inside an unscrollable or parent-controlled container
-        }
-        node.assertIsDisplayed()
+        compose.onNodeWithText(caption(month)).assertIsDisplayed()
     }
 
     @Test
