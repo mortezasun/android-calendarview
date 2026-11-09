@@ -4,29 +4,26 @@ Date: 2026-11-09
 Branch: update
 Architecture: decisions/0002-compose-v2-shared-core.md
 
-## Implemented
+## Current implementation
 
-- Shared selection engine and saveable Compose ownership (11 JUnit tests).
-- Native customizable month grid and Gregorian/Hijri/Jalali entry points (15 data tests).
-- Compose launcher with calendar/selection/locale/RTL controls, month navigation, shared
-  selection dialog and heatmap link (four navigation tests).
-- Native quarter/year heatmaps and migrated HeatMapViewActivity (five tests).
-- Calendar-independent vertical/horizontal list and pager library APIs.
-- CalendarSampleViewport integrates all five display modes into the launcher using a
-  bounded 480dp viewport and 25 real calendar months. Scroll states use epoch-day keys
-  and reset when calendar/window anchor changes. Heatmap button label is corrected.
+- UI-independent selection engine and observable/saveable Compose owner.
+- Native month grid, Gregorian/Hijri/Jalali builders and entry points.
+- Native quarter/year heatmaps and migrated heatmap activity.
+- Shared vertical/horizontal lists and pagers, integrated in five sample display modes.
+- Sample calendar/selection/locale/RTL controls, bounded 25-month window, navigation and dialog.
+- Saved selection now has version/mode headers, preserves empty values and rejects
+  incompatible restoration. Six regression tests added for the snapshot codec.
 
-See COMPOSE_MONTH_CONTAINERS.md for mode/window/navigation semantics and limitations.
-The viewport does not synchronize its swiped month back to the outer anchor. Outer navigation
-recenters the window; the dialog shows that anchor month. List and pager positions are
-remembered separately. All modes share the same outer selection.
+See V2_AUDIT.md for the prioritized review of all recorded open areas. That checklist
+separates implemented source from unverified behavior and incomplete migration/release work.
+See COMPOSE_MONTH_CONTAINERS.md for current sample window/navigation limitations.
 
 ## Verification
 
-Source review only. All 35 added JUnit tests remain unexecuted; no new tests in this step.
-No Gradle build, lint, Compose UI, gesture, restoration, device or RTL/accessibility check
-was performed. Available GitHub tools do not run builds. Plugin/compiler compatibility is
-unverified. Historical PROJECT_STATUS.md successful checks concern pre-migration code only.
+All 41 added JUnit tests remain unexecuted. Source review only: no Gradle build, lint,
+Compose UI, scroll/gesture, lifecycle restoration, device or RTL/accessibility test was run.
+Available GitHub tools do not execute builds. Compiler/plugin compatibility is unverified.
+Historical PROJECT_STATUS.md results describe pre-migration code, not the present branch.
 
 ```bash
 bash ./gradlew :calendarviewsample:assembleDebug
@@ -34,23 +31,12 @@ bash ./gradlew test
 bash ./gradlew :calendarviewsample:lintDebug :library:lintDebug
 ```
 
-Manual checks: all calendars/modes/locales, list and pager swipes, RTL, large fonts, rotation,
-anchor recentering, cross-month selection and shared dialog selection, heatmap navigation.
+Snapshot tests validate encoding only, not Compose SavedStateRegistry integration.
+Old unversioned development snapshots are intentionally not migrated.
 
-## Remaining work
+## Release status
 
-- Run actual builds/tests; add UI/restoration/scroll tests.
-- Add adjacent-month cells and remaining legacy customization/features.
-- Migrate legacy CalendarViewActivity; remove old views/layouts after replacements.
-- Clean dangling CustomCalendarViewActivity manifest entry.
-- Remove Jalali dependency from core after migrating legacy APIs requiring it.
-- Consolidate Compose coordinates in catalog; verify dependency/toolchain versions.
-- Update README, architecture, setup and agent rules; align metadata to 2.0.0.
-
-Core still exports Jalali; legacy ViewBinding remains. BOM 2026.09.00 remains in core build
-file and release metadata is unchanged. Disabled dates reject direct taps but can lie inside
-selected ranges. Locale and layout direction are independent. Hijri uses platform chronology.
-Jalali checks reject inconsistent conversion and non-Persian names are transliterations.
-Heatmaps remain Gregorian with synthetic demo data. State restoration is not verified.
-
-This is an incremental migration, not a completed, verified or published v2 release.
+Not complete and not release-verified. Legacy views, adapters, CalendarViewActivity and
+ViewBinding remain; core still exports Jalali. Adjacent-month cells and full API parity
+remain open. Main documentation/agent rules need migration. BOM coordinates remain in
+core build file; sample version is unchanged at 1.1.0-alpha1. No v2 tag/release was created.

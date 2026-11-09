@@ -8,6 +8,7 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.develotter.calendarview.enums.TypeSelectDay
 import com.develotter.calendarview.selection.CalendarSelection
+import com.develotter.calendarview.selection.CalendarSelectionSnapshot
 
 /** Observable owner of the UI-independent selection engine. Mutate on the UI thread. */
 class CalendarSelectionState(initialSelection: CalendarSelection) {
@@ -26,10 +27,12 @@ class CalendarSelectionState(initialSelection: CalendarSelection) {
 }
 
 /**
- * Remembers selection and saves explicit absolute-day keys through saved instance state.
- * Changing mode resets the selection. Initial keys are used only on first creation;
- * restored keys take precedence. Range interiors are never expanded into saved state.
- * Saved-state size still grows with explicit multiple selections.
+ * Remembers selection and saves a version, mode and explicit absolute-day keys.
+ * An empty selection still has a nonempty snapshot and takes precedence over initial dates.
+ * Changing mode during composition resets selection. Restoration separately checks mode;
+ * incompatible or invalid snapshots fall back to initialization. Old unversioned snapshots
+ * from development builds are not migrated. Initial dates are initializers, not controlled
+ * inputs. Saved-state size still grows with explicit multiple selections.
  */
 @Composable
 fun rememberCalendarSelectionState(
@@ -37,9 +40,11 @@ fun rememberCalendarSelectionState(
     initialEpochDays: List<Long> = emptyList(),
 ): CalendarSelectionState = rememberSaveable(
     mode,
-    saver = listSaver<CalendarSelectionState, Long>(
-        save = { it.selection.selectedDays },
-        restore = { CalendarSelectionState(CalendarSelection.from(mode, it)) },
+    saver = listSaver<CalendarSelectionState, String>(
+        save = { CalendarSelectionSnapshot.encode(it.selection) },
+        restore = { values ->
+            CalendarSelectionSnapshot.decode(mode, values)?.let { CalendarSelectionState(it) }
+        },
     ),
 ) {
     CalendarSelectionState(CalendarSelection.from(mode, initialEpochDays))
