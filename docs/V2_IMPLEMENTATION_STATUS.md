@@ -6,27 +6,59 @@ Architecture: decisions/0002-compose-v2-shared-core.md
 
 ## Step 1: UI-independent selection engine
 
-Added CalendarSelection in the shared :library module and 11 JUnit behavior tests.
-The engine uses the existing TypeSelectDay enum and introduces no dependencies.
-It stores copied, sorted absolute-day keys, with only endpoints retained for a range.
-The existing MonthSampleAdapter was inspected to preserve its tap transitions.
-Selection membership no longer needs a rendered view or cached binding.
+CalendarSelection in :library handles none, single, multiple and range selection using
+absolute-day keys, without view caches. Eleven JUnit behavior tests were added.
+The implementation and tests were committed in 2cbd21aa3b78908eaf00f297b6778f7fca555fe0.
+The tests have not been executed in this environment.
 
-The engine is an immutable-by-API value holder, not observable Compose state.
-A future Compose owner must publish each returned instance through observable state.
-Calendar modules must convert their dates to epoch days before using this API.
-The new engine is not yet wired into existing views or the sample.
+## Step 2: Compose foundation and native month grid
 
-## Checks
+The shared :library module now enables Compose alongside legacy ViewBinding. The existing
+kotlin-compose plugin alias is applied; no kotlin-android plugin is added to AGP built-in Kotlin.
+Compose runtime, saveable state, UI, Foundation and Material 3 use BOM 2026.09.00.
+The BOM is declared in the core build file; moving its coordinates into the version catalog
+is deferred. Existing toolchain and non-Compose dependency versions are unchanged.
 
-Source review only. No Gradle build, JUnit execution, lint, emulator or device check was run
-in this session: the available GitHub connector provides file operations, not a build runner.
-The tests are added but unverified. Prior successful results in PROJECT_STATUS.md describe
-the pre-migration code and must not be treated as verification of this change.
+Official setup sources consulted on 2026-11-09:
 
-Suggested verification in an Android development checkout:
+- https://developer.android.com/develop/ui/compose/bom
+- https://developer.android.com/develop/ui/compose/setup-compose-dependencies-and-compiler
+- https://developer.android.com/build/migrate-to-built-in-kotlin
+
+CalendarSelectionState publishes each selection change via Compose mutableStateOf.
+rememberCalendarSelectionState saves explicit epoch-day keys with a listSaver. The mode is
+configuration supplied by the caller; changing it resets state. Initial dates are only
+initializers, not controlled inputs. Large multiple selections can consume substantial saved state.
+
+CalendarMonthGrid is a native, stateless Compose renderer for one month. It accepts localized
+labels, a first-day offset, chronological day cells, selection and a click callback. Header,
+weekday and day content are composable slots. Disabled cells do not dispatch clicks.
+The layout follows ambient layout direction; RTL has not been manually verified.
+
+Example wiring inside a composable (month data must come from the calendar engine):
+
+```kotlin
+val state = rememberCalendarSelectionState(TypeSelectDay.Range)
+CalendarMonthGrid(
+    title = title,
+    weekdayLabels = weekdayLabels,
+    firstDayOffset = firstDayOffset,
+    days = days,
+    selection = state.selection,
+    onDayClick = state::onDayClick,
+)
+```
+
+## Verification limits
+
+Source review only. No Gradle compilation, JUnit execution, lint, saved-state restoration
+test, emulator or device check was run: the available GitHub connector is not a build runner.
+Plugin/compiler compatibility with the repository's AGP/Kotlin configuration must be checked
+by a real Gradle build. Earlier successful results in PROJECT_STATUS.md are pre-migration
+results, not verification of these changes.
 
 ```bash
+bash ./gradlew :library:compileDebugKotlin
 bash ./gradlew :library:testDebugUnitTest
 bash ./gradlew :calendarviewsample:assembleDebug
 bash ./gradlew :library:lintDebug
@@ -34,14 +66,13 @@ bash ./gradlew :library:lintDebug
 
 ## Remaining work
 
-- Audit calendar contracts, conversions and all public customization hooks.
-- Verify stable Compose/AndroidX versions and compatible Kotlin/AGP plugin configuration.
-- Add observable Compose state ownership and restoration.
-- Implement native calendar grid, list/pager navigation and composable customization slots.
-- Connect the three independently consumable calendar modules to the shared Compose core.
-- Migrate heatmap and the complete sample application.
-- Replace obsolete XML/ViewBinding rendering only after feature parity is established.
-- Align version metadata to 2.0.0 and update README, architecture, setup and agent rules.
-- Run build, behavior tests, lint and manual UI/RTL checks before declaring v2 complete.
+- Connect and test Gregorian, Hijri and Jalali engine data with the Compose core.
+- Add grid and saved-state restoration tests and run all existing behavior tests.
+- Implement list/pager navigation, adjacent-month cells and remaining customization hooks.
+- Migrate heatmap and the complete sample; remove old rendering only after replacement.
+- Move the Jalali dependency out of the shared core into its calendar module.
+- Finish dependency audit, catalog consolidation and actual toolchain compatibility checks.
+- Align release metadata to 2.0.0 and update README, architecture, setup and agent rules.
+- Run builds, lint and manual UI, accessibility and RTL checks.
 
-This step is implementation groundwork, not a completed Compose migration or a v2 release.
+This is an incremental implementation, not a completed Compose migration or a v2 release.
