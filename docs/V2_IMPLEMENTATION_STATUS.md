@@ -6,42 +6,38 @@ Architecture: decisions/0002-compose-v2-shared-core.md
 
 ## Current implementation
 
-- UI-independent selection engine and observable/saveable Compose owner.
-- Native month grid, Gregorian/Hijri/Jalali builders and entry points.
-- Native quarter/year heatmaps and migrated heatmap activity.
-- Shared vertical/horizontal lists and pagers, integrated in five sample display modes.
-- Sample calendar/selection/locale/RTL controls, bounded 25-month window, navigation and dialog.
-- Versioned saved-selection codec with mode validation and preservation of empty selections.
-- Android verification workflow configured for update pushes/PRs, with independent assemble,
-  JVM test and all-module lint jobs plus available report/APK artifacts. See CI.md.
+- Shared selection engine, versioned snapshot codec and saveable Compose owner.
+- Native Gregorian/Hijri/Jalali month UI and data builders.
+- Native quarter/year heatmaps and migrated heatmap demo.
+- Shared lists/pagers and five bounded sample display modes.
+- Sample selection/calendar/locale/RTL controls, navigation and shared dialog.
+- Build/JVM-test/all-module-lint Actions workflow configured; results unobserved.
+- Four Compose instrumented tests added for saved-state restoration, mode changes and
+  grid interaction semantics, with required test/debug dependencies. See COMPOSE_TESTS.md.
 
-V2_AUDIT.md remains the prioritized checklist. Its statement that no workflow existed
-describes the earlier audit snapshot; a workflow is now configured, but actual execution
-and results remain pending. COMPOSE_MONTH_CONTAINERS.md documents current navigation limits.
+## Priority 0 verification
 
-## Verification
-
-All 41 added JUnit tests remain unexecuted from this session's perspective. No Gradle build,
-lint, Compose UI, gesture, lifecycle restoration, device or RTL/accessibility result has
-been observed. Available GitHub connector tools cannot execute builds or inspect Actions
-runs. CI configuration is not proof of a passing build. Compiler/plugin compatibility
-remains unverified. Historical PROJECT_STATUS.md results concern pre-migration code only.
-
-The workflow can run automatically after the approved push, subject to repository settings.
-It uses the documented JDK/SDK configuration without bypassing failures. Verify conclusions
-for the exact commit in GitHub Actions; record actual results before closing priority 0.
-
-Local equivalents:
+41 added JVM tests and four added instrumented Compose tests are unexecuted from this
+session's perspective. Test source is not proof of compilation or success. No observed
+Gradle, lint, emulator/device, UI or restoration result exists for this migration.
+The public Actions page fetch failed; the connector cannot inspect Actions runs/logs.
+Existing CI does not execute or necessarily compile the newly added instrumentation tests.
+An emulator CI job remains open. See CI.md for current workflow scope and V2_AUDIT.md for
+the priority checklist. Historical PROJECT_STATUS.md results concern pre-migration code.
 
 ```bash
-bash ./gradlew :calendarviewsample:assembleDebug
+bash ./gradlew :calendarviewsample:assembleDebug :library:assembleDebugAndroidTest
 bash ./gradlew test
-bash ./gradlew :library:lintDebug :calendar-gregorian:lintDebug :calendar-hijri:lintDebug :calendar-solarHijri:lintDebug :calendarviewsample:lintDebug
+bash ./gradlew :library:connectedDebugAndroidTest
 ```
 
-## Release status
+The final command needs a compatible running emulator/device. StateRestorationTester
+simulates Compose restoration; it does not replace real activity/process-death checks.
+Compiler/plugin and SDK-package availability remain unverified until builds run.
 
-Not complete or release-verified. Legacy views/adapters, CalendarViewActivity and ViewBinding
-remain; core still exports Jalali. Adjacent-month cells and full API parity remain open.
-Documentation/agent rules need migration. BOM is in core build file; sample version remains
-1.1.0-alpha1. No v2 tag/release created. Emulator/UI/restoration tests are not part of CI yet.
+## Remaining migration/release work
+
+Adjacent-month cells, full old API parity, synchronized navigation from swiped months,
+legacy CalendarViewActivity/views/layout cleanup, dangling manifest entry, Jalali dependency
+isolation, catalog consolidation, dependency/toolchain verification and main documentation
+updates remain open. Version stays 1.1.0-alpha1; no 2.0.0 release/tag was created.
