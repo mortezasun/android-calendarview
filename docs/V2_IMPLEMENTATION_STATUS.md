@@ -6,66 +6,71 @@ Architecture: decisions/0002-compose-v2-shared-core.md
 
 ## Implemented steps
 
-1. CalendarSelection: UI-independent none/single/multiple/range selection and 11 JUnit tests.
+1. CalendarSelection: UI-independent none/single/multiple/range selection; 11 JUnit tests.
 2. Shared Compose core: CalendarSelectionState, rememberCalendarSelectionState and native
-   CalendarMonthGrid with customizable header, weekday and day slots. Compose BOM 2026.09.00
-   is declared in the core build file. Legacy ViewBinding remains during migration.
-3. Gregorian Compose integration: gregorianMonthData builds localized labels, locale-based
-   or explicit week starts, absolute-day keys and enabled flags. GregorianCalendarMonth
-   connects that data to the shared native grid. Five data tests were added. The Gregorian
-   module enables Compose and exports the shared core through api(project(":library")).
+   CalendarMonthGrid with header/weekday/day slots. BOM 2026.09.00 is in the core build file.
+3. Gregorian: gregorianMonthData and GregorianCalendarMonth; five data tests.
+4. Hijri: hijriMonthData and HijriCalendarMonth; five data tests. The module enables Compose
+   and exports :library via api. Saturday-first preserves the old module default and can
+   be overridden. Input dates are normalized to the start of their month without changing
+   their Hijrah chronology; click callbacks preserve that chronology too.
 
-The Gregorian entry point is controlled: callers own the displayed YearMonth and selection.
-Custom rendering can use gregorianMonthData with CalendarMonthGrid directly.
-Locale controls formatting and week defaults, not the ambient Compose layout direction.
-Disabled cells reject clicks but are not excluded from the interior of a selected range.
-The old GregorianStatus and views remain unchanged. The sample is not yet wired to Compose.
+Both calendar entry points are controlled: callers own month and selection. Directly use
+the data builders with CalendarMonthGrid for custom content slots. Locale controls labels,
+not ambient layout direction. Disabled days reject taps but may lie inside selected ranges.
+No list/pager/navigation controls or adjacent-month cells have been implemented yet.
+
+Hijri dates follow the platform Hijrah chronology and its supported date range; this does
+not implement local moon-sighting adjustments. Gregorian and Hijri selection identities
+share absolute epoch days. The old calendar classes and sample views remain unchanged.
 
 ## Usage inside a composable
 
 ```kotlin
 val state = rememberCalendarSelectionState(TypeSelectDay.Range)
-GregorianCalendarMonth(
-    month = YearMonth.of(2026, 11),
+HijriCalendarMonth(
+    month = HijrahDate.now(),
     selection = state.selection,
     onDateClick = { state.onDayClick(it.toEpochDay()) },
-    locale = Locale.GERMANY,
+    locale = Locale.forLanguageTag("ar"),
 )
 ```
 
-Imports come from java.time, java.util.Locale, the shared core's compose package,
-the shared TypeSelectDay enum and calendars.gregorian.compose.GregorianCalendarMonth.
-Selection is saved as explicit epoch-day keys; changing mode resets remembered selection
-during composition. Initial selections are initializers, not controlled inputs. Large
-multiple selections may consume substantial saved-instance-state space.
+Import HijrahDate from java.time.chrono, Locale from java.util, shared Compose state
+from com.develotter.calendarview.compose, TypeSelectDay from the shared enums package,
+and HijriCalendarMonth from com.develotter.calendarview.calendars.hijri.compose.
+
+Selection saves explicit epoch-day keys. Initial selections are initializers, not controlled
+inputs. Mode changes reset remembered selection during composition. Large multiple selections
+can consume substantial saved-instance-state space. Restoration has not been tested.
 
 ## Verification limits
 
-Source review only. All 16 new JUnit tests are unexecuted. No Gradle compilation, lint,
-emulator/device check, saved-state restoration or manual RTL/accessibility check was run.
-The GitHub connector offers file operations, not a build runner. Plugin/compiler compatibility
-with the existing AGP/Kotlin configuration is not established by these commits. Earlier
-PROJECT_STATUS.md build results concern the pre-migration implementation only.
+Source review only. All 21 added JUnit tests are unexecuted. No Gradle compilation, lint,
+emulator/device test, restoration test or manual UI/RTL/accessibility check was performed.
+The available GitHub connector is not a build runner. Plugin/compiler compatibility with
+the existing AGP/Kotlin configuration is unverified. PROJECT_STATUS.md results describe
+the pre-migration implementation, not these changes.
 
 ```bash
-bash ./gradlew :calendar-gregorian:compileDebugKotlin
-bash ./gradlew :library:testDebugUnitTest :calendar-gregorian:testDebugUnitTest
+bash ./gradlew :calendar-hijri:compileDebugKotlin
+bash ./gradlew :library:testDebugUnitTest :calendar-gregorian:testDebugUnitTest :calendar-hijri:testDebugUnitTest
 bash ./gradlew :calendarviewsample:assembleDebug
-bash ./gradlew :library:lintDebug :calendar-gregorian:lintDebug
+bash ./gradlew :library:lintDebug :calendar-gregorian:lintDebug :calendar-hijri:lintDebug
 ```
 
 ## Remaining work
 
-- Implement Hijri and Jalali Compose entry points and verify absolute-day conversions.
+- Implement Jalali Compose entry point and verify absolute-day conversion.
 - Add navigation, list/pager modes, adjacent-month cells and remaining customization hooks.
-- Add grid, selection-state and saved-state restoration tests; execute behavior tests.
-- Migrate heatmap and sample; remove legacy rendering after feature parity.
-- Move Jalali dependency from core to its calendar module.
-- Consolidate Compose dependencies in the catalog and finish version/toolchain verification.
+- Add UI/state/restoration tests and execute existing behavior tests.
+- Migrate heatmap and sample; remove old rendering after replacement.
+- Move Jalali dependency out of the core into its module.
+- Consolidate Compose coordinates in the version catalog and verify dependency/toolchain versions.
 - Update README, architecture, setup and agent rules; align release metadata to 2.0.0.
 - Run builds, lint and manual UI/RTL/accessibility checks before declaring completion.
 
-Official setup references consulted during step 2:
+Official setup references consulted in step 2:
 
 - https://developer.android.com/develop/ui/compose/bom
 - https://developer.android.com/develop/ui/compose/setup-compose-dependencies-and-compiler
