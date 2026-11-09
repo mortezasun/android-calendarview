@@ -6,67 +6,72 @@ Architecture: decisions/0002-compose-v2-shared-core.md
 
 ## Implemented steps
 
-1. CalendarSelection: UI-independent none/single/multiple/range selection; 11 JUnit tests.
-2. Shared Compose core: CalendarSelectionState, rememberCalendarSelectionState and native
-   CalendarMonthGrid with header/weekday/day slots. BOM 2026.09.00 is in the core build file.
-3. Gregorian: gregorianMonthData and GregorianCalendarMonth; five data tests.
-4. Hijri: hijriMonthData and HijriCalendarMonth; five data tests. The module enables Compose
-   and exports :library via api. Saturday-first preserves the old module default and can
-   be overridden. Input dates are normalized to the start of their month without changing
-   their Hijrah chronology; click callbacks preserve that chronology too.
+1. UI-independent CalendarSelection for none/single/multiple/range; 11 JUnit tests.
+2. Shared Compose selection state, saveable ownership and native CalendarMonthGrid.
+3. Gregorian month builder and GregorianCalendarMonth; five data tests.
+4. Hijri month builder and HijriCalendarMonth; five data tests.
+5. Solar Hijri month builder, solarHijriEpochDay and SolarHijriCalendarMonth; five data tests.
+   The Solar Hijri module enables Compose and explicitly exports both core and JalaliCalendar.
 
-Both calendar entry points are controlled: callers own month and selection. Directly use
-the data builders with CalendarMonthGrid for custom content slots. Locale controls labels,
-not ambient layout direction. Disabled days reject taps but may lie inside selected ranges.
-No list/pager/navigation controls or adjacent-month cells have been implemented yet.
+All three calendar modules now contain native Compose entry points depending on the shared
+core, not on each other. These are incremental single-month APIs, not feature-complete
+replacements for the previous view library. Old views and sample wiring remain unchanged.
+The core still exports the Jalali library pending legacy API cleanup; dependency isolation
+is therefore not complete. Compose BOM 2026.09.00 remains in the core build file.
 
-Hijri dates follow the platform Hijrah chronology and its supported date range; this does
-not implement local moon-sighting adjustments. Gregorian and Hijri selection identities
-share absolute epoch days. The old calendar classes and sample views remain unchanged.
+Calendar builders provide localized labels and epoch-day identities. Gregorian defaults
+to the locale's week start; Hijri/Jalali preserve Saturday-first with explicit overrides.
+Locale does not set Compose layout direction. Custom rendering uses each builder with
+CalendarMonthGrid slots. Disabled dates reject direct taps but may lie in selected ranges.
 
-## Usage inside a composable
+Solar Hijri uses the existing conversion extension and JalaliCalendar, with round-trip and
+consecutive-day checks that reject conversion inconsistencies. No new conversion algorithm
+or wider supported year range is claimed. Persian month names come from JalaliCalendar;
+other locales use the existing project's English transliterations, not fully translated
+Jalali month names. Mutable consumer predicates receive separate JalaliCalendar instances.
+Hijri follows platform chronology data, not local moon-sighting adjustments.
+
+## Solar Hijri usage inside a composable
 
 ```kotlin
 val state = rememberCalendarSelectionState(TypeSelectDay.Range)
-HijriCalendarMonth(
-    month = HijrahDate.now(),
+SolarHijriCalendarMonth(
+    month = JalaliCalendar(1400, 1, 1),
     selection = state.selection,
-    onDateClick = { state.onDayClick(it.toEpochDay()) },
-    locale = Locale.forLanguageTag("ar"),
+    onDateClick = { state.onDayClick(solarHijriEpochDay(it)) },
+    locale = Locale.forLanguageTag("fa"),
 )
 ```
 
-Import HijrahDate from java.time.chrono, Locale from java.util, shared Compose state
-from com.develotter.calendarview.compose, TypeSelectDay from the shared enums package,
-and HijriCalendarMonth from com.develotter.calendarview.calendars.hijri.compose.
+Import JalaliCalendar from ir.huri.jcal, Locale from java.util, shared Compose state from
+com.develotter.calendarview.compose, TypeSelectDay from the shared enums package and the
+Solar Hijri entry points from com.develotter.calendarview.calendars.solarHijri.compose.
 
-Selection saves explicit epoch-day keys. Initial selections are initializers, not controlled
-inputs. Mode changes reset remembered selection during composition. Large multiple selections
-can consume substantial saved-instance-state space. Restoration has not been tested.
+Callers own visible month and selection. Saved selection contains explicit epoch-day keys.
+Initial dates are initializers, not controlled inputs. Large multiple selections can consume
+substantial saved-instance-state space. Restoration has not been tested.
 
 ## Verification limits
 
-Source review only. All 21 added JUnit tests are unexecuted. No Gradle compilation, lint,
+Source review only. All 26 added JUnit tests are unexecuted. No Gradle compilation, lint,
 emulator/device test, restoration test or manual UI/RTL/accessibility check was performed.
-The available GitHub connector is not a build runner. Plugin/compiler compatibility with
-the existing AGP/Kotlin configuration is unverified. PROJECT_STATUS.md results describe
-the pre-migration implementation, not these changes.
+The GitHub connector is not a build runner. Compiler/plugin compatibility is unverified.
+PROJECT_STATUS.md successful build results concern the pre-migration implementation only.
 
 ```bash
-bash ./gradlew :calendar-hijri:compileDebugKotlin
-bash ./gradlew :library:testDebugUnitTest :calendar-gregorian:testDebugUnitTest :calendar-hijri:testDebugUnitTest
+bash ./gradlew :calendar-solarHijri:compileDebugKotlin
+bash ./gradlew test
 bash ./gradlew :calendarviewsample:assembleDebug
-bash ./gradlew :library:lintDebug :calendar-gregorian:lintDebug :calendar-hijri:lintDebug
+bash ./gradlew :library:lintDebug :calendar-gregorian:lintDebug :calendar-hijri:lintDebug :calendar-solarHijri:lintDebug
 ```
 
 ## Remaining work
 
-- Implement Jalali Compose entry point and verify absolute-day conversion.
-- Add navigation, list/pager modes, adjacent-month cells and remaining customization hooks.
-- Add UI/state/restoration tests and execute existing behavior tests.
-- Migrate heatmap and sample; remove old rendering after replacement.
-- Move Jalali dependency out of the core into its module.
-- Consolidate Compose coordinates in the version catalog and verify dependency/toolchain versions.
+- Add navigation, list/pager modes, adjacent-month cells and missing customization hooks.
+- Add UI/state/restoration tests; run all behavior and conversion tests.
+- Migrate heatmap and sample; remove old rendering only after replacement.
+- Remove Jalali dependency from shared core after migrating affected legacy APIs.
+- Consolidate Compose coordinates in the catalog and verify dependency/toolchain versions.
 - Update README, architecture, setup and agent rules; align release metadata to 2.0.0.
 - Run builds, lint and manual UI/RTL/accessibility checks before declaring completion.
 
