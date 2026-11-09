@@ -61,8 +61,7 @@ class CalendarSampleUiTest {
         val text = caption(month)
         val node = compose.onNodeWithText(text)
         val bounds = node.fetchSemanticsNode().boundsInWindow
-        val rootBounds = compose.onRoot().fetchSemanticsNode().boundsInWindow
-        println("TEST_DEBUG: month=$text, bounds=$bounds, rootBounds=$rootBounds")
+        println("TEST_DEBUG: month=$text, bounds=$bounds")
         node.assertIsDisplayed()
     }
 
