@@ -58,11 +58,7 @@ class CalendarSampleUiTest {
 
     private fun assertMonth(month: YearMonth) {
         showViewport()
-        val text = caption(month)
-        val node = compose.onNodeWithText(text)
-        val bounds = node.fetchSemanticsNode().boundsInWindow
-        println("TEST_DEBUG: month=$text, bounds=$bounds")
-        node.assertIsDisplayed()
+        compose.onNodeWithText(caption(month)).assertIsDisplayed()
     }
 
     @Test

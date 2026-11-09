@@ -124,7 +124,7 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                     Text("Next month days")
                     Switch(checked = nextDays, onCheckedChange = { nextDays = it })
                 }
-                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { move(-1) }) { Text("Previous") }
                     Button(onClick = { anchor = LocalDate.now().toEpochDay(); error = null }) { Text("Today") }
                     Button(onClick = { move(1) }) { Text("Next") }
