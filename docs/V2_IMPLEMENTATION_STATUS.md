@@ -4,31 +4,29 @@ Date: 2026-11-09
 Branch: update
 Architecture: decisions/0002-compose-v2-shared-core.md
 
-## Current implementation
+## Implemented source
 
-Shared selection/versioned snapshots/saveable ownership; three native calendar month
-APIs/builders; heatmaps; shared lists/pagers and five sample modes; CI and emulator checks.
+Shared selection/saveable snapshots, native grid and three calendars, adjacent-day
+providers/sample switches, heatmaps, list/pager APIs and five sample modes, build/test/lint
+and emulator workflows, plus corrections for manifest/test-host/KVM issues.
 
-Adjacent days are now wired into Gregorian/Hijri/Jalali entry points using calendar-specific
-day factories. Two saved sample switches apply to all modes and the dialog. Both visibility
-flags default off. The same enabled predicate, selection identity and click behavior apply
-to current and adjacent dates. See ADJACENT_MONTH_DAYS.md for contracts and compatibility.
+Sample navigation now uses the settled visible month. Previous/Next/dialog/mode switches
+share that anchor; the 25-month window has a separate saved center and only recenters
+when a requested month lies outside it. Adjacent-day switches and selection remain shared.
+See COMPOSE_MONTH_CONTAINERS.md for synchronization contracts and unverified edge cases.
 
-## Verification evidence
+## Verification
 
-User reported both workflows green for prior grid commit bab4922d1b9f29392d0e379d207bd2d18a95f8aa.
-Earlier screenshot confirmed the KVM-correction instrumentation run green. These establish
-previous baselines only; this integration has no observed build/test/lint/emulator outcome.
-
-51 new JVM tests and four new Compose instrumented tests exist after this change. Four
-JVM engine-integration tests were added here. Device behavior and CI results must be
-checked again for the new commit. No full activity/process recreation, font-scaling, RTL
-or accessibility acceptance is implied by the current focused instrumented tests.
+55 added JVM tests and four added core Compose instrumented tests exist after this change.
+Four window tests were added here; they are not gesture/coroutine/lifecycle tests.
+No build/test/lint/emulator outcome is observed for the new navigation code. Previous
+green workflow reports concern earlier commits, not this new state. Sample UI automation,
+rapid gesture/request handling and real activity/process restoration remain open.
 
 ## Remaining work
 
-Synchronize swiped-month navigation/dialog/mode changes, complete legacy settings/custom
-rendering/API parity, migrate legacy CalendarViewActivity and remove obsolete views/XML
-after replacement, isolate Jalali dependency, consolidate version catalog, update main
-documentation/agent rules and align release metadata. Expand UI/restoration/device coverage.
-Version remains 1.1.0-alpha1; migration is incomplete and no 2.0.0 release/tag is published.
+Execute CI and sample navigation checks; add sample UI/restoration coverage; complete
+legacy settings/customization/API parity; migrate CalendarViewActivity and remove obsolete
+views/XML after replacement; isolate Jalali dependency; consolidate catalog; update main
+documentation/agent rules and release metadata. Version stays 1.1.0-alpha1; migration
+is incomplete and no 2.0.0 release/tag has been published.

@@ -67,7 +67,7 @@ class LauncherActivity : AppCompatActivity() {
     }
 }
 
-/** Saves UI configuration; selection is shared across months and the dialog. */
+/** Saves UI configuration; selection and the settled visible month are shared with the dialog. */
 @Composable
 private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> Unit) {
     var calendarName by rememberSaveable { mutableStateOf(SampleCalendar.Gregorian.name) }
@@ -130,7 +130,10 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                     Button(onClick = { move(1) }) { Text("Next") }
                 }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                CalendarSampleViewport(calendar, anchor) { monthAnchor ->
+                CalendarSampleViewport(
+                    calendar = calendar, anchor = anchor,
+                    onVisibleMonthChanged = { anchor = it; error = null },
+                ) { monthAnchor ->
                     SampleMonth(calendar, monthAnchor, locale, state, previousDays, nextDays)
                 }
                 Text("Selected dates / range endpoints (ISO):")
