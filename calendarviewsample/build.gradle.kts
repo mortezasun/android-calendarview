@@ -30,7 +30,6 @@ extensions.configure<ApplicationExtension> {
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
-        viewBinding = true
         compose = true
     }
 }
@@ -42,10 +41,6 @@ kotlin {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
-    implementation(libs.google.material)
     implementation(project(":library"))
     implementation(project(":calendar-gregorian"))
     implementation(project(":calendar-solarHijri"))

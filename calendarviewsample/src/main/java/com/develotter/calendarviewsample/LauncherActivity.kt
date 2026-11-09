@@ -59,8 +59,7 @@ class LauncherActivity : AppCompatActivity() {
             setContent {
                 MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
                     CalendarSample(
-                        onLegacyCalendar = { startActivity(Intent(this@LauncherActivity, CalendarViewActivity::class.java)) },
-                        onLegacyHeatmap = { startActivity(Intent(this@LauncherActivity, HeatMapViewActivity::class.java)) },
+                        onHeatmap = { startActivity(Intent(this@LauncherActivity, HeatMapViewActivity::class.java)) },
                     )
                 }
             }
@@ -70,7 +69,7 @@ class LauncherActivity : AppCompatActivity() {
 
 /** Saves UI configuration; selection and the settled visible month are shared with the dialog. */
 @Composable
-private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> Unit) {
+private fun CalendarSample(onHeatmap: () -> Unit) {
     var calendarName by rememberSaveable { mutableStateOf(SampleCalendar.Gregorian.name) }
     var modeName by rememberSaveable { mutableStateOf(TypeSelectDay.Single.name) }
     var localeTag by rememberSaveable { mutableStateOf("en") }
@@ -144,8 +143,7 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                     TextButton(onClick = state::clear) { Text("Clear selection") }
                     TextButton(onClick = { showDialog = true }) { Text("Open dialog") }
                 }
-                TextButton(onClick = onLegacyCalendar) { Text("Legacy calendar demo") }
-                TextButton(onClick = onLegacyHeatmap) { Text("Compose heatmap demo") }
+                TextButton(onClick = onHeatmap) { Text("Compose heatmap demo") }
             }
         }
         if (showDialog) {

@@ -25,8 +25,6 @@ extensions.configure<LibraryExtension> {
         targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
-        // Retain legacy rendering until the sample and calendar modules are migrated.
-        viewBinding = true
         compose = true
     }
 }
@@ -37,9 +35,6 @@ kotlin {
 }
 dependencies {
     implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.google.material)
-    api(libs.jalali.calendar.huri)
 
     // Public Compose APIs must also be available to consumers of this library.
     api(platform("androidx.compose:compose-bom:2026.09.00"))
