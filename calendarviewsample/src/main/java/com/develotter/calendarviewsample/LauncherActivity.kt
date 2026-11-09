@@ -49,7 +49,7 @@ import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.util.Locale
 
-/** Native Compose demo host; legacy demos remain reachable during migration. */
+/** Native Compose demo host; legacy calendar remains reachable during migration. */
 class LauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -124,7 +124,9 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                     Button(onClick = { move(1) }) { Text("Next") }
                 }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                SampleMonth(calendar, anchor, locale, state)
+                CalendarSampleViewport(calendar, anchor) { monthAnchor ->
+                    SampleMonth(calendar, monthAnchor, locale, state)
+                }
                 Text("Selected dates / range endpoints (ISO):")
                 Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -132,7 +134,7 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                     TextButton(onClick = { showDialog = true }) { Text("Open dialog") }
                 }
                 TextButton(onClick = onLegacyCalendar) { Text("Legacy calendar demo") }
-                TextButton(onClick = onLegacyHeatmap) { Text("Legacy heatmap demo") }
+                TextButton(onClick = onLegacyHeatmap) { Text("Compose heatmap demo") }
             }
         }
         if (showDialog) {

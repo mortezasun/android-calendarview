@@ -1,70 +1,41 @@
 # Compose month lists and pagers
 
-The shared core provides CalendarMonthList and CalendarMonthPager. Both are calendar-neutral:
-consumers map indices to months and provide rendering. No calendar-specific dependency is
-introduced in the shared core by these containers. Both support horizontal and vertical axes.
+CalendarMonthList and CalendarMonthPager in the shared core accept monthCount, native
+LazyListState/PagerState, a monthKey function, an active-month callback and composable content
+by index. Both support vertical/horizontal axes. They do not know concrete calendar systems.
 
-## Gregorian pager example
+## Sample integration
 
-This composable shows a fixed 25-month window with the middle month initially visible.
-The initial anchor is remembered and saved, preventing rotation from shifting the window.
+LauncherActivity now embeds CalendarSampleViewport with five modes: Single, VerticalList,
+HorizontalList, HorizontalPager and VerticalPager. Every mode shares the outer selection.
+A fixed 25-month window is built using moveSampleMonth(calendar, anchor, index - 12), so
+month index 12 contains the anchor and each engine uses its own calendar arithmetic.
 
-```kotlin
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import com.develotter.calendarview.calendars.gregorian.compose.GregorianCalendarMonth
-import com.develotter.calendarview.compose.CalendarMonthPager
-import com.develotter.calendarview.compose.rememberCalendarSelectionState
-import java.time.YearMonth
+The viewport is 480dp high with bounded width. Horizontal list items are 320dp wide. Pager
+content and single/horizontal-list content have vertical overflow scrolling. The vertical
+lazy list is explicitly bounded before being placed inside the outer scrolling Column.
+Nested scrolling, font scaling and gestures still require actual device verification.
 
-@Composable
-fun GregorianPagerExample() {
-    val startText = rememberSaveable { YearMonth.now().minusMonths(12).toString() }
-    val start = YearMonth.parse(startText)
-    val selection = rememberCalendarSelectionState()
-    val pager = rememberPagerState(initialPage = 12, pageCount = { 25 })
-    CalendarMonthPager(
-        monthCount = 25,
-        state = pager,
-        modifier = Modifier.height(440.dp),
-        monthKey = { start.plusMonths(it.toLong()).toString() },
-    ) { index ->
-        GregorianCalendarMonth(
-            month = start.plusMonths(index.toLong()),
-            selection = selection.selection,
-            onDateClick = { selection.onDayClick(it.toEpochDay()) },
-        )
-    }
-}
-```
+Previous/Today/Next above the viewport recenter the entire window on the chosen anchor;
+they do not advance from the month most recently reached by swiping. Swipes scroll inside
+the fixed window. Lists share one saved list position across axes; pagers share a separate
+saved pager position. Switching between list and pager can therefore show different indices.
+Both initialize at 12. Calendar or anchor changes re-key/reset these positions.
 
-Use rememberCoroutineScope and launch { pager.animateScrollToPage(targetIndex) } for
-buttons, validating targetIndex against 0 until pager.pageCount. For lists, supply a
-rememberLazyListState and use animateScrollToItem instead. First/last window navigation
-is caller policy; these finite containers do not automatically append months.
+The active-index label shows first-visible list index or settled pager page. The calendar
+dialog intentionally shows the anchor month, not the swiped page. It edits shared selection.
+If any month in the full window exceeds an engine's range, the viewport displays an error
+instead of constructing a partial window. No infinite loading is implemented.
 
-## Contracts
+## Library contracts
 
-- Positive monthCount; external PagerState.pageCount must match it.
-- Vertical list: bounded height. Horizontal list: bounded width, explicit positive finite
-  horizontalMonthWidth (default 320.dp). Pager: bounded width and height.
-- Do not nest a vertical lazy list in the launcher's unbounded vertical scrolling Column.
-  Integrating modes there requires a bounded viewport or restructuring the screen.
-- Share selection outside monthContent so selections survive off-screen disposal.
-- Stable, unique, saveable month keys identify items. Default keys are indices, suitable
-  only for a fixed window. Re-key/reset state when the window's identity changes.
-- List callback: first visible index. Pager callback: settled page. Initial callbacks fire.
-- Rendering and navigation remain engine-owned; Hijri/Jalali consumers map indices using
-  their calendar's month arithmetic, never by adding 30 days.
-- These APIs do not add adjacent-month cells or replace legacy adapters automatically.
+- monthCount must be positive; external PagerState.pageCount must match.
+- Vertical list requires bounded height, horizontal list bounded width. Pager needs both.
+- Keys must be unique and saveable. Defaults use indices and suit fixed windows only.
+- Re-key native state when window identity changes; share selection outside item content.
+- Use state.animateScrollToItem / animateScrollToPage from a caller coroutine for buttons.
+- Callbacks report first-visible item for lists and settled page for pagers, including initial
+  composition. They do not calculate the most-visible month or synchronize the host anchor.
+- Adjacent-month cells and legacy adapter parity remain separate migration work.
 
-## Verification
-
-Source-reviewed only. No compilation, Compose UI test, gesture, saved-state or RTL test has
-been executed for these APIs. No new passing tests are claimed. The sample still uses its
-single-month screen; the containers are library APIs and are not yet wired into its controls.
+No compilation, UI, gesture, state-restoration or RTL tests have been executed in this session.
