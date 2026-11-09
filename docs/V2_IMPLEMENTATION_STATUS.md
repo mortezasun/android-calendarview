@@ -4,60 +4,60 @@ Date: 2026-11-09
 Branch: update
 Architecture: decisions/0002-compose-v2-shared-core.md
 
-## Implemented steps
+## Implemented
 
-1. UI-independent CalendarSelection; 11 JUnit behavior tests.
-2. Compose selection owner with saveable state and native customizable CalendarMonthGrid.
-3. Gregorian data builder and single-month Compose entry point; five data tests.
-4. Hijri data builder and single-month Compose entry point; five data tests.
-5. Solar Hijri data builder, checked epoch conversion and Compose entry point; five tests.
-6. Launcher replaced by a Compose sample with calendar switching, previous/next/today
-   navigation, all selection modes, clearing, locale selection (en/de/fa/ar), explicit RTL
-   switch, ISO selection summary and a native Compose calendar dialog. Navigation logic
-   has four unit tests and uses real calendar months rather than fixed day offsets.
+1. UI-independent selection engine: 11 JUnit tests.
+2. Compose selection ownership, saved selection and customizable native month grid.
+3. Gregorian month data and Compose entry point: five tests.
+4. Hijri month data and Compose entry point: five tests.
+5. Jalali month data, checked epoch conversion and Compose entry point: five tests.
+6. Compose launcher with calendar/mode/locale/RTL switching, month navigation, selection
+   summary, clearing and shared-selection dialog: four navigation tests.
+7. Native CalendarQuarterHeatmap and CalendarYearHeatmap; HeatMapViewActivity migrated
+   to Compose with synthetic data, bounded year navigation (1900..2100), weekday visibility
+   switch and day-details dialog. Five heatmap data tests added.
 
-## Sample behavior
+## Heatmap API and behavior
 
-The existing manifest still launches LauncherActivity, now an AppCompatActivity hosting
-a ComposeView with lifecycle-bound composition disposal. No activity-compose dependency
-was added. The app enables Compose and directly declares Foundation and Material 3, using
-the shared core's transitive BOM constraint. ViewBinding remains for legacy screens.
-Release metadata is unchanged; this is not version 2.0.0 or a published release.
+heatmapQuarterData builds chronological seven-day week columns with null padding outside
+the quarter. Missing intensities become zero; finite values clamp to 0..1, while NaN and
+infinities become zero. Input maps are not mutated or retained by the resulting cells.
+Out-of-quarter entries are ignored. The heatmap remains Gregorian, matching the old API.
 
-Calendar type, selection mode, locale tag, RTL flag, anchor day and dialog visibility use
-rememberSaveable. Selection uses the shared saveable owner. Changing calendar preserves
-the absolute anchor and selected dates; changing selection mode clears selection during
-composition. Each engine displays the month containing the anchor. Previous/next normalize
-to the destination month's first day. Navigation range failures leave the current anchor
-unchanged and show an error. Today reads the current local date when tapped.
+Quarter views use 48dp clickable cells and horizontal scrolling, localized quarter/month
+range and weekday labels, localized date/intensity accessibility descriptions and an
+optional custom color function/day slot. Default colors preserve the old implementation's
+red-at-zero to green-at-one direction. Year view composes four quarters; the caller supplies
+vertical scrolling. Recomposition replaces content rather than accumulating child views.
+Layout follows ambient direction; actual RTL/accessibility behavior is unverified.
 
-Main screen and dialog intentionally edit the same selection; dismissing the dialog does
-not cancel changes. The summary shows ISO dates (range endpoints only), clearly labeled.
-Controls remain English demonstration labels; calendar labels follow selected locale. RTL
-is controlled independently. System light/dark theme is used, and content applies safe
-drawing insets and vertical scrolling. Saved-state restoration has not been verified.
+HeatMapViewActivity no longer inflates XML or ViewBinding. Its existing launcher button
+still says 'Legacy heatmap demo', but now opens the Compose screen. The old heatmap classes
+and layouts remain for compatibility until the public API migration is complete; old bugs
+are not claimed fixed in those retained classes. Demo intensities are deterministic synthetic
+values, not user data. The demo uses the system locale/theme independently of launcher options.
 
-Legacy calendar and heatmap remain accessible through buttons. Their sources and XML
-are retained; this step is not a full migration of those demos or the heatmap. The obsolete
-CustomCalendarViewActivity manifest declaration remains a documented pre-existing issue.
-All three modules depend on the shared core, not one another, but the core still exports
-the Jalali dependency pending legacy cleanup. BOM 2026.09.00 remains in the core build file.
+## Other behavior and limits
 
-## Calendar limitations
+Calendar modules depend on shared core, not one another; core still exports Jalali pending
+legacy cleanup. BOM 2026.09.00 is in the core build file. Release metadata is unchanged.
+Single-month APIs lack library-level list/pager navigation and adjacent-month cells. Calendar
+labels follow locale but RTL is a separate host setting. Disabled days reject direct taps
+but may lie inside selected ranges. Hijri follows platform chronology, not moon sighting.
+Jalali checks reject inconsistent conversions; non-Persian month names are transliterations.
 
-Single-month APIs do not yet implement list/pager modes, adjacent-month cells, or all old
-adapter features. Disabled dates reject clicks but can lie in range interiors. Hijri uses
-platform chronology data, not moon sighting. Jalali conversion checks reject inconsistent
-round trips. Persian month names come from JalaliCalendar; other locales use the project's
-English transliterations. Calendar conversion errors during rendering are not swallowed;
-only navigation actions display range errors.
+Launcher preserves primitive settings and anchor with rememberSaveable; selection mode
+changes clear selection during composition. Switching calendars retains absolute dates.
+Main screen and dialog share selection, so dialog dismissal does not cancel edits. Controls
+are English demo labels. Old CalendarViewActivity remains reachable and ViewBinding-enabled.
+The pre-existing dangling CustomCalendarViewActivity manifest entry remains unresolved.
 
 ## Verification
 
-Source review only. All 30 added JUnit tests are unexecuted. No Gradle compilation, lint,
-emulator/device run, UI test or saved-state/RTL/accessibility check was performed. The
-GitHub connector is not a build runner. Plugin/compiler compatibility is unverified.
-PROJECT_STATUS.md successful results apply only to pre-migration code.
+Source review only. All 35 added JUnit tests are unexecuted. No Gradle compilation, lint,
+emulator/device run, UI, restoration or RTL/accessibility check was performed. The GitHub
+connector is not a build runner. Compiler/plugin compatibility is unverified. Historical
+PROJECT_STATUS.md successful checks concern pre-migration code, not the current changes.
 
 ```bash
 bash ./gradlew :calendarviewsample:assembleDebug
@@ -65,17 +65,16 @@ bash ./gradlew test
 bash ./gradlew :calendarviewsample:lintDebug :library:lintDebug
 ```
 
-Manual checks: launch, switch all calendars/locales/modes, navigate year boundaries, select
-a cross-month range, clear selection, edit in dialog, dismiss/reopen, rotate/recreate,
-check system dark theme and RTL, and open both legacy demos.
+Manual checks must include all calendars, modes, locales, year boundaries, range selection,
+dialogs, rotation/recreation, dark theme, RTL, heatmap scrolling and intensity/day feedback.
 
 ## Remaining work
 
-- Run actual builds/tests; add Compose UI and saved-state restoration tests.
-- Add library list/pager/navigation APIs, adjacent-month cells and missing customization.
-- Migrate heatmap and remaining legacy demo features; then remove old views/layouts.
-- Remove Jalali dependency from core after migrating affected legacy APIs.
-- Consolidate Compose coordinates and verify dependency/toolchain versions.
-- Update README, architecture, setup, agent rules and release metadata to 2.0.0.
+- Run builds/tests and add Compose UI/restoration tests.
+- Add list/pager/navigation APIs, adjacent-month cells and remaining customization hooks.
+- Migrate remaining legacy calendar demo features, then remove obsolete views/layouts.
+- Remove Jalali dependency from shared core after migrating affected APIs.
+- Consolidate coordinates in version catalog and verify versions/toolchain compatibility.
+- Update README, architecture, setup, agent rules and release metadata for 2.0.0.
 
-This remains an incremental migration, not a completed or verified v2 release.
+This is an incremental migration, not a completed, verified or published v2 release.
