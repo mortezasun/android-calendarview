@@ -1,381 +1,171 @@
 package com.develotter.calendarviewsample
 
-import android.animation.ArgbEvaluator
-import android.animation.ValueAnimator
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
-import androidx.core.view.children
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
-import com.develotter.calendarview.adapter.MonthSampleAdapter
-import com.develotter.calendarview.calendars.gregorian.GregorianStatus
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
+import com.develotter.calendarview.calendars.gregorian.compose.GregorianCalendarMonth
+import com.develotter.calendarview.calendars.hijri.compose.HijriCalendarMonth
+import com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriCalendarMonth
+import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
+import com.develotter.calendarview.compose.CalendarSelectionState
+import com.develotter.calendarview.compose.rememberCalendarSelectionState
 import com.develotter.calendarview.enums.TypeSelectDay
-import com.develotter.calendarview.calendars.solarHijri.SolarHijriDayStatus
-import com.develotter.calendarview.status.CalendarStatus
-import com.develotter.calendarview.status.DayStatus
-import com.develotter.calendarview.status.MonthStatus
-import com.develotter.calendarview.status.SelectRangeDayStatus
-import com.develotter.calendarviewsample.databinding.CalendarDialogBinding
-import com.develotter.calendarviewsample.databinding.LauncherActivityBinding
-import com.develotter.calendarviewsample.databinding.RowCalendarBinding
-import com.develotter.calendarviewsample.databinding.RowCalendarControllerBinding
-import com.develotter.calendarviewsample.databinding.RowMonthBinding
-import com.develotter.calendarviewsample.databinding.RowShowSelectedDayBinding
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import ir.huri.jcal.JalaliCalendar
-import java.time.DayOfWeek
-import java.time.format.TextStyle
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.chrono.HijrahDate
 import java.util.Locale
-import java.util.Vector
 
-class LauncherActivity: AppCompatActivity()  {
-    private lateinit var binding: LauncherActivityBinding
-
-
-    private lateinit var thisCalendarStatus: CalendarStatus
-    private  var textStyle: TextStyle = TextStyle.SHORT_STANDALONE
-
-    private lateinit var lcInUse: Locale
+/** Native Compose demo host; legacy demos remain reachable during migration. */
+class LauncherActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        lcInUse =getSuperLocale()
-        binding = LauncherActivityBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        setSupportActionBar(binding.toolbar)
-        val adapter = MyAdapter(getData())
-
-        val layoutManager: RecyclerView.LayoutManager = LinearLayoutManager(this)
-        binding.list.adapter = adapter
-        binding.list.layoutManager = layoutManager
-
-    }
-
-
-
-
-    private fun getData(): Vector<MyData> {
-        val data = Vector<MyData>()
-        data.add(MyData(1,"Calendar View", R.drawable.baseline_calendar_month_24))
-        data.add(MyData(2,"Calendar View in Dialog", R.drawable.baseline_calendar_month_24))
-        data.add(MyData(4,"Heatmap Calendar", R.drawable.baseline_map_24))
-
-
-        return data
-    }
-
-    data class MyData(val index: Int,val title: String, val imageResource: Int)
-
-    inner class MyAdapter(private val data: Vector<MyData>) :
-        RecyclerView.Adapter<MyViewHolder>() {
-
-        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): MyViewHolder {
-            val itemView = layoutInflater.inflate(R.layout.row_launcher, parent, false)
-            return MyViewHolder(itemView)
-        }
-
-        override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-            holder.bind(data[position])
-            holder.itemView.setOnClickListener {
-                when(data[position].index){
-                    1->{
-                        val intent = Intent(this@LauncherActivity, CalendarViewActivity::class.java)
-                        startActivity(intent)
-                    }
-                    2->{
-                        showCalendarDialog()
-                    }
-
-                    4->{
-                        val intent = Intent(this@LauncherActivity, HeatMapViewActivity::class.java)
-                        startActivity(intent)
-                    }
-                }
-            }
-
-        }
-        override fun getItemCount() = data.size
-    }
-    inner class MyViewHolder(itemView: android.view.View) : RecyclerView.ViewHolder(itemView) {
-
-        private val titleTextView: android.widget.TextView = itemView.findViewById(R.id.titleTextView)
-        private val imageView: android.widget.ImageView = itemView.findViewById(R.id.imageView)
-
-        fun bind(myData: MyData) {
-            titleTextView.text = myData.title
-            imageView.setImageResource(myData.imageResource)
-
-        }
-    }
-    fun showCalendarDialog() {
-        val bindingDialog = CalendarDialogBinding.inflate(layoutInflater)
-
-        thisCalendarStatus = CalendarStatus().setLocalInUse(lcInUse).setShowRowMonthName(true)
-
-        setUpCalendar(bindingDialog)
-        AlertDialog.Builder(this)
-
-            .setView(bindingDialog.root)
-
-
-            .show()
-    }
-   
-
-    fun setUpCalendar(binding: CalendarDialogBinding) {
-
-        var dayStatusListSelectedBySingleSelect: MutableList<DayStatus> = mutableListOf()
-
-        val jal = SolarHijriDayStatus(JalaliCalendar(1404, 2, 7), lcInUse)
-        val jal1 = SolarHijriDayStatus(JalaliCalendar(1404, 2, 14), lcInUse)
-        val jal2 = SolarHijriDayStatus(JalaliCalendar(1404, 2, 21), lcInUse)
-        dayStatusListSelectedBySingleSelect.add(0, jal)
-        binding.calendar.addMonths(GregorianStatus::class.java,object :
-            MonthSampleAdapter<RowCalendarBinding, RowCalendarBinding, RowMonthBinding, RowShowSelectedDayBinding>
-                (
-                thisCalendarStatus
-            ) {
-            override fun onBindWeekView(dayStatus: DayOfWeek): RowCalendarBinding {
-                val binding = RowCalendarBinding.inflate(layoutInflater)
-                binding.textRow.text =
-                    dayStatus.getDisplayName(textStyle, thisCalendarStatus.getLocalInUse())
-
-
-
-                return binding
-            }
-
-            override val select: RowShowSelectedDayBinding
-                get() = RowShowSelectedDayBinding.inflate(layoutInflater)
-
-
-            override fun onBindDayView(dayStatus: DayStatus): RowCalendarBinding {
-                val binding = RowCalendarBinding.inflate(layoutInflater)
-                binding.textRow.text = dayStatus.formatDayIntWithLocale()
-
-                animateDaySelection(dayStatus, binding)
-
-                return binding
-            }
-
-            override fun onBindControllerCalendar(): ViewBinding {
-
-                val bindings = RowCalendarControllerBinding.inflate(layoutInflater)
-                bindings.nextButton.setOnClickListener {
-                    binding.calendar.scrollToNextMonth()
-                }
-                bindings.prevButton.setOnClickListener {
-                    binding.calendar.scrollToPreviousMonth()
-                }
-                return bindings
-            }
-
-            override fun onBindMonthView(monthStatus: MonthStatus<*, *>): RowMonthBinding {
-                val binding = RowMonthBinding.inflate(layoutInflater)
-                binding.textRowMonth.text = monthStatus.getThisMonthCaption()
-
-
-                return binding
-            }
-
-
-            override fun onBindLastMonthDayView(dayStatus: DayStatus): RowCalendarBinding {
-                val binding = RowCalendarBinding.inflate(layoutInflater)
-
-                binding.textRow.text = dayStatus.formatDayIntWithLocale()
-                binding.textRow.setTextColor(
-                    ContextCompat.getColor(
-                        this@LauncherActivity,
-                        R.color.gray
+        setContentView(ComposeView(this).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+                    CalendarSample(
+                        onLegacyCalendar = { startActivity(Intent(this@LauncherActivity, CalendarViewActivity::class.java)) },
+                        onLegacyHeatmap = { startActivity(Intent(this@LauncherActivity, HeatMapViewActivity::class.java)) },
                     )
-                )
-                return binding
-            }
-
-            override fun onBindNextMonthDayView(dayStatus: DayStatus): RowCalendarBinding {
-                val binding = RowCalendarBinding.inflate(layoutInflater)
-                binding.textRow.text = dayStatus.formatDayIntWithLocale()
-                binding.textRow.setTextColor(
-                    ContextCompat.getColor(
-                        this@LauncherActivity,
-                        R.color.gray
-                    )
-                )
-                return binding
-            }
-
-            override fun onDayFocused(status: MonthStatus<*, DayStatus>) {
-
-            }
-
-
-            override fun onDayItemClick(
-                dayStatus: DayStatus,
-                viewbinding: RowCalendarBinding
-            ) {
-                animateDaySelection(dayStatus, viewbinding)
-
-                var list = getSelectedList()
-
-                val group =
-                    binding.calendar.findViewById<ChipGroup>(select.ChipGroupLayout.id) as (ChipGroup)
-                if(thisCalendarStatus.getTypeSelectDay()==TypeSelectDay.Range){
-                    if(list.isNotEmpty()) {
-
-                        var chip = group.findViewWithTag<Chip>(
-                            "-100"
-                        )
-                        if(chip==null){
-                            chip= Chip(this@LauncherActivity)
-                            group.addView(chip)
-                        }
-
-                        var title = if (list.size == 1) {
-                            getString(R.string.From) + "  " + list[0].getDisplayName(textStyle)
-                        }else{
-                            getString(R.string.From) + "  " + list[0].getDisplayName(textStyle) + " , " + getString(R.string.To)+ " " + list[1].getDisplayName(textStyle)
-                        }
-                        chip.text =title
-                        chip.tag ="-100"
-
-                        if (list.size>1){
-                            //binding.toolbar.title = binding.calendar.getMonthInPosition().getThisMonthCaption() + ": (${list[0].localDate.until(list[1].localDate).days+1}) "
-                        }
-
-                    }else
-                    {
-                        group.removeAllViews()
-                      //  binding.toolbar.title = binding.calendar.getMonthInPosition().getThisMonthCaption()
-                    }
-
-                }else {
-                   // binding.toolbar.title = binding.calendar.getMonthInPosition().getThisMonthCaption() + ": (${list.size}) "
-                    list.forEach { it ->
-
-                        createChip(group,getKeyStringForViewBinding(it), it.getDisplayName(textStyle))
-                    }
-                    val oldList = group.children.toList()
-                    oldList.forEach {
-                        var chip = list.find { d -> getKeyStringForViewBinding(d) == it.tag }
-                        if (chip == null) {
-                            group.removeView(it)
-                        }
-                    }
                 }
-
-            }
-
-            override fun onUpdateMonthView(   monthStatus: MonthStatus<*, *>,headerPager: RowMonthBinding) {
-                headerPager.textRowMonth.text = monthStatus.getThisMonthCaption()
-            }
-
-            override fun onMonthViewActive(
-                monthStatus: MonthStatus<*, *>
-            ) {
-
-              //  binding.toolbar.title = monthStatus.getThisMonthCaption() + ": (${getSelectedList().size}) "
             }
         })
-
     }
-    private fun createChip(group: ChipGroup,key: String,title:String){
-        var chip = group.findViewWithTag<Chip>(
-            key
-        )
-        if (chip == null) {
-            var ch = Chip(this@LauncherActivity)
+}
 
-            ch.text = title
-            ch.tag =key
+/** Saves primitive UI configuration and a shared selection across calendar switches. */
+@Composable
+private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> Unit) {
+    var calendarName by rememberSaveable { mutableStateOf(SampleCalendar.Gregorian.name) }
+    var modeName by rememberSaveable { mutableStateOf(TypeSelectDay.Single.name) }
+    var localeTag by rememberSaveable { mutableStateOf("en") }
+    var rtl by rememberSaveable { mutableStateOf(false) }
+    var anchor by rememberSaveable { mutableStateOf(LocalDate.now().toEpochDay()) }
+    var showDialog by rememberSaveable { mutableStateOf(false) }
+    var error by rememberSaveable { mutableStateOf<String?>(null) }
+    val calendar = SampleCalendar.valueOf(calendarName)
+    val state = rememberCalendarSelectionState(TypeSelectDay.valueOf(modeName))
+    val locale = Locale.forLanguageTag(localeTag)
 
-            group.addView(ch)
+    fun move(offset: Int) {
+        try {
+            anchor = moveSampleMonth(calendar, anchor, offset)
+            error = null
+        } catch (exception: RuntimeException) {
+            error = exception.message ?: "Date outside the supported calendar range"
         }
-    }
-
-    private fun animateDaySelection(dayStatus: DayStatus, viewbinding: RowCalendarBinding) {
-        if (dayStatus.isToday()) {
-            viewbinding.baseRow.setBackgroundColor(
-                ContextCompat.getColor(
-                    this@LauncherActivity,
-                    R.color.white
-                )
-            )
-            viewbinding.textRow.setTextColor(
-                ContextCompat.getColor(
-                    this@LauncherActivity,
-                    R.color.purple_200
-                )
-            )
-        } else {
-            viewbinding.baseRow.setBackgroundColor(
-                ContextCompat.getColor(
-                    this@LauncherActivity,
-                    R.color.white
-                )
-            )
-            viewbinding.textRow.setTextColor(
-                ContextCompat.getColor(
-                    this@LauncherActivity,
-                    R.color.purple_500
-                )
-            )
-        }
-        val startBackgroundColor = ContextCompat.getColor(
-            this@LauncherActivity,
-            if (dayStatus.isChecked) R.color.white else R.color.teal_200
-        )
-        val endBackgroundColor = ContextCompat.getColor(
-            this@LauncherActivity,
-            if (dayStatus.isChecked) R.color.teal_200 else R.color.white
-        )
-        val backgroundColorAnimator =
-            ValueAnimator.ofObject(ArgbEvaluator(), startBackgroundColor, endBackgroundColor)
-        backgroundColorAnimator.duration = 400
-        backgroundColorAnimator.addUpdateListener { animator ->
-            viewbinding.baseRow.setBackgroundColor(animator.animatedValue as Int)
-        }
-
-
-        backgroundColorAnimator.start()
-
-        when (dayStatus.selectRangeDayStatus) {
-            SelectRangeDayStatus.Nothing -> {
-                viewbinding.imgRowEndBottom.visibility = View.GONE
-                viewbinding.imgRowEndTop.visibility = View.GONE
-                viewbinding.imgRowStartTop.visibility = View.GONE
-                viewbinding.imgRowStartBottom.visibility = View.GONE
-            }
-
-            SelectRangeDayStatus.AsStartOrEnd -> {
-                viewbinding.imgRowEndBottom.visibility = View.VISIBLE
-                viewbinding.imgRowEndTop.visibility = View.VISIBLE
-                viewbinding.imgRowStartTop.visibility = View.VISIBLE
-                viewbinding.imgRowStartBottom.visibility = View.VISIBLE
-            }
-
-            SelectRangeDayStatus.AsStart -> {
-                viewbinding.imgRowEndBottom.visibility = View.GONE
-                viewbinding.imgRowEndTop.visibility = View.GONE
-                viewbinding.imgRowStartTop.visibility = View.VISIBLE
-                viewbinding.imgRowStartBottom.visibility = View.VISIBLE
-            }
-
-            SelectRangeDayStatus.AsEnd -> {
-                viewbinding.imgRowEndBottom.visibility = View.VISIBLE
-                viewbinding.imgRowEndTop.visibility = View.VISIBLE
-                viewbinding.imgRowStartTop.visibility = View.GONE
-                viewbinding.imgRowStartBottom.visibility = View.GONE
-            }
-        }
-
-
     }
 
+    CompositionLocalProvider(LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr) {
+        Surface(Modifier.fillMaxSize()) {
+            Column(
+                Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text("Compose Calendar Demo", style = MaterialTheme.typography.headlineSmall)
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SampleCalendar.entries.forEach { item ->
+                        FilterChip(
+                            selected = calendar == item,
+                            onClick = { calendarName = item.name; error = null },
+                            label = { Text(item.name) },
+                        )
+                    }
+                }
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TypeSelectDay.entries.forEach { mode ->
+                        FilterChip(selected = mode.name == modeName, onClick = { modeName = mode.name }, label = { Text(mode.name) })
+                    }
+                }
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf("en", "de", "fa", "ar").forEach { tag ->
+                        FilterChip(selected = localeTag == tag, onClick = { localeTag = tag }, label = { Text(tag) })
+                    }
+                    Text("RTL")
+                    Switch(checked = rtl, onCheckedChange = { rtl = it })
+                }
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { move(-1) }) { Text("Previous") }
+                    Button(onClick = { anchor = LocalDate.now().toEpochDay(); error = null }) { Text("Today") }
+                    Button(onClick = { move(1) }) { Text("Next") }
+                }
+                error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                SampleMonth(calendar, anchor, locale, state)
+                Text("Selected dates / range endpoints (ISO):")
+                Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = state::clear) { Text("Clear selection") }
+                    TextButton(onClick = { showDialog = true }) { Text("Open dialog") }
+                }
+                TextButton(onClick = onLegacyCalendar) { Text("Legacy calendar demo") }
+                TextButton(onClick = onLegacyHeatmap) { Text("Legacy heatmap demo") }
+            }
+        }
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                confirmButton = { TextButton(onClick = { showDialog = false }) { Text("Close") } },
+                title = { Text("${calendar.name} calendar") },
+                text = {
+                    Column(Modifier.verticalScroll(rememberScrollState())) {
+                        SampleMonth(calendar, anchor, locale, state)
+                    }
+                },
+            )
+        }
+    }
+}
+
+/** Uses the same absolute anchor and selection when changing calendar systems. */
+@Composable
+private fun SampleMonth(calendar: SampleCalendar, anchor: Long, locale: Locale, state: CalendarSelectionState) {
+    val date = LocalDate.ofEpochDay(anchor)
+    when (calendar) {
+        SampleCalendar.Gregorian -> GregorianCalendarMonth(
+            month = YearMonth.from(date), selection = state.selection,
+            onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+        )
+        SampleCalendar.Hijri -> HijriCalendarMonth(
+            month = HijrahDate.from(date), selection = state.selection,
+            onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+        )
+        SampleCalendar.SolarHijri -> SolarHijriCalendarMonth(
+            month = JalaliCalendar(date), selection = state.selection,
+            onDateClick = { state.onDayClick(solarHijriEpochDay(it)) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
