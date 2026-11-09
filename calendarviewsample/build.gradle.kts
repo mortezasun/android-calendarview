@@ -12,8 +12,8 @@ extensions.configure<ApplicationExtension> {
         applicationId = "com.develotter.calendarviewsample"
         minSdk = 27
         targetSdk = 37
-        versionCode = 2
-        versionName = "1.1.0-alpha1"
+        versionCode = 20000
+        versionName = "2.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

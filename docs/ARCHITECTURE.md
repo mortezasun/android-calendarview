@@ -1,131 +1,70 @@
-# Architecture
+# Architecture (v2.0.0)
 
 ## Overview
 
-This repository is a **calendar widget library** plus a demo app. It does not use MVVM, MVI or
-Clean Architecture in the usual app sense. The central pattern is a **generic custom-view library
-with template-method adapter hooks**:
+`android-calendarview` is a **native Jetpack Compose calendar library** with decoupled calendar engines and an interactive demo app. Version 2.0.0 eliminates all legacy XML layouts, ViewBinding, custom view measurement, and reflection.
 
-- `MultiMonthView` owns the scrolling list of months.
-- `MonthView` renders one month as a manually measured grid.
-- `MonthStatus` / `DayStatus` abstract the calendar system.
-- `BaseCalendarAdapter` / `MonthSampleAdapter` let the consumer supply `ViewBinding` instances and
-  receive callbacks.
+The architecture follows standard Compose state and rendering patterns:
+- **Stateless rendering:** `CalendarMonthGrid` and `CalendarDayCell` render month layouts declaratively.
+- **Calendar abstraction:** Calendar engines supply month data snapshots (`GregorianMonthData`, `HijriMonthData`, `SolarHijriMonthData`) and day cells (`CalendarDayCell`).
+- **Unified selection engine:** `CalendarSelection` and `CalendarSelectionState` operate on universal epoch-day identities (`Long`).
+- **Containers:** Compose foundational lists and pagers (`HorizontalPager`, `VerticalPager`, `LazyRow`, `LazyColumn`) provide smooth scrolling and month navigation.
+- **Canvas Heatmaps:** `CalendarQuarterHeatmap` and `CalendarYearHeatmap` render activity intensities using Compose graphics.
+
+---
 
 ## Modules
 
 | Module | Responsibility |
 |--------|----------------|
-| `:library` | Public views (`MultiMonthView`, `MonthView`), heatmap views, enums, status base classes, selection logic. |
-| `:calendar-gregorian` | `GregorianStatus` / `GregorianDayStatus` backed by `YearMonth` / `LocalDate`. |
-| `:calendar-hijri` | `HijriStatus` / `HijriDayStatus` backed by `HijrahDate`, plus conversion helpers. |
-| `:calendar-solarHijri` | `SolarHijriStatus` / `SolarHijriDayStatus` backed by `JalaliCalendar`, plus conversion helpers. |
-| `:calendarviewsample` | Demo activities and layout bindings; not published. |
+| `:library` | Core Compose views (`CalendarMonthGrid`, `CalendarQuarterHeatmap`, `CalendarYearHeatmap`), month containers (`CalendarHorizontalPager`, `CalendarVerticalPager`, etc.), selection state machine (`CalendarSelection`, `CalendarSelectionState`, `TypeSelectDay`), and cell data models. |
+| `:calendar-gregorian` | Gregorian calendar engine backed by `java.time.YearMonth` and `java.time.LocalDate`. Provides `GregorianCalendarMonth`, `gregorianMonthData`, and `gregorianDayCell`. |
+| `:calendar-hijri` | Islamic Hijri calendar engine backed by `java.time.chrono.HijrahDate`. Provides `HijriCalendarMonth`, `hijriMonthData`, and `hijriDayCell`. |
+| `:calendar-solarHijri` | Solar Hijri / Jalali calendar engine backed by `ir.huri:jalalicalendar`. Provides `SolarHijriCalendarMonth`, `solarHijriMonthData`, and `solarHijriDayCell`. |
+| `:calendarviewsample` | Interactive Compose demo app illustrating configuration, selection modes, navigation, dialogs, and heatmaps. |
 
-Dependency direction is one-way: `calendar-* -> library`, `calendarviewsample -> all`. `library`
-has no knowledge of the concrete calendar modules; the calendar class is passed in by the consumer.
+### Dependency Rules
 
-## Entry points
+- The dependency graph is strictly one-way: `calendar-* -> library`, `calendarviewsample -> all`.
+- `:library` does not depend on any specific calendar engine or third-party calendar library (such as `jcal`).
+- `calendar-solarHijri` is the only module that declares and encapsulates the `ir.huri:jalalicalendar` dependency.
 
-- `com.develotter.calendarview.MultiMonthView` - XML-inflatable view; configured with
-  `addMonths(clazzMonth, adapter)`.
-- `com.develotter.calendarview.status.CalendarStatus` - configuration object (view mode, locale,
-  selection type, visible labels, month window size).
-- `com.develotter.calendarview.adapter.MonthSampleAdapter` - the class consumers subclass.
-- `com.develotter.calendarview.heatmap.CalendarHeatmapYearSectionedView` - heatmap entry point with
-  `applyHeatmapData(year, data, onDayClick)`.
+---
 
-## Generic ViewBinding contract
+## Core Rendering Pipeline
 
-`MultiMonthView<D, W, M, SelectController>` and `MonthView` are parameterized by four
-`ViewBinding` types:
+1. **Month Data Snapshot:**
+   The caller supplies a month descriptor (e.g. `YearMonth`, `HijrahDate`, or `JalaliCalendar`). The calendar engine computes the `firstDayOffset` (relative to the configured `firstDayOfWeek`) and formats localized `CalendarDayCell` items.
+2. **Cell Grid Layout:**
+   `buildCalendarMonthCells` creates complete 7-column rows. When `fixedSixRows = true`, the grid always produces 42 cells. Padding cells for previous and next months are either left blank (`null`) or populated with real adjacent day identities via `adjacentDayProvider`.
+3. **Compose Month Grid:**
+   `CalendarMonthGrid` lays out the month title (optional), weekday header row (optional), and the 7-column cell grid using Compose `Column`, `Row`, and `Surface`.
+4. **Day Interaction & Focus:**
+   Day cells display their localized labels. Current days have a primary-colored border focus indicator (`day.isToday`). Clicks pass the cell's `epochDay` to `onDayClick`. Disabled dates reject interactions.
+5. **RTL Support:**
+   Compose layout automatically reflects the ambient `LocalLayoutDirection`. In RTL layouts (e.g., Persian or Arabic), columns are positioned from right to left without custom arithmetic.
 
-| Type | Used for | Binding hook |
-|------|----------|--------------|
-| `D` | Day cell | `onBindDayView`, `onBindLastMonthDayView`, `onBindNextMonthDayView` |
-| `W` | Weekday label | `onBindWeekView` |
-| `M` | Month header | `onBindMonthView`, `onUpdateMonthView` |
-| `SelectController` | Selected-day summary | `select` property and `onBindControllerCalendar` |
+---
 
-`MonthView` is instantiated programmatically by `MultiMonthDataAdapter`; `MultiMonthView` is
-usually declared in XML and inflated. The type parameters are erased at runtime, so
-`MultiMonthView.addMonths` reflects on the supplied `MonthStatus` class and the code contains
-`@Suppress("UNCHECKED_CAST")` at the view/adapter boundaries.
+## State and Selection Engine
 
-## Rendering pipeline
+State is managed declaratively and cleanly separated from UI rendering:
 
-1. `MultiMonthView.addMonths` removes all children and builds `yearMonthList`.
-2. The list contains `getCountsMonthAfterAndBefore() * 2` months. Each entry is created through
-   reflection: a helper instance is moved by `minusMonths(N).plusMonths(i)`, then the new base
-   instance receives that month via `setInstanceDay`.
-3. Optional headers are added: one month caption row (`onBindMonthView`) and, for
-   `TypeWeekShow.Fix`, one fixed row of seven weekday labels (`onBindWeekView`).
-4. A `RecyclerView` with `MultiMonthDataAdapter` is added. Its layout manager depends on
-   `TypeViewCalender`: vertical/horizontal list or pager. Pager modes attach a `PagerSnapHelper`
-   and report the snapped position through `onMonthViewActive`.
-5. For each bound item, `MonthView.setUp` creates a `DayStatus` per day through
-   `MonthStatus.setOnCreateDayStatus`. Leading/trailing grid cells are filled from the previous and
-   next month when `CalendarStatus` allows it.
-6. `MonthView` measures and lays out the grid itself: equal cell width/height, 7 columns by
-   default, RTL-aware column placement.
-7. `MonthSampleAdapter.onCreateDayView` installs click/long-click listeners and caches the binding
-   in `dayStatusListSelectedViewBinding`, keyed by a zero-padded `yyyyMMdd` string.
+- **Epoch-Day Identities:** Dates across all three calendar systems are mapped to standard epoch-day integers (`Long`), enabling seamless cross-calendar selections and comparisons.
+- **Selection Modes (`TypeSelectDay`):**
+  - `None`: Read-only calendar.
+  - `Single`: Exactly zero or one selected day.
+  - `Multiple`: Arbitrary set of selected days.
+  - `Range`: An ordered contiguous range bounded by start and end epoch days. Intermediate days are computed immutably.
+- **State Preservation:**
+  `rememberCalendarSelectionState` uses `rememberSaveable` with `CalendarSelectionSnapshot` saver, ensuring selections survive activity recreation and configuration changes (e.g., screen rotation, dark/light theme toggle).
 
-`MultiMonthView` also exposes navigation helpers (`scrollToNextMonth`, `scrollToPreviousMonth`,
-`scrollToThisMonth`, `scrollToToday`, `scrollToMonth`). Position reads are only valid while the
-RecyclerView is idle; `getPosition` returns `-1` otherwise.
+---
 
-## State and selection
+## Heatmap Architecture
 
-There is no ViewModel and no reactive stream. State is held in mutable objects:
-
-- `CalendarStatus` - configuration; changing it requires rebuilding via `addMonths`.
-- `DayStatus.isChecked` and `DayStatus.selectRangeDayStatus` - per-day selection flags.
-- `BaseCalendarAdapter` - selection lists for none/single/multiple/range.
-- `MultiMonthDataAdapter` / `MonthView` - transient view state.
-
-When a day is clicked, `MonthSampleAdapter.onHandleClickRowDay` dispatches by
-`CalendarStatus.getTypeSelectDay()`. The adapter updates the flags and lists, then calls
-`onDayItemClick(dayStatus, binding)` so the consumer repaints that cell. Range selection additionally
-recomputes intermediate days and repaints all cached bindings that fall inside the range.
-
-Because only existing view bindings can be repainted immediately, off-screen days keep their state
-flags but are not re-rendered until the consumer decides how to restore them. There is no
-persistence: selections live in memory and disappear when the owning activity is recreated.
-
-## Heatmap
-
-The heatmap is independent of the month/calendar abstraction:
-
-- `CalendarHeatmapYearSectionedView` stacks four `QuarterHeatmapView`s.
-- `QuarterHeatmapView` builds a Monday-first week grid for a date range and hosts one
-  `DayHeatMapView` per day plus month/weekday labels.
-- `HeatMapCalendarView` is an alternative single-year view with the same `DayHeatMapView` cells.
-- `DayHeatMapView` draws a colored rectangle from `heatIntensity` (`0.0..1.0`, not clamped) and
-  forwards clicks through `onDayClick`.
-
-The heatmap uses `java.time.LocalDate` only and does not support the Hijri/Jalali engines.
-
-## Layers that do not exist
-
-- **Dependency injection:** none (no Hilt/Koin/Dagger). Objects are constructed manually.
-- **Navigation:** the sample uses plain `Activity` intents. Navigation libraries are declared in
-  the sample but no navigation graph is used.
-- **Network, database, file storage:** none.
-- **Background work:** none (no coroutines, workers or services).
-- **Compose:** none. The Compose plugin alias is declared at the root with `apply false` only.
-
-## Important files
-
-| File | Role |
-|------|------|
-| `library/src/main/java/com/develotter/calendarview/MultiMonthView.kt` | Month window and RecyclerView host. |
-| `library/src/main/java/com/develotter/calendarview/MonthView.kt` | Manual month grid. |
-| `library/src/main/java/com/develotter/calendarview/adapter/MonthSampleAdapter.kt` | Selection behaviour. |
-| `library/src/main/java/com/develotter/calendarview/status/CalendarStatus.kt` | Configuration surface. |
-| `library/src/main/java/com/develotter/calendarview/status/MonthStatus.kt` | Calendar-system contract. |
-| `calendar-gregorian/.../GregorianStatus.kt` | Reference implementation of `MonthStatus`. |
-| `calendar-hijri/.../HijriStatus.kt` | Manual Hijri month arithmetic. |
-| `calendar-solarHijri/.../SolarHijriStatus.kt` | Manual Jalali month arithmetic. |
-| `library/src/main/java/com/develotter/calendarview/heatmap/` | Heatmap views. |
-| `calendarviewsample/src/main/java/com/develotter/calendarviewsample/CalendarViewActivity.kt` | Full adapter wiring example. |
+The heatmap component is decoupled from month grid calculations:
+- `CalendarQuarterHeatmap` renders 13-week quarter columns using Compose `Canvas`.
+- `CalendarYearHeatmap` stacks four quarters vertically or horizontally.
+- Intensities are represented as a map `Map<LocalDate, Float>` where values range from `0.0f` to `1.0f`.
+- Weekday labels and month headers adapt to ambient light/dark theme color schemes.
