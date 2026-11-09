@@ -21,7 +21,6 @@
         </activity>
         <activity android:name=".HeatMapViewActivity"/>
         <activity android:name=".CalendarViewActivity"/>
-        <activity android:name=".CustomCalendarViewActivity"/>
     </application>
 
 </manifest>
