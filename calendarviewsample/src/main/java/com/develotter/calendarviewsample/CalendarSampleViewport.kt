@@ -30,6 +30,7 @@ import com.develotter.calendarview.compose.CalendarMonthList
 import com.develotter.calendarview.compose.CalendarMonthPager
 import com.develotter.calendarview.compose.CalendarScrollAxis
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 
 private enum class SampleDisplayMode { Single, VerticalList, HorizontalList, HorizontalPager, VerticalPager }
 
@@ -102,6 +103,12 @@ private fun SynchronizedMonthViewport(
             publishedMonth = desired
         }
         appliedRequest = desired
+        if (mode != SampleDisplayMode.Single) {
+            val targetIndex = months.indexOf(desired)
+            snapshotFlow {
+                if (isList) listState.firstVisibleItemIndex else pagerState.settledPage
+            }.first { it == targetIndex }
+        }
         ready = true
     }
     LaunchedEffect(mode, listState, pagerState, months) {

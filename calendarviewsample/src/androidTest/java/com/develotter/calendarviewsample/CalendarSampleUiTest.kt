@@ -52,15 +52,7 @@ class CalendarSampleUiTest {
     private fun caption(month: YearMonth): String = month.format(DateTimeFormatter.ofPattern("LLLL uuuu", Locale.ENGLISH))
 
     private fun showViewport() {
-        try {
-            compose.onNodeWithText("Compose heatmap demo").performScrollTo()
-        } catch (_: AssertionError) {
-            // Node is outside any scrollable container or obscured
-        }
-        try {
-            compose.onNode(hasText("Window month ", substring = true)).performScrollTo()
-        } catch (_: AssertionError) {
-        }
+        compose.onNode(hasText("Window month ", substring = true)).performScrollTo()
         compose.waitForIdle()
     }
 
