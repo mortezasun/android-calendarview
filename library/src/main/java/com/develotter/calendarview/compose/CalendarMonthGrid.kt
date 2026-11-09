@@ -48,7 +48,12 @@ fun CalendarMonthGrid(
 ) {
     require(weekdayLabels.size == 7) { "Exactly seven weekday labels are required" }
     val cells = buildCalendarMonthCells(
-        days, firstDayOffset, showPreviousMonthDays, showNextMonthDays, adjacentDayProvider, fixedSixRows,
+        days = days,
+        firstDayOffset = firstDayOffset,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        fixedSixRows = fixedSixRows,
+        adjacentDayProvider = adjacentDayProvider,
     )
     Column(modifier) {
         if (showHeader) {

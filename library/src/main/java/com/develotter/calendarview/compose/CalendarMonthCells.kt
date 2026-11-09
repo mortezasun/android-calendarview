@@ -24,8 +24,8 @@ fun buildCalendarMonthCells(
     firstDayOffset: Int,
     showPreviousMonthDays: Boolean = false,
     showNextMonthDays: Boolean = false,
-    adjacentDayProvider: ((Long) -> CalendarDayCell)? = null,
     fixedSixRows: Boolean = false,
+    adjacentDayProvider: ((Long) -> CalendarDayCell)? = null,
 ): List<CalendarDayCell?> {
     require(days.size in 1..31) { "A month must contain 1..31 days" }
     require(firstDayOffset in 0..6) { "firstDayOffset must be in 0..6" }
@@ -51,3 +51,19 @@ fun buildCalendarMonthCells(
         }
     }
 }
+
+/** Overload retaining positional compatibility when [adjacentDayProvider] is passed as the 5th parameter. */
+fun buildCalendarMonthCells(
+    days: List<CalendarDayCell>,
+    firstDayOffset: Int,
+    showPreviousMonthDays: Boolean,
+    showNextMonthDays: Boolean,
+    adjacentDayProvider: ((Long) -> CalendarDayCell)?,
+): List<CalendarDayCell?> = buildCalendarMonthCells(
+    days = days,
+    firstDayOffset = firstDayOffset,
+    showPreviousMonthDays = showPreviousMonthDays,
+    showNextMonthDays = showNextMonthDays,
+    fixedSixRows = false,
+    adjacentDayProvider = adjacentDayProvider,
+)

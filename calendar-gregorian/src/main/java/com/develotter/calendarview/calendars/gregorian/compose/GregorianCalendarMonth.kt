@@ -22,8 +22,8 @@ data class GregorianMonthData(val title: String, val weekdayLabels: List<String>
 fun gregorianDayCell(
     date: LocalDate,
     locale: Locale = Locale.getDefault(),
-    isDateEnabled: (LocalDate) -> Boolean = { true },
     today: LocalDate = LocalDate.now(),
+    isDateEnabled: (LocalDate) -> Boolean = { true },
 ): CalendarDayCell {
     val numbers = NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }
     return CalendarDayCell(
@@ -39,13 +39,13 @@ fun gregorianMonthData(
     month: YearMonth,
     locale: Locale = Locale.getDefault(),
     firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek,
-    isDateEnabled: (LocalDate) -> Boolean = { true },
     today: LocalDate = LocalDate.now(),
+    isDateEnabled: (LocalDate) -> Boolean = { true },
 ): GregorianMonthData = GregorianMonthData(
     title = month.format(DateTimeFormatter.ofPattern("LLLL uuuu", locale)),
     weekdayLabels = List(7) { firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale) },
     firstDayOffset = Math.floorMod(month.atDay(1).dayOfWeek.value - firstDayOfWeek.value, 7),
-    days = (1..month.lengthOfMonth()).map { gregorianDayCell(month.atDay(it), locale, isDateEnabled, today) },
+    days = (1..month.lengthOfMonth()).map { gregorianDayCell(date = month.atDay(it), locale = locale, today = today, isDateEnabled = isDateEnabled) },
 )
 
 /**
@@ -62,21 +62,23 @@ fun GregorianCalendarMonth(
     modifier: Modifier = Modifier,
     locale: Locale = Locale.getDefault(),
     firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek,
-    isDateEnabled: (LocalDate) -> Boolean = { true },
     showPreviousMonthDays: Boolean = false,
     showNextMonthDays: Boolean = false,
     today: LocalDate = LocalDate.now(),
     showHeader: Boolean = true,
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
+    isDateEnabled: (LocalDate) -> Boolean = { true },
 ) {
-    val data = gregorianMonthData(month, locale, firstDayOfWeek, isDateEnabled, today)
+    val data = gregorianMonthData(
+        month = month, locale = locale, firstDayOfWeek = firstDayOfWeek, today = today, isDateEnabled = isDateEnabled,
+    )
     CalendarMonthGrid(
         title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
         days = data.days, selection = selection, modifier = modifier,
         onDayClick = { onDateClick(LocalDate.ofEpochDay(it)) },
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
-        adjacentDayProvider = { gregorianDayCell(LocalDate.ofEpochDay(it), locale, isDateEnabled, today) },
         showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
+        adjacentDayProvider = { gregorianDayCell(date = LocalDate.ofEpochDay(it), locale = locale, today = today, isDateEnabled = isDateEnabled) },
     )
 }
