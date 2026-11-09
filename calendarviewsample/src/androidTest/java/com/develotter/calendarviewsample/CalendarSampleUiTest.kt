@@ -34,7 +34,18 @@ class CalendarSampleUiTest {
     val compose = createAndroidComposeRule<LauncherActivity>()
 
     private fun click(label: String) {
-        compose.onNodeWithText(label).performScrollTo().performClick()
+        val node = compose.onNodeWithText(label)
+        try {
+            node.performScrollTo()
+        } catch (_: AssertionError) {
+            // Node is outside any scrollable container (e.g. dialog action bar)
+        }
+        node.performClick()
+        compose.waitForIdle()
+    }
+
+    private fun clickDialog(label: String) {
+        compose.onNode(hasText(label) and hasAnyAncestor(isDialog())).performClick()
         compose.waitForIdle()
     }
 
@@ -62,7 +73,7 @@ class CalendarSampleUiTest {
         assertMonth(initial.plusMonths(2))
         click("Open dialog")
         compose.onNode(hasText(caption(initial.plusMonths(2))) and hasAnyAncestor(isDialog())).assertIsDisplayed()
-        click("Close")
+        clickDialog("Close")
         click("VerticalList")
         assertMonth(initial.plusMonths(2))
         click("Previous")
@@ -105,7 +116,7 @@ class CalendarSampleUiTest {
         val description = selected.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.ENGLISH))
         click("Open dialog")
         compose.onNode(hasContentDescription(description) and hasAnyAncestor(isDialog())).performClick()
-        click("Close")
+        clickDialog("Close")
         compose.onNodeWithText(selected.toString()).assertExists()
         click("Clear selection")
         compose.onNodeWithText(selected.toString()).assertDoesNotExist()
