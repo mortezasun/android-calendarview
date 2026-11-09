@@ -100,6 +100,10 @@ class CalendarSampleUiTest {
         val selected = initial.atDay(1)
         val description = selected.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.ENGLISH))
         showViewport()
+        try {
+            compose.onNodeWithContentDescription(description).performScrollTo()
+        } catch (_: AssertionError) {
+        }
         compose.onNodeWithContentDescription(description).performClick()
         compose.onNodeWithText(selected.toString()).assertExists()
         click("Next")

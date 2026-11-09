@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -117,15 +118,11 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                     Text("RTL")
                     Switch(checked = rtl, onCheckedChange = { rtl = it })
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                     Text("Previous month days")
                     Switch(checked = previousDays, onCheckedChange = { previousDays = it })
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Next month days")
                     Switch(checked = nextDays, onCheckedChange = { nextDays = it })
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text("Fixed 6 rows")
                     Switch(checked = fixedSixRows, onCheckedChange = { fixedSixRows = it })
                 }
