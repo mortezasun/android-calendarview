@@ -40,6 +40,7 @@ kotlin {
 }
 dependencies {
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
     implementation(libs.google.material)
     implementation(project(":library"))

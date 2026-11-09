@@ -2,7 +2,8 @@ package com.develotter.calendarviewsample
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -32,9 +33,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.calendars.gregorian.compose.GregorianCalendarMonth
@@ -50,20 +49,17 @@ import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.util.Locale
 
-/** Native Compose demo host; legacy calendar remains reachable during migration. */
-class LauncherActivity : AppCompatActivity() {
+/** Native Compose demo host using ComponentActivity and direct setContent. */
+class LauncherActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(ComposeView(this).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
-                    CalendarSample(
-                        onHeatmap = { startActivity(Intent(this@LauncherActivity, HeatMapViewActivity::class.java)) },
-                    )
-                }
+        setContent {
+            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+                CalendarSample(
+                    onHeatmap = { startActivity(Intent(this@LauncherActivity, HeatMapViewActivity::class.java)) },
+                )
             }
-        })
+        }
     }
 }
 
