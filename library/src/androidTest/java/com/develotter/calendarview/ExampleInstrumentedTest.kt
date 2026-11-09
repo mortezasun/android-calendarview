@@ -6,19 +6,17 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Test
 import org.junit.runner.RunWith
 
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
 
-/**
- * Instrumented test, which will execute on an Android device.
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
+/** Instrumentation smoke test for the library's self-instrumenting test APK. */
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
     @Test
     fun useAppContext() {
-        // Context of the app under test.
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.develotter.calendarview", appContext.packageName)
+        // A library has no application APK with its namespace as applicationId.
+        // The default test host uses the namespace plus .test and targets itself.
+        val instrumentation = InstrumentationRegistry.getInstrumentation()
+        assertEquals("com.develotter.calendarview.test", instrumentation.context.packageName)
+        assertEquals(instrumentation.context.packageName, instrumentation.targetContext.packageName)
     }
 }
