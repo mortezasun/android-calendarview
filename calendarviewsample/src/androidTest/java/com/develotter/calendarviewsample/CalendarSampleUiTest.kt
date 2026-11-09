@@ -52,6 +52,11 @@ class CalendarSampleUiTest {
     private fun caption(month: YearMonth): String = month.format(DateTimeFormatter.ofPattern("LLLL uuuu", Locale.ENGLISH))
 
     private fun showViewport() {
+        try {
+            compose.onNode(hasText("Selected dates / range endpoints (ISO):")).performScrollTo()
+        } catch (_: AssertionError) {
+            // Node is outside any scrollable container or obscured
+        }
         compose.onNode(hasText("Window month ", substring = true)).performScrollTo()
         compose.waitForIdle()
     }
