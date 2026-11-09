@@ -5,6 +5,15 @@ import com.develotter.calendarview.enums.TypeViewCalender
 import com.develotter.calendarview.enums.TypeWeekShow
 import java.util.Locale
 
+/**
+ * Mutable configuration for one calendar instance.
+ *
+ * The values are read by [com.develotter.calendarview.MultiMonthView] and the adapter while the
+ * calendar is being built. Changing a value afterwards does not update existing views; call
+ * `MultiMonthView.addMonths(...)` again to rebuild the calendar with the new configuration.
+ *
+ * Setters return this instance so settings can be chained.
+ */
 class CalendarStatus {
 
 

@@ -15,9 +15,9 @@ import java.time.LocalDate
 /**
  * A custom view that displays a visual representation of heat intensity for a given date.
  *
- * The view renders a colored rectangle where the color's intensity reflects the `heatIntensity` value.
- *  A higher `heatIntensity` results in a more intense color, transitioning from blue to red.  It also includes
- * a ripple effect on click to provide user feedback.
+ * The view renders a colored rectangle where the color reflects the `heatIntensity` value.
+ * 0.0 renders red and 1.0 renders green (see [getHeatColor]); values outside 0.0..1.0 are not
+ * clamped. It also includes a ripple effect on click to provide user feedback.
  *
  * @property date The date associated with this heat map view.  Defaults to the current date.
  * @property heatIntensity A value between 0.0 and 1.0 (inclusive) representing the heat intensity.

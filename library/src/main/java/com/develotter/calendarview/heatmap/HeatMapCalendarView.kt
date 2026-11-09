@@ -122,8 +122,9 @@ class HeatMapCalendarView(context: Context, attrs: AttributeSet?) : ViewGroup(co
         val totalColumns = weeks + 1
         val cellSize = (r - l) / totalColumns
 
-        // Layout of the month labels in the top row (row 0)
-        // Here we calculate the start and end week index for each month
+        // Layout of the month labels in the top row (row 0). A label spans from the week
+        // containing the first day to the week containing the last day of the month. Column 0 is
+        // reserved for the weekday labels, hence the +1 when converting day offsets to columns.
         for (month in 1..12) {
             val monthStart = LocalDate.of(year, month, 1)
             val diff = ChronoUnit.DAYS.between(firstGridDate, monthStart).toInt()
@@ -148,8 +149,9 @@ class HeatMapCalendarView(context: Context, attrs: AttributeSet?) : ViewGroup(co
         }
 
         // Layout of the DayViews in the remaining grid (columns 1 to weeks, rows 1 to 7)
-        // We iterate over the entire grid. The date is calculated as:
-        // cellDate = firstGridDate + ((col-1)*7 + row)
+        // Column-major grid: column = week, row = weekday (Monday first). firstGridDate is the
+        // Monday on or before January 1st, so this mapping is the inverse of the index used when
+        // the DayHeatMapViews were created.
         for (row in 0 until 7) {
             for (col in 1 until totalColumns) {
                 val cellDate = firstGridDate.plusDays(((col - 1) * 7 + row).toLong())

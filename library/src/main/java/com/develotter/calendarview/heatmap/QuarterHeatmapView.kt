@@ -25,7 +25,8 @@ import java.util.Locale
  * @param startDate The first date of the quarter to be displayed.
  * @param endDate The last date of the quarter to be displayed.
  * @param hideWeekNames When true, the weekday labels in the first column are hidden. Defaults to false.
- * @param monthLabelSpacingDp Additional spacing in dp for month labels. Defaults to 8dp.
+ * @param monthLabelSpacingDp Additional spacing in dp for month labels. Defaults to 8dp; the
+ *        parameter is currently not applied by the layout code.
  */
 @SuppressLint("ViewConstructor")
 class QuarterHeatmapView @JvmOverloads constructor(
@@ -176,7 +177,10 @@ class QuarterHeatmapView @JvmOverloads constructor(
         }
     }
 
-    // Apply heatmap data: keys are LocalDate, values are intensity (0.0 to 1.0).
+    /**
+     * Applies intensities keyed by date. Days without an entry are set to `0f`.
+     * Values are forwarded to [DayHeatMapView.heatIntensity] without clamping.
+     */
     fun applyHeatmapData(heatmapData: Map<LocalDate, Float>) {
         dayHeatMapViewMap.forEach { (date, dayView) ->
             dayView.addHeatIntensity(heatmapData[date] ?: 0f)

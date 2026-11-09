@@ -10,6 +10,15 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import java.time.format.TextStyle
 
+/**
+ * Default implementation of the selection behaviour (none/single/multiple/range).
+ *
+ * Consumers only implement the `onBind*` hooks and [onDayItemClick] for rendering. This class owns
+ * the selection lists and keeps [DayStatus.isChecked] and [DayStatus.selectRangeDayStatus] in sync.
+ *
+ * Keys in [dayStatusListAdapter] and [dayStatusListSelectedViewBinding] come from
+ * [getKeyStringForViewBinding], so the same day can be looked up across rendered months.
+ */
 abstract class MonthSampleAdapter<Day : ViewBinding, Week : ViewBinding, Month : ViewBinding, SelectController : ViewBinding>(
     calendarStatus: CalendarStatus,
     dayStatusListAdapter: MutableMap<String, DayStatus> = mutableMapOf(),
@@ -45,6 +54,12 @@ abstract class MonthSampleAdapter<Day : ViewBinding, Week : ViewBinding, Month :
         return rows
     }
 
+    /**
+     * Builds a stable, sortable key in `yyyyMMdd` form (zero padded).
+     *
+     * The key is used as a map key and converted to [Int] when comparing days. Zero padding keeps
+     * lexicographic and numeric order identical, which the range selection logic relies on.
+     */
     open fun getKeyStringForViewBinding(dayStatus: DayStatus): String {
         var monthString = ""
         var dayString = ""
@@ -98,6 +113,19 @@ abstract class MonthSampleAdapter<Day : ViewBinding, Week : ViewBinding, Month :
         dayStatusListSelectedRange.sortWith(compareBy { getKeyStringForViewBinding(it).toInt() })
     }
 
+    /**
+     * Range selection state machine.
+     *
+     * Invariants:
+     * - [dayStatusListSelectedRange] contains the start and/or end day, sorted ascending.
+     * - Days between start and end are tracked in [dayStatusListSelectedByMultipleSelect] for
+     *   repainting only; they are not user-visible range endpoints.
+     *
+     * Tapping the only selected day clears the selection, tapping outside an existing two-day
+     * range moves the nearest endpoint, and tapping between the endpoints replaces the end day.
+     * Repainting uses [dayStatusListSelectedViewBinding], so only days with a live binding are
+     * updated immediately; the state flags of off-screen days remain set.
+     */
     override fun onRangeClickRowDay(dayStatus: DayStatus, viewbinding: Day, isLong: Boolean) {
         sortRangeListBase()
 
@@ -347,6 +375,13 @@ abstract class MonthSampleAdapter<Day : ViewBinding, Week : ViewBinding, Month :
 
     }
 
+    /**
+     * Sorts the range and promotes its endpoints to [SelectRangeDayStatus.AsStart] and
+     * [SelectRangeDayStatus.AsEnd].
+     *
+     * Precondition: exactly two entries in [dayStatusListSelectedRange]. Callers must check the
+     * size; this method indexes `[0]` and `[1]` directly.
+     */
     fun getPeriodByRange(action: (startDay: DayStatus, endDay: DayStatus) -> Unit) {
         sortRangeListBase()
         dayStatusListSelectedRange[0].selectRangeDayStatus = SelectRangeDayStatus.AsStart

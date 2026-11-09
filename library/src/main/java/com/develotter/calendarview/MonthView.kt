@@ -14,6 +14,14 @@ import kotlin.math.abs
 import kotlin.math.min
 
 
+/**
+ * Renders a single month as a fixed grid of day views.
+ *
+ * The grid is laid out manually: [numColumns] columns (XML attribute `numColumns`, default 7) and
+ * as many rows as needed. Leading/trailing cells are filled with days from the previous/next month
+ * when enabled in [com.develotter.calendarview.status.CalendarStatus]. Cells are measured to equal
+ * shares of the available space so all rows align.
+ */
 class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding,SelectController : ViewBinding> @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
@@ -56,6 +64,8 @@ class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding,SelectControll
         monthStatus: MonthStatus<*, DayStatus>
     ) {
 
+        // Months are bound once per adapter item. The guard makes a repeated bind idempotent:
+        // adding the children again would duplicate every day cell.
         if (dayStatusList.isEmpty()) {
             inDayCellViewAdapter = thisInDayCellViewAdapter
 
@@ -82,6 +92,9 @@ class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding,SelectControll
 
                 dayStatusList.add(dayStatus)
                 val rows =thisInDayCellViewAdapter.onCreateDayView(dayStatus, day)
+                // Fill the cells before the first day with trailing days of the previous month.
+                // The offset is calendar-aware: getTrueIntDayOfWeek maps weekdays differently for
+                // Gregorian (Monday first) and Hijri/Jalali (Saturday first).
                 if (day == 1 && dayStatus.localDate.dayOfWeek != monthStatus.getStartDayOfWeek()) {
                     val lastMonth = monthStatus.minusMonths(1)
 
@@ -105,6 +118,8 @@ class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding,SelectControll
                     }
                 }
                 addView(rows.root)
+                // Symmetric case: fill the cells after the last day with leading days of the next
+                // month, again using the calendar-specific weekday mapping.
                 if (day == monthStatus.atEndOfMonth() && dayStatus.localDate.dayOfWeek != monthStatus.getEndDayOfWeek()) {
                     val nextMonth = monthStatus.plusMonths(1)
 
@@ -149,6 +164,8 @@ class MonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding,SelectControll
         val heightMode = MeasureSpec.getMode(heightMeasureSpec)
         val heightSize = MeasureSpec.getSize(heightMeasureSpec)
 
+        // Cells always receive an exact share of the measured size. The manual onLayout below
+        // relies on measuredWidth/measuredHeight, so every child is measured with exact bounds.
         // Determine total width
         val totalWidth = if (widthMode == MeasureSpec.EXACTLY) widthSize else widthSize
 

@@ -4,6 +4,16 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.Locale
 
+/**
+ * Calendar-system independent view of one month.
+ *
+ * Implementations provide month navigation and day creation for their calendar system.
+ * [com.develotter.calendarview.MultiMonthView] builds a sliding window of months by repeatedly
+ * calling [minusMonths] and [plusMonths], and [MonthView] asks [setOnCreateDayStatus] for every
+ * visible day. Navigation methods return new instances and must not mutate the receiver.
+ *
+ * @param lcInUse Locale used for month/day names and number formatting.
+ */
 abstract class MonthStatus<Month,Day>(   val lcInUse: Locale) {
 
 

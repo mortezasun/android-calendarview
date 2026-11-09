@@ -69,6 +69,13 @@ open class SolarHijriStatus(localInUse: Locale) : MonthStatus<SolarHijriDayStatu
         return plusMonths(-count)
     }
 
+    /**
+     * Moves the month by [count] using manual arithmetic.
+     *
+     * `JalaliCalendar` has no month navigation API, so the offset is split into years (floor for
+     * positive offsets, ceil for negative ones) and months, then wrapped at 12. The day is reset to
+     * 1 because the target month may be shorter than the current day of month.
+     */
     override fun plusMonths(count: Int): MonthStatus<SolarHijriDayStatus, DayStatus> {
         var status = SolarHijriStatus(lcInUse)
 

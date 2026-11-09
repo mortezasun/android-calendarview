@@ -56,6 +56,13 @@ class HijriStatus(localInUse: Locale) : MonthStatus<HijriDayStatus, DayStatus>(l
         return plusMonths(-count)
     }
 
+    /**
+     * Moves the month by [count] using manual arithmetic.
+     *
+     * [HijrahDate] has no `plusMonths`, so the offset is split into years (floor for positive
+     * offsets, ceil for negative ones) and months, then wrapped at 12. The day is reset to 1
+     * because the target month may be shorter than the current day of month.
+     */
     override fun plusMonths(count: Int): MonthStatus<HijriDayStatus, DayStatus> {
         var status = HijriStatus(lcInUse)
 

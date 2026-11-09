@@ -17,6 +17,24 @@ import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
 import java.util.Locale
 
+/**
+ * Scrollable list of months rendered with consumer-supplied [ViewBinding]s.
+ *
+ * The view is normally declared in XML and configured programmatically:
+ * ```
+ * multiMonthView.addMonths(GregorianStatus::class.java, object : MonthSampleAdapter<...>(status) {
+ *     // inflate and bind day/week/month/controller views
+ * })
+ * ```
+ * [addMonths] creates a window of months around today and reuses the same adapter for every month.
+ * Vertical/horizontal lists and paged variants are selected through
+ * [com.develotter.calendarview.status.CalendarStatus].
+ *
+ * @param D binding for a day cell
+ * @param W binding for a weekday label
+ * @param M binding for a month header
+ * @param SelectController binding for the selected-day summary
+ */
 @Suppress("UNCHECKED_CAST")
 open class MultiMonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding, SelectController : ViewBinding> @JvmOverloads constructor(
     context: Context,
@@ -42,6 +60,16 @@ open class MultiMonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding, Sel
 
 
 
+    /**
+     * Rebuilds the calendar and starts rendering from the current month.
+     *
+     * All previous children are removed, so this is also the way to apply changes to
+     * [com.develotter.calendarview.status.CalendarStatus]. [clazzMonth] must be a [MonthStatus]
+     * subclass with a public constructor taking a single [Locale]; it is instantiated twice per
+     * month (base and helper) to compute the month window.
+     *
+     * The window spans `getCountsMonthAfterAndBefore() * 2` months around today.
+     */
     fun <T : MonthStatus<*, DayStatus>> addMonths(
         clazzMonth: Class<T>,
         fromInDayCellViewAdapter: BaseCalendarAdapter<D, W, M, SelectController>
@@ -214,6 +242,12 @@ open class MultiMonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding, Sel
         return yearMonthList.count().minus(1).div(2)
     }
 
+    /**
+     * Returns the snapped month position, or `-1` while the RecyclerView is not idle.
+     *
+     * Callers must handle `-1`: navigation invoked during a running animation intentionally does
+     * nothing instead of skipping a month.
+     */
     fun getPosition(recyclerView: RecyclerView, newState: Int): Int {
         if (newState == RecyclerView.SCROLL_STATE_IDLE) {
             val layoutManager = recyclerView.layoutManager as LinearLayoutManager
@@ -225,6 +259,10 @@ open class MultiMonthView<D : ViewBinding, W : ViewBinding, M : ViewBinding, Sel
         return -1
     }
 
+    /**
+     * Switches the RecyclerView to paged scrolling and keeps [inPosition] in sync with the snapped
+     * page. The [PagerSnapHelper] is attached only in this mode; plain list modes do not use it.
+     */
     fun pager(direction: Int) {
 
 

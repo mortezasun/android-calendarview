@@ -9,6 +9,17 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 
+/**
+ * Selection and display state for a single calendar day.
+ *
+ * Calendar modules subclass this to provide their own day/month/year values. The selection flags
+ * ([isChecked], [selectRangeDayStatus]) are maintained by
+ * [com.develotter.calendarview.adapter.MonthSampleAdapter] and are independent of how the cell is
+ * rendered.
+ *
+ * @param localDate Gregorian date used as the common time axis across all calendar systems.
+ * @param lcInUse Locale used for formatting and digit conversion.
+ */
 abstract class DayStatus(val localDate: LocalDate,val lcInUse: Locale) {
     var isChecked: Boolean = false
     var selectRangeDayStatus: SelectRangeDayStatus = SelectRangeDayStatus.Nothing
@@ -45,6 +56,13 @@ abstract class DayStatus(val localDate: LocalDate,val lcInUse: Locale) {
 
     }
 
+    /**
+     * Formats [number] using [lcInUse]. For Persian/Arabic language tags the digits are forced to
+     * Arabic-Indic zero so day numbers match the localized calendar text.
+     *
+     * Note: the check compares the full language tag, so regional variants such as `fa-IR` do not
+     * take this branch.
+     */
     fun formatNumberToArabicDigits(number: Int): String {
 
         val numberFormat = NumberFormat.getInstance(lcInUse)

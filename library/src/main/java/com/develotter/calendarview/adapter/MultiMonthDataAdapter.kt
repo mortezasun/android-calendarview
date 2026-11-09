@@ -12,11 +12,19 @@ import com.develotter.calendarview.R
 import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
 @Suppress("UNCHECKED_CAST")
+/**
+ * Adapter that renders one [MonthView] per entry of the month window.
+ *
+ * Every holder owns a fixed-height container and a fresh [MonthView]. The shared
+ * [BaseCalendarAdapter] is passed to each month, so all months use the same selection state and
+ * rendering callbacks.
+ */
 class MultiMonthDataAdapter<D: ViewBinding,W: ViewBinding,M: ViewBinding,SelectController: ViewBinding>(
     private val inDayCellViewAdapterThis : BaseCalendarAdapter<D, W,M,SelectController>
     ,private val yearMonthListThis: MutableList<MonthStatus<*, DayStatus>>) :
     Adapter<RecyclerView.ViewHolder>() {
     init {
+        // Give the consumer a chance to reset its own state before any month is created.
         inDayCellViewAdapterThis.onReset()
     }
     override fun onCreateViewHolder(

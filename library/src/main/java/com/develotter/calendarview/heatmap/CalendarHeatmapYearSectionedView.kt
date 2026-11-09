@@ -26,6 +26,12 @@ class CalendarHeatmapYearSectionedView @JvmOverloads constructor(
     init {
         orientation = VERTICAL
     }
+    /**
+     * Builds four quarter views for [year] and adds them to this layout.
+     *
+     * Note: existing children are not removed. Calling this method more than once adds another set
+     * of quarter views on top of the previous one.
+     */
     fun applyHeatmapData(year:Int,heatmapData: Map<LocalDate, Float>,listener: (LocalDate) -> Unit) {
         currentYear = year
         val q1View = QuarterHeatmapView(

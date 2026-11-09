@@ -6,6 +6,14 @@ import com.develotter.calendarview.status.DayStatus
 import com.develotter.calendarview.status.MonthStatus
 
 
+/**
+ * Connects the calendar model to the views supplied by the consumer.
+ *
+ * Each type parameter is the [ViewBinding] used for one part of the calendar:
+ * [Day] for a day cell, [Week] for a weekday label, [Month] for a month header and
+ * [SelectController] for the selected-day summary. The selection state itself is shared by all
+ * months and is stored in the lists below.
+ */
 abstract class BaseCalendarAdapter<Day : ViewBinding, Week : ViewBinding, Month : ViewBinding,SelectController: ViewBinding>(
     var calendarStatus: CalendarStatus,
     var dayStatusListAdapter:  MutableMap<String, DayStatus> = mutableMapOf(),

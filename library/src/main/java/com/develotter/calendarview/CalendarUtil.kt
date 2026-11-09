@@ -7,6 +7,12 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 
+/**
+ * Maps a [TextStyle] to the pattern used for day captions.
+ *
+ * The patterns are fixed per style so every calendar module renders the same shape; weekday and
+ * month names are still localized through the [Locale] passed to the formatter.
+ */
 fun TextStyle.getStringFormatBase():String{
    return when(this){
         TextStyle.SHORT,
