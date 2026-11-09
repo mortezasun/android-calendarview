@@ -67,13 +67,15 @@ class LauncherActivity : AppCompatActivity() {
     }
 }
 
-/** Saves primitive UI configuration and a shared selection across calendar switches. */
+/** Saves UI configuration; selection is shared across months and the dialog. */
 @Composable
 private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> Unit) {
     var calendarName by rememberSaveable { mutableStateOf(SampleCalendar.Gregorian.name) }
     var modeName by rememberSaveable { mutableStateOf(TypeSelectDay.Single.name) }
     var localeTag by rememberSaveable { mutableStateOf("en") }
     var rtl by rememberSaveable { mutableStateOf(false) }
+    var previousDays by rememberSaveable { mutableStateOf(false) }
+    var nextDays by rememberSaveable { mutableStateOf(false) }
     var anchor by rememberSaveable { mutableStateOf(LocalDate.now().toEpochDay()) }
     var showDialog by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
@@ -99,11 +101,7 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                 Text("Compose Calendar Demo", style = MaterialTheme.typography.headlineSmall)
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     SampleCalendar.entries.forEach { item ->
-                        FilterChip(
-                            selected = calendar == item,
-                            onClick = { calendarName = item.name; error = null },
-                            label = { Text(item.name) },
-                        )
+                        FilterChip(selected = calendar == item, onClick = { calendarName = item.name; error = null }, label = { Text(item.name) })
                     }
                 }
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -118,6 +116,14 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                     Text("RTL")
                     Switch(checked = rtl, onCheckedChange = { rtl = it })
                 }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Previous month days")
+                    Switch(checked = previousDays, onCheckedChange = { previousDays = it })
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Next month days")
+                    Switch(checked = nextDays, onCheckedChange = { nextDays = it })
+                }
                 Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { move(-1) }) { Text("Previous") }
                     Button(onClick = { anchor = LocalDate.now().toEpochDay(); error = null }) { Text("Today") }
@@ -125,7 +131,7 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                 }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 CalendarSampleViewport(calendar, anchor) { monthAnchor ->
-                    SampleMonth(calendar, monthAnchor, locale, state)
+                    SampleMonth(calendar, monthAnchor, locale, state, previousDays, nextDays)
                 }
                 Text("Selected dates / range endpoints (ISO):")
                 Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
@@ -144,7 +150,7 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                 title = { Text("${calendar.name} calendar") },
                 text = {
                     Column(Modifier.verticalScroll(rememberScrollState())) {
-                        SampleMonth(calendar, anchor, locale, state)
+                        SampleMonth(calendar, anchor, locale, state, previousDays, nextDays)
                     }
                 },
             )
@@ -152,22 +158,27 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
     }
 }
 
-/** Uses the same absolute anchor and selection when changing calendar systems. */
 @Composable
-private fun SampleMonth(calendar: SampleCalendar, anchor: Long, locale: Locale, state: CalendarSelectionState) {
+private fun SampleMonth(
+    calendar: SampleCalendar, anchor: Long, locale: Locale, state: CalendarSelectionState,
+    previousDays: Boolean, nextDays: Boolean,
+) {
     val date = LocalDate.ofEpochDay(anchor)
     when (calendar) {
         SampleCalendar.Gregorian -> GregorianCalendarMonth(
             month = YearMonth.from(date), selection = state.selection,
             onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+            showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
         )
         SampleCalendar.Hijri -> HijriCalendarMonth(
             month = HijrahDate.from(date), selection = state.selection,
             onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+            showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
         )
         SampleCalendar.SolarHijri -> SolarHijriCalendarMonth(
             month = JalaliCalendar(date), selection = state.selection,
             onDateClick = { state.onDayClick(solarHijriEpochDay(it)) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+            showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
         )
     }
 }

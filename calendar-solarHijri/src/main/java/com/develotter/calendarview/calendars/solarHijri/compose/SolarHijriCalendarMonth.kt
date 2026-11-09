@@ -13,19 +13,10 @@ import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
 
-/** Localized month snapshot; lists must be treated as read-only. */
-data class SolarHijriMonthData(
-    val title: String,
-    val weekdayLabels: List<String>,
-    val firstDayOffset: Int,
-    val days: List<CalendarDayCell>,
-)
+/** Localized month snapshot; treat lists as read-only. */
+data class SolarHijriMonthData(val title: String, val weekdayLabels: List<String>, val firstDayOffset: Int, val days: List<CalendarDayCell>)
 
-/**
- * Maps a Jalali date to the shared absolute-day timeline using the existing conversion.
- * A round-trip check rejects inconsistencies between that conversion and JalaliCalendar.
- * Supported dates follow the existing converter/library; no broader range is promised.
- */
+/** Checked existing conversion to the shared timeline; no broader year range is promised. */
 fun solarHijriEpochDay(date: JalaliCalendar): Long {
     val gregorian = date.fromSolarHijriToLocalDate()
     val restored = JalaliCalendar(gregorian)
@@ -35,12 +26,29 @@ fun solarHijriEpochDay(date: JalaliCalendar): Long {
     return gregorian.toEpochDay()
 }
 
-/**
- * Builds the month containing [month] without mutating the supplied JalaliCalendar.
- * Saturday-first matches the existing module. Persian month names come from the library;
- * other locales use the existing project's English transliterations. Weekday names and
- * digits follow locale. Disabled dates reject taps, not selection of range interiors.
- */
+private fun solarMonthName(date: JalaliCalendar, locale: Locale): String =
+    if (locale.language == "fa") date.monthString else listOf(
+        "Farvardin", "Ordibehesht", "Khordad", "Tir", "Mordad", "Shahrivar",
+        "Mehr", "Aban", "Azar", "Dey", "Bahman", "Esfand",
+    )[date.month - 1]
+
+/** Formats one checked Jalali date; consumer predicates receive a separate mutable instance. */
+fun solarHijriDayCell(
+    date: JalaliCalendar,
+    locale: Locale = Locale.getDefault(),
+    isDateEnabled: (JalaliCalendar) -> Boolean = { true },
+): CalendarDayCell {
+    val epoch = solarHijriEpochDay(date)
+    val numbers = NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }
+    val weekday = LocalDate.ofEpochDay(epoch).dayOfWeek.getDisplayName(TextStyle.FULL, locale)
+    return CalendarDayCell(
+        epochDay = epoch, label = numbers.format(date.day),
+        accessibilityLabel = "$weekday, ${numbers.format(date.day)} ${solarMonthName(date, locale)} ${numbers.format(date.year)}",
+        enabled = isDateEnabled(JalaliCalendar(date.year, date.month, date.day)),
+    )
+}
+
+/** Saturday-first is configurable; non-Persian month names remain English transliterations. */
 fun solarHijriMonthData(
     month: JalaliCalendar,
     locale: Locale = Locale.getDefault(),
@@ -48,41 +56,24 @@ fun solarHijriMonthData(
     isDateEnabled: (JalaliCalendar) -> Boolean = { true },
 ): SolarHijriMonthData {
     val first = JalaliCalendar(month.year, month.month, 1)
-    val firstEpochDay = solarHijriEpochDay(first)
-    val length = first.monthLength
+    val epoch = solarHijriEpochDay(first)
     val numbers = NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }
-    val englishMonths = listOf(
-        "Farvardin", "Ordibehesht", "Khordad", "Tir", "Mordad", "Shahrivar",
-        "Mehr", "Aban", "Azar", "Dey", "Bahman", "Esfand",
-    )
-    val monthName = if (locale.language == "fa") first.monthString else englishMonths[first.month - 1]
-    val yearLabel = numbers.format(first.year)
     return SolarHijriMonthData(
-        title = "$monthName $yearLabel",
-        weekdayLabels = List(7) {
-            firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale)
-        },
-        firstDayOffset = Math.floorMod(LocalDate.ofEpochDay(firstEpochDay).dayOfWeek.value - firstDayOfWeek.value, 7),
-        days = (1..length).map { day ->
-            val date = JalaliCalendar(first.year, first.month, day)
-            val epochDay = solarHijriEpochDay(date)
-            require(epochDay == firstEpochDay + day - 1) { "Non-consecutive Solar Hijri month conversion" }
-            val weekday = LocalDate.ofEpochDay(epochDay).dayOfWeek.getDisplayName(TextStyle.FULL, locale)
-            CalendarDayCell(
-                epochDay = epochDay,
-                label = numbers.format(day),
-                accessibilityLabel = "$weekday, ${numbers.format(day)} $monthName $yearLabel",
-                // Use a separate mutable library instance for consumer predicates.
-                enabled = isDateEnabled(JalaliCalendar(first.year, first.month, day)),
-            )
+        title = "${solarMonthName(first, locale)} ${numbers.format(first.year)}",
+        weekdayLabels = List(7) { firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale) },
+        firstDayOffset = Math.floorMod(LocalDate.ofEpochDay(epoch).dayOfWeek.value - firstDayOfWeek.value, 7),
+        days = (1..first.monthLength).map { day ->
+            val cell = solarHijriDayCell(JalaliCalendar(first.year, first.month, day), locale, isDateEnabled)
+            require(cell.epochDay == epoch + day - 1) { "Non-consecutive Solar Hijri month conversion" }
+            cell
         },
     )
 }
 
 /**
- * Controlled native Solar Hijri UI. The caller owns month, selection and navigation.
- * For custom content use solarHijriMonthData with CalendarMonthGrid directly. Locale
- * does not set Compose layout direction. Callers must not mutate input during rendering.
+ * Controlled month UI with independently visible adjacent dates, blank by default.
+ * Adjacent dates use checked Jalali conversion and the same enabled predicate. Clicking
+ * selects/calls back without navigation. Locale does not set layout direction.
  */
 @Composable
 fun SolarHijriCalendarMonth(
@@ -93,15 +84,15 @@ fun SolarHijriCalendarMonth(
     locale: Locale = Locale.getDefault(),
     firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
     isDateEnabled: (JalaliCalendar) -> Boolean = { true },
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
 ) {
     val data = solarHijriMonthData(month, locale, firstDayOfWeek, isDateEnabled)
     CalendarMonthGrid(
-        title = data.title,
-        weekdayLabels = data.weekdayLabels,
-        firstDayOffset = data.firstDayOffset,
-        days = data.days,
-        selection = selection,
+        title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
+        days = data.days, selection = selection, modifier = modifier,
         onDayClick = { onDateClick(JalaliCalendar(LocalDate.ofEpochDay(it))) },
-        modifier = modifier,
+        showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
+        adjacentDayProvider = { solarHijriDayCell(JalaliCalendar(LocalDate.ofEpochDay(it)), locale, isDateEnabled) },
     )
 }

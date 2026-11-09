@@ -4,34 +4,31 @@ Date: 2026-11-09
 Branch: update
 Architecture: decisions/0002-compose-v2-shared-core.md
 
-## Current source
+## Current implementation
 
-Shared selection/snapshot/saveable state; three calendar month APIs/builders; native
-heatmaps; list/pager APIs and five sample display modes; sample controls/navigation/dialogs;
-build/test/lint and emulator workflows; corrected manifest, test-host assertion and KVM setup.
+Shared selection/versioned snapshots/saveable ownership; three native calendar month
+APIs/builders; heatmaps; shared lists/pagers and five sample modes; CI and emulator checks.
 
-The shared month grid now supports independently visible previous/next dates via a
-calendar-specific provider. isCurrentMonth is exposed to slots. Six pure grid tests added.
-Existing calendar entry points/sample still use blank padding until providers are wired.
-See ADJACENT_MONTH_DAYS.md for that precise scope and the remaining integration.
+Adjacent days are now wired into Gregorian/Hijri/Jalali entry points using calendar-specific
+day factories. Two saved sample switches apply to all modes and the dialog. Both visibility
+flags default off. The same enabled predicate, selection identity and click behavior apply
+to current and adjacent dates. See ADJACENT_MONTH_DAYS.md for contracts and compatibility.
 
-## Evidence and verification
+## Verification evidence
 
-The supplied screenshot shows Android instrumentation #3 for the KVM correction green.
-It does not expose per-test counts. Earlier uploaded HTML showed four Compose tests passing
-and the old smoke test failing; the smoke test and KVM setup were subsequently corrected.
-Build/JVM-test/lint success was previously reported by the user. These results establish
-a baseline for earlier code, not proof of the newly prepared grid changes.
+User reported both workflows green for prior grid commit bab4922d1b9f29392d0e379d207bd2d18a95f8aa.
+Earlier screenshot confirmed the KVM-correction instrumentation run green. These establish
+previous baselines only; this integration has no observed build/test/lint/emulator outcome.
 
-47 new JVM tests and four new instrumented tests exist after this change; the six new JVM
-tests have no observed result yet. Re-run both CI workflows for the new commit. Actual
-activity/process recreation, RTL, font scaling, accessibility, gesture/state coverage and
-additional runtime API levels remain open even when current CI is green.
+51 new JVM tests and four new Compose instrumented tests exist after this change. Four
+JVM engine-integration tests were added here. Device behavior and CI results must be
+checked again for the new commit. No full activity/process recreation, font-scaling, RTL
+or accessibility acceptance is implied by the current focused instrumented tests.
 
 ## Remaining work
 
-Wire adjacent-date providers into all calendar entry points and sample controls; complete
-legacy API parity; synchronize swiped-month navigation/dialog/mode switching; migrate
-legacy CalendarViewActivity; remove old views/XML and core Jalali dependency after replacement;
-consolidate catalog; update main documentation/agent rules and release metadata.
-Version remains 1.1.0-alpha1; no 2.0.0 release/tag created. Migration is not complete.
+Synchronize swiped-month navigation/dialog/mode changes, complete legacy settings/custom
+rendering/API parity, migrate legacy CalendarViewActivity and remove obsolete views/XML
+after replacement, isolate Jalali dependency, consolidate version catalog, update main
+documentation/agent rules and align release metadata. Expand UI/restoration/device coverage.
+Version remains 1.1.0-alpha1; migration is incomplete and no 2.0.0 release/tag is published.

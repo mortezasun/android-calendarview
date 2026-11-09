@@ -1,35 +1,48 @@
-# Adjacent days in the shared Compose grid
+# Adjacent dates: all calendar modules and sample
 
-CalendarMonthGrid now accepts showPreviousMonthDays and showNextMonthDays independently.
-Both default to false to preserve current entry-point behavior. When visible padding is
-needed, adjacentDayProvider must return a fully formatted CalendarDayCell for the requested
-absolute epoch day. A provider is not required if the requested side has no padding cells.
+CalendarMonthGrid supports independent showPreviousMonthDays/showNextMonthDays flags and
+a calendar-specific adjacentDayProvider. Both flags default to false. The shared builder
+produces complete seven-column rows, marks isCurrentMonth, preserves enabled flags and
+validates absolute-day identity and chronological current-month input.
 
-The pure buildCalendarMonthCells function constructs seven-column rows, checks chronological
-current-month identities, marks current cells true and adjacent cells false through
-isCurrentMonth, and preserves provider-supplied enabled flags. It rejects a provider returning
-a different epoch identity. Integer overflow and engine range errors propagate.
+## Completed engine integration
 
-Rendering uses the same selection/click path for current and adjacent dates. Selected cells
-use selection colors; unselected adjacent dates inherit onSurfaceVariant. Custom slots can
-inspect isCurrentMonth. Clicking an adjacent date selects/calls back but does not navigate.
-Range selection keeps the same absolute-day identity across repeated rendered occurrences.
+GregorianCalendarMonth, HijriCalendarMonth and SolarHijriCalendarMonth now expose both
+visibility flags and supply providers automatically. New public gregorianDayCell,
+hijriDayCell and solarHijriDayCell functions are shared by current-month and adjacent
+rendering, avoiding mismatched date labels/availability rules. Existing month-builder
+signatures remain unchanged. Composable flags were appended after isDateEnabled: use
+named isDateEnabled arguments instead of relying on it being the final trailing lambda.
 
-## Calendar-specific integration
+Gregorian dates use LocalDate, Hijri preserves the input Hijrah chronology, and Jalali
+uses checked epoch conversion. The predicate applies to each rendered date regardless
+of month. Jalali predicates receive a separate mutable instance. Range interiors can
+still include disabled days; this change does not introduce a whole-range blocking policy.
 
-This commit implements the shared renderer contract and six data tests, not the complete
-engine/sample integration. Existing GregorianCalendarMonth, HijriCalendarMonth and
-SolarHijriCalendarMonth still call the grid with default blank padding. Their entry points
-need provider wiring and UI controls in a subsequent change. The new contract does not
-incorrectly assume that Gregorian day numbers represent Hijri or Jalali dates.
+Locale controls labels, not layout direction. Persian month names use JalaliCalendar;
+other Jalali month names remain English transliterations. Date-range/conversion errors
+propagate rather than substituting Gregorian labels or silently suppressing bad dates.
 
-Providers must use the relevant calendar conversion and locale. Gregorian callers can map
-LocalDate.ofEpochDay(key), Hijri callers their Hijrah chronology, and Jalali callers the
-existing checked conversion. They must decide date-range and disabled-date policy.
+## Sample controls
+
+Two saved switches, Previous month days and Next month days, control all three calendars
+in every display mode and the shared-selection dialog. Defaults remain off. Adjacent
+clicks select/call back without automatic navigation. Repeated representations of the
+same date use the shared absolute-day selection identity. Existing window/navigation
+limitations documented in COMPOSE_MONTH_CONTAINERS.md are unchanged.
 
 ## Verification
 
-Six JVM tests added for blank padding, independent visibility, year boundary alignment,
-flags/input preservation and invalid inputs. New tests have not been run in this session.
-The previous KVM/instrumentation workflow is green in the supplied screenshot; it does not
-verify the changes in this commit. Updated builds, JVM tests and emulator checks must run.
+Four JVM integration tests added in the sample module, which intentionally depends on
+all three engines: Gregorian year boundary, Hijri year boundary, Jalali Nowruz and disabled
+predicates. This supplements six existing shared-grid tests. No result is observed for
+this new commit until CI runs. The user reported both workflows green for the previous
+grid commit bab4922d1b9f29392d0e379d207bd2d18a95f8aa, not for these new changes.
+
+```bash
+bash ./gradlew test :calendarviewsample:assembleDebug
+bash ./gradlew :library:connectedDebugAndroidTest
+```
+
+Manual checks: each flag independently and together, all calendars/locales/modes, selection
+across month/year boundaries, dialog parity, disabled dates, RTL and font scaling.
