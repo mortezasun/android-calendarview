@@ -37,14 +37,17 @@ fun solarHijriDayCell(
     date: JalaliCalendar,
     locale: Locale = Locale.getDefault(),
     isDateEnabled: (JalaliCalendar) -> Boolean = { true },
+    today: JalaliCalendar = JalaliCalendar(LocalDate.now()),
 ): CalendarDayCell {
     val epoch = solarHijriEpochDay(date)
     val numbers = NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }
     val weekday = LocalDate.ofEpochDay(epoch).dayOfWeek.getDisplayName(TextStyle.FULL, locale)
+    val isToday = date.year == today.year && date.month == today.month && date.day == today.day
     return CalendarDayCell(
         epochDay = epoch, label = numbers.format(date.day),
         accessibilityLabel = "$weekday, ${numbers.format(date.day)} ${solarMonthName(date, locale)} ${numbers.format(date.year)}",
         enabled = isDateEnabled(JalaliCalendar(date.year, date.month, date.day)),
+        isToday = isToday,
     )
 }
 
@@ -54,6 +57,7 @@ fun solarHijriMonthData(
     locale: Locale = Locale.getDefault(),
     firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
     isDateEnabled: (JalaliCalendar) -> Boolean = { true },
+    today: JalaliCalendar = JalaliCalendar(LocalDate.now()),
 ): SolarHijriMonthData {
     val first = JalaliCalendar(month.year, month.month, 1)
     val epoch = solarHijriEpochDay(first)
@@ -63,7 +67,7 @@ fun solarHijriMonthData(
         weekdayLabels = List(7) { firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale) },
         firstDayOffset = Math.floorMod(LocalDate.ofEpochDay(epoch).dayOfWeek.value - firstDayOfWeek.value, 7),
         days = (1..first.monthLength).map { day ->
-            val cell = solarHijriDayCell(JalaliCalendar(first.year, first.month, day), locale, isDateEnabled)
+            val cell = solarHijriDayCell(JalaliCalendar(first.year, first.month, day), locale, isDateEnabled, today)
             require(cell.epochDay == epoch + day - 1) { "Non-consecutive Solar Hijri month conversion" }
             cell
         },
@@ -86,13 +90,18 @@ fun SolarHijriCalendarMonth(
     isDateEnabled: (JalaliCalendar) -> Boolean = { true },
     showPreviousMonthDays: Boolean = false,
     showNextMonthDays: Boolean = false,
+    today: JalaliCalendar = JalaliCalendar(LocalDate.now()),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
 ) {
-    val data = solarHijriMonthData(month, locale, firstDayOfWeek, isDateEnabled)
+    val data = solarHijriMonthData(month, locale, firstDayOfWeek, isDateEnabled, today)
     CalendarMonthGrid(
         title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
         days = data.days, selection = selection, modifier = modifier,
         onDayClick = { onDateClick(JalaliCalendar(LocalDate.ofEpochDay(it))) },
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
-        adjacentDayProvider = { solarHijriDayCell(JalaliCalendar(LocalDate.ofEpochDay(it)), locale, isDateEnabled) },
+        adjacentDayProvider = { solarHijriDayCell(JalaliCalendar(LocalDate.ofEpochDay(it)), locale, isDateEnabled, today) },
+        showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
     )
 }

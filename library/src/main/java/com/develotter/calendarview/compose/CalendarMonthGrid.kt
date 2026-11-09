@@ -42,17 +42,24 @@ fun CalendarMonthGrid(
     showPreviousMonthDays: Boolean = false,
     showNextMonthDays: Boolean = false,
     adjacentDayProvider: ((Long) -> CalendarDayCell)? = null,
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
 ) {
     require(weekdayLabels.size == 7) { "Exactly seven weekday labels are required" }
     val cells = buildCalendarMonthCells(
-        days, firstDayOffset, showPreviousMonthDays, showNextMonthDays, adjacentDayProvider,
+        days, firstDayOffset, showPreviousMonthDays, showNextMonthDays, adjacentDayProvider, fixedSixRows,
     )
     Column(modifier) {
-        header(title)
-        Row(Modifier.fillMaxWidth()) {
-            weekdayLabels.forEach { label ->
-                Box(Modifier.weight(1f).padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
-                    weekdayContent(label)
+        if (showHeader) {
+            header(title)
+        }
+        if (showWeekdayLabels) {
+            Row(Modifier.fillMaxWidth()) {
+                weekdayLabels.forEach { label ->
+                    Box(Modifier.weight(1f).padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
+                        weekdayContent(label)
+                    }
                 }
             }
         }
@@ -77,6 +84,8 @@ fun CalendarMonthGrid(
                                 !day.isCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant
                                 else -> MaterialTheme.colorScheme.onSurface
                             },
+                            border = if (day.isToday && !selected) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
                         ) {
                             Box(Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
                                 dayContent(day, selected, selection.isRangeEndpoint(day.epochDay))

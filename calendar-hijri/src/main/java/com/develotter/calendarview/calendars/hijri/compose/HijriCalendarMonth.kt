@@ -22,12 +22,14 @@ fun hijriDayCell(
     date: HijrahDate,
     locale: Locale = Locale.getDefault(),
     isDateEnabled: (HijrahDate) -> Boolean = { true },
+    today: HijrahDate = HijrahDate.now(),
 ): CalendarDayCell {
     val numbers = NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }
     val format = DateTimeFormatter.ofPattern("EEEE d MMMM y G", locale).withChronology(date.chronology)
     return CalendarDayCell(
         epochDay = date.toEpochDay(), label = numbers.format(date.get(ChronoField.DAY_OF_MONTH)),
         accessibilityLabel = date.format(format), enabled = isDateEnabled(date),
+        isToday = date.toEpochDay() == today.toEpochDay(),
     )
 }
 
@@ -37,13 +39,14 @@ fun hijriMonthData(
     locale: Locale = Locale.getDefault(),
     firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
     isDateEnabled: (HijrahDate) -> Boolean = { true },
+    today: HijrahDate = HijrahDate.now(),
 ): HijriMonthData {
     val first = month.with(ChronoField.DAY_OF_MONTH, 1)
     return HijriMonthData(
         title = first.format(DateTimeFormatter.ofPattern("MMMM y G", locale).withChronology(first.chronology)),
         weekdayLabels = List(7) { firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale) },
         firstDayOffset = Math.floorMod(first.get(ChronoField.DAY_OF_WEEK) - firstDayOfWeek.value, 7),
-        days = (0 until first.lengthOfMonth()).map { hijriDayCell(first.plus(it.toLong(), ChronoUnit.DAYS), locale, isDateEnabled) },
+        days = (0 until first.lengthOfMonth()).map { hijriDayCell(first.plus(it.toLong(), ChronoUnit.DAYS), locale, isDateEnabled, today) },
     )
 }
 
@@ -63,13 +66,18 @@ fun HijriCalendarMonth(
     isDateEnabled: (HijrahDate) -> Boolean = { true },
     showPreviousMonthDays: Boolean = false,
     showNextMonthDays: Boolean = false,
+    today: HijrahDate = HijrahDate.now(),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
 ) {
-    val data = hijriMonthData(month, locale, firstDayOfWeek, isDateEnabled)
+    val data = hijriMonthData(month, locale, firstDayOfWeek, isDateEnabled, today)
     CalendarMonthGrid(
         title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
         days = data.days, selection = selection, modifier = modifier,
         onDayClick = { onDateClick(month.chronology.dateEpochDay(it)) },
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
-        adjacentDayProvider = { hijriDayCell(month.chronology.dateEpochDay(it), locale, isDateEnabled) },
+        adjacentDayProvider = { hijriDayCell(month.chronology.dateEpochDay(it), locale, isDateEnabled, today) },
+        showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
     )
 }

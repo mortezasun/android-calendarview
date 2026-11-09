@@ -68,4 +68,50 @@ class CalendarMonthCellsTest {
             assertTrue(rejected)
         }
     }
+
+    @Test
+    fun fixedSixRowsProduces42CellsEvenForShorterMonths() {
+        val fourWeekMonth = month(100L, 28)
+        val dynamicCells28 = buildCalendarMonthCells(fourWeekMonth, 0, fixedSixRows = false)
+        val fixedCells28 = buildCalendarMonthCells(fourWeekMonth, 0, fixedSixRows = true)
+        assertEquals(28, dynamicCells28.size)
+        assertEquals(42, fixedCells28.size)
+        assertEquals(28, fixedCells28.filterNotNull().size)
+        assertTrue(fixedCells28.takeLast(14).all { it == null })
+
+        val fiveWeekMonth = month(100L, 30)
+        val dynamicCells30 = buildCalendarMonthCells(fiveWeekMonth, 1, fixedSixRows = false)
+        val fixedCells30 = buildCalendarMonthCells(fiveWeekMonth, 1, fixedSixRows = true)
+        assertEquals(35, dynamicCells30.size)
+        assertEquals(42, fixedCells30.size)
+        assertEquals(30, fixedCells30.filterNotNull().size)
+        assertTrue(fixedCells30.takeLast(11).all { it == null })
+    }
+
+    @Test
+    fun fixedSixRowsWithNextDaysFillsAll42CellsWithConsecutiveDates() {
+        val fourWeekMonth = month(100L, 28)
+        val cells = buildCalendarMonthCells(
+            days = fourWeekMonth,
+            firstDayOffset = 0,
+            showPreviousMonthDays = false,
+            showNextMonthDays = true,
+            adjacentDayProvider = ::cell,
+            fixedSixRows = true,
+        )
+        assertEquals(42, cells.size)
+        assertEquals(42, cells.filterNotNull().size)
+        val expectedEpochs = (100L until 142L).toList()
+        assertEquals(expectedEpochs, cells.map { it!!.epochDay })
+        assertTrue(cells.take(28).all { it!!.isCurrentMonth })
+        assertTrue(cells.drop(28).all { !it!!.isCurrentMonth })
+    }
+
+    @Test
+    fun dayCellIsTodayDefaultsToFalseAndCanBeSet() {
+        val regular = cell(100L)
+        assertFalse(regular.isToday)
+        val today = regular.copy(isToday = true)
+        assertTrue(today.isToday)
+    }
 }

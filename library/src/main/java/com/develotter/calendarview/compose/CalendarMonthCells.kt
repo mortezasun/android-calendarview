@@ -7,11 +7,13 @@ data class CalendarDayCell(
     val accessibilityLabel: String,
     val enabled: Boolean = true,
     val isCurrentMonth: Boolean = true,
+    val isToday: Boolean = false,
 )
 
 /**
  * Creates complete seven-column rows from chronological current-month cells.
  * Previous/next padding can independently remain null or contain real adjacent dates.
+ * When [fixedSixRows] is true, the grid always produces 42 cells (6 rows).
  * The provider must format/validate dates using the chosen calendar engine, return the
  * requested epoch identity, and supply enabled flags. Calendar-range/overflow errors
  * propagate rather than silently substituting a different date or calendar system.
@@ -23,13 +25,14 @@ fun buildCalendarMonthCells(
     showPreviousMonthDays: Boolean = false,
     showNextMonthDays: Boolean = false,
     adjacentDayProvider: ((Long) -> CalendarDayCell)? = null,
+    fixedSixRows: Boolean = false,
 ): List<CalendarDayCell?> {
     require(days.size in 1..31) { "A month must contain 1..31 days" }
     require(firstDayOffset in 0..6) { "firstDayOffset must be in 0..6" }
     require(days.zipWithNext().all { (a, b) -> a.epochDay != Long.MAX_VALUE && b.epochDay == a.epochDay + 1 }) {
         "Current-month days must have consecutive chronological identities"
     }
-    val cellCount = ((firstDayOffset + days.size + 6) / 7) * 7
+    val cellCount = if (fixedSixRows) 42 else ((firstDayOffset + days.size + 6) / 7) * 7
     return List(cellCount) { index ->
         val relative = index - firstDayOffset
         when {

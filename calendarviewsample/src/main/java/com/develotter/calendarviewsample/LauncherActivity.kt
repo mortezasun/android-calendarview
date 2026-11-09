@@ -76,6 +76,7 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
     var rtl by rememberSaveable { mutableStateOf(false) }
     var previousDays by rememberSaveable { mutableStateOf(false) }
     var nextDays by rememberSaveable { mutableStateOf(false) }
+    var fixedSixRows by rememberSaveable { mutableStateOf(false) }
     var anchor by rememberSaveable { mutableStateOf(LocalDate.now().toEpochDay()) }
     var showDialog by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
@@ -125,6 +126,10 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                     Switch(checked = nextDays, onCheckedChange = { nextDays = it })
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Fixed 6 rows")
+                    Switch(checked = fixedSixRows, onCheckedChange = { fixedSixRows = it })
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { move(-1) }) { Text("Previous") }
                     Button(onClick = { anchor = LocalDate.now().toEpochDay(); error = null }) { Text("Today") }
                     Button(onClick = { move(1) }) { Text("Next") }
@@ -134,7 +139,7 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                     calendar = calendar, anchor = anchor,
                     onVisibleMonthChanged = { anchor = it; error = null },
                 ) { monthAnchor ->
-                    SampleMonth(calendar, monthAnchor, locale, state, previousDays, nextDays)
+                    SampleMonth(calendar, monthAnchor, locale, state, previousDays, nextDays, fixedSixRows)
                 }
                 Text("Selected dates / range endpoints (ISO):")
                 Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
@@ -153,7 +158,7 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
                 title = { Text("${calendar.name} calendar") },
                 text = {
                     Column(Modifier.verticalScroll(rememberScrollState())) {
-                        SampleMonth(calendar, anchor, locale, state, previousDays, nextDays)
+                        SampleMonth(calendar, anchor, locale, state, previousDays, nextDays, fixedSixRows)
                     }
                 },
             )
@@ -164,24 +169,24 @@ private fun CalendarSample(onLegacyCalendar: () -> Unit, onLegacyHeatmap: () -> 
 @Composable
 private fun SampleMonth(
     calendar: SampleCalendar, anchor: Long, locale: Locale, state: CalendarSelectionState,
-    previousDays: Boolean, nextDays: Boolean,
+    previousDays: Boolean, nextDays: Boolean, fixedSixRows: Boolean = false,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
     when (calendar) {
         SampleCalendar.Gregorian -> GregorianCalendarMonth(
             month = YearMonth.from(date), selection = state.selection,
             onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
-            showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
+            showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
         )
         SampleCalendar.Hijri -> HijriCalendarMonth(
             month = HijrahDate.from(date), selection = state.selection,
             onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
-            showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
+            showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
         )
         SampleCalendar.SolarHijri -> SolarHijriCalendarMonth(
             month = JalaliCalendar(date), selection = state.selection,
             onDateClick = { state.onDayClick(solarHijriEpochDay(it)) }, locale = locale, modifier = Modifier.fillMaxWidth(),
-            showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
+            showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
         )
     }
 }

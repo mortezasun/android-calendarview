@@ -23,12 +23,14 @@ fun gregorianDayCell(
     date: LocalDate,
     locale: Locale = Locale.getDefault(),
     isDateEnabled: (LocalDate) -> Boolean = { true },
+    today: LocalDate = LocalDate.now(),
 ): CalendarDayCell {
     val numbers = NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }
     return CalendarDayCell(
         epochDay = date.toEpochDay(), label = numbers.format(date.dayOfMonth),
         accessibilityLabel = date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)),
         enabled = isDateEnabled(date),
+        isToday = date == today,
     )
 }
 
@@ -38,11 +40,12 @@ fun gregorianMonthData(
     locale: Locale = Locale.getDefault(),
     firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek,
     isDateEnabled: (LocalDate) -> Boolean = { true },
+    today: LocalDate = LocalDate.now(),
 ): GregorianMonthData = GregorianMonthData(
     title = month.format(DateTimeFormatter.ofPattern("LLLL uuuu", locale)),
     weekdayLabels = List(7) { firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale) },
     firstDayOffset = Math.floorMod(month.atDay(1).dayOfWeek.value - firstDayOfWeek.value, 7),
-    days = (1..month.lengthOfMonth()).map { gregorianDayCell(month.atDay(it), locale, isDateEnabled) },
+    days = (1..month.lengthOfMonth()).map { gregorianDayCell(month.atDay(it), locale, isDateEnabled, today) },
 )
 
 /**
@@ -62,13 +65,18 @@ fun GregorianCalendarMonth(
     isDateEnabled: (LocalDate) -> Boolean = { true },
     showPreviousMonthDays: Boolean = false,
     showNextMonthDays: Boolean = false,
+    today: LocalDate = LocalDate.now(),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
 ) {
-    val data = gregorianMonthData(month, locale, firstDayOfWeek, isDateEnabled)
+    val data = gregorianMonthData(month, locale, firstDayOfWeek, isDateEnabled, today)
     CalendarMonthGrid(
         title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
         days = data.days, selection = selection, modifier = modifier,
         onDayClick = { onDateClick(LocalDate.ofEpochDay(it)) },
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
-        adjacentDayProvider = { gregorianDayCell(LocalDate.ofEpochDay(it), locale, isDateEnabled) },
+        adjacentDayProvider = { gregorianDayCell(LocalDate.ofEpochDay(it), locale, isDateEnabled, today) },
+        showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
     )
 }
