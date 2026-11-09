@@ -46,7 +46,8 @@ dependencies {
     api("androidx.compose.runtime:runtime")
     api("androidx.compose.runtime:runtime-saveable")
     api("androidx.compose.ui:ui")
-    implementation("androidx.compose.foundation:foundation")
+    // LazyListState and PagerState are exposed by the public month containers.
+    api("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
 
     testImplementation(libs.junit)
