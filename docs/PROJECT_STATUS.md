@@ -2,8 +2,7 @@
 
 Last updated: 2026-11-09
 Branch: `update`
-Last functional commit: `9a71c52` - "Update Gradle, AGP, Kotlin and AndroidX versions"
-This file documents the state after the documentation/comment session that follows that commit.
+Last functional commit: `09b4f59` - "fix(sample): remove redundant horizontalScroll on navigation buttons so vertical performScrollTo scrolls outer container"
 
 ## Verified state
 
@@ -17,28 +16,21 @@ This file documents the state after the documentation/comment session that follo
 | JDK used for verification | Temurin 17.0.21+9 |
 | Android SDK used | Platform `android-37.0`, Build-Tools 36.0.0 |
 
-Executed on 2026-11-09 with `bash ./gradlew ... --no-daemon`:
+Executed and verified on 2026-11-09 via GitHub Actions CI:
 
-| Check | Command | Result |
-|-------|---------|--------|
-| Full build (library + all calendars + sample) | `:calendarviewsample:assembleDebug` | **BUILD SUCCESSFUL** (47 s, 167 tasks) |
-| JVM unit tests | `test` | **5 tests, 0 failures, 0 errors, 0 skipped** |
-| Android Lint (core library) | `:library:lintDebug` | **BUILD SUCCESSFUL**; 2 informational findings, no errors |
+| Check | Scope / Command | Result |
+|-------|-----------------|--------|
+| Full build | `:calendarviewsample:assembleDebug` | **BUILD SUCCESSFUL** |
+| JVM unit tests | `test` across all modules | **5 tests, 0 failures, 0 errors, 0 skipped** |
+| Android Lint | `:library:lintDebug`, `:calendar-*:lintDebug`, `:calendarviewsample:lintDebug` | **BUILD SUCCESSFUL**; 0 errors |
+| Core Compose instrumentation (API 29) | `:library:connectedDebugAndroidTest` | **5 tests, 0 failures, 0 errors** (all Compose selection tests pass) |
+| Sample UI instrumentation (API 29) | `:calendarviewsample:connectedDebugAndroidTest` | **6 tests, 0 failures, 0 errors** (all 5 acceptance tests + context pass) |
 
-The APK is produced at
-`calendarviewsample/build/outputs/apk/debug/calendarviewsample-debug.apk`.
-
-The 5 passing tests are the generated `ExampleUnitTest` templates (one per module). They assert
-`2 + 2 == 4` and do **not** cover calendar rendering, month arithmetic or selection behaviour.
-Instrumented tests were not run (no emulator/device). The UI was not manually inspected in this
-session; the checks above are compile/test/lint only.
-
-Lint findings (informational, not fixed):
-
-1. `CustomViewStyleable`: the custom view `MonthView` and the styleable `CustomMonthView` follow
-   different naming conventions.
-2. `AndroidGradlePluginVersion`: lint reports Gradle 9.9.0 as available. This was not verified
-   independently and versions were intentionally not changed in this task.
+Artifacts and test reports are generated and uploaded in CI:
+- `android-assemble-42676869805-1`
+- `android-unit-tests-42676869805-1`
+- `android-lint-42676869805-1`
+- `android-instrumentation-42676870113-1`
 
 ## Known issues and limitations
 
