@@ -4,6 +4,10 @@
 
 A powerful, native Jetpack Compose calendar library for Android applications. Supports multi-calendar engines (Gregorian, Hijri, Solar Hijri / Jalali), unified selection models, configurable month grids, heatmap components, and complete RTL layout direction support.
 
+<p align="center">
+  <img src="docs/images/sample_demo.jpg" alt="Compose Calendar Demo" width="320"/>
+</p>
+
 ---
 
 ## ✨ Features
