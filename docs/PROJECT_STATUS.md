@@ -216,5 +216,29 @@ POM inspection:
 - `...:calendar-solarHijri:2.0.0` additionally carries `ir.huri:jalalicalendar:2.0.0`.
 - Every module publishes `<module>-2.0.0.aar`, `.pom`, `.module` and `-sources.jar`.
 
-Still open: an independent consumer project against `mavenLocal` and against JitPack, plus the
-`2.0.0` tag.
+Still open at that point: an independent consumer project and the `2.0.0` tag. The `mavenLocal`
+part is recorded in the next section; the JitPack preflight is still open.
+
+---
+
+## Session 2026-11-10: consumer test and CI status
+
+- An independent consumer project (`artifacts/consumer-test`, untracked) builds against the
+  artifacts from `publishToMavenLocal`, with no `project(...)` and no `includeBuild(...)`.
+  All four configurations build: Gregorian only, Hijri only, Solar Hijri only, and all three
+  engines sharing one selection.
+- The resolved compile classpath confirms the published metadata:
+  `calendar-gregorian -> library -> androidx.compose:compose-bom`, `calendar-hijri -> library`,
+  `calendar-solarHijri -> library` plus `ir.huri:jalalicalendar`. A consumer needs no own BOM
+  import; the versions arrive through the library metadata.
+- CI for `ece9864`: `Android verification` success, `Android instrumentation` (API 29) success.
+- Correction: the instrumentation workflow had failed for `46e66605` and `c894246`. The failing
+  assertion was the exact dp comparison of two weighted column widths in
+  `weeksAsRowsKeepsMinimumHeightWhenTheViewportIsNarrow`; weighted columns split the row into
+  whole pixels, so exact equality is not a contract. The test now asserts the documented 48dp
+  slot height plus click reporting. The failure message itself was never available - the job logs
+  require authentication and no KVM was available for a local emulator - so this is a strong
+  indication, not a log-confirmed diagnosis.
+
+Still open: the JitPack preflight with a commit hash, the release notes, the manual acceptance
+pass and the `2.0.0` tag.
