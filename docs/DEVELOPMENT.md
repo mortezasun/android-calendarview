@@ -4,15 +4,15 @@
 
 | Task | Location |
 |------|----------|
-| Change selection behaviour (single/multiple/range) | `library/.../adapter/MonthSampleAdapter.kt` |
-| Add a configuration switch | `library/.../status/CalendarStatus.kt`, then read it where the view is built |
-| Add a view mode (list/pager direction) | `library/.../enums/TypeViewCalender.kt`, `MultiMonthView.initRecyclerView` |
-| Change month grid geometry | `library/.../MonthView.kt` (`numColumns`, `onMeasure`, `onLayout`) |
-| Add a calendar system | New Gradle module with `MonthStatus` + `DayStatus` subclasses, modeled on `:calendar-gregorian` |
-| Change day formatting | `library/.../CalendarUtil.kt` and the calendar-specific `DayStatus` subclass |
+| Change selection behaviour (single/multiple/range) | `library/.../selection/CalendarSelection.kt` (`onDayClick`); saved state in `compose/CalendarSelectionState.kt` |
+| Add a configuration switch | The public composable in `library/.../compose/CalendarMonthGrid.kt` or `CalendarHeatmap.kt` (defaulted parameter, forwarded to the renderer) |
+| Add a view mode (list/pager direction) | `library/.../compose/CalendarMonthContainers.kt` (`CalendarMonthList`, `CalendarMonthPager`, `CalendarScrollAxis`) |
+| Change month grid geometry | `library/.../compose/CalendarMonthGrid.kt` and `CalendarMonthCells.kt` (`buildCalendarMonthCells`, `fixedSixRows`) |
+| Add a calendar system | New Gradle module with a `*MonthData` builder and a `*CalendarMonth` composable, modeled on `:calendar-gregorian` |
+| Change day formatting | The engine's `*MonthData.kt` / `*DayCell` code in its own module; the grid only renders `CalendarDayCell` |
 | Change heatmap rendering | `library/.../compose/CalendarHeatmap.kt` (`HeatmapBlock`, `HeatmapCell`) |
 | Change heatmap data handling | `heatmapQuarterData` (Gregorian) / `HeatmapMonthData` built in the caller, see `calendarviewsample/.../CalendarSampleHeatmap.kt` |
-| Change sample screen wiring | `calendarviewsample/.../CalendarViewActivity.kt` (reference) or `LauncherActivity.kt` |
+| Change sample screen wiring | `calendarviewsample/.../CalendarSampleWindow.kt`, `CalendarSampleNavigation.kt`, `CalendarSampleViewport.kt`; entry points `LauncherActivity.kt` and `HeatMapViewActivity.kt` |
 
 Keep the dependency direction intact: `:library` must not import classes from the calendar modules
 or from the sample. Calendar-specific code stays in its module.
@@ -23,49 +23,49 @@ or from the sample. Calendar-specific code stays in its module.
 
 1. Create a module like `:calendar-gregorian` (same `build.gradle.kts` shape, dependency on
    `:library`).
-2. Implement `MonthStatus<Month, DayStatus>`:
-   - month caption and names,
-   - length/start/end of month,
-   - `minusMonths`/`plusMonths` (return new instances; do not mutate the receiver),
-   - `setOnCreateDayStatus`, `atDay`,
-   - first/last day of week and their integer indexing.
-3. Implement `DayStatus` with the calendar's day/month/year values and text formatting.
+2. Implement the month data builder (`*MonthData.kt`), mirroring `gregorianMonthData`:
+   - localized month caption and weekday labels,
+   - `firstDayOffset` relative to the configured `firstDayOfWeek`,
+   - month length and one `CalendarDayCell` per day with epoch day, label, accessibility text,
+     `isToday` and `enabled`.
+3. Implement the public composable (`*CalendarMonth.kt`): a thin wrapper around
+   `CalendarMonthGrid` that forwards every configuration parameter.
 4. Add the module to `settings.gradle.kts` and to the consumer's dependencies.
-5. Extend the sample's `TypeArtCalender` only if the sample should demonstrate it.
+5. Add `*MonthDataTest` coverage next to the existing engine tests.
 
-`minusMonths`/`plusMonths` are called for every month in the window, so they must be pure and
-must not depend on the day currently selected.
+Epoch days are the only identity shared across engines, and the month arithmetic is called for
+every month in the window, so it must be pure and must not depend on the day currently selected.
 
-### New adapter rendering hook
+### New composable option
 
-Consumers implement the abstract `onBind*` methods of `MonthSampleAdapter`. If a new hook is
-needed, add it to `BaseCalendarAdapter`/`DayCellViewAdapter` with a default only where every
-existing consumer can use it; otherwise update all four modules and the sample in the same change.
-This is a public API change and must be called out in the summary.
+`CalendarMonthGrid`, the three engine month composables and the heatmaps are controlled and
+stateless. To add an option:
 
-### New `CalendarStatus` option
-
-1. Add a private field with a getter and a fluent setter.
-2. Read it while building views in `MultiMonthView.addMonths` or `MonthView.setUp`.
-3. Because `addMonths` rebuilds everything, document that callers must rebuild after changing it.
-4. Add the option to the sample only if it demonstrates the feature.
+1. Add it as a defaulted parameter on the public composable, before the trailing `dayContent`
+   slot (and before `colorForIntensity` for heatmaps), so existing trailing-lambda calls keep
+   compiling.
+2. Forward it in the engine wrapper and, for heatmaps, through `HeatmapRenderConfig`.
+3. Geometry belongs in `HeatmapStyle` (validated in its `init`); per-day state belongs in
+   `CalendarDayCell` / `HeatmapDayData` with a default value.
+4. Do not add internal mutable state for a value the caller already owns.
 
 ### Error handling and logging
 
 The library is deliberately small:
 
-- Invalid grid configuration throws `IllegalArgumentException` (`MonthView`, `numColumns`).
-- Methods that index selection lists directly have preconditions (`getPeriodByRange` expects two
-  entries); guard at the call site instead of swallowing exceptions.
-- The only logging is `Log.i("snappedView", ...)` in `MultiMonthView.getPosition`.
-- Do not add error-handling frameworks or coroutines for existing synchronous rendering.
+- Invalid configuration fails a `require` or throws `IllegalArgumentException`
+  (`HeatmapStyle` init, `heatmapQuarterData`, `CalendarSelection.from`).
+- `CalendarSelection.from` rejects too many days for the mode instead of truncating silently;
+  guard at the call site rather than swallowing the exception.
+- The library does not log. Do not add logging, error-handling frameworks or coroutines for
+  synchronous rendering.
 
 ### Comments
 
 - Write KDoc for public types and for non-obvious private helpers.
 - Comments explain **why** (constraints, invariants, calendar quirks), not **what** the next line
-  does. Example: the manual month arithmetic in `HijriStatus`/`SolarHijriStatus` explains why it
-  exists, because `HijrahDate` has no `plusMonths`.
+  does. Example: the manual month arithmetic in `hijriMonthData` explains why it exists, because
+  `HijrahDate` has no `plusMonths`.
 - Existing KDoc is English; keep new comments in English for consistency.
 - Fix a stale comment only when the code proves it wrong; otherwise leave it and note the
   discrepancy.
@@ -82,8 +82,9 @@ The library is deliberately small:
    ```bash
    ./gradlew :calendarviewsample:assembleDebug
    ```
-4. Run `./gradlew test`. The current tests are template placeholders, so passing them does not
-   prove calendar behaviour; state that explicitly in the summary.
+4. Run `./gradlew test` (JVM tests for selection, month cells, heatmap data and every engine).
+   The Compose UI and sample acceptance tests live in `src/androidTest` and need an emulator or
+   device; `./gradlew :library:compileDebugAndroidTestKotlin` only proves they compile.
 5. Run `./gradlew :library:lintDebug` when the change is non-trivial.
 6. Inspect `git diff` and `git status`: only intended files, no build output, no unrelated mode
    changes.
@@ -107,3 +108,7 @@ place it before the trailing `colorForIntensity` / `dayContent` parameters so ex
 trailing-lambda calls keep compiling, forward it in the Gregorian year overload and pass it to
 the private renderer through `HeatmapRenderConfig`. Cell geometry belongs in `HeatmapStyle`
 (with validation in its `init`), per-day state in `HeatmapDayData` with a default value.
+
+Keep the touch-target contract: `HeatmapCell` draws the visible cell from `visualModifier` and the
+interactive slot from `slotModifier`, which is sized to at least
+`LocalMinimumInteractiveComponentSize`. Do not move the click handling onto the small visual box.

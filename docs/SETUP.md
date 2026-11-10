@@ -51,8 +51,9 @@ chmod +x gradlew
 adb install -r calendarviewsample/build/outputs/apk/debug/calendarviewsample-debug.apk
 ```
 
-The demo app has three entries: a configurable calendar screen, the same calendar inside an
-`AlertDialog`, and a heatmap screen. `LauncherActivity` is the launcher entry point.
+The demo app has two activities: `LauncherActivity` (configurable calendar screen, including the
+synchronized calendar inside an `AlertDialog`) and `HeatMapViewActivity` (heatmap screen).
+`LauncherActivity` is the launcher entry point.
 
 Building only the core library:
 
@@ -67,9 +68,12 @@ Building only the core library:
 ./gradlew :library:lintDebug # Android Lint for the core library
 ```
 
-All `src/test` and `src/androidTest` classes are still the generated template tests
-(`ExampleUnitTest`, `ExampleInstrumentedTest`). They do not cover the calendar or selection logic.
-Instrumented tests require an emulator or device and were not part of the CLI verification.
+`src/test` holds the JVM tests: selection engine and saved-state snapshots, month-cell building,
+heatmap data and style validation, the sample helpers and one month-data suite per calendar
+engine. `src/androidTest` holds the Compose UI tests (`CalendarSelectionComposeTest`,
+`CalendarHeatmapComposeTest`, plus the sample acceptance tests). Only the `ExampleUnitTest` /
+`ExampleInstrumentedTest` files are leftover templates. Instrumented tests require an emulator or
+device and were not part of the CLI verification.
 
 ## Dependencies and repositories
 
@@ -80,8 +84,9 @@ Repositories are defined centrally in `settings.gradle.kts` with
 - `mavenCentral()` for Kotlin/JUnit and `ir.huri:jalalicalendar`,
 - `https://jitpack.io` for JitPack consumption.
 
-`:library` exposes `ir.huri:jalalicalendar` with `api`, so consumers of the Solar Hijri module get
-it transitively.
+`:calendar-solarHijri` is the only module that declares `ir.huri:jalalicalendar`, and it exposes it
+with `api`, so consumers of that engine get the library transitively while `:library` stays free
+of it.
 
 ## Secrets
 
@@ -100,7 +105,3 @@ keys.
 3. **Missing SDK location.** Without `ANDROID_HOME` or `local.properties`, Gradle stops during
    configuration with "SDK location not found".
 4. **No JDK installed.** AGP 9.5 requires JDK 17; a newer JDK may work but was not verified here.
-5. **Dangling activity in the sample manifest.** `calendarviewsample/src/main/AndroidManifest.xml`
-   declares `.CustomCalendarViewActivity`, but no such source file exists. It does not affect the
-   launcher or the build, but launching that activity would fail. See
-   [PROJECT_STATUS.md](PROJECT_STATUS.md).

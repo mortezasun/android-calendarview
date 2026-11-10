@@ -1,6 +1,6 @@
 # Project status
 
-Last updated: 2026-11-09
+Last updated: 2026-11-10
 Version: `2.0.0`
 Branch: `update`
 
@@ -17,7 +17,9 @@ Branch: `update`
 | JDK used for verification | Temurin 17.0.21+9 |
 | Android SDK used | Platform `android-37.0`, Build-Tools 36.0.0 |
 
-Executed and verified on 2026-11-09 via GitHub Actions CI:
+Executed and verified on 2026-11-09 via GitHub Actions CI. This block is the historical CI row set;
+the `test` count below belongs to that run. The current local count is 70 - see the sessions at
+the end of this file:
 
 | Check | Scope / Command | Result |
 |-------|-----------------|--------|
@@ -101,9 +103,55 @@ Known limitations / open points:
   selection highlight are not device-verified and have no Compose UI test yet.
 - Visible default change: the Gregorian heatmaps now draw a today border (default
   `today = LocalDate.now()`), matching the month views. Pass `today = null` for the old look.
-- `HeatmapStyle.cellSize` below 48dp also shrinks the touch target below the 48dp guideline.
-- Stale documentation, not changed in this session: `AGENTS.md` still describes the 1.x
-  XML/ViewBinding architecture (`MultiMonthView`, `MonthSampleAdapter`, "no Compose"), and the
-  remaining rows of the `docs/DEVELOPMENT.md` table plus `docs/ARCHITECTURE.md` container names
-  (`CalendarHorizontalPager`, `CalendarVerticalPager`) refer to APIs that no longer exist
-  (the actual containers are `CalendarMonthList` / `CalendarMonthPager`).
+- `HeatmapStyle.cellSize` below 48dp shrunk the touch target below the 48dp guideline. Resolved in
+  the follow-up session below.
+- Stale documentation: `AGENTS.md`, `docs/DEVELOPMENT.md`, `docs/ARCHITECTURE.md` and other status
+  files still described the 1.x XML/ViewBinding architecture and APIs that no longer exist.
+  Resolved in the follow-up session below.
+
+---
+
+## Session 2026-11-10 (follow-up): documentation, heatmap touch target, heatmap UI tests
+
+Closes the open points of the previous session. No public composable, parameter or type was renamed
+or removed; the only behaviour change is the heatmap touch target described below.
+
+- `:library` (`compose/CalendarHeatmap.kt`):
+  - `HeatmapCell` now separates the interactive slot (`slotModifier`) from the drawn cell
+    (`visualModifier`). The slot is
+    `max(HeatmapStyle.cellSize, LocalMinimumInteractiveComponentSize)`, so a cell smaller than 48dp
+    keeps a full-size touch target while the visible cell stays at `cellSize`.
+  - Default geometry is unchanged: `HeatmapStyle()` still produces 48dp cells on a 48dp pitch.
+  - The weekday label column and the `null` padding cells use the same slot size, so labels and
+    grid stay aligned.
+- `:library` `androidTest`: new `CalendarHeatmapComposeTest` (6 tests) covers `WeeksAsRows` label
+  rendering and click reporting by epoch day, `WeeksAsColumns` scrolling plus click reporting, RTL
+  weekday mirroring, caller-owned selection semantics, disabled days and the minimum touch target
+  at `cellSize = 24.dp`.
+- Documentation aligned to the Compose v2 state: `AGENTS.md` (architecture rules and verified
+  commands), `docs/DEVELOPMENT.md` (real file paths, engine and option patterns, actual test
+  state), `docs/ARCHITECTURE.md` (container names, heatmap slot behaviour), `docs/SETUP.md` (test
+  state, `ir.huri:jalalicalendar` ownership, removed manifest problem).
+  `docs/V2_IMPLEMENTATION_STATUS.md` is now a superseded pointer at this file.
+  `docs/COMPOSE_TESTS.md`, `docs/SAMPLE_UI_TESTS.md`, `docs/CI_FAILURES.md` and `docs/V2_AUDIT.md`
+  were corrected for the same consistency.
+
+Executed on 2026-11-10 locally (Temurin 17.0.21+9, Platform `android-37.0`, Build-Tools 36.0.0):
+
+| Check | Result |
+|-------|--------|
+| `test` (all modules) | 70 tests, 0 failures, 0 errors |
+| `:library:compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL (compiled, not executed) |
+| `:library:lintDebug` | BUILD SUCCESSFUL, no lint errors |
+| `:calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
+
+Remaining limitations:
+- No emulator or device was available. The six new heatmap UI tests and the five existing selection
+  UI tests are compiled but not executed, so their runtime behaviour is unverified.
+- `CalendarHeatmapComposeTest` uses `createComposeRule`, which now reports a deprecation warning in
+  favour of the `junit4.v2` variant. It matches the existing `CalendarSelectionComposeTest`; the
+  migration was not part of this change.
+- No release tag was created and no version was bumped. That stays a separate, deliberate step per
+  `docs/decisions/0002-compose-v2-shared-core.md`.
+- No independent JitPack consumer build and no fresh CI run for the resulting commit were performed
+  here.

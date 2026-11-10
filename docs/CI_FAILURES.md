@@ -1,5 +1,11 @@
 # CI failure investigation
 
+Status: **resolved.** The dangling manifest entry was removed together with the legacy
+activities; the current `calendarviewsample/src/main/AndroidManifest.xml` declares only
+`LauncherActivity` and `HeatMapViewActivity`. This file is kept as the record of the original
+investigation, and the "Correction" section below still describes the 1.x-era state in which
+`CalendarViewActivity` existed.
+
 Date: 2026-11-09
 Branch: update
 Reported run: 42628963758

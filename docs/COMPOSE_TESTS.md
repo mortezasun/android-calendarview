@@ -1,10 +1,19 @@
 # Compose instrumentation checks
 
 Module: :library
-Test class: com.develotter.calendarview.compose.CalendarSelectionComposeTest
-Four added tests cover cleared-selection restoration, range restoration, mode changes
+Test classes:
+
+- com.develotter.calendarview.compose.CalendarSelectionComposeTest
+- com.develotter.calendarview.compose.CalendarHeatmapComposeTest
+
+Five selection tests cover cleared-selection restoration, range restoration, mode changes
 and disabled/selected grid-cell semantics. StateRestorationTester simulates Compose
 saved state; it does not kill the process or recreate the real sample activity.
+
+Six heatmap tests cover both orientations, click reporting by epoch day, RTL weekday
+mirroring, caller-owned selection semantics, disabled days and the minimum touch target
+when `HeatmapStyle.cellSize` is below 48 dp. They render the composables directly, not a
+heatmap screen inside the sample app.
 
 ## Emulator workflow
 
@@ -40,10 +49,10 @@ Logcat from the connected test device. No device logs were collected in this ses
 User reported verification run 42630675110 as successful. That report concerns the
 existing verification workflow, not this new emulator workflow. The assistant could not
 retrieve the linked run and has not independently checked job conclusions or test counts.
-The four instrumented tests and new emulator setup remain unverified until execution.
+The instrumented tests and the emulator setup remain unverified until execution.
 
-Still open: actual emulator results, real activity/process recreation, list/pager gestures
-and restoration, window identity, RTL/font scaling/accessibility, additional runtime API
+Still open: actual emulator results for both classes, real activity/process recreation,
+list/pager gestures and restoration, window identity, font scaling, additional runtime API
 levels, Android calendar conversions and end-to-end sample checks.
 
 References:

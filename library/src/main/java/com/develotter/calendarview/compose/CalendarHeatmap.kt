@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -86,6 +87,11 @@ enum class HeatmapOrientation {
  * 48dp square cells without gaps, rectangular shape and a 64dp weekday label column.
  * In [HeatmapOrientation.WeeksAsRows] cells take an equal share of the width and
  * [cellSize] is used as the row height; [weekdayLabelWidth] is ignored there.
+ *
+ * [cellSize] only controls the drawn cell, not the touch target: every cell keeps at least
+ * the platform minimum interactive size ([LocalMinimumInteractiveComponentSize], 48dp by
+ * default) as its layout slot. Cells below that size therefore render smaller while the
+ * grid keeps a 48dp pitch, so taps stay reliable instead of shrinking with the visuals.
  */
 @Immutable
 data class HeatmapStyle(
@@ -361,6 +367,9 @@ private fun <T : Any> HeatmapBlock(
 ) {
     val style = config.style
     val spacing = Arrangement.spacedBy(style.cellSpacing)
+    // Visual cell size and touch target are independent: a cell smaller than the platform
+    // minimum still occupies a full-size slot, so hit areas never shrink below the guideline.
+    val slotSize = maxOf(style.cellSize, LocalMinimumInteractiveComponentSize.current)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         if (config.showHeader) {
             config.header(title)
@@ -371,7 +380,7 @@ private fun <T : Any> HeatmapBlock(
                     Column(verticalArrangement = spacing) {
                         weekdayLabels.forEach { label ->
                             Box(
-                                Modifier.size(width = style.weekdayLabelWidth, height = style.cellSize),
+                                Modifier.size(width = style.weekdayLabelWidth, height = slotSize),
                                 contentAlignment = Alignment.Center,
                             ) { config.weekdayContent(label) }
                         }
@@ -381,7 +390,15 @@ private fun <T : Any> HeatmapBlock(
                     weeks.forEach { week ->
                         Column(verticalArrangement = spacing) {
                             week.forEach { day ->
-                                HeatmapCell(day, Modifier.size(style.cellSize), config, cellInfo, onClick, dayContent)
+                                HeatmapCell(
+                                    day,
+                                    slotModifier = Modifier.size(slotSize),
+                                    visualModifier = Modifier.size(style.cellSize),
+                                    config = config,
+                                    cellInfo = cellInfo,
+                                    onClick = onClick,
+                                    dayContent = dayContent,
+                                )
                             }
                         }
                     }
@@ -401,8 +418,13 @@ private fun <T : Any> HeatmapBlock(
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = spacing) {
                         week.forEach { day ->
                             HeatmapCell(
-                                day, Modifier.weight(1f).height(style.cellSize),
-                                config, cellInfo, onClick, dayContent,
+                                day,
+                                slotModifier = Modifier.weight(1f).height(slotSize),
+                                visualModifier = Modifier.fillMaxWidth().height(style.cellSize),
+                                config = config,
+                                cellInfo = cellInfo,
+                                onClick = onClick,
+                                dayContent = dayContent,
                             )
                         }
                     }
@@ -415,14 +437,16 @@ private fun <T : Any> HeatmapBlock(
 @Composable
 private fun <T : Any> HeatmapCell(
     day: T?,
-    modifier: Modifier,
+    slotModifier: Modifier,
+    visualModifier: Modifier,
     config: HeatmapRenderConfig,
     cellInfo: (T) -> HeatmapCellInfo,
     onClick: (T) -> Unit,
     dayContent: @Composable (T) -> Unit,
 ) {
     if (day == null) {
-        Box(modifier)
+        // Padding cells keep the slot so the grid stays aligned with the real cells.
+        Box(slotModifier)
         return
     }
     val info = cellInfo(day)
@@ -443,13 +467,18 @@ private fun <T : Any> HeatmapCell(
         Modifier.clickable(enabled = info.enabled, role = Role.Button) { onClick(day) }
     }
     Box(
-        modifier
-            .alpha(if (info.enabled) 1f else style.disabledAlpha)
-            .clip(style.cellShape)
-            .background(config.colorForIntensity(info.intensity))
-            .then(border)
+        slotModifier
             .semantics { contentDescription = info.description }
             .then(interaction),
         contentAlignment = Alignment.Center,
-    ) { dayContent(day) }
+    ) {
+        Box(
+            visualModifier
+                .alpha(if (info.enabled) 1f else style.disabledAlpha)
+                .clip(style.cellShape)
+                .background(config.colorForIntensity(info.intensity))
+                .then(border),
+            contentAlignment = Alignment.Center,
+        ) { dayContent(day) }
+    }
 }

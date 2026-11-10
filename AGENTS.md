@@ -16,42 +16,52 @@ is not part of your task and never reset, stash or overwrite it without explicit
 ## Project at a glance
 
 - Multi-module Android **library** project, not an app-first project.
-- `:library` contains the public views, adapter contracts, status models and heatmap views.
+- `:library` contains the Compose core: month grid, selection engine, scrolling containers and
+  heatmaps.
 - `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` are calendar engines that depend
   on `:library`. `:calendarviewsample` is the demo app and depends on all modules.
 - Public API lives in `com.develotter.calendarview.*`; calendar-specific types live in
   `com.develotter.calendarview.calendars.*`.
-- Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, `compileSdk` 37, `minSdk` 27, Java 17.
-- UI is **XML + ViewBinding**. There is **no Compose**, no ViewModel/Flow, no DI framework, no
-  network and no persistence layer.
+- Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk` 37,
+  `minSdk` 27, Java 17.
+- UI is **100% Jetpack Compose**. There are no XML layouts, no ViewBinding, no custom view
+  measurement, no ViewModel/Flow, no DI framework, no network and no persistence layer.
 
 ## Architecture conventions
 
-- The core is a generic custom-view library. `MultiMonthView<D, W, M, SelectController>` and
-  `MonthView` are parameterized by four `ViewBinding` types (day, week, month header, selection
-  controller). Preserve these type parameters and the consumer-facing adapter hooks.
-- `MonthStatus<Month, Day>` and `DayStatus` are the calendar-system abstraction. A new calendar
-  system is added as a new module with subclasses of both, not by branching inside `:library`.
-- Selection behaviour (none/single/multiple/range) lives in `MonthSampleAdapter`. Consumers only
-  implement rendering callbacks such as `onBindDayView` and `onDayItemClick`.
-- State is plain mutable objects: `CalendarStatus`, `DayStatus.isChecked`,
-  `DayStatus.selectRangeDayStatus` and the selection lists in the adapter. Do not introduce
-  `StateFlow`, LiveData or ViewModels for existing features.
-- Calendar changes are applied by calling `MultiMonthView.addMonths(...)` again; the method clears
-  and rebuilds all children. Keep that contract unless the task explicitly changes it.
-- Public names, signatures and XML attributes are API. Do not rename or remove them as a side
-  effect of another change.
+- `CalendarMonthGrid` is the stateless rendering core: title, seven weekday labels,
+  `firstDayOffset` and `CalendarDayCell` items. The engine composables wrap it; they do not
+  reimplement the grid.
+- Day identity is an epoch day (`Long`) everywhere. Never key selection or callbacks by formatted
+  dates or calendar-specific objects.
+- `CalendarSelection` is an immutable value. `rememberCalendarSelectionState` owns it with
+  `rememberSaveable` and a `CalendarSelectionSnapshot` saver; range interiors are computed, never
+  enumerated. Do not replace this with `StateFlow`, LiveData or a ViewModel.
+- `CalendarMonthList` and `CalendarMonthPager` are calendar-independent containers: a month count
+  plus a month-content lambda. They read the ambient `LayoutDirection` and `LazyListState` /
+  `PagerState` supplied by the caller.
+- Heatmaps are built from `heatmapQuarterData` (Gregorian) or caller-built `HeatmapMonthData`.
+  All public heatmaps share one private `HeatmapBlock`/`HeatmapCell` renderer and `HeatmapStyle`.
+- Public composables are **controlled and stateless**. The caller owns selection, navigation and
+  the visible month; the library only renders and reports clicks. Do not add internal mutable
+  state for values the caller already owns.
+- Public composable signatures are API. Add options as defaulted parameters before the trailing
+  `dayContent` (and, for heatmaps, `colorForIntensity`) lambda so existing calls keep compiling.
+  Do not rename or remove parameters as a side effect of another change.
+- Heatmap cells keep a touch target of at least `LocalMinimumInteractiveComponentSize` even when
+  `HeatmapStyle.cellSize` is smaller. Do not move click handling onto the shrunken visual cell.
 
 ## Verified commands
 
-These commands were executed successfully on 2026-11-09 with JDK 17 and Android SDK Platform 37
+These commands were executed successfully on 2026-11-10 with JDK 17 and Android SDK Platform 37
 (package `platforms;android-37.0`):
 
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew test                                    # JVM unit tests
+./gradlew test                                    # 70 JVM unit tests, all modules
 ./gradlew :library:lintDebug                      # lint for the core library
+./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
 ```
 
 Single-module compile checks, for example `./gradlew :library:compileDebugKotlin`, are acceptable

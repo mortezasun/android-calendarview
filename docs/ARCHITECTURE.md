@@ -17,7 +17,7 @@ The architecture follows standard Compose state and rendering patterns:
 
 | Module | Responsibility |
 |--------|----------------|
-| `:library` | Core Compose views (`CalendarMonthGrid`, `CalendarQuarterHeatmap`, `CalendarYearHeatmap`), month containers (`CalendarHorizontalPager`, `CalendarVerticalPager`, etc.), selection state machine (`CalendarSelection`, `CalendarSelectionState`, `TypeSelectDay`), and cell data models. |
+| `:library` | Core Compose views (`CalendarMonthGrid`, `CalendarQuarterHeatmap`, `CalendarYearHeatmap`), month containers (`CalendarMonthList`, `CalendarMonthPager`), selection state machine (`CalendarSelection`, `CalendarSelectionState`, `TypeSelectDay`), and cell data models. |
 | `:calendar-gregorian` | Gregorian calendar engine backed by `java.time.YearMonth` and `java.time.LocalDate`. Provides `GregorianCalendarMonth`, `gregorianMonthData`, and `gregorianDayCell`. |
 | `:calendar-hijri` | Islamic Hijri calendar engine backed by `java.time.chrono.HijrahDate`. Provides `HijriCalendarMonth`, `hijriMonthData`, and `hijriDayCell`. |
 | `:calendar-solarHijri` | Solar Hijri / Jalali calendar engine backed by `ir.huri:jalalicalendar`. Provides `SolarHijriCalendarMonth`, `solarHijriMonthData`, and `solarHijriDayCell`. |
@@ -77,7 +77,10 @@ The heatmap is decoupled from month grid calculations but shares its configurati
 - Heatmap-specific layout: `HeatmapOrientation.WeeksAsColumns` (activity chart, horizontal
   scroll, default) or `WeeksAsRows` (month-grid layout, cells share the width), and
   `HeatmapStyle` for cell size, spacing, shape, label width, border widths and disabled alpha.
-  `HeatmapStyle()` reproduces the original 48dp rectangular cells without gaps.
+  `HeatmapStyle()` reproduces the original 48dp rectangular cells without gaps. `cellSize`
+  controls only the drawn cell: every cell occupies a layout slot of at least the platform
+  minimum interactive size (48dp), so smaller cells keep a full-size touch target and the grid
+  keeps a 48dp pitch.
 - Colors: `colorForIntensity` maps the normalized intensity (0..1) to the cell fill; selected
   cells get a `selectedBorderColor` border, which takes precedence over the today border.
 - Layout follows the ambient `LayoutDirection`, so RTL works without extra parameters.

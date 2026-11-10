@@ -5,6 +5,10 @@ Branch: update
 Scope: source/document review of the migration work and recorded open points, not an
 exhaustive repository-wide correctness proof. No build or runtime verification occurred.
 
+Historical snapshot: several `OPEN` items below were completed afterwards (legacy view/XML
+removal, Jalali isolation, version catalog, localization, documentation migration, 2.0.0
+metadata). Treat [PROJECT_STATUS.md](PROJECT_STATUS.md) as the current status source.
+
 ## Priority 0: verification and correctness
 
 - OPEN: compile every module and assemble the sample. No migration commit has a verified

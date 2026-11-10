@@ -44,6 +44,8 @@ If a test fails, inspect its assertion/report rather than weakening the intended
 
 ## Remaining broader migration work
 
-Full old API inventory/parity, legacy CalendarViewActivity migration and obsolete code/XML
-removal, dependency isolation/catalog consolidation, release/consumer checks, complete
-localization, main documentation/agent-rule updates and version 2.0.0 remain unfinished.
+Release and independent-consumer checks, a fresh CI run for the current commit and the final
+module build/test/lint matrix remain open. The legacy feature inventory, obsolete view/XML
+removal, dependency isolation, catalog consolidation, sample localization and the main
+documentation/agent-rule migration are complete as of
+[docs/PROJECT_STATUS.md](PROJECT_STATUS.md).
