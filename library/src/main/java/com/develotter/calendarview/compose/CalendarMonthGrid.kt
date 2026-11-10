@@ -1,5 +1,6 @@
 package com.develotter.calendarview.compose
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -7,12 +8,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -26,6 +29,8 @@ import com.develotter.calendarview.selection.CalendarSelection
  * All dates share selection and click handling; clicks do not automatically navigate.
  * Slots receive cells with isCurrentMonth plus selection/endpoint flags. Do not install
  * competing click handlers in slots. Layout follows ambient direction, including RTL.
+ * Today indicator uses [todayBorderColor] (defaults to tertiary) so it never clashes
+ * with the primary selection highlight.
  */
 @Composable
 fun CalendarMonthGrid(
@@ -45,6 +50,7 @@ fun CalendarMonthGrid(
     showHeader: Boolean = true,
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
+    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
 ) {
     require(weekdayLabels.size == 7) { "Exactly seven weekday labels are required" }
     val cells = buildCalendarMonthCells(
@@ -89,8 +95,8 @@ fun CalendarMonthGrid(
                                 !day.isCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant
                                 else -> MaterialTheme.colorScheme.onSurface
                             },
-                            border = if (day.isToday && !selected) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+                            border = if (day.isToday) BorderStroke(1.5.dp, todayBorderColor) else null,
+                            shape = RoundedCornerShape(8.dp),
                         ) {
                             Box(Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
                                 dayContent(day, selected, selection.isRangeEndpoint(day.epochDay))

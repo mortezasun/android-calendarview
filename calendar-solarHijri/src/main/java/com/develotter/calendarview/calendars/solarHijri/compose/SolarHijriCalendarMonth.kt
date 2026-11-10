@@ -1,7 +1,9 @@
 package com.develotter.calendarview.calendars.solarHijri.compose
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.develotter.calendarview.calendars.solarHijri.fromSolarHijriToLocalDate
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarMonthGrid
@@ -93,6 +95,7 @@ fun SolarHijriCalendarMonth(
     showHeader: Boolean = true,
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
+    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
     isDateEnabled: (JalaliCalendar) -> Boolean = { true },
 ) {
     val data = solarHijriMonthData(
@@ -104,6 +107,7 @@ fun SolarHijriCalendarMonth(
         onDayClick = { onDateClick(JalaliCalendar(LocalDate.ofEpochDay(it))) },
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
         showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
         adjacentDayProvider = { solarHijriDayCell(date = JalaliCalendar(LocalDate.ofEpochDay(it)), locale = locale, today = today, isDateEnabled = isDateEnabled) },
     )
 }

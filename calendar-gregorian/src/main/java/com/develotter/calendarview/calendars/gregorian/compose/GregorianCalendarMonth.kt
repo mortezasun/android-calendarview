@@ -1,7 +1,9 @@
 package com.develotter.calendarview.calendars.gregorian.compose
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarMonthGrid
 import com.develotter.calendarview.selection.CalendarSelection
@@ -68,6 +70,7 @@ fun GregorianCalendarMonth(
     showHeader: Boolean = true,
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
+    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
     isDateEnabled: (LocalDate) -> Boolean = { true },
 ) {
     val data = gregorianMonthData(
@@ -79,6 +82,7 @@ fun GregorianCalendarMonth(
         onDayClick = { onDateClick(LocalDate.ofEpochDay(it)) },
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
         showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
         adjacentDayProvider = { gregorianDayCell(date = LocalDate.ofEpochDay(it), locale = locale, today = today, isDateEnabled = isDateEnabled) },
     )
 }
