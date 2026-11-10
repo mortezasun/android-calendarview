@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 240" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#12131A" />
+      <stop offset="50%" stop-color="#1A1C29" />
+      <stop offset="100%" stop-color="#0E0F15" />
+    </linearGradient>
+
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#262A3E" />
+      <stop offset="100%" stop-color="#1C1E2D" />
+    </linearGradient>
+
+    <linearGradient id="composeAccent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4285F4" />
+      <stop offset="50%" stop-color="#7B1FA2" />
+      <stop offset="100%" stop-color="#00C853" />
+    </linearGradient>
+
+    <linearGradient id="highlightPill" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8AB4F8" />
+      <stop offset="100%" stop-color="#C58AF9" />
+    </linearGradient>
+
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="800" height="240" rx="20" fill="url(#bgGrad)" />
+
+  <!-- Outer Border / Glow -->
+  <rect x="1.5" y="1.5" width="797" height="237" rx="18.5" fill="none" stroke="url(#composeAccent)" stroke-width="1.5" stroke-opacity="0.3" />
+
+  <!-- Logo Mark Graphic (Left: Calendar + 3 Systems Harmonized) -->
+  <g transform="translate(48, 30)" filter="url(#shadow)">
+    <!-- Base Calendar Frame -->
+    <rect x="0" y="0" width="180" height="180" rx="28" fill="url(#cardGrad)" stroke="#383D59" stroke-width="2" />
+
+    <!-- Calendar Header Bar with Compose Color Gradient -->
+    <path d="M 0 28 A 28 28 0 0 1 28 0 L 152 0 A 28 28 0 0 1 180 28 L 180 50 L 0 50 Z" fill="url(#composeAccent)" />
+
+    <!-- Binder Rings -->
+    <rect x="42" y="-6" width="12" height="18" rx="6" fill="#E8EAED" />
+    <rect x="126" y="-6" width="12" height="18" rx="6" fill="#E8EAED" />
+
+    <!-- Day Grid Representation -->
+    <circle cx="36" cy="80" r="10" fill="#3D4468" />
+    <circle cx="72" cy="80" r="10" fill="#3D4468" />
+    <circle cx="108" cy="80" r="10" fill="#8AB4F8" />
+    <circle cx="144" cy="80" r="10" fill="#3D4468" />
+
+    <!-- Selected Date Highlight (Single / Range active pill) -->
+    <rect x="24" y="106" width="94" height="28" rx="14" fill="url(#highlightPill)" />
+    <circle cx="38" cy="120" r="10" fill="#1C1E2D" />
+    <circle cx="72" cy="120" r="8" fill="#FFFFFF" fill-opacity="0.8" />
+    <circle cx="104" cy="120" r="10" fill="#1C1E2D" />
+    <circle cx="144" cy="120" r="10" fill="#3D4468" />
+
+    <!-- Bottom Row (Dots) -->
+    <circle cx="36" cy="154" r="10" fill="#3D4468" />
+    <circle cx="72" cy="154" r="10" fill="#81C995" />
+    <circle cx="108" cy="154" r="10" fill="#3D4468" />
+    <circle cx="144" cy="154" r="10" fill="#3D4468" />
+  </g>
+
+  <!-- Typography & Semantic Message -->
+  <!-- Main Title -->
+  <text x="264" y="86" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="38" font-weight="800" fill="#FFFFFF" letter-spacing="-0.5">
+    CalendarView <tspan fill="url(#highlightPill)">Compose</tspan>
+  </text>
+
+  <!-- Subtitle / Architecture Statement -->
+  <text x="264" y="122" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="500" fill="#9AA0A6" letter-spacing="0.2">
+    Native Jetpack Compose • Modular Tri-Calendar Engine
+  </text>
+
+  <!-- Badges / Core Pillars -->
+  <!-- Gregorian Badge -->
+  <g transform="translate(264, 146)">
+    <rect width="112" height="32" rx="16" fill="#1E293B" stroke="#334155" stroke-width="1" />
+    <circle cx="16" cy="16" r="5" fill="#38BDF8" />
+    <text x="30" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#E2E8F0">Gregorian</text>
+  </g>
+
+  <!-- Hijri Badge -->
+  <g transform="translate(386, 146)">
+    <rect width="84" height="32" rx="16" fill="#1E293B" stroke="#334155" stroke-width="1" />
+    <circle cx="16" cy="16" r="5" fill="#34D399" />
+    <text x="30" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#E2E8F0">Hijri</text>
+  </g>
+
+  <!-- Solar Hijri Badge -->
+  <g transform="translate(480, 146)">
+    <rect width="116" height="32" rx="16" fill="#1E293B" stroke="#334155" stroke-width="1" />
+    <circle cx="16" cy="16" r="5" fill="#FBBF24" />
+    <text x="30" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="600" fill="#E2E8F0">Solar Hijri</text>
+  </g>
+
+  <!-- Version Pill -->
+  <g transform="translate(606, 146)">
+    <rect width="64" height="32" rx="16" fill="#7C3AED" fill-opacity="0.3" stroke="#A78BFA" stroke-width="1" />
+    <text x="17" y="21" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#DDD6FE">v2.0</text>
+  </g>
+</svg>

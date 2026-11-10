@@ -1,6 +1,13 @@
-![https://jitpack.io/#mortezasun/android-calendarview/2.0.0](https://jitpack.io/v/mortezasun/calendarview.svg)
+<p align="center">
+  <img src="docs/images/banner.svg" alt="CalendarView Compose Banner" width="100%"/>
+</p>
 
-# 📅 Native Jetpack Compose CalendarView for Android (v2.0.0)
+<p align="center">
+  <a href="https://jitpack.io/#mortezasun/android-calendarview"><img src="https://jitpack.io/v/mortezasun/calendarview.svg" alt="JitPack Release"/></a>
+  <img src="https://img.shields.io/badge/Platform-Android%20Compose-green.svg" alt="Platform"/>
+  <img src="https://img.shields.io/badge/Material-Material%203-blue.svg" alt="Material 3"/>
+  <img src="https://img.shields.io/badge/License-Apache%202.0-orange.svg" alt="License"/>
+</p>
 
 A powerful, native Jetpack Compose calendar library for Android applications. Supports multi-calendar engines (Gregorian, Hijri, Solar Hijri / Jalali), unified selection models, configurable month grids, heatmap components, and complete RTL layout direction support.
 
