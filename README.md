@@ -40,7 +40,7 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 - **One selection engine for all calendars** – `None`, `Single`, `Multiple` and `Range`, keyed by absolute epoch days and saved across process death via `rememberSaveable`.
 - **Configurable month grid** – dynamic rows or fixed 6 rows (42 cells), independently toggleable previous/next-month days, header/weekday visibility, disabled dates and a customizable *today* border.
 - **Scrolling containers** – `CalendarMonthList` (`LazyColumn`/`LazyRow`) and `CalendarMonthPager` (`HorizontalPager`/`VerticalPager`).
-- **Heatmaps** – Gregorian quarter/year heatmaps plus a calendar-agnostic year heatmap that works with any engine.
+- **Heatmaps** – Gregorian quarter/year heatmaps plus a calendar-agnostic year heatmap for any engine, with the same options as the month views (colors, today border, disabled dates, selection, RTL) and switchable orientation and cell style.
 - **Accessibility & RTL** – localized content descriptions, 48 dp touch targets, and layout that follows the ambient `LayoutDirection`.
 - **Controlled & stateless** – the caller owns selection and navigation; the library only renders and reports clicks.
 
@@ -235,6 +235,8 @@ CalendarMonthPager(
 
 ## 🔥 Heatmaps
 
+Heatmaps support the same options as the month views (locale, RTL, header/weekday slots, today border, disabled dates, selection) plus heatmap-specific orientation, cell style and color scale.
+
 ### Gregorian year / quarter
 
 ```kotlin
@@ -245,17 +247,19 @@ CalendarYearHeatmap(
 )
 ```
 
-`CalendarQuarterHeatmap(year, quarter, intensities, onDayClick)` renders a single quarter and additionally accepts `colorForIntensity` and `dayContent`.
+`CalendarQuarterHeatmap(year, quarter, intensities, onDayClick)` renders a single quarter and accepts the same options. The Gregorian heatmaps additionally take `firstDayOfWeek`, `today` (`null` = no today border) and `isDateEnabled`.
 
 ### Any calendar (Hijri, Jalali, …)
 
-The calendar-agnostic overload takes pre-built `HeatmapMonthData` blocks, so `:library` stays free of engine dependencies. Build them from the engine's month data (`gregorianMonthData`, `hijriMonthData`, `solarHijriMonthData`):
+The calendar-agnostic overload takes pre-built `HeatmapMonthData` blocks, so `:library` stays free of engine dependencies. Build them from the engine's month data (`gregorianMonthData`, `hijriMonthData`, `solarHijriMonthData`); `isToday` and `enabled` come straight from the engine's `CalendarDayCell`:
 
 ```kotlin
 fun SolarHijriMonthData.toHeatmap(intensity: (Long) -> Float): HeatmapMonthData {
     val cells = buildList<HeatmapDayData?> {
         repeat(firstDayOffset) { add(null) }
-        days.forEach { add(HeatmapDayData(it.epochDay, it.accessibilityLabel, intensity(it.epochDay))) }
+        days.forEach {
+            add(HeatmapDayData(it.epochDay, it.accessibilityLabel, intensity(it.epochDay), it.isToday, it.enabled))
+        }
         while (size % 7 != 0) add(null)
     }
     return HeatmapMonthData(title, weekdayLabels, cells.chunked(7))
@@ -269,7 +273,35 @@ CalendarYearHeatmap(
 )
 ```
 
-See [`CalendarSampleHeatmap.kt`](calendarviewsample/src/main/java/com/develotter/calendarviewsample/CalendarSampleHeatmap.kt) for a complete example covering all three engines.
+### Heatmap options
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `orientation` | `HeatmapOrientation.WeeksAsColumns` | `WeeksAsColumns` = activity chart (one column per week, scrolls horizontally); `WeeksAsRows` = month-grid layout (one row per week, fills the width). |
+| `style` | `HeatmapStyle()` | Cell geometry: `cellSize`, `cellSpacing`, `cellShape`, `weekdayLabelWidth`, `todayBorderWidth`, `selectedBorderWidth`, `disabledAlpha`. The default keeps the classic 48 dp square cells; smaller cells also shrink the touch target below the recommended 48 dp. |
+| `colorForIntensity` | red → green | Maps the normalized intensity (0..1) to the cell color. |
+| `showHeader` / `showWeekdayLabels` | `true` | Toggle the month/quarter title and the weekday labels. |
+| `header` / `weekdayContent` | `Text(it)` | Slots to restyle the title and weekday labels. |
+| `todayBorderColor` | `MaterialTheme.colorScheme.tertiary` | Border of today's cell. |
+| `selection` / `selectedBorderColor` | `null` / `colorScheme.primary` | Pass a `CalendarSelection` to highlight selected days; you update it in `onDayClick`. |
+| `dayContent` | empty | Composable drawn inside every cell. |
+
+```kotlin
+val state = rememberCalendarSelectionState(TypeSelectDay.Range)
+
+CalendarYearHeatmap(
+    months = months,
+    onDayClick = { day -> state.onDayClick(day.epochDay) },
+    orientation = HeatmapOrientation.WeeksAsRows,
+    style = HeatmapStyle(cellSize = 36.dp, cellSpacing = 4.dp, cellShape = RoundedCornerShape(8.dp)),
+    selection = state.selection,
+    todayBorderColor = Color(0xFF1565C0),
+    colorForIntensity = { lerp(Color(0xFFEBEDF0), Color(0xFF216E39), it) },
+    header = { Text(it, style = MaterialTheme.typography.titleMedium) },
+)
+```
+
+Disabled days are dimmed and can't be clicked. In RTL layouts the grid is mirrored automatically. The heatmap screen of the demo app lets you try every option; see [`HeatMapViewActivity.kt`](calendarviewsample/src/main/java/com/develotter/calendarviewsample/HeatMapViewActivity.kt) and [`CalendarSampleHeatmap.kt`](calendarviewsample/src/main/java/com/develotter/calendarviewsample/CalendarSampleHeatmap.kt).
 
 ---
 

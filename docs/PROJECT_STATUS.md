@@ -63,3 +63,47 @@ All 8 phases of the 2.0.0 modernization plan are complete:
 8. **Documentation and Versioning:**
    - Aligned versions to `2.0.0`.
    - Updated `README.md`, `ARCHITECTURE.md`, and `V2_MIGRATION_MAPPING.md`.
+
+---
+
+## Session 2026-11-10: Heatmap configuration parity
+
+Heatmaps now offer the month grid's configuration surface. All changes are additive; no public
+name or parameter was removed or renamed.
+
+- `:library` (`CalendarHeatmap.kt`):
+  - New `HeatmapOrientation` (`WeeksAsColumns` default, `WeeksAsRows` month-grid layout) and
+    `HeatmapStyle` (cell size, spacing, shape, weekday label width, border widths, disabled alpha;
+    validated in `init`, defaults equal the previous geometry).
+  - `HeatmapDayData` gained `isToday = false` and `enabled = true`.
+  - `CalendarQuarterHeatmap` and both `CalendarYearHeatmap` overloads gained `showHeader`,
+    `orientation`, `style`, `selection`, `todayBorderColor`, `selectedBorderColor`, `header` and
+    `weekdayContent`; the Gregorian ones also `today` and `isDateEnabled`. The Gregorian
+    `CalendarYearHeatmap` now also accepts `colorForIntensity` and `dayContent`.
+  - New parameters sit before the trailing `colorForIntensity` / `dayContent`, so existing
+    trailing-lambda calls still compile. All three composables share one private renderer.
+- Sample: the heatmap screen adds selection modes, locale, RTL, first weekday, orientation,
+  color palette, cell style, today-border color, header toggle and "disable future days".
+  Mode `None` keeps the previous detail dialog. `sampleHeatmapYear` gained `firstDayOfWeek`
+  and `isDateEnabled` and forwards `isToday` / `enabled` from the engines.
+
+Verified on 2026-11-10 locally (JDK 17.0.21, Platform `android-37.0`, Build-Tools 36.0.0):
+
+| Check | Result |
+|-------|--------|
+| `:calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
+| `test` (all modules) | 70 tests, 0 failures, 0 errors, 0 skipped |
+| `:library:lintDebug`, `:calendarviewsample:lintDebug` | BUILD SUCCESSFUL, 0 errors; no new warnings from this change |
+| `:library:compileDebugAndroidTestKotlin`, `:calendarviewsample:compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL (compiled only, not executed) |
+
+Known limitations / open points:
+- Instrumentation tests were not run (no emulator available); the new heatmap layouts, RTL and
+  selection highlight are not device-verified and have no Compose UI test yet.
+- Visible default change: the Gregorian heatmaps now draw a today border (default
+  `today = LocalDate.now()`), matching the month views. Pass `today = null` for the old look.
+- `HeatmapStyle.cellSize` below 48dp also shrinks the touch target below the 48dp guideline.
+- Stale documentation, not changed in this session: `AGENTS.md` still describes the 1.x
+  XML/ViewBinding architecture (`MultiMonthView`, `MonthSampleAdapter`, "no Compose"), and the
+  remaining rows of the `docs/DEVELOPMENT.md` table plus `docs/ARCHITECTURE.md` container names
+  (`CalendarHorizontalPager`, `CalendarVerticalPager`) refer to APIs that no longer exist
+  (the actual containers are `CalendarMonthList` / `CalendarMonthPager`).

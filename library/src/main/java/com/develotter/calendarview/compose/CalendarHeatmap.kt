@@ -1,24 +1,37 @@
 package com.develotter.calendarview.compose
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.develotter.calendarview.selection.CalendarSelection
 import java.text.NumberFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -39,11 +52,17 @@ data class HeatmapQuarterData(
     val weeks: List<List<HeatmapDay?>>,
 )
 
-/** Calendar-agnostic heatmap day; [label] is the caller-formatted, localized date. */
+/**
+ * Calendar-agnostic heatmap day; [label] is the caller-formatted, localized date.
+ * [isToday] draws the today border and [enabled] = false renders the cell dimmed and
+ * not clickable, mirroring [CalendarDayCell] of the month grid.
+ */
 data class HeatmapDayData(
     val epochDay: Long,
     val label: String,
     val intensity: Float,
+    val isToday: Boolean = false,
+    val enabled: Boolean = true,
 )
 
 /** Calendar-agnostic month block: seven weekday rows, one column per week. */
@@ -52,6 +71,47 @@ data class HeatmapMonthData(
     val weekdayLabels: List<String>,
     val weeks: List<List<HeatmapDayData?>>,
 )
+
+/** Placement of the seven weekdays and the week sequence inside a heatmap block. */
+enum class HeatmapOrientation {
+    /** Activity-chart layout: weekdays are rows, each week is a column; scrolls horizontally. */
+    WeeksAsColumns,
+
+    /** Month-grid layout: weekdays are columns, each week is a row; cells share the width. */
+    WeeksAsRows,
+}
+
+/**
+ * Geometry of heatmap cells. The defaults reproduce the original heatmap look:
+ * 48dp square cells without gaps, rectangular shape and a 64dp weekday label column.
+ * In [HeatmapOrientation.WeeksAsRows] cells take an equal share of the width and
+ * [cellSize] is used as the row height; [weekdayLabelWidth] is ignored there.
+ */
+@Immutable
+data class HeatmapStyle(
+    val cellSize: Dp = 48.dp,
+    val cellSpacing: Dp = 0.dp,
+    val cellShape: Shape = RectangleShape,
+    val weekdayLabelWidth: Dp = 64.dp,
+    val todayBorderWidth: Dp = 1.5.dp,
+    val selectedBorderWidth: Dp = 3.dp,
+    val disabledAlpha: Float = 0.38f,
+) {
+    init {
+        require(cellSize.value.isFinite() && cellSize.value > 0f) { "cellSize must be finite and positive" }
+        require(cellSpacing.value.isFinite() && cellSpacing.value >= 0f) { "cellSpacing must be finite and non-negative" }
+        require(weekdayLabelWidth.value.isFinite() && weekdayLabelWidth.value >= 0f) {
+            "weekdayLabelWidth must be finite and non-negative"
+        }
+        require(todayBorderWidth.value.isFinite() && todayBorderWidth.value >= 0f) {
+            "todayBorderWidth must be finite and non-negative"
+        }
+        require(selectedBorderWidth.value.isFinite() && selectedBorderWidth.value >= 0f) {
+            "selectedBorderWidth must be finite and non-negative"
+        }
+        require(disabledAlpha in 0f..1f) { "disabledAlpha must be in 0..1" }
+    }
+}
 
 /** Finite values are clamped; NaN and infinities become zero. */
 fun normalizeHeatmapIntensity(value: Float): Float = if (value.isFinite()) value.coerceIn(0f, 1f) else 0f
@@ -87,6 +147,11 @@ fun heatmapQuarterData(
  * The ambient layout direction controls column placement. Labels follow [locale].
  * The default red-to-green scale preserves the legacy view's actual color direction;
  * callers can replace the color function and the composable cell content.
+ *
+ * Layout, cell geometry, header/weekday slots, today border, disabled dates and selection
+ * highlight behave like [CalendarMonthGrid]: [selection] only renders state, the caller
+ * still owns it and updates it from [onDayClick]. A selected cell shows
+ * [selectedBorderColor] instead of the today border because the fill is the intensity color.
  */
 @Composable
 fun CalendarQuarterHeatmap(
@@ -98,6 +163,16 @@ fun CalendarQuarterHeatmap(
     locale: Locale = Locale.getDefault(),
     firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
     showWeekdayLabels: Boolean = true,
+    showHeader: Boolean = true,
+    orientation: HeatmapOrientation = HeatmapOrientation.WeeksAsColumns,
+    style: HeatmapStyle = HeatmapStyle(),
+    today: LocalDate? = LocalDate.now(),
+    isDateEnabled: (LocalDate) -> Boolean = { true },
+    selection: CalendarSelection? = null,
+    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    selectedBorderColor: Color = MaterialTheme.colorScheme.primary,
+    header: @Composable (String) -> Unit = { Text(it) },
+    weekdayContent: @Composable (String) -> Unit = { Text(it) },
     colorForIntensity: (Float) -> Color = { lerp(Color.Red, Color.Green, it) },
     dayContent: @Composable (HeatmapDay) -> Unit = {},
 ) {
@@ -105,46 +180,43 @@ fun CalendarQuarterHeatmap(
     val monthFormat = DateTimeFormatter.ofPattern("LLLL uuuu", locale)
     val dateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)
     val percent = NumberFormat.getPercentInstance(locale)
-    Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text("${data.start.format(monthFormat)} - ${data.end.format(monthFormat)}")
-        Row {
-            if (showWeekdayLabels) {
-                Column {
-                    repeat(7) { index ->
-                        Box(Modifier.size(width = 64.dp, height = 48.dp), contentAlignment = Alignment.Center) {
-                            Text(firstDayOfWeek.plus(index.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale))
-                        }
-                    }
-                }
-            }
-            Row(Modifier.weight(1f).horizontalScroll(rememberScrollState())) {
-                data.weeks.forEach { week ->
-                    Column {
-                        week.forEach { day ->
-                            if (day == null) {
-                                Box(Modifier.size(48.dp))
-                            } else {
-                                val description = "${day.date.format(dateFormat)}: ${percent.format(day.intensity)}"
-                                Box(
-                                    Modifier.size(48.dp)
-                                        .background(colorForIntensity(day.intensity))
-                                        .semantics { contentDescription = description }
-                                        .clickable(role = Role.Button) { onDayClick(day.date) },
-                                    contentAlignment = Alignment.Center,
-                                ) { dayContent(day) }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    val config = HeatmapRenderConfig(
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        orientation = orientation,
+        style = style,
+        selection = selection,
+        todayBorderColor = todayBorderColor,
+        selectedBorderColor = selectedBorderColor,
+        header = header,
+        weekdayContent = weekdayContent,
+        colorForIntensity = colorForIntensity,
+    )
+    HeatmapBlock(
+        title = "${data.start.format(monthFormat)} - ${data.end.format(monthFormat)}",
+        weekdayLabels = List(7) { firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale) },
+        weeks = data.weeks,
+        config = config,
+        modifier = modifier,
+        cellInfo = { day ->
+            HeatmapCellInfo(
+                epochDay = day.date.toEpochDay(),
+                intensity = day.intensity,
+                description = "${day.date.format(dateFormat)}: ${percent.format(day.intensity)}",
+                isToday = day.date == today,
+                enabled = isDateEnabled(day.date),
+            )
+        },
+        onClick = { onDayClick(it.date) },
+        dayContent = dayContent,
+    )
 }
 
 /**
  * Four native Compose quarters. The caller supplies vertical scrolling or a bounded host.
  * Data changes recompose the existing tree instead of appending duplicate quarter views.
  * This heatmap deliberately uses Gregorian LocalDate, matching the old heatmap API.
+ * All configuration parameters are forwarded to every [CalendarQuarterHeatmap].
  */
 @Composable
 fun CalendarYearHeatmap(
@@ -155,12 +227,29 @@ fun CalendarYearHeatmap(
     locale: Locale = Locale.getDefault(),
     firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
     showWeekdayLabels: Boolean = true,
+    showHeader: Boolean = true,
+    orientation: HeatmapOrientation = HeatmapOrientation.WeeksAsColumns,
+    style: HeatmapStyle = HeatmapStyle(),
+    today: LocalDate? = LocalDate.now(),
+    isDateEnabled: (LocalDate) -> Boolean = { true },
+    selection: CalendarSelection? = null,
+    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    selectedBorderColor: Color = MaterialTheme.colorScheme.primary,
+    header: @Composable (String) -> Unit = { Text(it) },
+    weekdayContent: @Composable (String) -> Unit = { Text(it) },
+    colorForIntensity: (Float) -> Color = { lerp(Color.Red, Color.Green, it) },
+    dayContent: @Composable (HeatmapDay) -> Unit = {},
 ) {
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         for (quarter in 1..4) {
             CalendarQuarterHeatmap(
                 year, quarter, intensities, onDayClick, locale = locale,
                 firstDayOfWeek = firstDayOfWeek, showWeekdayLabels = showWeekdayLabels,
+                showHeader = showHeader, orientation = orientation, style = style,
+                today = today, isDateEnabled = isDateEnabled, selection = selection,
+                todayBorderColor = todayBorderColor, selectedBorderColor = selectedBorderColor,
+                header = header, weekdayContent = weekdayContent,
+                colorForIntensity = colorForIntensity, dayContent = dayContent,
             )
         }
     }
@@ -173,6 +262,8 @@ fun CalendarYearHeatmap(
  * of concrete calendars. Every month needs seven weekday labels and week columns with seven
  * entries each (null marks padding outside the month). Intensities are normalized to 0..1.
  * The caller owns year navigation and builds [months] with its calendar engine.
+ * Today and disabled state come from [HeatmapDayData]; the remaining configuration
+ * matches [CalendarQuarterHeatmap].
  */
 @Composable
 fun CalendarYearHeatmap(
@@ -181,6 +272,14 @@ fun CalendarYearHeatmap(
     modifier: Modifier = Modifier,
     locale: Locale = Locale.getDefault(),
     showWeekdayLabels: Boolean = true,
+    showHeader: Boolean = true,
+    orientation: HeatmapOrientation = HeatmapOrientation.WeeksAsColumns,
+    style: HeatmapStyle = HeatmapStyle(),
+    selection: CalendarSelection? = null,
+    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    selectedBorderColor: Color = MaterialTheme.colorScheme.primary,
+    header: @Composable (String) -> Unit = { Text(it) },
+    weekdayContent: @Composable (String) -> Unit = { Text(it) },
     colorForIntensity: (Float) -> Color = { lerp(Color.Red, Color.Green, it) },
     dayContent: @Composable (HeatmapDayData) -> Unit = {},
 ) {
@@ -188,64 +287,169 @@ fun CalendarYearHeatmap(
     require(months.all { month ->
         month.weekdayLabels.size == 7 && month.weeks.all { week -> week.size == 7 }
     }) { "Heatmap months require seven weekday labels and seven cells per week" }
+    val percent = NumberFormat.getPercentInstance(locale)
+    val config = HeatmapRenderConfig(
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        orientation = orientation,
+        style = style,
+        selection = selection,
+        todayBorderColor = todayBorderColor,
+        selectedBorderColor = selectedBorderColor,
+        header = header,
+        weekdayContent = weekdayContent,
+        colorForIntensity = colorForIntensity,
+    )
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         months.forEach { month ->
-            CalendarHeatmapMonthBlock(
-                month = month,
-                onDayClick = onDayClick,
-                locale = locale,
-                showWeekdayLabels = showWeekdayLabels,
-                colorForIntensity = colorForIntensity,
+            HeatmapBlock(
+                title = month.title,
+                weekdayLabels = month.weekdayLabels,
+                weeks = month.weeks,
+                config = config,
+                modifier = Modifier,
+                cellInfo = { day ->
+                    val intensity = normalizeHeatmapIntensity(day.intensity)
+                    HeatmapCellInfo(
+                        epochDay = day.epochDay,
+                        intensity = intensity,
+                        description = "${day.label}: ${percent.format(intensity)}",
+                        isToday = day.isToday,
+                        enabled = day.enabled,
+                    )
+                },
+                onClick = onDayClick,
                 dayContent = dayContent,
             )
         }
     }
 }
 
+/** Render options shared by all public heatmaps, bundled to keep the private renderer small. */
+private class HeatmapRenderConfig(
+    val showHeader: Boolean,
+    val showWeekdayLabels: Boolean,
+    val orientation: HeatmapOrientation,
+    val style: HeatmapStyle,
+    val selection: CalendarSelection?,
+    val todayBorderColor: Color,
+    val selectedBorderColor: Color,
+    val header: @Composable (String) -> Unit,
+    val weekdayContent: @Composable (String) -> Unit,
+    val colorForIntensity: (Float) -> Color,
+)
+
+/** Calendar-independent view of one cell; [intensity] is already normalized. */
+private class HeatmapCellInfo(
+    val epochDay: Long,
+    val intensity: Float,
+    val description: String,
+    val isToday: Boolean,
+    val enabled: Boolean,
+)
+
 @Composable
-private fun CalendarHeatmapMonthBlock(
-    month: HeatmapMonthData,
-    onDayClick: (HeatmapDayData) -> Unit,
-    locale: Locale,
-    showWeekdayLabels: Boolean,
-    colorForIntensity: (Float) -> Color,
-    dayContent: @Composable (HeatmapDayData) -> Unit,
+private fun <T : Any> HeatmapBlock(
+    title: String,
+    weekdayLabels: List<String>,
+    weeks: List<List<T?>>,
+    config: HeatmapRenderConfig,
+    modifier: Modifier,
+    cellInfo: (T) -> HeatmapCellInfo,
+    onClick: (T) -> Unit,
+    dayContent: @Composable (T) -> Unit,
 ) {
-    val percent = NumberFormat.getPercentInstance(locale)
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(month.title)
-        Row {
-            if (showWeekdayLabels) {
-                Column {
-                    month.weekdayLabels.forEach { label ->
-                        Box(
-                            Modifier.size(width = 64.dp, height = 48.dp),
-                            contentAlignment = Alignment.Center,
-                        ) { Text(label) }
+    val style = config.style
+    val spacing = Arrangement.spacedBy(style.cellSpacing)
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        if (config.showHeader) {
+            config.header(title)
+        }
+        when (config.orientation) {
+            HeatmapOrientation.WeeksAsColumns -> Row {
+                if (config.showWeekdayLabels) {
+                    Column(verticalArrangement = spacing) {
+                        weekdayLabels.forEach { label ->
+                            Box(
+                                Modifier.size(width = style.weekdayLabelWidth, height = style.cellSize),
+                                contentAlignment = Alignment.Center,
+                            ) { config.weekdayContent(label) }
+                        }
+                    }
+                }
+                Row(Modifier.weight(1f).horizontalScroll(rememberScrollState()), horizontalArrangement = spacing) {
+                    weeks.forEach { week ->
+                        Column(verticalArrangement = spacing) {
+                            week.forEach { day ->
+                                HeatmapCell(day, Modifier.size(style.cellSize), config, cellInfo, onClick, dayContent)
+                            }
+                        }
                     }
                 }
             }
-            Row(Modifier.weight(1f).horizontalScroll(rememberScrollState())) {
-                month.weeks.forEach { week ->
-                    Column {
-                        week.forEach { day ->
-                            if (day == null) {
-                                Box(Modifier.size(48.dp))
-                            } else {
-                                val intensity = normalizeHeatmapIntensity(day.intensity)
-                                val description = "${day.label}: ${percent.format(intensity)}"
-                                Box(
-                                    Modifier.size(48.dp)
-                                        .background(colorForIntensity(intensity))
-                                        .semantics { contentDescription = description }
-                                        .clickable(role = Role.Button) { onDayClick(day) },
-                                    contentAlignment = Alignment.Center,
-                                ) { dayContent(day) }
+            HeatmapOrientation.WeeksAsRows -> Column(verticalArrangement = spacing) {
+                if (config.showWeekdayLabels) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = spacing) {
+                        weekdayLabels.forEach { label ->
+                            Box(Modifier.weight(1f).padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
+                                config.weekdayContent(label)
                             }
+                        }
+                    }
+                }
+                weeks.forEach { week ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = spacing) {
+                        week.forEach { day ->
+                            HeatmapCell(
+                                day, Modifier.weight(1f).height(style.cellSize),
+                                config, cellInfo, onClick, dayContent,
+                            )
                         }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+private fun <T : Any> HeatmapCell(
+    day: T?,
+    modifier: Modifier,
+    config: HeatmapRenderConfig,
+    cellInfo: (T) -> HeatmapCellInfo,
+    onClick: (T) -> Unit,
+    dayContent: @Composable (T) -> Unit,
+) {
+    if (day == null) {
+        Box(modifier)
+        return
+    }
+    val info = cellInfo(day)
+    val style = config.style
+    val selection = config.selection
+    val selected = selection != null && info.epochDay in selection
+    val border = when {
+        selected && style.selectedBorderWidth > 0.dp ->
+            Modifier.border(style.selectedBorderWidth, config.selectedBorderColor, style.cellShape)
+        info.isToday && style.todayBorderWidth > 0.dp ->
+            Modifier.border(style.todayBorderWidth, config.todayBorderColor, style.cellShape)
+        else -> Modifier
+    }
+    // Only expose selected/not-selected semantics when the caller actually uses selection.
+    val interaction = if (selection != null) {
+        Modifier.selectable(selected = selected, enabled = info.enabled, role = Role.Button) { onClick(day) }
+    } else {
+        Modifier.clickable(enabled = info.enabled, role = Role.Button) { onClick(day) }
+    }
+    Box(
+        modifier
+            .alpha(if (info.enabled) 1f else style.disabledAlpha)
+            .clip(style.cellShape)
+            .background(config.colorForIntensity(info.intensity))
+            .then(border)
+            .semantics { contentDescription = info.description }
+            .then(interaction),
+        contentAlignment = Alignment.Center,
+    ) { dayContent(day) }
 }

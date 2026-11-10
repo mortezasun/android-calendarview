@@ -2,37 +2,58 @@ package com.develotter.calendarviewsample
 
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthData
 import com.develotter.calendarview.calendars.hijri.compose.hijriMonthData
+import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthData
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.HeatmapDayData
 import com.develotter.calendarview.compose.HeatmapMonthData
 import ir.huri.jcal.JalaliCalendar
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
+import java.time.temporal.WeekFields
 import java.util.Locale
 
 /**
  * Builds one heatmap year for the selected calendar. Calendar engines stay in their own
  * modules; :library only receives the generic [HeatmapMonthData] snapshots.
+ * A null [firstDayOfWeek] keeps each engine's default (locale-based for Gregorian,
+ * Saturday for Hijri and Solar Hijri). [isDateEnabled] is evaluated on the shared
+ * Gregorian timeline and becomes [HeatmapDayData.enabled], like the month views.
  */
 fun sampleHeatmapYear(
     calendar: SampleCalendar,
     year: Int,
     locale: Locale,
     today: LocalDate = LocalDate.now(),
+    firstDayOfWeek: DayOfWeek? = null,
+    isDateEnabled: (LocalDate) -> Boolean = { true },
 ): List<HeatmapMonthData> = when (calendar) {
     SampleCalendar.Gregorian -> (1..12).map { month ->
-        val data = gregorianMonthData(YearMonth.of(year, month), locale, today = today)
+        val data = gregorianMonthData(
+            YearMonth.of(year, month), locale,
+            firstDayOfWeek = firstDayOfWeek ?: WeekFields.of(locale).firstDayOfWeek,
+            today = today, isDateEnabled = isDateEnabled,
+        )
         data.toHeatmapMonth()
     }
     SampleCalendar.Hijri -> (1..12).map { month ->
-        val data = hijriMonthData(HijrahDate.of(year, month, 1), locale, today = HijrahDate.from(today))
+        val data = hijriMonthData(
+            HijrahDate.of(year, month, 1), locale,
+            firstDayOfWeek = firstDayOfWeek ?: DayOfWeek.SATURDAY,
+            today = HijrahDate.from(today), isDateEnabled = { isDateEnabled(LocalDate.from(it)) },
+        )
         data.toHeatmapMonth()
     }
     SampleCalendar.SolarHijri -> (1..12).map { month ->
-        val data = solarHijriMonthData(JalaliCalendar(year, month, 1), locale, today = JalaliCalendar(today))
+        val data = solarHijriMonthData(
+            JalaliCalendar(year, month, 1), locale,
+            firstDayOfWeek = firstDayOfWeek ?: DayOfWeek.SATURDAY,
+            today = JalaliCalendar(today),
+            isDateEnabled = { isDateEnabled(LocalDate.ofEpochDay(solarHijriEpochDay(it))) },
+        )
         data.toHeatmapMonth()
     }
 }
@@ -69,7 +90,15 @@ private fun heatmapMonth(
     val cells = buildList<HeatmapDayData?> {
         repeat(firstDayOffset) { add(null) }
         days.forEach { day ->
-            add(HeatmapDayData(day.epochDay, day.accessibilityLabel, sampleHeatmapIntensity(day.epochDay)))
+            add(
+                HeatmapDayData(
+                    epochDay = day.epochDay,
+                    label = day.accessibilityLabel,
+                    intensity = sampleHeatmapIntensity(day.epochDay),
+                    isToday = day.isToday,
+                    enabled = day.enabled,
+                ),
+            )
         }
         while (size % 7 != 0) add(null)
     }

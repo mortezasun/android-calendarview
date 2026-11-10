@@ -9,7 +9,7 @@ The architecture follows standard Compose state and rendering patterns:
 - **Calendar abstraction:** Calendar engines supply month data snapshots (`GregorianMonthData`, `HijriMonthData`, `SolarHijriMonthData`) and day cells (`CalendarDayCell`).
 - **Unified selection engine:** `CalendarSelection` and `CalendarSelectionState` operate on universal epoch-day identities (`Long`).
 - **Containers:** Compose foundational lists and pagers (`HorizontalPager`, `VerticalPager`, `LazyRow`, `LazyColumn`) provide smooth scrolling and month navigation.
-- **Canvas Heatmaps:** `CalendarQuarterHeatmap` and `CalendarYearHeatmap` render activity intensities using Compose graphics.
+- **Heatmaps:** `CalendarQuarterHeatmap` and `CalendarYearHeatmap` render activity intensities as a grid of Compose cells, configurable like the month grid.
 
 ---
 
@@ -63,8 +63,21 @@ State is managed declaratively and cleanly separated from UI rendering:
 
 ## Heatmap Architecture
 
-The heatmap component is decoupled from month grid calculations:
-- `CalendarQuarterHeatmap` renders 13-week quarter columns using Compose `Canvas`.
-- `CalendarYearHeatmap` stacks four quarters vertically or horizontally.
-- Intensities are represented as a map `Map<LocalDate, Float>` where values range from `0.0f` to `1.0f`.
-- Weekday labels and month headers adapt to ambient light/dark theme color schemes.
+The heatmap is decoupled from month grid calculations but shares its configuration model:
+- `CalendarQuarterHeatmap` (Gregorian, `Map<LocalDate, Float>`) renders one quarter;
+  the Gregorian `CalendarYearHeatmap(year, ...)` stacks four quarters.
+- The calendar-agnostic `CalendarYearHeatmap(months: List<HeatmapMonthData>, ...)` renders
+  month blocks built by the caller with any engine (`gregorianMonthData`, `hijriMonthData`,
+  `solarHijriMonthData`), so `:library` stays independent of calendar engines.
+  `HeatmapDayData.isToday` / `enabled` carry the engine's `CalendarDayCell` state.
+- All three composables share one private renderer (`HeatmapBlock` / `HeatmapCell`) and the
+  same options as `CalendarMonthGrid`: `showHeader`, `showWeekdayLabels`, `header` and
+  `weekdayContent` slots, today border (`todayBorderColor`), disabled dates (dimmed, not
+  clickable) and an optional `CalendarSelection` that is rendered but owned by the caller.
+- Heatmap-specific layout: `HeatmapOrientation.WeeksAsColumns` (activity chart, horizontal
+  scroll, default) or `WeeksAsRows` (month-grid layout, cells share the width), and
+  `HeatmapStyle` for cell size, spacing, shape, label width, border widths and disabled alpha.
+  `HeatmapStyle()` reproduces the original 48dp rectangular cells without gaps.
+- Colors: `colorForIntensity` maps the normalized intensity (0..1) to the cell fill; selected
+  cells get a `selectedBorderColor` border, which takes precedence over the today border.
+- Layout follows the ambient `LayoutDirection`, so RTL works without extra parameters.

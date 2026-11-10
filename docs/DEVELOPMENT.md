@@ -10,8 +10,8 @@
 | Change month grid geometry | `library/.../MonthView.kt` (`numColumns`, `onMeasure`, `onLayout`) |
 | Add a calendar system | New Gradle module with `MonthStatus` + `DayStatus` subclasses, modeled on `:calendar-gregorian` |
 | Change day formatting | `library/.../CalendarUtil.kt` and the calendar-specific `DayStatus` subclass |
-| Change heatmap rendering | `library/.../heatmap/DayHeatMapView.kt` |
-| Change heatmap data handling | `QuarterHeatmapView.applyHeatmapData` / `CalendarHeatmapYearSectionedView` |
+| Change heatmap rendering | `library/.../compose/CalendarHeatmap.kt` (`HeatmapBlock`, `HeatmapCell`) |
+| Change heatmap data handling | `heatmapQuarterData` (Gregorian) / `HeatmapMonthData` built in the caller, see `calendarviewsample/.../CalendarSampleHeatmap.kt` |
 | Change sample screen wiring | `calendarviewsample/.../CalendarViewActivity.kt` (reference) or `LauncherActivity.kt` |
 
 Keep the dependency direction intact: `:library` must not import classes from the calendar modules
@@ -98,3 +98,12 @@ verify layout, RTL behaviour or selection visuals.
 - Publishing happens through JitPack from Git tags; the repository does not contain a Maven
   publishing configuration.
 - Do not bump versions or update dependencies as part of an unrelated change.
+
+### New heatmap option
+
+Heatmap options mirror `CalendarMonthGrid`. Add a new option as a defaulted parameter to all
+three public heatmaps (`CalendarQuarterHeatmap` and both `CalendarYearHeatmap` overloads),
+place it before the trailing `colorForIntensity` / `dayContent` parameters so existing
+trailing-lambda calls keep compiling, forward it in the Gregorian year overload and pass it to
+the private renderer through `HeatmapRenderConfig`. Cell geometry belongs in `HeatmapStyle`
+(with validation in its `init`), per-day state in `HeatmapDayData` with a default value.
