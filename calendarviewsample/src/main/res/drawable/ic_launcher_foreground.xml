@@ -1,30 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:pathData="M31,63.928c0,0 6.4,-11 12.1,-13.1c7.2,-2.6 26,-1.4 26,-1.4l38.1,38.1L107,108.928l-32,-1L31,63.928z">
+
+    <!-- Calendar Sheet (Central safe area in 108dp canvas) -->
+    <path
+        android:fillColor="#282C40"
+        android:strokeColor="#3D4468"
+        android:strokeWidth="1"
+        android:pathData="M34,24 L74,24 A10,10 0 0 1 84,34 L84,74 A10,10 0 0 1 74,84 L34,84 A10,10 0 0 1 24,74 L24,34 A10,10 0 0 1 34,24 Z" />
+
+    <!-- Top Bar with Compose Color Gradient -->
+    <path
+        android:pathData="M34,24 L74,24 A10,10 0 0 1 84,34 L84,40 L24,40 L24,34 A10,10 0 0 1 34,24 Z">
         <aapt:attr name="android:fillColor">
             <gradient
-                android:endX="85.84757"
-                android:endY="92.4963"
-                android:startX="42.9492"
-                android:startY="49.59793"
+                android:startX="24"
+                android:startY="24"
+                android:endX="84"
+                android:endY="40"
                 android:type="linear">
-                <item
-                    android:color="#44000000"
-                    android:offset="0.0" />
-                <item
-                    android:color="#00000000"
-                    android:offset="1.0" />
+                <item android:color="#4285F4" android:offset="0.0" />
+                <item android:color="#7B1FA2" android:offset="0.5" />
+                <item android:color="#00C853" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Binder Rings -->
+    <path
+        android:fillColor="#E8EAED"
+        android:pathData="M37,21 L41,21 A2,2 0 0 1 43,23 L43,27 A2,2 0 0 1 41,29 L37,29 A2,2 0 0 1 35,27 L35,23 A2,2 0 0 1 37,21 Z" />
+    <path
+        android:fillColor="#E8EAED"
+        android:pathData="M67,21 L71,21 A2,2 0 0 1 73,23 L73,27 A2,2 0 0 1 71,29 L67,29 A2,2 0 0 1 65,27 L65,23 A2,2 0 0 1 67,21 Z" />
+
+    <!-- Row 1: Day Dots -->
+    <path
+        android:fillColor="#3D4468"
+        android:pathData="M36,49 A3,3 0 1,1 36,49.01" />
+    <path
+        android:fillColor="#3D4468"
+        android:pathData="M48,49 A3,3 0 1,1 48,49.01" />
+    <path
+        android:fillColor="#8AB4F8"
+        android:pathData="M60,49 A3,3 0 1,1 60,49.01" />
+    <path
+        android:fillColor="#3D4468"
+        android:pathData="M72,49 A3,3 0 1,1 72,49.01" />
+
+    <!-- Row 2: Selected Range Pill (Selection Engine) -->
+    <path
+        android:pathData="M37,58 L63,58 A4.5,4.5 0 0 1 67.5,62.5 A4.5,4.5 0 0 1 63,67 L37,67 A4.5,4.5 0 0 1 32.5,62.5 A4.5,4.5 0 0 1 37,58 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="32.5"
+                android:startY="62.5"
+                android:endX="67.5"
+                android:endY="62.5"
+                android:type="linear">
+                <item android:color="#8AB4F8" android:offset="0.0" />
+                <item android:color="#C58AF9" android:offset="1.0" />
             </gradient>
         </aapt:attr>
     </path>
     <path
+        android:fillColor="#1C1E2D"
+        android:pathData="M37,62.5 A2.5,2.5 0 1,1 37,62.51" />
+    <path
         android:fillColor="#FFFFFF"
-        android:fillType="nonZero"
-        android:pathData="M65.3,45.828l3.8,-6.6c0.2,-0.4 0.1,-0.9 -0.3,-1.1c-0.4,-0.2 -0.9,-0.1 -1.1,0.3l-3.9,6.7c-6.3,-2.8 -13.4,-2.8 -19.7,0l-3.9,-6.7c-0.2,-0.4 -0.7,-0.5 -1.1,-0.3C38.8,38.328 38.7,38.828 38.9,39.228l3.8,6.6C36.2,49.428 31.7,56.028 31,63.928h46C76.3,56.028 71.8,49.428 65.3,45.828zM43.4,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2c-0.3,-0.7 -0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C45.3,56.528 44.5,57.328 43.4,57.328L43.4,57.328zM64.6,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2s-0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C66.5,56.528 65.6,57.328 64.6,57.328L64.6,57.328z"
-        android:strokeWidth="1"
-        android:strokeColor="#00000000" />
+        android:pathData="M50,62.5 A2,2 0 1,1 50,62.51" />
+    <path
+        android:fillColor="#1C1E2D"
+        android:pathData="M63,62.5 A2.5,2.5 0 1,1 63,62.51" />
+    <path
+        android:fillColor="#3D4468"
+        android:pathData="M72,62.5 A3,3 0 1,1 72,62.51" />
+
+    <!-- Row 3: Multi-Calendar Representation (Hijri Green & Solar Sun Accent) -->
+    <path
+        android:fillColor="#3D4468"
+        android:pathData="M36,75 A3,3 0 1,1 36,75.01" />
+    <path
+        android:fillColor="#81C995"
+        android:pathData="M48,75 A3,3 0 1,1 48,75.01" />
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M60,75 A3,3 0 1,1 60,75.01" />
+    <path
+        android:fillColor="#3D4468"
+        android:pathData="M72,75 A3,3 0 1,1 72,75.01" />
 </vector>
