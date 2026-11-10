@@ -78,9 +78,10 @@ The heatmap is decoupled from month grid calculations but shares its configurati
   scroll, default) or `WeeksAsRows` (month-grid layout, cells share the width), and
   `HeatmapStyle` for cell size, spacing, shape, label width, border widths and disabled alpha.
   `HeatmapStyle()` reproduces the original 48dp rectangular cells without gaps. `cellSize`
-  controls only the drawn cell: every cell occupies a layout slot of at least the platform
-  minimum interactive size (48dp), so smaller cells keep a full-size touch target and the grid
-  keeps a 48dp pitch.
+  controls only the drawn cell: the layout slot is at least the platform minimum interactive size
+  (48dp) in height, and on both edges in `WeeksAsColumns`, so smaller cells keep a full-size touch
+  target. `WeeksAsRows` has to fit seven columns and shares the row width instead, so below roughly
+  `7 * 48dp + spacing` of viewport width its columns drop under 48dp.
 - Colors: `colorForIntensity` maps the normalized intensity (0..1) to the cell fill; selected
   cells get a `selectedBorderColor` border, which takes precedence over the today border.
 - Layout follows the ambient `LayoutDirection`, so RTL works without extra parameters.

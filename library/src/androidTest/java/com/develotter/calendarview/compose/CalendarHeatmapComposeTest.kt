@@ -1,7 +1,10 @@
 package com.develotter.calendarview.compose
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
@@ -135,7 +138,40 @@ class CalendarHeatmapComposeTest {
         }
         val bounds = compose.onNodeWithContentDescription("Day 10: 50%").getUnclippedBoundsInRoot()
         val height = bounds.bottom - bounds.top
+        val width = bounds.right - bounds.left
         assertTrue("touch target height was $height, expected at least 48dp", height >= 48.dp)
+        assertTrue("touch target width was $width, expected at least 48dp", width >= 48.dp)
+    }
+
+    @Test
+    fun weeksAsRowsKeepsMinimumHeightWhenTheViewportIsNarrow() {
+        // A 300dp viewport leaves each of the seven columns well below 48dp: this orientation
+        // shares the row width instead of forcing a minimum, so only the slot height is guaranteed.
+        compose.setContent {
+            MaterialTheme {
+                Box(Modifier.width(300.dp)) {
+                    CalendarYearHeatmap(
+                        months = listOf(heatmapMonth(listOf(day(10L), day(11L)))),
+                        onDayClick = {},
+                        orientation = HeatmapOrientation.WeeksAsRows,
+                        style = HeatmapStyle(cellSize = 24.dp),
+                        locale = Locale.US,
+                    )
+                }
+            }
+        }
+        val first = compose.onNodeWithContentDescription("Day 10: 50%").getUnclippedBoundsInRoot()
+        val second = compose.onNodeWithContentDescription("Day 11: 50%").getUnclippedBoundsInRoot()
+        assertTrue(
+            "slot height was ${first.bottom - first.top}, expected at least 48dp",
+            first.bottom - first.top >= 48.dp,
+        )
+        assertEquals(
+            "columns share the row width equally",
+            (first.right - first.left).value,
+            (second.right - second.left).value,
+            0.5f,
+        )
     }
 }
 

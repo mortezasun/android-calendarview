@@ -278,7 +278,7 @@ CalendarYearHeatmap(
 | Parameter | Default | Description |
 |-----------|---------|-------------|
 | `orientation` | `HeatmapOrientation.WeeksAsColumns` | `WeeksAsColumns` = activity chart (one column per week, scrolls horizontally); `WeeksAsRows` = month-grid layout (one row per week, fills the width). |
-| `style` | `HeatmapStyle()` | Cell geometry: `cellSize`, `cellSpacing`, `cellShape`, `weekdayLabelWidth`, `todayBorderWidth`, `selectedBorderWidth`, `disabledAlpha`. The default keeps the classic 48 dp square cells. `cellSize` only changes the drawn cell: every cell keeps a layout slot of at least 48 dp, so smaller cells stay easy to tap and the grid uses a 48 dp pitch. |
+| `style` | `HeatmapStyle()` | Cell geometry: `cellSize`, `cellSpacing`, `cellShape`, `weekdayLabelWidth`, `todayBorderWidth`, `selectedBorderWidth`, `disabledAlpha`. The default keeps the classic 48 dp square cells. `cellSize` only changes the drawn cell: `WeeksAsColumns` keeps a layout slot of at least 48 dp on both edges, `WeeksAsRows` at least 48 dp in height. `WeeksAsRows` shares the row width between seven columns, so below roughly `7 × 48 dp + spacing` of viewport width a column is narrower than 48 dp. |
 | `colorForIntensity` | red → green | Maps the normalized intensity (0..1) to the cell color. |
 | `showHeader` / `showWeekdayLabels` | `true` | Toggle the month/quarter title and the weekday labels. |
 | `header` / `weekdayContent` | `Text(it)` | Slots to restyle the title and weekday labels. |

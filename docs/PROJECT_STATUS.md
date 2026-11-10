@@ -153,5 +153,36 @@ Remaining limitations:
   migration was not part of this change.
 - No release tag was created and no version was bumped. That stays a separate, deliberate step per
   `docs/decisions/0002-compose-v2-shared-core.md`.
-- No independent JitPack consumer build and no fresh CI run for the resulting commit were performed
-  here.
+- No independent JitPack consumer build was performed here.
+
+CI for commit `5e736f6` completed successfully:
+
+| Workflow | Run | Conclusion |
+|----------|-----|------------|
+| `Android verification` | 42890377741 | success |
+| `Android instrumentation` (API 29) | 42890377813 | success |
+
+These conclusions were read from the GitHub Actions API for that exact `head_sha`. The job logs and
+per-test counts were not downloaded, so this records the workflow outcome, not a per-test review.
+
+---
+
+### Correction: `WeeksAsRows` width is not a touch-target guarantee
+
+A review found that the paragraph above over-states the guarantee for
+`HeatmapOrientation.WeeksAsRows`. That orientation shares the row width between seven columns
+(`Modifier.weight(1f)`), so the slot width is `(viewport - 6 * cellSpacing) / 7` and falls below
+48dp on viewports narrower than roughly `7 * 48dp + 6 * cellSpacing` (for example a 320dp
+split-screen window). Only the slot height carries the minimum there.
+
+- Behaviour is unchanged: `WeeksAsColumns` already sizes both slot edges with
+  `Modifier.size(slotSize)`.
+- `HeatmapStyle` KDoc, `README.md`, `docs/ARCHITECTURE.md`, `AGENTS.md` and `docs/DEVELOPMENT.md`
+  now scope the guarantee per orientation instead of claiming it for every cell.
+- `CalendarHeatmapComposeTest` checks both edges in `WeeksAsColumns`, and for `WeeksAsRows` at a
+  300dp viewport the height minimum plus the equal column share.
+
+Enforcing a 48dp width in `WeeksAsRows` would need horizontal scrolling for a seven-column month
+grid or dropping the equal-width fill; both change the documented layout, and `CalendarMonthGrid`
+shares the same seven-column constraint. That stays an open product decision rather than a silent
+fix.

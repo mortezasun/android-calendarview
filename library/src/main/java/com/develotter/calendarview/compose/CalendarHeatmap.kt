@@ -88,10 +88,17 @@ enum class HeatmapOrientation {
  * In [HeatmapOrientation.WeeksAsRows] cells take an equal share of the width and
  * [cellSize] is used as the row height; [weekdayLabelWidth] is ignored there.
  *
- * [cellSize] only controls the drawn cell, not the touch target: every cell keeps at least
- * the platform minimum interactive size ([LocalMinimumInteractiveComponentSize], 48dp by
- * default) as its layout slot. Cells below that size therefore render smaller while the
- * grid keeps a 48dp pitch, so taps stay reliable instead of shrinking with the visuals.
+ * [cellSize] only controls the drawn cell, not the touch target. Every cell gets a layout slot of
+ * at least the platform minimum interactive size ([LocalMinimumInteractiveComponentSize], 48dp by
+ * default): in [HeatmapOrientation.WeeksAsColumns] both slot edges, in
+ * [HeatmapOrientation.WeeksAsRows] the slot height. Cells drawn below that size therefore stay
+ * easy to tap.
+ *
+ * [HeatmapOrientation.WeeksAsRows] gives each cell an equal share of the row width instead of a
+ * fixed minimum, because seven weekday columns have to fit the viewport. Below roughly
+ * `7 * 48dp + 6 * cellSpacing` of available width (for example a 320dp split-screen window) a
+ * column is narrower than 48dp; use [HeatmapOrientation.WeeksAsColumns] when every cell needs a
+ * full-size target.
  */
 @Immutable
 data class HeatmapStyle(

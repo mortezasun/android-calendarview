@@ -49,7 +49,9 @@ is not part of your task and never reset, stash or overwrite it without explicit
   `dayContent` (and, for heatmaps, `colorForIntensity`) lambda so existing calls keep compiling.
   Do not rename or remove parameters as a side effect of another change.
 - Heatmap cells keep a touch target of at least `LocalMinimumInteractiveComponentSize` even when
-  `HeatmapStyle.cellSize` is smaller. Do not move click handling onto the shrunken visual cell.
+  `HeatmapStyle.cellSize` is smaller: both edges in `WeeksAsColumns`, the height in `WeeksAsRows`,
+  which shares the row width between seven columns. Do not move click handling onto the shrunken
+  visual cell.
 
 ## Verified commands
 

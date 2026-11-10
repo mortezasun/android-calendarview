@@ -111,4 +111,6 @@ the private renderer through `HeatmapRenderConfig`. Cell geometry belongs in `He
 
 Keep the touch-target contract: `HeatmapCell` draws the visible cell from `visualModifier` and the
 interactive slot from `slotModifier`, which is sized to at least
-`LocalMinimumInteractiveComponentSize`. Do not move the click handling onto the small visual box.
+`LocalMinimumInteractiveComponentSize`. `WeeksAsColumns` sizes both slot edges; `WeeksAsRows`
+sizes only the height and lets `weight` share the row width, because seven columns must fit. Do not
+move the click handling onto the small visual box.
