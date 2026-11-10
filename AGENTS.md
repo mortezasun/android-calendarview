@@ -64,6 +64,8 @@ chmod +x gradlew                                  # if the checkout lost the exe
 ./gradlew test                                    # 70 JVM unit tests, all modules
 ./gradlew :library:lintDebug                      # lint for the core library
 ./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
+./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
+  :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal  # into ~/.m2
 ```
 
 Single-module compile checks, for example `./gradlew :library:compileDebugKotlin`, are acceptable

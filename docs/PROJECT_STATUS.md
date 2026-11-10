@@ -186,3 +186,35 @@ Enforcing a 48dp width in `WeeksAsRows` would need horizontal scrolling for a se
 grid or dropping the equal-width fill; both change the documented layout, and `CalendarMonthGrid`
 shares the same seven-column constraint. That stays an open product decision rather than a silent
 fix.
+
+---
+
+## Session 2026-11-10: Maven publishing for 2.0.0
+
+The repository had no publishing configuration, so the installation coordinates documented in
+`README.md` could not be resolved by any consumer and JitPack had no artifact to build.
+
+- All four library modules now apply `maven-publish`, publish the `release` variant and ship a
+  sources jar. `:calendarviewsample` stays excluded.
+- `group` and `version` are defined once in the root `build.gradle.kts`
+  (`com.github.mortezasun.android-calendarview`, `2.0.0`); each artifact id is the module name.
+- New `jitpack.yml` pins `openjdk17`, which AGP 9.5 requires.
+
+Verified locally on 2026-11-10:
+
+| Check | Result |
+|-------|--------|
+| `publishToMavenLocal` for all four modules | BUILD SUCCESSFUL |
+| `test` (all modules) | 70 tests, 0 failures, 0 errors |
+| `:calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
+
+POM inspection:
+
+- `...:library:2.0.0` imports `androidx.compose:compose-bom` through `dependencyManagement` and
+  lists `runtime`, `runtime-saveable`, `ui` and `foundation` in compile scope.
+- `...:calendar-gregorian:2.0.0` and the other engines depend on `...:library:2.0.0` (compile).
+- `...:calendar-solarHijri:2.0.0` additionally carries `ir.huri:jalalicalendar:2.0.0`.
+- Every module publishes `<module>-2.0.0.aar`, `.pom`, `.module` and `-sources.jar`.
+
+Still open: an independent consumer project against `mavenLocal` and against JitPack, plus the
+`2.0.0` tag.

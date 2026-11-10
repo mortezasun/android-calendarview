@@ -95,9 +95,14 @@ verify layout, RTL behaviour or selection visuals.
 
 ## Release and versioning notes
 
-- The sample declares `versionCode`/`versionName` in `calendarviewsample/build.gradle.kts`.
-- Publishing happens through JitPack from Git tags; the repository does not contain a Maven
-  publishing configuration.
+- The published version lives once in the root `build.gradle.kts` (`allprojects` group and version)
+  and is shared by every module. The artifact id is the module name: `library`,
+  `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`.
+- The four library modules apply `maven-publish` and publish their `release` variant with a sources
+  jar under `com.github.mortezasun.android-calendarview`. `:calendarviewsample` is not published.
+- JitPack builds from Git tags and commit hashes; `jitpack.yml` pins the JDK because AGP 9.5 needs
+  JDK 17. Verify with `./gradlew publishToMavenLocal` and inspect the generated POMs before tagging.
+- The sample declares its own `versionCode`/`versionName` in `calendarviewsample/build.gradle.kts`.
 - Do not bump versions or update dependencies as part of an unrelated change.
 
 ### New heatmap option

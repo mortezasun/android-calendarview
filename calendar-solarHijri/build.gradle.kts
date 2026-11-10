@@ -1,8 +1,10 @@
 import com.android.build.api.dsl.LibraryExtension
+import org.gradle.api.publish.maven.MavenPublication
 
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.compose)
+    `maven-publish`
 }
 
 extensions.configure<LibraryExtension> {
@@ -29,10 +31,22 @@ extensions.configure<LibraryExtension> {
     buildFeatures {
         compose = true
     }
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            afterEvaluate { from(components["release"]) }
+        }
     }
 }
 dependencies {

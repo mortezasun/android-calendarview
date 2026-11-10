@@ -94,6 +94,26 @@ The project needs no API keys, tokens or signing secrets for debug builds. Relea
 configured in the repository. Never commit keystores, `local.properties`, credentials or private
 keys.
 
+## Publishing
+
+The four library modules apply `maven-publish` and publish their `release` variant with a sources
+jar as `com.github.mortezasun.android-calendarview:<module>:<version>`. The group and version are
+defined once in the root `build.gradle.kts`; the artifact id is the module name.
+`calendarviewsample` is not published. `jitpack.yml` pins JDK 17 for the JitPack build.
+
+```bash
+./gradlew \
+  :library:publishToMavenLocal \
+  :calendar-gregorian:publishToMavenLocal \
+  :calendar-hijri:publishToMavenLocal \
+  :calendar-solarHijri:publishToMavenLocal
+```
+
+Artifacts land in `~/.m2/repository/com/github/mortezasun/android-calendarview/`. Check the
+generated POMs: each `calendar-*` module must depend on `...:library` in compile scope, and
+`calendar-solarHijri` must additionally carry `ir.huri:jalalicalendar`. Publishing locally does not
+prove that JitPack can build the project; that needs a separate consumer test against JitPack.
+
 ## Known setup problems
 
 1. **Old SDK command-line tools cannot see API 37.** They fail with

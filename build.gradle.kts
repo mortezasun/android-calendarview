@@ -5,3 +5,10 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.compose) apply false
 }
+
+// Single source of truth for the published coordinates. JitPack resolves multi-module
+// projects as com.github.USER.REPO:MODULE:VERSION.
+allprojects {
+    group = "com.github.mortezasun.android-calendarview"
+    version = "2.0.0"
+}
