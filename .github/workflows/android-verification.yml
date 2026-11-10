@@ -24,7 +24,7 @@ jobs:
       matrix:
         include:
           - check: assemble
-            tasks: ':calendarviewsample:assembleDebug'
+            tasks: ':calendarviewsample:assembleDebug :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease'
           - check: unit-tests
             tasks: 'test'
           - check: lint
@@ -70,3 +70,4 @@ jobs:
             **/build/reports/**
             **/build/test-results/**
             calendarviewsample/build/outputs/apk/debug/*.apk
+            **/build/outputs/aar/*.aar
