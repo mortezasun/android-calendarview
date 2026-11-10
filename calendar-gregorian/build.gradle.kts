@@ -37,6 +37,8 @@ kotlin {
 dependencies {
     // Public entry points expose shared selection and Compose types to consumers.
     api(project(":library"))
+    // Default todayBorderColor reads MaterialTheme; :library keeps Material 3 implementation-only.
+    implementation(libs.androidx.compose.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -37,6 +37,8 @@ kotlin {
 }
 dependencies {
     api(project(":library"))
+    // Default todayBorderColor reads MaterialTheme; :library keeps Material 3 implementation-only.
+    implementation(libs.androidx.compose.material3)
     // Explicit because JalaliCalendar is part of this module's public API.
     api(libs.jalali.calendar.huri)
     testImplementation(libs.junit)

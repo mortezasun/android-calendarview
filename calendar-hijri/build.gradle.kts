@@ -37,6 +37,8 @@ kotlin {
 }
 dependencies {
     api(project(":library"))
+    // Default todayBorderColor reads MaterialTheme; :library keeps Material 3 implementation-only.
+    implementation(libs.androidx.compose.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
