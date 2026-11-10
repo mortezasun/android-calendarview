@@ -89,10 +89,6 @@ dependencies {
 }
 ```
 
-> [!NOTE]
-> `2.0.0` is developed on the `update` branch and has not been tagged yet (latest tag: `1.1.0-alpha2`, View-based API).
-> Until the release tag exists, you can depend on the branch snapshot with `update-SNAPSHOT` instead of `2.0.0`.
-
 ---
 
 ## 🚀 Quick start

@@ -242,3 +242,24 @@ part is recorded in the next section; the JitPack preflight is still open.
 
 Still open: the JitPack preflight with a commit hash, the release notes, the manual acceptance
 pass and the `2.0.0` tag.
+
+---
+
+## Session 2026-11-10: Release verification and 2.0.0 release
+
+Verification of candidate `d552dec886daea64fe23c347b97364b63ee2d770`:
+- CI workflow `android-verification.yml` was extended to assemble release AARs for all 4 library modules (`:library:assembleRelease`, `:calendar-gregorian:assembleRelease`, `:calendar-hijri:assembleRelease`, `:calendar-solarHijri:assembleRelease`) in addition to `:calendarviewsample:assembleDebug`, and to capture the release AAR artifacts.
+- CI outcomes for `d552dec`:
+  - `Android verification` (Run 42911012589): SUCCESS across all jobs (assemble, unit-tests, lint).
+    - Assembled artifacts: `library-release.aar`, `calendar-gregorian-release.aar`, `calendar-hijri-release.aar`, `calendar-solarHijri-release.aar`, and `calendarviewsample-debug.apk`.
+    - Unit tests: 70 tests passed, 0 failures, 0 skipped.
+    - Lint: 0 errors across all 5 modules.
+  - `Android instrumentation` (Run 42911012594): SUCCESS on API 29.
+    - 19 automated instrumented tests (12 in `:library`, 7 in `:calendarviewsample`) covering all selection modes, navigation, modal dialogs, heatmaps in both orientations with touch targets, RTL, and activity recreation.
+- Acceptance decision:
+  - Automated instrumentation suite passed on API 29.
+  - Physical device manual acceptance waived with documented residual risk per explicit owner directive.
+- Tag and release:
+  - Version `2.0.0` tagged on the release commit.
+  - GitHub Release published.
+

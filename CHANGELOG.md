@@ -1,10 +1,9 @@
 # Changelog
 
-## 2.0.0 - Unreleased
+## 2.0.0 - 2026-11-10
 
-Status: release preparation on `update`. This entry does not announce a published tag or
-verified JitPack release. See [release checklist](docs/RELEASE_CHECKLIST.md) and
-[project status](docs/PROJECT_STATUS.md) for acceptance evidence.
+Native Jetpack Compose release of `android-calendarview`. See [release checklist](docs/RELEASE_CHECKLIST.md)
+and [project status](docs/PROJECT_STATUS.md) for verification evidence.
 
 ### Breaking changes
 
