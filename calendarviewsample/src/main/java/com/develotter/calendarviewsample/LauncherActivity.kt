@@ -148,8 +148,16 @@ private fun CalendarSample(onHeatmap: () -> Unit) {
                 confirmButton = { TextButton(onClick = { showDialog = false }) { Text("Close") } },
                 title = { Text("${calendar.name} calendar") },
                 text = {
-                    Column(Modifier.verticalScroll(rememberScrollState())) {
-                        SampleMonth(calendar, anchor, locale, state, previousDays, nextDays, fixedSixRows)
+                    CalendarSampleViewport(
+                        calendar = calendar,
+                        anchor = anchor,
+                        onVisibleMonthChanged = { anchor = it; error = null },
+                        showModeSelector = false,
+                        showWindowLabel = false,
+                        forcedMode = SampleDisplayMode.HorizontalPager,
+                        viewportHeight = 340.dp,
+                    ) { monthAnchor ->
+                        SampleMonth(calendar, monthAnchor, locale, state, previousDays, nextDays, fixedSixRows)
                     }
                 },
             )

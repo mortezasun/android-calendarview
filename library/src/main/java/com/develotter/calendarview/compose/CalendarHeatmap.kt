@@ -39,6 +39,20 @@ data class HeatmapQuarterData(
     val weeks: List<List<HeatmapDay?>>,
 )
 
+/** Calendar-agnostic heatmap day; [label] is the caller-formatted, localized date. */
+data class HeatmapDayData(
+    val epochDay: Long,
+    val label: String,
+    val intensity: Float,
+)
+
+/** Calendar-agnostic month block: seven weekday rows, one column per week. */
+data class HeatmapMonthData(
+    val title: String,
+    val weekdayLabels: List<String>,
+    val weeks: List<List<HeatmapDayData?>>,
+)
+
 /** Finite values are clamped; NaN and infinities become zero. */
 fun normalizeHeatmapIntensity(value: Float): Float = if (value.isFinite()) value.coerceIn(0f, 1f) else 0f
 
@@ -148,6 +162,90 @@ fun CalendarYearHeatmap(
                 year, quarter, intensities, onDayClick, locale = locale,
                 firstDayOfWeek = firstDayOfWeek, showWeekdayLabels = showWeekdayLabels,
             )
+        }
+    }
+}
+
+/**
+ * Calendar-agnostic year heatmap built from caller-supplied month blocks.
+ *
+ * Use this for Hijri, Solar Hijri or any other calendar engine: :library stays independent
+ * of concrete calendars. Every month needs seven weekday labels and week columns with seven
+ * entries each (null marks padding outside the month). Intensities are normalized to 0..1.
+ * The caller owns year navigation and builds [months] with its calendar engine.
+ */
+@Composable
+fun CalendarYearHeatmap(
+    months: List<HeatmapMonthData>,
+    onDayClick: (HeatmapDayData) -> Unit,
+    modifier: Modifier = Modifier,
+    locale: Locale = Locale.getDefault(),
+    showWeekdayLabels: Boolean = true,
+    colorForIntensity: (Float) -> Color = { lerp(Color.Red, Color.Green, it) },
+    dayContent: @Composable (HeatmapDayData) -> Unit = {},
+) {
+    require(months.isNotEmpty()) { "At least one heatmap month is required" }
+    require(months.all { month ->
+        month.weekdayLabels.size == 7 && month.weeks.all { week -> week.size == 7 }
+    }) { "Heatmap months require seven weekday labels and seven cells per week" }
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        months.forEach { month ->
+            CalendarHeatmapMonthBlock(
+                month = month,
+                onDayClick = onDayClick,
+                locale = locale,
+                showWeekdayLabels = showWeekdayLabels,
+                colorForIntensity = colorForIntensity,
+                dayContent = dayContent,
+            )
+        }
+    }
+}
+
+@Composable
+private fun CalendarHeatmapMonthBlock(
+    month: HeatmapMonthData,
+    onDayClick: (HeatmapDayData) -> Unit,
+    locale: Locale,
+    showWeekdayLabels: Boolean,
+    colorForIntensity: (Float) -> Color,
+    dayContent: @Composable (HeatmapDayData) -> Unit,
+) {
+    val percent = NumberFormat.getPercentInstance(locale)
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(month.title)
+        Row {
+            if (showWeekdayLabels) {
+                Column {
+                    month.weekdayLabels.forEach { label ->
+                        Box(
+                            Modifier.size(width = 64.dp, height = 48.dp),
+                            contentAlignment = Alignment.Center,
+                        ) { Text(label) }
+                    }
+                }
+            }
+            Row(Modifier.weight(1f).horizontalScroll(rememberScrollState())) {
+                month.weeks.forEach { week ->
+                    Column {
+                        week.forEach { day ->
+                            if (day == null) {
+                                Box(Modifier.size(48.dp))
+                            } else {
+                                val intensity = normalizeHeatmapIntensity(day.intensity)
+                                val description = "${day.label}: ${percent.format(intensity)}"
+                                Box(
+                                    Modifier.size(48.dp)
+                                        .background(colorForIntensity(intensity))
+                                        .semantics { contentDescription = description }
+                                        .clickable(role = Role.Button) { onDayClick(day) },
+                                    contentAlignment = Alignment.Center,
+                                ) { dayContent(day) }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

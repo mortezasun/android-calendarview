@@ -127,6 +127,18 @@ class CalendarSampleUiTest {
     }
 
     @Test
+    fun dialogPagerSwipesToAdjacentMonth() {
+        val initial = YearMonth.now()
+        click("Open dialog")
+        compose.onNode(hasText(caption(initial)) and hasAnyAncestor(isDialog())).assertIsDisplayed()
+        compose.onNode(hasText(caption(initial)) and hasAnyAncestor(isDialog()))
+            .performTouchInput { swipeLeft() }
+        compose.waitForIdle()
+        compose.onNode(hasText(caption(initial.plusMonths(1))) and hasAnyAncestor(isDialog())).assertIsDisplayed()
+        clickDialog("Close")
+    }
+
+    @Test
     fun calendarAndLocaleControlsRenderTheMatchingEngineCaption() {
         val today = LocalDate.now()
         for (tag in listOf("en", "de", "fa", "ar")) {

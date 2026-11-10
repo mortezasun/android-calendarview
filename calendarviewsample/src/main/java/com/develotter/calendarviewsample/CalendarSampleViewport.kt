@@ -25,6 +25,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.compose.CalendarMonthList
 import com.develotter.calendarview.compose.CalendarMonthPager
@@ -32,7 +33,7 @@ import com.develotter.calendarview.compose.CalendarScrollAxis
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 
-private enum class SampleDisplayMode { Single, VerticalList, HorizontalList, HorizontalPager, VerticalPager }
+internal enum class SampleDisplayMode { Single, VerticalList, HorizontalList, HorizontalPager, VerticalPager }
 
 /**
  * Controlled visible month with an independently saved finite window center.
@@ -44,19 +45,25 @@ internal fun CalendarSampleViewport(
     calendar: SampleCalendar,
     anchor: Long,
     onVisibleMonthChanged: (Long) -> Unit = {},
+    showModeSelector: Boolean = true,
+    showWindowLabel: Boolean = true,
+    forcedMode: SampleDisplayMode? = null,
+    viewportHeight: Dp = 480.dp,
     monthContent: @Composable (Long) -> Unit,
 ) {
     var modeName by rememberSaveable { mutableStateOf(SampleDisplayMode.Single.name) }
     var center by rememberSaveable(calendar.name) { mutableStateOf(anchor) }
-    val mode = SampleDisplayMode.valueOf(modeName)
+    val mode = forcedMode ?: SampleDisplayMode.valueOf(modeName)
     val request = remember(calendar, anchor) { runCatching { moveSampleMonth(calendar, anchor, 0) } }
     val window = remember(calendar, center) { runCatching { sampleMonthWindow(calendar, center) } }
     val desired = request.getOrNull()
     val months = window.getOrNull()
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SampleDisplayMode.entries.forEach { item ->
-                FilterChip(selected = mode == item, onClick = { modeName = item.name }, label = { Text(item.name) })
+        if (showModeSelector) {
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SampleDisplayMode.entries.forEach { item ->
+                    FilterChip(selected = mode == item, onClick = { modeName = item.name }, label = { Text(item.name) })
+                }
             }
         }
         when {
@@ -69,7 +76,15 @@ internal fun CalendarSampleViewport(
                 Text("Updating month window")
             }
             else -> key(calendar.name, center, mode) {
-                SynchronizedMonthViewport(mode, months, desired, onVisibleMonthChanged, monthContent)
+                SynchronizedMonthViewport(
+                    mode = mode,
+                    months = months,
+                    desired = desired,
+                    onVisibleMonthChanged = onVisibleMonthChanged,
+                    showWindowLabel = showWindowLabel,
+                    viewportHeight = viewportHeight,
+                    monthContent = monthContent,
+                )
             }
         }
     }
@@ -81,6 +96,8 @@ private fun SynchronizedMonthViewport(
     months: List<Long>,
     desired: Long,
     onVisibleMonthChanged: (Long) -> Unit,
+    showWindowLabel: Boolean,
+    viewportHeight: Dp,
     monthContent: @Composable (Long) -> Unit,
 ) {
     val target = months.indexOf(desired)
@@ -132,8 +149,10 @@ private fun SynchronizedMonthViewport(
         isList -> listState.firstVisibleItemIndex
         else -> pagerState.settledPage
     }
-    Text("Window month ${active + 1} / ${months.size}")
-    val viewport = Modifier.fillMaxWidth().height(480.dp)
+    if (showWindowLabel) {
+        Text("Window month ${active + 1} / ${months.size}")
+    }
+    val viewport = Modifier.fillMaxWidth().height(viewportHeight)
     when (mode) {
         SampleDisplayMode.Single -> Box(viewport) {
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) { monthContent(desired) }
