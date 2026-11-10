@@ -37,18 +37,18 @@ dependencies {
     implementation(libs.androidx.core.ktx)
 
     // Public Compose APIs must also be available to consumers of this library.
-    api(platform("androidx.compose:compose-bom:2026.09.00"))
-    api("androidx.compose.runtime:runtime")
-    api("androidx.compose.runtime:runtime-saveable")
-    api("androidx.compose.ui:ui")
+    api(platform(libs.androidx.compose.bom))
+    api(libs.androidx.compose.runtime)
+    api(libs.androidx.compose.runtime.saveable)
+    api(libs.androidx.compose.ui)
     // LazyListState and PagerState are exposed by the public month containers.
-    api("androidx.compose.foundation:foundation")
-    implementation("androidx.compose.material3:material3")
+    api(libs.androidx.compose.foundation)
+    implementation(libs.androidx.compose.material3)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform("androidx.compose:compose-bom:2026.09.00"))
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

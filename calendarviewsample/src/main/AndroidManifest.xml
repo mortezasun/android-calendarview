@@ -7,18 +7,17 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar">
+        android:theme="@android:style/Theme.Material.NoTitleBar">
         <activity
             android:name=".LauncherActivity"
-            android:exported="true"
-          >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".HeatMapViewActivity"/>
+        <activity android:name=".HeatMapViewActivity" />
     </application>
 
 </manifest>
