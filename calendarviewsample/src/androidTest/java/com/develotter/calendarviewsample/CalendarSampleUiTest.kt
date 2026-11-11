@@ -1,7 +1,6 @@
 package com.develotter.calendarviewsample
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
@@ -101,21 +100,22 @@ class CalendarSampleUiTest {
         val selected = initial.atDay(1)
         val description = selected.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.ENGLISH))
         showViewport()
-        try {
-            compose.onNodeWithContentDescription(description, substring = true).performScrollTo()
-        } catch (_: AssertionError) {
-        }
-        compose.onNodeWithContentDescription(description, substring = true).performClick()
-        compose.waitForIdle()
-        compose.onNodeWithContentDescription(description, substring = true).assertIsSelected()
+        // Select in the fully visible dialog; the main page nests scroll viewports.
+        click("Open dialog")
+        compose.onNode(
+            hasContentDescription(description, substring = true) and hasAnyAncestor(isDialog()),
+        ).performClick()
+        clickDialog("Close")
+        compose.onNodeWithText(selected.toString()).assertExists()
         click("Next")
         assertMonth(initial.plusMonths(1))
         compose.activityRule.scenario.recreate()
         compose.waitForIdle()
         assertMonth(initial.plusMonths(1))
+        compose.onNodeWithText(selected.toString()).assertExists()
         click("Previous")
         assertMonth(initial)
-        compose.onNodeWithContentDescription(description, substring = true).assertIsSelected()
+        compose.onNodeWithText(selected.toString()).assertExists()
     }
 
     @Test
