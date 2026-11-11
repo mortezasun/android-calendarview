@@ -2,7 +2,7 @@
 
 Workflow: .github/workflows/android-verification.yml
 Branch: update
-Status when introduced: configured source only; no execution result observed.
+Status: active; the 2.1.0 release-tree verification jobs passed on 2026-11-11.
 
 ## Triggers and cost
 
@@ -44,18 +44,18 @@ Downloaded artifacts contain available Gradle HTML/XML reports, test results, to
 diagnostics and the debug APK when assembly produced it. Upload runs even after failures,
 but missing files produce a warning, not a passing check. Artifacts alone prove no success.
 
-The connector used in this session cannot list Actions runs or download their logs. A
-workflow commit is not evidence of execution or success. If results cannot be inspected,
-keep verification status pending. A manual run must select update; workflow_dispatch may
-not appear in the UI until GitHub discovers the workflow on the default branch. Automatic
-push runs are therefore the primary trigger for this branch-only setup.
+The 2.1.0 release runs were inspected through the public GitHub check pages. A workflow
+commit alone is not evidence of execution or success; the final status and exact run IDs are
+recorded in [PROJECT_STATUS.md](PROJECT_STATUS.md). Automatic push runs remain the primary
+trigger for this branch-only setup.
 
 ## Remaining priority-0 checks
 
 This workflow does not start an emulator, install/run the APK, test Android saved-state
 restoration, execute Compose UI tests or assess gestures, accessibility, RTL and screenshots.
-Add those separately after the compile/unit/lint baseline is working. Also test release
-variants and independent consumers before calling version 2 release-ready.
+Add those separately after the compile/unit/lint baseline is working. The 2.1.0 release
+runs and the JitPack-only consumer are recorded in [PROJECT_STATUS.md](PROJECT_STATUS.md);
+this workflow still does not execute the sample's full gesture/accessibility matrix.
 
 Official action documentation consulted:
 

@@ -23,7 +23,8 @@ remains a historical record.
   all four modules, plus the BOM POM/module metadata.
 - [x] JitPack-only consumer resolved the BOM and all four constrained modules at `2.1.0`;
   `mavenLocal()` is absent from the consumer build.
-- [x] README installation coordinates, CHANGELOG and PROJECT_STATUS updated for `2.1.0`.
+- [x] README installation coordinates, CHANGELOG, PROJECT_STATUS, ARCHITECTURE, SETUP and
+  [release notes](releases/2.1.0.md) updated for `2.1.0`.
 
 ## 2. Previous release: 2.0.1 (2026-11-11)
 

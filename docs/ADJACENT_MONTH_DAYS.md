@@ -35,9 +35,9 @@ limitations documented in COMPOSE_MONTH_CONTAINERS.md are unchanged.
 
 Four JVM integration tests added in the sample module, which intentionally depends on
 all three engines: Gregorian year boundary, Hijri year boundary, Jalali Nowruz and disabled
-predicates. This supplements six existing shared-grid tests. No result is observed for
-this new commit until CI runs. The user reported both workflows green for the previous
-grid commit bab4922d1b9f29392d0e379d207bd2d18a95f8aa, not for these new changes.
+predicates. This supplements six existing shared-grid tests. The 2.1.0 release-tree API 29
+runs passed all 26 instrumentation tests; the earlier report for grid commit
+bab4922d1b9f29392d0e379d207bd2d18a95f8aa remains historical.
 
 ```bash
 bash ./gradlew test :calendarviewsample:assembleDebug

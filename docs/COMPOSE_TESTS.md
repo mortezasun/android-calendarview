@@ -2,6 +2,9 @@
 
 Last verified: 2026-11-11
 
+The 2.1.0 release-tree runs passed all 26 tests on API 29 on 2026-11-11; see
+[PROJECT_STATUS.md](PROJECT_STATUS.md) for the run IDs.
+
 ## Test inventory
 
 The checked-in Android instrumentation suite contains **26 test methods**:

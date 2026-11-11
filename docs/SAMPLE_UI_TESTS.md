@@ -38,9 +38,10 @@ bash ./gradlew :calendarviewsample:assembleDebugAndroidTest
 bash ./gradlew :calendarviewsample:connectedDebugAndroidTest
 ```
 
-Status when introduced: added source/configuration only. No new passing results are claimed.
-Actual UI hierarchy, gesture timing and ActivityScenario behavior must be verified by CI.
-If a test fails, inspect its assertion/report rather than weakening the intended behavior.
+Status: these sample tests are included in the 26-test API 29 instrumentation suite. The two
+2.1.0 release-tree runs passed on 2026-11-11; exact run IDs are in
+[PROJECT_STATUS.md](PROJECT_STATUS.md). If a test fails, inspect its assertion/report rather
+than weakening the intended behavior.
 
 ## Remaining broader migration work
 

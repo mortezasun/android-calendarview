@@ -54,6 +54,7 @@ the GitHub Release and JitPack tag build are published.
 - Tag `2.1.0` and the GitHub Release are published. The JitPack build log reports
   `BUILD SUCCESSFUL` and lists AAR, POM, module metadata and sources for all four modules,
   plus the BOM POM/module metadata. The 2.0.1 tag remains unchanged.
+  See [the 2.1.0 release notes](docs/releases/2.1.0.md) for the published summary.
 
 ## 2.0.1 - 2026-11-11
 

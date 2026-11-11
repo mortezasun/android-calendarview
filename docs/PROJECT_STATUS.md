@@ -41,7 +41,18 @@ Branch: `update`
   `2.0.1` and against JitPack `2.1.0`; candidate-only source also compiles the Hijri
   provider and range-policy APIs.
 
-### Independent consumer verification
+### 2.1.0 JitPack consumer verification
+
+The candidate repository was removed before this build. The consumer used
+`--refresh-dependencies`, resolved every calendar artifact from JitPack and has no
+`mavenLocal()` repository. The BOM supplied all four calendar versions; the consumer compiled
+both the 2.0.1-compatible screen and the candidate-only provider/range-policy source.
+
+| Consumer | Declared dependencies | Resolved from JitPack | Result |
+|---|---|---|---|
+| BOM + all three engines | `calendar-bom:2.1.0`; versionless `library` and engines | BOM constraints at `2.1.0`; AAR, POM, module and sources for all four modules; `ir.huri:jalalicalendar:2.0.0` | BUILD SUCCESSFUL |
+
+### 2.0.1 consumer verification (historical)
 
 The consumer is a standalone Gradle build (not part of this repository's module graph).
 Its repositories are `google()`, `mavenCentral()` and `https://jitpack.io`; `mavenLocal()`

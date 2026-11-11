@@ -1,8 +1,8 @@
 # ADR 0003: Phase 3 distribution and Hijri method hook
 
 Date: 2026-11-11
-Status: Distribution and Hijri hook implemented; strategic items deferred
-Target release: 2.0.1
+Status: Distribution and Hijri hook released in 2.1.0; strategic items deferred
+Target release: 2.1.0
 Target branch: update
 
 ## Context
@@ -53,8 +53,8 @@ those strategic options yet.
 - A host using a local Hijri method can supply a provider without changing `:library`
   or the public calendar-independent rendering surface.
 - The existing JitPack coordinates and version remain valid.
-- The existing `2.0.1` tag predates the BOM; the README marks the `2.1.0` BOM example as
-  unreleased until a consumer-verified tag exists.
+- Tag `2.1.0` contains the BOM and has been consumer-verified. The `2.0.1` tag remains the
+  previous release and was not moved.
 - Until the deferred items are approved, the project stays an Android Compose library
   rather than a multiplatform library, and JitPack remains the only configured
   remote publication path.

@@ -87,9 +87,9 @@ jobs:
           ### Verification
           - Two complete API 29 instrumentation runs on the identical release tree: ${PARENT_SHA} and ${GITHUB_SHA}.
           - JVM tests, lint, publishing verification and public API guard passed on both release-tree commits.
-          - JitPack tag-build and remote consumer verification are the remaining post-release checks.
+          - JitPack built the tag and a JitPack-only consumer resolved the BOM and all four modules.
 
-          ### Intended JitPack coordinates
+          ### JitPack coordinates
           - com.github.mortezasun.android-calendarview:library:2.1.0
           - com.github.mortezasun.android-calendarview:calendar-gregorian:2.1.0
           - com.github.mortezasun.android-calendarview:calendar-hijri:2.1.0

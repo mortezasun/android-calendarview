@@ -1,7 +1,7 @@
 # Setup
 
-Verified on 2026-11-09 against branch `update` (commit `9a71c52` plus the documentation commit
-based on it).
+Verified on 2026-11-11 against release `2.1.0` (commit `bd046a188d9a661e657affe580c7a7fa1a3e98ba`)
+and its post-release documentation commit.
 
 ## Required tools
 
@@ -132,8 +132,9 @@ generated POMs: each `calendar-*` module must depend on `...:library` in compile
 `calendar-solarHijri` must additionally carry `ir.huri:jalalicalendar`, and the BOM must list all
 four modules in `dependencyManagement` with the root version. The shared POM fields (name,
 description, URL, license, developer, SCM) come from the root build. Maven Central signing and
-upload are not configured. Publishing locally does not prove that JitPack can build the project;
-that needs a separate consumer test against JitPack.
+upload are not configured. JitPack built release `2.1.0` and a JitPack-only consumer resolved the
+BOM plus all four modules on 2026-11-11; see [PROJECT_STATUS.md](PROJECT_STATUS.md) and
+[RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
 
 ## Known setup problems
 

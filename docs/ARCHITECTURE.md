@@ -1,8 +1,8 @@
-# Architecture (v2.0.0)
+# Architecture (v2.1.0)
 
 ## Overview
 
-`android-calendarview` is a **native Jetpack Compose calendar library** with decoupled calendar engines and an interactive demo app. Version 2.0.0 eliminates all legacy XML layouts, ViewBinding, custom view measurement, and reflection.
+`android-calendarview` is a **native Jetpack Compose calendar library** with decoupled calendar engines and an interactive demo app. Version `2.1.0` is the current release; version 2.0.0 eliminated all legacy XML layouts, ViewBinding, custom view measurement, and reflection.
 
 The architecture follows standard Compose state and rendering patterns:
 - **Stateless rendering:** `CalendarMonthGrid` and `CalendarDayCell` render month layouts declaratively.
@@ -81,6 +81,7 @@ State is managed declaratively and cleanly separated from UI rendering:
 - `:calendar-bom` is a `java-platform` publication. Its POM has `dependencyManagement` constraints for `library`, `calendar-gregorian`, `calendar-hijri` and `calendar-solarHijri` at the root version.
 - Root `build.gradle.kts` owns group, version and the shared POM block (name, description, URL, Apache-2.0 license, developer, SCM). Module POMs inherit it.
 - JitPack and the publishing CI publish the BOM together with the four AAR modules. Maven Central signing, namespace verification and upload are not configured; the metadata is a prerequisite only.
+- Release `2.1.0` publishes the BOM and all four modules on JitPack. The tag build and a JitPack-only consumer were verified on 2026-11-11; see [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ## Product views, markers and styling
 

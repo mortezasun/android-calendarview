@@ -1,0 +1,37 @@
+name: Update 2.1.0 release notes
+
+on:
+  push:
+    branches: [update]
+    paths:
+      - .github/workflows/update-2-1-0-release-notes.yml
+      - docs/releases/2.1.0.md
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-2-1-0-release-notes
+  cancel-in-progress: true
+
+jobs:
+  update:
+    if: github.repository == 'mortezasun/android-calendarview'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: mortezasun/android-calendarview
+    steps:
+      - name: Check out release-note source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Update the 2.1.0 GitHub Release body
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release view 2.1.0 --repo "$GH_REPO" >/dev/null
+          gh release edit 2.1.0 --repo "$GH_REPO" --notes-file docs/releases/2.1.0.md

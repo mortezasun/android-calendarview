@@ -13,6 +13,8 @@
 
 A native Jetpack Compose calendar library for Android. It ships one shared, calendar-independent core (month grid, selection engine, containers, heatmaps) plus pluggable calendar engines for **Gregorian**, **Islamic Hijri** and **Solar Hijri (Jalali / Persian)** — with full RTL support.
 
+**Current release:** [`2.1.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.1.0) — binary-compatible 2.0.1 bridge, BOM and Hijri provider. See the [2.1.0 release notes](docs/releases/2.1.0.md).
+
 ---
 
 ## Contents
@@ -532,6 +534,7 @@ CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Compose architecture, rendering and state model |
 | [V2_MIGRATION_MAPPING.md](docs/V2_MIGRATION_MAPPING.md) | 1.x → 2.0.0 migration matrix |
 | [PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | Verified status, test coverage, release notes |
+| [releases/2.1.0.md](docs/releases/2.1.0.md) | Current release notes and verification evidence |
 | [ADJACENT_MONTH_DAYS.md](docs/ADJACENT_MONTH_DAYS.md) | Previous/next-month day behavior |
 | [COMPOSE_MONTH_CONTAINERS.md](docs/COMPOSE_MONTH_CONTAINERS.md) | List and pager containers |
 | [SETUP.md](docs/SETUP.md) · [DEVELOPMENT.md](docs/DEVELOPMENT.md) | Local setup and development workflow |
