@@ -1,10 +1,62 @@
 # Project status
 
 Last updated: 2026-11-11
-Version: `2.0.1` (unreleased library publishing patch; published release remains `2.0.0`)
+Version: `2.0.1` (published)
 Branch: `master`
 
-## Current patch status
+## Current release status: 2.0.1 (published)
+
+- Release commit `068c57ff90bd8a7e503788a7d951dca65f8f3953` is tagged `2.0.1` and the
+  GitHub Release `2.0.1` is published.
+- JitPack built the tagged commit successfully. The retrieved build log
+  (`https://jitpack.io/com/github/mortezasun/android-calendarview/2.0.1/build.log`)
+  reports `BUILD SUCCESSFUL in 1m` and lists AAR, POM, Gradle module metadata and sources
+  artifacts for `library`, `calendar-gregorian`, `calendar-hijri` and
+  `calendar-solarHijri` at `2.0.1`.
+- Physical device acceptance remains waived as recorded below. No new physical-device
+  testing is claimed.
+
+### Independent consumer verification
+
+The consumer is a standalone Gradle build (not part of this repository's module graph).
+Its repositories are `google()`, `mavenCentral()` and `https://jitpack.io`; `mavenLocal()`
+is absent, and it has no `project(...)` or `includeBuild(...)` reference to this
+repository. `~/.m2` did not exist during the runs. Every configuration was built with
+`--refresh-dependencies`, and the `--info` logs record the JitPack download URLs for the
+`2.0.1` artifacts.
+
+| Consumer configuration | Declared calendar dependency | Resolved published artifacts | Result |
+|---|---|---|---|
+| Gregorian only | `calendar-gregorian:2.0.1` | `calendar-gregorian:2.0.1`, `library:2.0.1` | BUILD SUCCESSFUL |
+| Hijri only | `calendar-hijri:2.0.1` | `calendar-hijri:2.0.1`, `library:2.0.1` | BUILD SUCCESSFUL |
+| Solar Hijri only | `calendar-solarHijri:2.0.1` | `calendar-solarHijri:2.0.1`, `library:2.0.1`, `ir.huri:jalalicalendar:2.0.0` | BUILD SUCCESSFUL |
+| All three engines | all three `2.0.1` engines | `calendar-gregorian:2.0.1`, `calendar-hijri:2.0.1`, `calendar-solarHijri:2.0.1`, one `library:2.0.1` | BUILD SUCCESSFUL |
+
+Each app module compiled a Compose screen that calls its engine's public composable; the
+all-three screen renders `GregorianCalendarMonth`, `HijriCalendarMonth` and
+`SolarHijriCalendarMonth` together.
+
+### Runtime smoke test
+
+- Device: API 29 AOSP x86_64 emulator with 4 GB RAM, running under software emulation
+  (`-accel off`; KVM was not accessible to this runner).
+- Test: `AllCalendarsSmokeTest.allThreeCalendarsRenderAndAcceptSelection` in the
+  all-three consumer app. It launches the app, verifies the three calendar test tags,
+  clicks the first clickable day in each calendar and asserts that each selection summary
+  changes.
+- Result: `OK (1 test)` in 119.056 s. The Gradle `connectedDebugAndroidTest` task skipped
+  the emulator because ddmlib's device-property query timed out on the slow software
+  emulator; the same test APK was executed directly through
+  `adb shell am instrument`.
+- Not covered: physical devices, additional API levels, locales, RTL, rotation or process
+  death.
+
+## Historical evidence
+
+### 2.0.1 preparation session (historical)
+
+The following describes the pre-release preparation state; the items listed as open were
+completed by the release recorded above.
 
 - PR #1 merged publishing commit `4b570f2af666fcc9ace532523a42326176215e52` into
   master as `d265b7fd314ee55285a1970ad5bbfe1ce4df1ed3`.
@@ -12,16 +64,10 @@ Branch: `master`
   - Verification Run 42980672262: assemble, unit-tests and lint.
   - Instrumentation Run 42980672194: Core and sample instrumentation.
   - Publishing Run 42980672274: isolated Maven publication and artifact checks.
-- The owner reported on 2026-11-11 that JitPack for `4b570f2` is green and all artifacts
-  built correctly. This is owner-reported evidence; no independent log retrieval is claimed.
-- The library publication version is now prepared as `2.0.1`. No tag or GitHub Release
-  `2.0.1` is created by this preparation. The sample app version is not changed by this
-  library-only publishing patch.
-- Still open: CI for the resulting candidate, independent JitPack consumer verification,
-  explicit approval for the final tag/release, and final tagged-version consumption.
-- Physical device acceptance remains waived as recorded below. No new device testing is claimed.
-
-## Historical evidence
+- The owner reported on 2026-11-11 that JitPack for `4b570f2` was green. That was
+  owner-reported evidence at the time; the `2.0.1` tag now has a retrieved build log.
+- At the end of that session the candidate CI, tag/release, JitPack build and independent
+  consumer verification were still open.
 
 The sessions below retain their original verification scope. Earlier statements that tests
 were unexecuted or a tag was missing describe those sessions, not the current overall state.

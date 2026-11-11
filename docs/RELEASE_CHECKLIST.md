@@ -1,11 +1,39 @@
-# Release acceptance: 2.0.0
+# Release acceptance
 
-Status: GitHub release published; remote Maven distribution acceptance remains OPEN.
-The `2.0.0` tag and both branches were observed at
-`9e521a67fde6316e4672d239a40797a2a9609518` before this follow-up.
-Do not move the published tag to incorporate subsequent fixes.
+Status: `2.0.1` is released, built successfully by JitPack and consumed from JitPack by
+an independent project. The 2.0.0 material at the end is a historical record.
 
-## Correction to the historical candidate reference
+## 1. Current release: 2.0.1 (2026-11-11)
+
+- [x] Release commit `068c57ff90bd8a7e503788a7d951dca65f8f3953` is tagged `2.0.1`.
+  The published tag was not moved.
+- [x] GitHub Release `2.0.1` is published.
+- [x] JitPack build for `2.0.1` succeeded. Build log:
+  `https://jitpack.io/com/github/mortezasun/android-calendarview/2.0.1/build.log`
+  (`BUILD SUCCESSFUL in 1m`; AAR, POM, module metadata and sources listed for all four
+  modules).
+- [x] Consumer: Gregorian only built from JitPack.
+- [x] Consumer: Hijri only built from JitPack.
+- [x] Consumer: Solar Hijri only built from JitPack; `library` and
+  `ir.huri:jalalicalendar:2.0.0` resolved transitively.
+- [x] Consumer: all three engines built together; no dependency conflict and one shared
+  `library:2.0.1`.
+- [x] `mavenLocal()` excluded and `~/.m2` absent for all four builds; JitPack download
+  URLs and resolved artifacts recorded.
+- [x] Runtime smoke test on an API 29 emulator: all three calendars rendered, one day
+  selected in each, `OK (1 test)`.
+- [x] README installation coordinates, CHANGELOG and PROJECT_STATUS updated for `2.0.1`.
+
+Residual limitation: the runtime test used a software-emulated x86_64 image and covered
+one API level, default locale and one selection per calendar. It does not replace the
+full manual acceptance matrix.
+
+## 2. Historical 2.0.0 acceptance record
+
+Checkbox states in this section are the states recorded at the end of the 2.0.0 session.
+The 2.0.1 section above is the current status.
+
+### 2.1 Candidate and CI evidence
 
 The previous version of this checklist and PROJECT_STATUS.md used the incorrect full
 SHA `d552dec886daea64fe23c347b97364b63ee2d770`. The actual commit in the repository
@@ -13,8 +41,6 @@ with the short name `d552dec` is `d552decb8f7382e883e705533079664e76ab1158`.
 This correction does not independently establish the head SHA of the historical CI runs;
 that mapping still needs direct verification. The reference in PROJECT_STATUS.md is
 historical and must not be used as an exact verification target without this correction.
-
-## 1. Historical verification evidence
 
 PROJECT_STATUS.md records the following results for candidate `d552dec`:
 
@@ -30,7 +56,7 @@ PROJECT_STATUS.md records the following results for candidate `d552dec`:
 The release SHA includes a publishing configuration change after the recorded candidate.
 Historical success is not automatically proof for this later configuration.
 
-## 2. Publishing and JitPack - still open
+### 2.2 Publishing and JitPack (2.0.0 session)
 
 - [x] Local publishing and independent consumer builds in four configurations are recorded
   in PROJECT_STATUS.md (Maven Local baseline only).
@@ -43,8 +69,9 @@ Historical success is not automatically proof for this later configuration.
 - [ ] Record build version, commit SHA, log and consumer results.
 
 The earlier Cloudflare/HTTP failure was a failed availability check, not a passed
-JitPack preflight. The user reports that JitPack is not green. The log and status could
-not be retrieved during this follow-up, so a specific JitPack failure cause is not confirmed.
+JitPack preflight. At that time the user reported that JitPack was not green. The log and
+status could not be retrieved during that follow-up, so a specific JitPack failure cause
+is not confirmed.
 
 The follow-up changes invoke Gradle through Bash and explicitly publish all four library
 modules. This removes reliance on the wrapper executable bit; it does not prove that
@@ -52,21 +79,24 @@ permissions were the observed JitPack failure. A separate CI workflow validates 
 publication tasks and generated AAR/POM/module/sources files in an isolated Maven repository.
 That CI job is not a substitute for a JitPack consumer build.
 
-## 3. Manual acceptance
+The items in this subsection were closed by the 2.0.1 release section above: the tag
+build log was retrieved, and all four consumer configurations were built from JitPack.
+
+### 2.3 Manual acceptance (2.0.0)
 
 - [x] API 29 instrumentation results are recorded for selection, navigation, dialogs,
   heatmaps, RTL and activity recreation. Exact coverage is determined by the test reports;
   a passing suite is not exhaustive verification of every locale, font scale or runtime.
 - [x] Physical device testing was waived with documented residual risk in PROJECT_STATUS.md.
 
-## 4. Documentation
+### 2.4 Documentation (2.0.0 session)
 
 - [x] Changelog and migration guide exist.
 - [x] Historical status files are retained.
 - [ ] Correct historical run-to-SHA references after inspecting the run metadata.
 - [ ] Record final remote-consumer evidence; do not equate Maven Local success with JitPack success.
 
-## 5. Publication and follow-up release
+### 2.5 Publication (2.0.0)
 
 - [x] Tag `2.0.0` exists.
 - [x] GitHub Release `2.0.0` is published.
@@ -74,5 +104,6 @@ That CI job is not a substitute for a JitPack consumer build.
 - [ ] If a source/configuration fix is required, verify it on a new commit first and obtain
   separate approval for a patch release such as `2.0.1`. Do not rewrite `2.0.0`.
 
-This follow-up targets `update` only. No change to `master`, release tag or GitHub Release
-is authorized by this document. No fresh build, consumer run or device test is claimed here.
+The 2.0.0 follow-up targeted `update` only. No change to `master`, release tag or GitHub
+Release was authorized by that document. No fresh build, consumer run or device test is
+claimed there.

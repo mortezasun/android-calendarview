@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.1 - Unreleased
+## 2.0.1 - 2026-11-11
 
 Publishing patch for the Compose 2.0 release. No calendar rendering, selection API or
 minimum Android version changes are introduced by this patch.
@@ -16,12 +16,24 @@ minimum Android version changes are introduced by this patch.
 - Publishing verification CI with an isolated Maven repository and checks for nonempty
   AAR, POM, Gradle module metadata and sources artifacts for all four modules.
 
-### Verification scope
+### Release verification
 
-All five PR checks for publishing commit `4b570f2` succeeded before merge into master
-(PR #1, merge commit `d265b7f`). The owner reports that JitPack also built that commit
-successfully. This is not a claim that `2.0.1` has already been tagged, built on JitPack
-or consumed by an independent project. The new candidate needs its own CI results.
+- Release commit `068c57ff90bd8a7e503788a7d951dca65f8f3953` is tagged `2.0.1`; the
+  GitHub Release `2.0.1` is published.
+- The JitPack build log for the tag
+  (`https://jitpack.io/com/github/mortezasun/android-calendarview/2.0.1/build.log`)
+  reports `BUILD SUCCESSFUL in 1m` and lists AAR, POM, Gradle module metadata and
+  sources artifacts for all four modules.
+- An independent consumer project (separate Gradle build, no `mavenLocal()`, no
+  `project(...)` or `includeBuild(...)`) built all four configurations from JitPack:
+  Gregorian only, Hijri only, Solar Hijri only and all three engines. The shared
+  `library:2.0.1` resolved transitively, and the Solar Hijri configuration also resolved
+  `ir.huri:jalalicalendar:2.0.0`.
+- A runtime smoke test on an API 29 emulator rendered all three calendars and selected
+  one day in each (`OK (1 test)`).
+
+The smoke test used a software-emulated x86_64 image. Physical-device acceptance remains
+waived; see [the release checklist](docs/RELEASE_CHECKLIST.md).
 
 ## 2.0.0 - 2026-11-10
 
