@@ -13,10 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 /**
@@ -70,10 +72,20 @@ fun CalendarMonthHeader(
         Text(it, style = MaterialTheme.typography.titleMedium)
     },
     previousContent: @Composable () -> Unit = {
-        Text("\u2039", style = MaterialTheme.typography.titleLarge, modifier = Modifier.clearAndSetSemantics {})
+        val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+        Text(
+            if (rtl) "\u203A" else "\u2039",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.clearAndSetSemantics {},
+        )
     },
     nextContent: @Composable () -> Unit = {
-        Text("\u203A", style = MaterialTheme.typography.titleLarge, modifier = Modifier.clearAndSetSemantics {})
+        val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+        Text(
+            if (rtl) "\u2039" else "\u203A",
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.clearAndSetSemantics {},
+        )
     },
 ) {
     Row(

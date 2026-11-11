@@ -23,14 +23,33 @@ import androidx.compose.ui.unit.dp
  * Number of whole month columns that fit into [availableWidth].
  * At least one column is returned; invalid dimensions fail instead of silently collapsing.
  */
-fun calendarMonthColumns(availableWidth: Dp, minMonthWidth: Dp): Int {
+fun calendarMonthColumns(availableWidth: Dp, minMonthWidth: Dp): Int =
+    calendarMonthColumns(availableWidth, minMonthWidth, 0.dp)
+
+/**
+ * Number of whole month columns that fit into [availableWidth] with [horizontalSpacing]
+ * between columns, so every month still reaches [minMonthWidth]. At least one column is
+ * returned; invalid dimensions fail instead of silently collapsing.
+ */
+fun calendarMonthColumns(
+    availableWidth: Dp,
+    minMonthWidth: Dp,
+    horizontalSpacing: Dp,
+): Int {
     require(availableWidth.value.isFinite() && availableWidth.value > 0f) {
         "availableWidth must be finite and positive"
     }
     require(minMonthWidth.value.isFinite() && minMonthWidth.value > 0f) {
         "minMonthWidth must be finite and positive"
     }
-    return maxOf(1, (availableWidth.value / minMonthWidth.value).toInt())
+    require(horizontalSpacing.value.isFinite() && horizontalSpacing.value >= 0f) {
+        "horizontalSpacing must be finite and non-negative"
+    }
+    return maxOf(
+        1,
+        ((availableWidth.value + horizontalSpacing.value) /
+            (minMonthWidth.value + horizontalSpacing.value)).toInt(),
+    )
 }
 
 /**
@@ -69,7 +88,7 @@ fun CalendarMonthColumns(
         if (activeIndex in 0 until monthCount) callback(activeIndex)
     }
     BoxWithConstraints(modifier) {
-        val columns = calendarMonthColumns(maxWidth, minMonthWidth)
+        val columns = calendarMonthColumns(maxWidth, minMonthWidth, horizontalSpacing)
         LazyVerticalGrid(
             columns = GridCells.Fixed(columns),
             state = state,

@@ -15,6 +15,13 @@ class CalendarMonthColumnsTest {
     }
 
     @Test
+    fun accountsForSpacingWhenHonoringTheMinimumWidth() {
+        assertEquals(1, calendarMonthColumns(640.dp, 320.dp, 8.dp))
+        assertEquals(2, calendarMonthColumns(648.dp, 320.dp, 8.dp))
+        assertEquals(2, calendarMonthColumns(720.dp, 320.dp, 8.dp))
+    }
+
+    @Test
     fun invalidDimensionsAreRejected() {
         var rejected = false
         try {
@@ -27,6 +34,14 @@ class CalendarMonthColumnsTest {
         rejected = false
         try {
             calendarMonthColumns(320.dp, 0.dp)
+        } catch (_: IllegalArgumentException) {
+            rejected = true
+        }
+        assertTrue(rejected)
+
+        rejected = false
+        try {
+            calendarMonthColumns(320.dp, 320.dp, -1.dp)
         } catch (_: IllegalArgumentException) {
             rejected = true
         }

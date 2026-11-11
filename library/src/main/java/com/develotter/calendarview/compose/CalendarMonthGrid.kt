@@ -42,8 +42,8 @@ private val WeekNumberWidth = 40.dp
  * Today indicator uses [todayBorderColor] (defaults to tertiary) so it never clashes
  * with the primary selection highlight. Pass a localized [todayDescription] to append it to
  * the accessibility description of today's cell; the default null keeps the date-only label.
- * The header is exposed as a heading and every week/cell carries collection semantics so
- * screen readers can announce the grid position.
+ * The header is exposed as a heading, the week container owns one collection description and
+ * every day and optional week-number cell carries its collection position.
  *
  * [markers] are keyed by epoch day and render up to four dots below the day content. Their
  * localized descriptions are appended to the day's accessibility label. [weekNumber] adds a
@@ -108,80 +108,89 @@ fun CalendarMonthGrid(
         }
         val weeks = cells.chunked(7)
         val columnCount = if (showWeekNumbers) 8 else 7
-        weeks.forEachIndexed { rowIndex, week ->
-            val weekNumberLabel = if (showWeekNumbers) {
-                week.firstNotNullOfOrNull { it }?.let { day -> weekNumber?.invoke(day.epochDay) }
-            } else {
-                null
-            }
-            Row(
-                Modifier.fillMaxWidth().semantics {
-                    collectionInfo = CollectionInfo(rowCount = weeks.size, columnCount = columnCount)
-                },
-            ) {
-                if (showWeekNumbers) {
-                    Box(
-                        Modifier.width(WeekNumberWidth).heightIn(min = 48.dp),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        if (weekNumberLabel != null) weekNumberContent(weekNumberLabel)
-                    }
+        Column(
+            Modifier.fillMaxWidth().semantics {
+                collectionInfo = CollectionInfo(rowCount = weeks.size, columnCount = columnCount)
+            },
+        ) {
+            weeks.forEachIndexed { rowIndex, week ->
+                val weekNumberLabel = if (showWeekNumbers) {
+                    week.firstNotNullOfOrNull { it }?.let { day -> weekNumber.invoke(day.epochDay) }
+                } else {
+                    null
                 }
-                week.forEachIndexed { columnIndex, day ->
-                    val cellModifier = Modifier.weight(1f).heightIn(min = 48.dp)
-                    if (day == null) {
-                        Box(cellModifier)
-                    } else {
-                        val selected = day.epochDay in selection
-                        val dayMarkers = markers[day.epochDay].orEmpty()
-                        val suffix = calendarMarkerDescription(dayMarkers, day.isToday, todayDescription)
-                        val description = if (suffix == null) {
-                            day.accessibilityLabel
-                        } else {
-                            "${day.accessibilityLabel}, $suffix"
-                        }
-                        Surface(
-                            modifier = cellModifier
-                                .semantics {
-                                    contentDescription = description
-                                    collectionItemInfo = CollectionItemInfo(
-                                        rowIndex = rowIndex,
-                                        rowSpan = 1,
-                                        columnIndex = columnIndex + if (showWeekNumbers) 1 else 0,
-                                        columnSpan = 1,
-                                    )
-                                }
-                                .selectable(
-                                    selected = selected, enabled = day.enabled, role = Role.Button,
-                                    onClick = { onDayClick(day.epochDay) },
-                                ),
-                            color = when {
-                                selected -> style.selectedContainerColor
-                                    ?: MaterialTheme.colorScheme.primaryContainer
-                                else -> style.surfaceColor ?: MaterialTheme.colorScheme.surface
+                Row(Modifier.fillMaxWidth()) {
+                    if (showWeekNumbers) {
+                        Box(
+                            Modifier.width(WeekNumberWidth).heightIn(min = 48.dp).semantics {
+                                collectionItemInfo = CollectionItemInfo(
+                                    rowIndex = rowIndex,
+                                    rowSpan = 1,
+                                    columnIndex = 0,
+                                    columnSpan = 1,
+                                )
                             },
-                            contentColor = when {
-                                selected -> style.selectedContentColor
-                                    ?: MaterialTheme.colorScheme.onPrimaryContainer
-                                !day.isCurrentMonth -> style.adjacentContentColor
-                                    ?: MaterialTheme.colorScheme.onSurfaceVariant
-                                else -> style.contentColor ?: MaterialTheme.colorScheme.onSurface
-                            },
-                            border = if (day.isToday) {
-                                BorderStroke(1.5.dp, effectiveTodayBorderColor)
-                            } else {
-                                null
-                            },
-                            shape = RoundedCornerShape(8.dp),
+                            contentAlignment = Alignment.Center,
                         ) {
-                            Column(
-                                Modifier.padding(8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
+                            if (weekNumberLabel != null) weekNumberContent(weekNumberLabel)
+                        }
+                    }
+                    week.forEachIndexed { columnIndex, day ->
+                        val cellModifier = Modifier.weight(1f).heightIn(min = 48.dp)
+                        if (day == null) {
+                            Box(cellModifier)
+                        } else {
+                            val selected = day.epochDay in selection
+                            val dayMarkers = markers[day.epochDay].orEmpty()
+                            val suffix = calendarMarkerDescription(dayMarkers, day.isToday, todayDescription)
+                            val description = if (suffix == null) {
+                                day.accessibilityLabel
+                            } else {
+                                "${day.accessibilityLabel}, $suffix"
+                            }
+                            Surface(
+                                modifier = cellModifier
+                                    .semantics {
+                                        contentDescription = description
+                                        collectionItemInfo = CollectionItemInfo(
+                                            rowIndex = rowIndex,
+                                            rowSpan = 1,
+                                            columnIndex = columnIndex + if (showWeekNumbers) 1 else 0,
+                                            columnSpan = 1,
+                                        )
+                                    }
+                                    .selectable(
+                                        selected = selected, enabled = day.enabled, role = Role.Button,
+                                        onClick = { onDayClick(day.epochDay) },
+                                    ),
+                                color = when {
+                                    selected -> style.selectedContainerColor
+                                        ?: MaterialTheme.colorScheme.primaryContainer
+                                    else -> style.surfaceColor ?: MaterialTheme.colorScheme.surface
+                                },
+                                contentColor = when {
+                                    selected -> style.selectedContentColor
+                                        ?: MaterialTheme.colorScheme.onPrimaryContainer
+                                    !day.isCurrentMonth -> style.adjacentContentColor
+                                        ?: MaterialTheme.colorScheme.onSurfaceVariant
+                                    else -> style.contentColor ?: MaterialTheme.colorScheme.onSurface
+                                },
+                                border = if (day.isToday) {
+                                    BorderStroke(1.5.dp, effectiveTodayBorderColor)
+                                } else {
+                                    null
+                                },
+                                shape = RoundedCornerShape(8.dp),
                             ) {
-                                dayContent(day, selected, selection.isRangeEndpoint(day.epochDay))
-                                if (dayMarkers.isNotEmpty()) {
-                                    Spacer(Modifier.height(2.dp))
-                                    CalendarMarkerRow(dayMarkers)
+                                Column(
+                                    Modifier.padding(8.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    dayContent(day, selected, selection.isRangeEndpoint(day.epochDay))
+                                    if (dayMarkers.isNotEmpty()) {
+                                        Spacer(Modifier.height(2.dp))
+                                        CalendarMarkerRow(dayMarkers)
+                                    }
                                 }
                             }
                         }

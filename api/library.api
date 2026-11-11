@@ -56,6 +56,7 @@ public final class com.develotter.calendarview.compose.CalendarMonthCellsKt {
 
 public final class com.develotter.calendarview.compose.CalendarMonthColumnsKt {
   public static final int calendarMonthColumns(float, float);
+  public static final int calendarMonthColumns(float, float, float);
   public static final void CalendarMonthColumns(int, androidx.compose.ui.Modifier, float, androidx.compose.foundation.lazy.grid.LazyGridState, float, float, kotlin.jvm.functions.Function1<? super java.lang.Integer, ? extends java.lang.Object>, kotlin.jvm.functions.Function1<? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function3<? super java.lang.Integer, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int);
 }
 
