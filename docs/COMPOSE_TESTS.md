@@ -1,70 +1,125 @@
 # Compose instrumentation checks
 
-Module: :library
-Test classes:
+Last verified: 2026-11-11
 
-- com.develotter.calendarview.compose.CalendarSelectionComposeTest
-- com.develotter.calendarview.compose.CalendarHeatmapComposeTest
-- com.develotter.calendarview.compose.CalendarMonthHeaderComposeTest
-- com.develotter.calendarview.compose.CalendarProductViewsComposeTest
+## Test inventory
 
-Five selection tests cover cleared-selection restoration, range restoration, mode changes
-and disabled/selected grid-cell semantics. StateRestorationTester simulates Compose
-saved state; it does not kill the process or recreate the real sample activity.
+The checked-in Android instrumentation suite contains **26 test methods**:
+**16 in `:library`** and **10 in `:calendarviewsample`**. The source inventory is:
 
-Six heatmap tests cover both orientations, click reporting by epoch day, RTL weekday
-mirroring, caller-owned selection semantics, disabled days and the minimum touch target
-when `HeatmapStyle.cellSize` is below 48 dp. They render the composables directly, not a
-heatmap screen inside the sample app.
+### `:library`
 
-Two header tests cover navigation dispatch with disabled bounds and the optional localized
-today suffix appended to a day cell's accessibility description. Two product-view tests cover
-the week grid (week number, marker description and click reporting) and the agenda (day label,
-marker description and click reporting). They render the composables directly and were compiled
-but not executed in the 2026-11-11 session.
+- `CalendarSelectionComposeTest` (4 tests): cleared-selection restoration, range
+  restoration, mode changes and disabled/selected grid-cell semantics.
+- `CalendarHeatmapComposeTest` (7 tests): both orientations, click reporting by epoch
+  day, RTL weekday mirroring, caller-owned selection, disabled days and the minimum
+  touch target for small cells.
+- `CalendarMonthHeaderComposeTest` (2 tests): disabled navigation and the optional
+  localized today suffix in a day description.
+- `CalendarProductViewsComposeTest` (2 tests): week grid and agenda rendering and click
+  reporting.
+- `ExampleInstrumentedTest` (1 test): generated package check.
+
+### `:calendarviewsample`
+
+- `CalendarSampleUiTest` (9 tests): list/pager navigation, dialog selection, dialog
+  pager swipe, caption content, caption visibility, activity restoration and the two
+  main-viewport selection tests described below.
+- `ExampleInstrumentedTest` (1 test): generated package check.
+
+## Main-viewport selection regression
+
+`selectingVisibleDayInMainViewportUpdatesSelection` and
+`touchingVisibleDayInMainViewportUpdatesSelection` select Gregorian/Single in the real
+launcher, find the first day of the current month in the main viewport, assert that it is
+displayed, clickable and not selected, then select it. One test uses the semantics click;
+the other uses a real touch click. Each starts from a fresh activity state, so the second
+click cannot clear the first selection.
+
+Both tests check the rendered day and the selection summary:
+
+```kotlin
+dayNode.assertIsDisplayed()
+dayNode.assertHasClickAction()
+dayNode.assertIsNotSelected()
+// select, then:
+dayNode.assertIsSelected()
+compose.onNodeWithText(selected.toString()).assertExists()
+```
+
+The search uses a marker-tolerant content-description substring. The tests do not open a
+dialog and do not set selection state directly.
+
+### Why the first attempt failed
+
+The day was below the small API-29 screen. The main viewport is a 480 dp `Column` inside
+the sample's page; `performScrollTo()` on the day scrolls that inner `Column`, not the
+outer page. The page therefore still clipped the day. The helper now finds the outer
+scroll node by requiring a descendant with the `Window month` label and swipes that page
+before the day assertions. This was a test-setup bug, not a production selection bug:
+after the outer page scroll, both the semantics click and the touch click update the day
+and the summary successfully.
+
+## Dialog restoration remains a separate contract
+
+`selectedDateAndVisibleMonthSurviveActualActivityRecreation` keeps selecting through the
+real dialog, checks the shared summary and visible month, calls
+`compose.activityRule.scenario.recreate()`, then checks the summary, the visible month
+and the rendered `Selected` semantics after navigating back to the selected month.
+
+It proves activity recreation, not process death. The dialog test and the main-viewport
+tests intentionally cover different entry paths. The dialog path working does not by
+itself prove selection in the main viewport.
+
+## Caption contracts
+
+`everyCalendarAndLocaleRendersTheExpectedCaptionContent` checks the calculated localized
+title for all three engines and the `en`, `de`, `fa` and `ar` locales with
+`assertExists()`. It does not claim that every pager/list instance displays the title.
+`gregorianCaptionIsDisplayedInSingleMainViewport` scrolls to the Single-mode title and
+uses `assertIsDisplayed()`; that is the separate visibility contract.
 
 ## Emulator workflow
 
-.github/workflows/android-instrumentation.yml runs on update pushes, PRs targeting update
-and manual dispatch. It is separate from the existing build/JVM-test/lint workflow.
-It uses ubuntu-24.04 explicitly rather than following changes to ubuntu-latest.
+`.github/workflows/android-instrumentation.yml` runs on `update` pushes, PRs targeting
+`update` and manual dispatch. It uses `ubuntu-24.04`, installs the documented compile SDK
+and build tools, compiles both instrumentation APKs, then starts API 29
+`google_apis` x86_64 with animations disabled. API 29 is a runtime baseline, not a full
+Android matrix.
 
-The job installs the repository's documented compile SDK/build tools and compiles
-:library:assembleDebugAndroidTest before starting an emulator. Compilation failure stops
-emulator setup. KVM permissions are configured only on the disposable hosted runner.
-reactivecircus/android-emulator-runner@v2 starts API 29 google_apis x86_64 with animations
-disabled. API 29 is a first runtime baseline, not a full minimum/latest Android matrix.
+`scripts/run-connected-tests.sh` runs both `:library:connectedDebugAndroidTest` and
+`:calendarviewsample:connectedDebugAndroidTest`, preserves failure status with
+`pipefail`, and dumps Logcat in an EXIT trap. It is the command used by the emulator step.
+The workflow has a 45-minute timeout; reports and test APKs are retained for seven days.
 
-scripts/run-connected-tests.sh runs all core connectedDebugAndroidTest tests, including
-existing template tests. It preserves failure status through pipefail and collects Logcat
-in an EXIT trap before emulator cleanup. Diagnostics are best-effort, not a success signal.
-Reports/test APK/logs are retained seven days; missing artifacts only warn. The job has
-a 45-minute timeout and may consume Actions minutes and storage. No secrets, write-token
-permissions, publishing, deployment or privileged pull_request_target execution are added.
-Action refs use major versions, not pinned SHAs.
-
-```bash
-bash ./gradlew :library:assembleDebugAndroidTest
-# With a dedicated running emulator/device and adb on PATH:
-bash scripts/run-connected-tests.sh
-```
-
-Do not collect logs from a personal device containing private app data. The script dumps
-Logcat from the connected test device. No device logs were collected in this session.
+The workflow now has a separate summary step that parses the JUnit XML and emits public
+check annotations with the exact library and sample test counts. The failure reporter is
+limited to a failure of the emulator step itself, so a failure in compilation, artifact
+upload or another later step is not mislabelled as a connected-test failure.
 
 ## Verification status
 
-User reported verification run 42630675110 as successful. That report concerns the
-existing verification workflow, not this new emulator workflow. The assistant could not
-retrieve the linked run and has not independently checked job conclusions or test counts.
-The instrumented tests and the emulator setup remain unverified until execution.
+The full core and sample instrumentation run **43065898948** for commit
+`f7010a58fa59ea6a56836a207f9a27ac92e73efa` completed successfully on API 29. Its
+emulator step succeeded, and the two main-viewport tests, the dialog restoration test and
+the caption tests were part of the executed suite. That run predates the test-count
+summary step; the checked-in inventory is 16 library plus 10 sample tests.
 
-Still open: actual emulator results for the selection, heatmap, header and product-view classes,
-real activity/process recreation, list/pager gestures and restoration, window identity, font
-scaling, additional runtime API levels, Android calendar conversions and end-to-end sample
-checks.
+A second full run was started for the follow-up commit that added the diagnosis scope and
+count summary. The final exact counts must be read from that run's annotations rather than
+inferred from the green job icon.
 
-References:
+Remaining limits:
+
+- Activity recreation is covered; real process death is not.
+- API 29 on the hosted emulator is not a physical-device acceptance test or a full API,
+  locale, form-factor or rotation matrix.
+- The main-viewport tests use the actual launcher callbacks and real day nodes, but they
+  do not test drag-range selection or a user-opened date picker.
+- Pager/list gestures are covered only by the existing navigation and dialog tests.
+- The workflow uses action major-version refs, not pinned commit SHAs.
+
+## References
 
 - https://developer.android.com/develop/ui/compose/testing
 - https://developer.android.com/develop/ui/compose/testing/common-patterns

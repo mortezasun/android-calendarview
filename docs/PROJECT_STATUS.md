@@ -578,3 +578,43 @@ Remaining limitations:
 - No version bump, tag, JitPack consumer build, Maven Central upload or release was performed. The
   `2.1.0` BOM example remains explicitly unreleased.
 
+---
+
+## Session 2026-11-11: verified main-viewport selection and instrumentation diagnostics
+
+Branch `update`; no release version, tag or publication was changed in this session.
+
+- `b71ed14600281e86bfbc9bcb459fad476c44732c` (baseline): Android instrumentation run
+  `43057537150` succeeded, but that run predates the public test-count summary. The previous
+  dialog-only test did not exercise the failing main-viewport selection path.
+- `1267142` added the separate semantics and touch main-viewport tests, plus the split caption
+  content/visibility contracts. Its first CI run `43064116534` failed because the day was below
+  the small emulator screen; the inner calendar scrolled, not the outer sample page.
+- `f7010a5` fixed the test setup by targeting the outer scroll container explicitly. Android
+  instrumentation run `43065898948` succeeded on the full core and sample suite. Both
+  main-viewport tests, the dialog restoration test and the caption tests were green.
+- `7320fe2` scoped the failure reporter to `steps.instrumentation.outcome == 'failure'`, added a
+  repeatable Python test suite for the reporter and added public JUnit count annotations.
+  Android verification `43068767081` and Android publishing verification `43068767401` succeeded
+  for this commit.
+- The checked-in instrumentation inventory is 26 tests (16 library, 10 sample). The sample suite
+  keeps the dialog path and the main-viewport path as separate contracts; the main-viewport tests
+  use the real `onDayClick` callback and check both `Selected` semantics and the selection
+  summary. Activity recreation is covered; process death is not.
+
+Local checks for `7320fe2` (Temurin 17.0.21+9, Platform `android-37.0`, Build-Tools 36.0.0):
+
+| Check | Result |
+|-------|--------|
+| `test` (all modules) | 113 tests, 0 failures, 0 errors, 0 skipped |
+| `:calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
+| `:library:assembleDebugAndroidTest` and `:calendarviewsample:assembleDebugAndroidTest` | BUILD SUCCESSFUL |
+| `lintDebug` for library, Gregorian, Hijri, Solar Hijri and sample | BUILD SUCCESSFUL, 0 errors |
+| Python reporter suite (`scripts/test_report_instrumented_failures.py`) | 8 tests, OK |
+| Instrumentation on API 29 | full CI run `43065898948` successful; second run for `7320fe2` recorded separately above |
+
+Remaining limits: the second full run's exact XML counts must be taken from its summary
+annotations; no local emulator or physical device was available; API 29 is not a full device
+matrix; the main-viewport tests use the current month's first day and do not cover drag-range
+selection.
+
