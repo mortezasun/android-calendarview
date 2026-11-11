@@ -1,16 +1,25 @@
 package com.develotter.calendarviewsample
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.click as touchClick
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeLeft
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthData
@@ -61,6 +70,52 @@ class CalendarSampleUiTest {
         compose.onNodeWithText(caption(month)).assertIsDisplayed()
     }
 
+    private fun selectSingleGregorian() {
+        click("Gregorian")
+        // "Single" appears once for the selection mode and once for the display mode.
+        compose.onAllNodesWithText("Single")[0].performClick()
+        compose.onAllNodesWithText("Single")[1].performClick()
+        compose.waitForIdle()
+    }
+
+    private fun scrollMainViewportUp() {
+        val window = compose.onNode(hasText("Window month ", substring = true))
+        window.performScrollTo()
+        window.performTouchInput {
+            swipe(
+                start = center,
+                end = Offset(center.x, (center.y - 300f).coerceAtLeast(0f)),
+                durationMillis = 300,
+            )
+        }
+        compose.waitForIdle()
+    }
+
+    private fun assertDisplayedInMainViewport(node: SemanticsNodeInteraction) {
+        try {
+            node.assertIsDisplayed()
+            return
+        } catch (_: AssertionError) {
+            scrollMainViewportUp()
+        }
+        node.performScrollTo()
+        compose.waitForIdle()
+        node.assertIsDisplayed()
+    }
+
+    private fun visibleMainDay(description: String, selected: Boolean): SemanticsNodeInteraction {
+        compose.onAllNodes(isDialog()).assertCountEquals(0)
+        val day = compose.onNodeWithContentDescription(description, substring = true)
+        assertDisplayedInMainViewport(day)
+        day.assertHasClickAction()
+        if (selected) day.assertIsSelected() else day.assertIsNotSelected()
+        compose.onAllNodes(isDialog()).assertCountEquals(0)
+        return day
+    }
+
+    private fun englishDescription(date: LocalDate): String =
+        date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.ENGLISH))
+
     @Test
     fun swipeThenNextDialogAndModeSwitchUseTheReachedMonth() {
         val initial = YearMonth.now()
@@ -95,18 +150,46 @@ class CalendarSampleUiTest {
     }
 
     @Test
+    fun selectingVisibleDayInMainViewportUpdatesSelection() {
+        val selected = YearMonth.now().atDay(1)
+        val description = englishDescription(selected)
+        selectSingleGregorian()
+        showViewport()
+        val day = visibleMainDay(description, selected = false)
+        day.performClick()
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription(description, substring = true).assertIsSelected()
+        compose.onNodeWithText(selected.toString()).assertExists()
+    }
+
+    @Test
+    fun touchingVisibleDayInMainViewportUpdatesSelection() {
+        val selected = YearMonth.now().atDay(1)
+        val description = englishDescription(selected)
+        selectSingleGregorian()
+        showViewport()
+        val day = visibleMainDay(description, selected = false)
+        day.performTouchInput { touchClick() }
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription(description, substring = true).assertIsSelected()
+        compose.onNodeWithText(selected.toString()).assertExists()
+    }
+
+    @Test
     fun selectedDateAndVisibleMonthSurviveActualActivityRecreation() {
         val initial = YearMonth.now()
         val selected = initial.atDay(1)
-        val description = selected.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.ENGLISH))
+        val description = englishDescription(selected)
         showViewport()
-        // Select in the fully visible dialog; the main page nests scroll viewports.
+        // This checks dialog selection and restoration; main-viewport selection is
+        // covered separately by the two tests above.
         click("Open dialog")
         compose.onNode(
             hasContentDescription(description, substring = true) and hasAnyAncestor(isDialog()),
         ).performClick()
         clickDialog("Close")
         compose.onNodeWithText(selected.toString()).assertExists()
+        visibleMainDay(description, selected = true)
         click("Next")
         assertMonth(initial.plusMonths(1))
         compose.activityRule.scenario.recreate()
@@ -115,7 +198,7 @@ class CalendarSampleUiTest {
         compose.onNodeWithText(selected.toString()).assertExists()
         click("Previous")
         assertMonth(initial)
-        compose.onNodeWithText(selected.toString()).assertExists()
+        visibleMainDay(description, selected = true)
     }
 
     @Test
@@ -143,7 +226,7 @@ class CalendarSampleUiTest {
     }
 
     @Test
-    fun calendarAndLocaleControlsRenderTheMatchingEngineCaption() {
+    fun everyCalendarAndLocaleRendersTheExpectedCaptionContent() {
         val today = LocalDate.now()
         for (tag in listOf("en", "de", "fa", "ar")) {
             click(tag)
@@ -156,9 +239,20 @@ class CalendarSampleUiTest {
                     SampleCalendar.Hijri -> hijriMonthData(HijrahDate.from(today), locale).title
                     SampleCalendar.SolarHijri -> solarHijriMonthData(JalaliCalendar(today), locale).title
                 }
-                // The demo page is vertically scrollable; the caption content is the contract here.
                 compose.onNodeWithText(title).assertExists()
             }
         }
+    }
+
+    @Test
+    fun gregorianCaptionIsDisplayedInSingleMainViewport() {
+        val today = LocalDate.now()
+        click("en")
+        click("Gregorian")
+        compose.onAllNodesWithText("Single")[1].performClick()
+        compose.waitForIdle()
+        val title = gregorianMonthData(YearMonth.from(today), Locale.ENGLISH).title
+        showViewport()
+        assertDisplayedInMainViewport(compose.onNodeWithText(title))
     }
 }
