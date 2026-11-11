@@ -11,5 +11,5 @@ plugins {
 // projects as com.github.USER.REPO:MODULE:VERSION.
 allprojects {
     group = "com.github.mortezasun.android-calendarview"
-    version = "2.0.0"
+    version = "2.0.1"
 }

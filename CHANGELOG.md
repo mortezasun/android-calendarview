@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.0.1 - Unreleased
+
+Publishing patch for the Compose 2.0 release. No calendar rendering, selection API or
+minimum Android version changes are introduced by this patch.
+
+### Fixed
+
+- Invoke the Gradle wrapper through Bash on JitPack instead of relying on its executable bit.
+- Explicitly publish the core and all three calendar engines in the JitPack install step.
+- Correct release verification documentation and the historical candidate SHA reference.
+
+### Added
+
+- Publishing verification CI with an isolated Maven repository and checks for nonempty
+  AAR, POM, Gradle module metadata and sources artifacts for all four modules.
+
+### Verification scope
+
+All five PR checks for publishing commit `4b570f2` succeeded before merge into master
+(PR #1, merge commit `d265b7f`). The owner reports that JitPack also built that commit
+successfully. This is not a claim that `2.0.1` has already been tagged, built on JitPack
+or consumed by an independent project. The new candidate needs its own CI results.
+
 ## 2.0.0 - 2026-11-10
 
 Native Jetpack Compose release of `android-calendarview`. See [release checklist](docs/RELEASE_CHECKLIST.md)

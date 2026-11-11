@@ -1,8 +1,32 @@
 # Project status
 
-Last updated: 2026-11-10
-Version: `2.0.0`
-Branch: `update`
+Last updated: 2026-11-11
+Version: `2.0.1` (unreleased library publishing patch; published release remains `2.0.0`)
+Branch: `master`
+
+## Current patch status
+
+- PR #1 merged publishing commit `4b570f2af666fcc9ace532523a42326176215e52` into
+  master as `d265b7fd314ee55285a1970ad5bbfe1ce4df1ed3`.
+- The GitHub check-runs API confirmed all five new PR checks succeeded:
+  - Verification Run 42980672262: assemble, unit-tests and lint.
+  - Instrumentation Run 42980672194: Core and sample instrumentation.
+  - Publishing Run 42980672274: isolated Maven publication and artifact checks.
+- The owner reported on 2026-11-11 that JitPack for `4b570f2` is green and all artifacts
+  built correctly. This is owner-reported evidence; no independent log retrieval is claimed.
+- The library publication version is now prepared as `2.0.1`. No tag or GitHub Release
+  `2.0.1` is created by this preparation. The sample app version is not changed by this
+  library-only publishing patch.
+- Still open: CI for the resulting candidate, independent JitPack consumer verification,
+  explicit approval for the final tag/release, and final tagged-version consumption.
+- Physical device acceptance remains waived as recorded below. No new device testing is claimed.
+
+## Historical evidence
+
+The sessions below retain their original verification scope. Earlier statements that tests
+were unexecuted or a tag was missing describe those sessions, not the current overall state.
+The old full candidate SHA was corrected to the actual `d552dec` commit in the final historical
+section; the mapping of the older run IDs to that SHA still needs direct API confirmation.
 
 ## Verified state
 
@@ -247,7 +271,8 @@ pass and the `2.0.0` tag.
 
 ## Session 2026-11-10: Release verification and 2.0.0 release
 
-Verification of candidate `d552dec886daea64fe23c347b97364b63ee2d770`:
+Verification of candidate `d552decb8f7382e883e705533079664e76ab1158` (corrected repository SHA;
+the historical run-to-SHA mapping still needs direct confirmation):
 - CI workflow `android-verification.yml` was extended to assemble release AARs for all 4 library modules (`:library:assembleRelease`, `:calendar-gregorian:assembleRelease`, `:calendar-hijri:assembleRelease`, `:calendar-solarHijri:assembleRelease`) in addition to `:calendarviewsample:assembleDebug`, and to capture the release AAR artifacts.
 - CI outcomes for `d552dec`:
   - `Android verification` (Run 42911012589): SUCCESS across all jobs (assemble, unit-tests, lint).
