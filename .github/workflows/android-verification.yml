@@ -58,6 +58,10 @@ jobs:
       - name: Run ${{ matrix.check }}
         run: bash ./gradlew ${{ matrix.tasks }} --no-daemon --stacktrace --console=plain
 
+      - name: Test instrumentation failure reporter
+        if: matrix.check == 'unit-tests'
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
+
       - name: Check the public API surface
         if: matrix.check == 'assemble'
         run: bash scripts/api-check.sh

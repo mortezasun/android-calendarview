@@ -46,6 +46,7 @@ jobs:
         run: bash scripts/prepare-kvm.sh
 
       - name: Run all core and sample instrumented tests on API 29
+        id: instrumentation
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -71,6 +72,10 @@ jobs:
             calendarviewsample/build/outputs/androidTest-results/**
             calendarviewsample/build/outputs/apk/androidTest/debug/*.apk
 
+      - name: Summarize instrumented test reports
+        if: always()
+        run: python3 scripts/summarize-instrumented-tests.py
+
       - name: Report failed instrumented tests
-        if: failure()
+        if: ${{ failure() && steps.instrumentation.outcome == 'failure' }}
         run: python3 scripts/report-instrumented-failures.py
