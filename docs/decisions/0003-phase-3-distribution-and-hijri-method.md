@@ -53,6 +53,8 @@ those strategic options yet.
 - A host using a local Hijri method can supply a provider without changing `:library`
   or the public calendar-independent rendering surface.
 - The existing JitPack coordinates and version remain valid.
+- The existing `2.0.1` tag predates the BOM; the README marks the `2.1.0` BOM example as
+  unreleased until a consumer-verified tag exists.
 - Until the deferred items are approved, the project stays an Android Compose library
   rather than a multiplatform library, and JitPack remains the only configured
   remote publication path.

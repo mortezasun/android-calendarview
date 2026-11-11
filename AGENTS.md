@@ -55,7 +55,8 @@ is not part of your task and never reset, stash or overwrite it without explicit
   belongs in `CalendarRangePolicy`, while drag gestures and picker dialogs stay host concerns.
 - The Hijri method hook is engine-local: `HijriDateProvider` maps epoch days to `HijrahDate` and
   back. Keep the Umm-al-Qura default and forward a caller-supplied provider through month data,
-  week data and `HijriCalendarMonth`; never put mutable provider state in `:library`.
+  week data, `HijriCalendarMonth` and the provider-aware `HijriMonthState`/`rememberHijriMonthState`;
+  never put mutable provider state in `:library`.
 - Public composable signatures are API. Add options as defaulted parameters before the trailing
   `dayContent` (and, for heatmaps, `colorForIntensity`) lambda so existing calls keep compiling.
   Do not rename or remove parameters as a side effect of another change.
@@ -72,7 +73,7 @@ These commands were executed successfully with JDK 17 and Android SDK Platform 3
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew test                                    # 107 JVM unit tests, all modules
+./gradlew test                                    # 113 JVM unit tests, all modules
 ./gradlew :library:lintDebug                      # lint for the core library
 ./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \

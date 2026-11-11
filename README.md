@@ -101,13 +101,16 @@ dependencies {
 }
 ```
 
-### Bill of Materials
+### Bill of Materials (unreleased)
 
-Import the BOM once instead of repeating the version on every artifact:
+The BOM is not part of the published `2.0.1` tag. Use the explicit `2.0.1` versions above
+until a release containing the BOM is published. The proposed `2.1.0` BOM can be tested
+from a local publication or a commit build:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.0.1"))
+    // Not yet published: 2.1.0 is the proposed next release.
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.1.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
     implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri")
@@ -117,7 +120,7 @@ dependencies {
 The BOM is part of the same publication set and is included by `jitpack.yml` and the
 publishing workflow. The existing `2.0.1` release tag predates the BOM, so it resolves
 from a newer tag or commit build that includes this revision. Maven Local works with the
-publish command below. The POM contains the metadata Maven Central requires, but signing,
+publish command below; the version must match the next released tag. The POM contains the metadata Maven Central requires, but signing,
 namespace verification and upload are not configured; JitPack remains the only configured
 remote repository.
 
@@ -170,7 +173,7 @@ val hijriToday = hijriMethod.dateForEpochDay(LocalDate.now().toEpochDay())
 HijriCalendarMonth(
     month = hijriToday,
     selection = state.selection,
-    onDateClick = { date -> state.onDayClick(date.toEpochDay()) },
+    onDateClick = { date -> state.onDayClick(hijriMethod.epochDayFor(date)) },
     today = hijriToday,
     dateProvider = hijriMethod,
 )
@@ -178,7 +181,8 @@ HijriCalendarMonth(
 
 A provider maps epoch days to `HijrahDate` and back. `hijriMonthData` and `hijriWeekData`
 accept the same `dateProvider`; the provider affects labels and the displayed today, while
-selection remains keyed by absolute epoch day.
+selection remains keyed by absolute epoch day. The click callback receives the displayed
+`HijrahDate`, so map it back through `epochDayFor` before storing a selected day.
 
 ### Solar Hijri / Jalali (Persian)
 

@@ -347,8 +347,8 @@ Additive public work; no existing public name or parameter was removed or rename
   - `CalendarSelection` has structural `equals`/`hashCode`/`toString` and is `@Immutable`;
     membership uses an internal set. `CalendarSelectionState` is `@Stable`; month and heatmap data
     classes are `@Immutable`.
-  - `CalendarMonthGrid` adds optional `todayDescription`, heading semantics and
-    `CollectionInfo`/`CollectionItemInfo` per week and cell.
+  - `CalendarMonthGrid` adds optional `todayDescription`, heading semantics, one
+    `CollectionInfo` on the week container and `CollectionItemInfo` per day/week-number cell.
 - Engines:
   - `GregorianMonthData`, `HijriMonthData` and `SolarHijriMonthData` implement
     `CalendarMonthData` and are `@Immutable`.
@@ -527,4 +527,54 @@ Executed on 2026-11-11 locally (Temurin 17.0.21+9, Platform `android-37.0`, Buil
 Remaining limitations:
 - No emulator or device was available. The new Compose controls were not visually exercised,
   and the instrumentation tests were only compiled, not executed.
+
+---
+
+## Session 2026-11-11: Review fixes for Hijri identity, invariants and accessibility
+
+Follow-up to the four-commit review. The changes are additive at the public JVM level;
+old constructors and helper overloads remain present.
+
+- Hijri identity:
+  - Month offsets and week starts are derived from the absolute epoch-day weekday, not from the
+    provider-displayed HijrahDate. Month and week cells now line up with their weekday labels
+    under `-1`, `0` and `+1` methods.
+  - `HijriCalendarMonth` documents that `onDateClick` receives the displayed date; the sample
+    and README map it back with `HijriDateProvider.epochDayFor()` before storing selection.
+  - `HijriMonthState` and `rememberHijriMonthState` gained provider-aware overloads. The sample
+    navigation, month/week data, agenda data, heatmap year and disabled-date predicate all use
+    the same provider. The three-argument state API remains Umm al-Qura.
+- Selection invariants:
+  - `CalendarSelectionState` validates complete initial ranges and complete restored ranges.
+    Invalid restoration falls back to initialization; incomplete first endpoints remain valid.
+- Layout and accessibility:
+  - `calendarMonthColumns` accounts for `horizontalSpacing`; the existing two-argument helper
+    remains as a delegating overload.
+  - The month grid exposes one `CollectionInfo` on its week container and item info on day and
+    optional week-number cells. Default header arrows mirror in RTL.
+- Distribution docs: the README marks the `2.1.0` BOM example as unreleased; the existing
+  `2.0.1` tag still has no BOM. API dumps contain only the three additive signatures.
+- Tests: provider-backed month/week alignment, provider state today, sample month boundary and
+  range-constructor rejection were added.
+
+Executed on 2026-11-11 locally (Temurin 17.0.21+9, Platform `android-37.0`, Build-Tools 36.0.0):
+
+| Check | Result |
+|-------|--------|
+| `test` (all modules) | 113 tests, 0 failures, 0 errors, 0 skipped |
+| `:calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
+| `lintDebug` for library, Gregorian, Hijri, Solar Hijri and sample | BUILD SUCCESSFUL, 0 errors |
+| AndroidTest compilation for library, Hijri and sample | BUILD SUCCESSFUL (compiled only, not executed) |
+| Release AARs for all four library modules | BUILD SUCCESSFUL |
+| `publishToMavenLocal` for all modules and BOM | BUILD SUCCESSFUL |
+| BOM POM constraints | library, Gregorian, Hijri and Solar Hijri at `2.0.1` |
+| `bash scripts/api-check.sh` after `--update` | Public API matches the checked-in dumps |
+
+Remaining limitations:
+- No emulator or device was available. Instrumented tests, visual RTL arrows, semantics and the
+  new sample interactions were not executed.
+- The API guard is a static JVM-signature check. No standalone consumer binary compiled against
+  the published `2.0.1` artifacts was built.
+- No version bump, tag, JitPack consumer build, Maven Central upload or release was performed. The
+  `2.1.0` BOM example remains explicitly unreleased.
 

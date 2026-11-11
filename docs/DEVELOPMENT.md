@@ -10,7 +10,7 @@
 | Change month grid geometry | `library/.../compose/CalendarMonthGrid.kt` and `CalendarMonthCells.kt` (`buildCalendarMonthCells`, `fixedSixRows`) |
 | Add a calendar system | New Gradle module with a `*MonthData` builder and a `*CalendarMonth` composable, modeled on `:calendar-gregorian` |
 | Change day formatting | The engine's `*MonthData.kt` / `*DayCell` code in its own module; the grid only renders `CalendarDayCell` |
-| Change the Hijri method | `calendar-hijri/.../HijriDateProvider.kt`; pass the provider through `hijriMonthData`, `hijriWeekData` and `HijriCalendarMonth` |
+| Change the Hijri method | `calendar-hijri/.../HijriDateProvider.kt`; pass the provider through `hijriMonthData`, `hijriWeekData`, `HijriCalendarMonth` and the provider-aware `HijriMonthState`/`rememberHijriMonthState` |
 | Change heatmap rendering | `library/.../compose/CalendarHeatmap.kt` (`HeatmapBlock`, `HeatmapCell`) |
 | Change heatmap data handling | `heatmapQuarterData` (Gregorian) / `CalendarMonthData.toHeatmap()`; see `calendarviewsample/.../CalendarSampleHeatmap.kt` |
 | Add month navigation | `:library` `compose/CalendarMonthHeader.kt` (state contract and header); the engine's `compose/*MonthState.kt` (month arithmetic and saved state) |
