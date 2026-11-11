@@ -8,7 +8,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -79,16 +81,26 @@ class CalendarSampleUiTest {
     }
 
     private fun scrollMainViewportUp() {
-        val window = compose.onNode(hasText("Window month ", substring = true))
-        window.performScrollTo()
-        window.performTouchInput {
+        val page = compose.onNode(
+            hasScrollAction() and hasAnyDescendant(hasText("Window month ", substring = true)),
+        )
+        page.performTouchInput {
             swipe(
-                start = center,
-                end = Offset(center.x, (center.y - 300f).coerceAtLeast(0f)),
+                start = Offset(center.x, 300f),
+                end = Offset(center.x, 0f),
                 durationMillis = 300,
             )
         }
         compose.waitForIdle()
+    }
+
+    private fun assertDisplayed(node: SemanticsNodeInteraction, label: String) {
+        try {
+            node.assertIsDisplayed()
+        } catch (error: AssertionError) {
+            val bounds = node.fetchSemanticsNode().boundsInRoot
+            throw AssertionError("$label is not displayed; boundsInRoot=$bounds", error)
+        }
     }
 
     private fun assertDisplayedInMainViewport(node: SemanticsNodeInteraction) {
@@ -100,7 +112,7 @@ class CalendarSampleUiTest {
         }
         node.performScrollTo()
         compose.waitForIdle()
-        node.assertIsDisplayed()
+        assertDisplayed(node, "Main calendar day")
     }
 
     private fun visibleMainDay(description: String, selected: Boolean): SemanticsNodeInteraction {
