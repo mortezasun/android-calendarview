@@ -8,7 +8,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.develotter.calendarview.calendars.hijri.HijriDateProvider
+import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
+import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
@@ -21,6 +24,10 @@ import java.util.Locale
  * Months are normalized to their first day, so the state never carries a day-of-month that
  * could overflow during navigation. Navigation stops at the bounds instead of throwing;
  * [goTo] rejects out-of-range targets. Mutate on the UI thread.
+ *
+ * The three-parameter constructor uses Umm al-Qura for [goToToday]. Use the provider
+ * constructor when the displayed dates come from another [HijriDateProvider], so "today"
+ * follows the same absolute-day method as the grid.
  */
 @Stable
 class HijriMonthState(
@@ -28,6 +35,18 @@ class HijriMonthState(
     minMonth: HijrahDate? = null,
     maxMonth: HijrahDate? = null,
 ) : CalendarMonthNavigationState {
+    private var dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider
+
+    /** Creates a state whose today action uses [dateProvider] for the absolute-day mapping. */
+    constructor(
+        initialMonth: HijrahDate,
+        minMonth: HijrahDate? = null,
+        maxMonth: HijrahDate? = null,
+        dateProvider: HijriDateProvider,
+    ) : this(initialMonth, minMonth, maxMonth) {
+        this.dateProvider = dateProvider
+    }
+
     val minMonth: HijrahDate? = minMonth?.let(::firstDayOfMonth)
     val maxMonth: HijrahDate? = maxMonth?.let(::firstDayOfMonth)
 
@@ -51,7 +70,7 @@ class HijriMonthState(
         get() = maxMonth == null || month.toEpochDay() < maxMonth.toEpochDay()
 
     override val canGoToday: Boolean
-        get() = inRange(firstDayOfMonth(HijrahDate.now()))
+        get() = inRange(todayMonth())
 
     override fun previous() {
         if (canGoPrevious) month = firstDayOfMonth(month.minus(1, ChronoUnit.MONTHS))
@@ -62,7 +81,7 @@ class HijriMonthState(
     }
 
     override fun goToToday() {
-        val today = firstDayOfMonth(HijrahDate.now())
+        val today = todayMonth()
         if (inRange(today)) month = today
     }
 
@@ -76,6 +95,9 @@ class HijriMonthState(
     /** Localized month caption matching [hijriMonthData]. */
     fun title(locale: Locale = Locale.getDefault()): String =
         month.format(DateTimeFormatter.ofPattern("MMMM y G", locale).withChronology(month.chronology))
+
+    private fun todayMonth(): HijrahDate =
+        firstDayOfMonth(dateProvider.dateForEpochDay(LocalDate.now().toEpochDay()))
 
     private fun inRange(value: HijrahDate): Boolean {
         val min = minMonth
@@ -114,5 +136,34 @@ fun rememberHijriMonthState(
     }
     return rememberSaveable(initialMonth, minMonth, maxMonth, saver = saver) {
         HijriMonthState(initialMonth, minMonth, maxMonth)
+    }
+}
+
+/**
+ * Remembers a saveable [HijriMonthState] whose today action uses [dateProvider]. The saved
+ * value is the Hijri year and month; restoration normalizes to the first day again.
+ */
+@Composable
+fun rememberHijriMonthState(
+    initialMonth: HijrahDate,
+    minMonth: HijrahDate? = null,
+    maxMonth: HijrahDate? = null,
+    dateProvider: HijriDateProvider,
+): HijriMonthState {
+    val saver = remember(minMonth, maxMonth, dateProvider) {
+        listSaver<HijriMonthState, Int>(
+            save = {
+                listOf(
+                    it.month.get(ChronoField.YEAR),
+                    it.month.get(ChronoField.MONTH_OF_YEAR),
+                )
+            },
+            restore = {
+                HijriMonthState(HijrahDate.of(it[0], it[1], 1), minMonth, maxMonth, dateProvider)
+            },
+        )
+    }
+    return rememberSaveable(initialMonth, minMonth, maxMonth, dateProvider, saver = saver) {
+        HijriMonthState(initialMonth, minMonth, maxMonth, dateProvider)
     }
 }

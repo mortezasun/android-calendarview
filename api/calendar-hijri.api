@@ -54,6 +54,7 @@ public final class com.develotter.calendarview.calendars.hijri.compose.HijriMont
 
 public final class com.develotter.calendarview.calendars.hijri.compose.HijriMonthState implements com.develotter.calendarview.compose.CalendarMonthNavigationState {
   public com.develotter.calendarview.calendars.hijri.compose.HijriMonthState(java.time.chrono.HijrahDate, java.time.chrono.HijrahDate, java.time.chrono.HijrahDate);
+  public com.develotter.calendarview.calendars.hijri.compose.HijriMonthState(java.time.chrono.HijrahDate, java.time.chrono.HijrahDate, java.time.chrono.HijrahDate, com.develotter.calendarview.calendars.hijri.HijriDateProvider);
   public final java.time.chrono.HijrahDate getMinMonth();
   public final java.time.chrono.HijrahDate getMaxMonth();
   public final java.time.chrono.HijrahDate getMonth();
@@ -69,6 +70,7 @@ public final class com.develotter.calendarview.calendars.hijri.compose.HijriMont
 
 public final class com.develotter.calendarview.calendars.hijri.compose.HijriMonthStateKt {
   public static final com.develotter.calendarview.calendars.hijri.compose.HijriMonthState rememberHijriMonthState(java.time.chrono.HijrahDate, java.time.chrono.HijrahDate, java.time.chrono.HijrahDate, androidx.compose.runtime.Composer, int, int);
+  public static final com.develotter.calendarview.calendars.hijri.compose.HijriMonthState rememberHijriMonthState(java.time.chrono.HijrahDate, java.time.chrono.HijrahDate, java.time.chrono.HijrahDate, com.develotter.calendarview.calendars.hijri.HijriDateProvider, androidx.compose.runtime.Composer, int, int);
 }
 
 public final class com.develotter.calendarview.calendars.hijri.compose.HijriWeekData implements com.develotter.calendarview.compose.CalendarWeekData {

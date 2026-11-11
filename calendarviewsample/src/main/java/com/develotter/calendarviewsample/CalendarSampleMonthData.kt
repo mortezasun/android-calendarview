@@ -9,7 +9,6 @@ import com.develotter.calendarview.compose.CalendarMonthData
 import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.chrono.HijrahDate
 import java.util.Locale
 
 /**
@@ -28,7 +27,7 @@ fun sampleMonthData(
     return when (calendar) {
         SampleCalendar.Gregorian -> gregorianMonthData(YearMonth.from(date), locale, today = today)
         SampleCalendar.Hijri -> hijriMonthData(
-            month = HijrahDate.from(date),
+            month = hijriDateProvider.dateForEpochDay(anchorEpochDay),
             locale = locale,
             today = hijriDateProvider.dateForEpochDay(today.toEpochDay()),
             dateProvider = hijriDateProvider,

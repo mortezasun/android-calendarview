@@ -82,9 +82,11 @@ private val firstDayOptions = listOf<DayOfWeek?>(null, DayOfWeek.MONDAY, DayOfWe
 private fun HeatmapSample() {
     var calendarName by rememberSaveable { mutableStateOf(SampleCalendar.Gregorian.name) }
     val calendar = SampleCalendar.valueOf(calendarName)
-    var year by rememberSaveable(calendarName) { mutableStateOf(sampleHeatmapCurrentYear(calendar)) }
     var hijriOffset by rememberSaveable { mutableIntStateOf(0) }
     val hijriProvider = remember(hijriOffset) { OffsetHijriDateProvider(hijriOffset) }
+    var year by rememberSaveable(calendarName, hijriOffset) {
+        mutableStateOf(sampleHeatmapCurrentYear(calendar, hijriDateProvider = hijriProvider))
+    }
     var labels by rememberSaveable { mutableStateOf(true) }
     var header by rememberSaveable { mutableStateOf(true) }
     var localeTag by rememberSaveable { mutableStateOf("en") }

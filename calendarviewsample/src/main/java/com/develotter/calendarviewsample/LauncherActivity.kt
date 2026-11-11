@@ -204,7 +204,12 @@ private fun CalendarSample(onHeatmap: () -> Unit) {
                     }
                 }
                 if (useHeaderApi) {
-                    val navigation = rememberSampleMonthNavigation(calendar, anchor, locale) { visible ->
+                    val navigation = rememberSampleMonthNavigation(
+                        calendar = calendar,
+                        anchor = anchor,
+                        locale = locale,
+                        hijriDateProvider = hijriProvider,
+                    ) { visible ->
                         anchor = visible
                         error = null
                     }
@@ -340,8 +345,9 @@ private fun SampleMonth(
             showHeader = showHeader, weekNumber = weekNumberProvider,
         )
         SampleCalendar.Hijri -> HijriCalendarMonth(
-            month = HijrahDate.from(date), selection = state.selection,
-            onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+            month = hijriProvider.dateForEpochDay(anchor), selection = state.selection,
+            onDateClick = { state.onDayClick(hijriProvider.epochDayFor(it)) },
+            locale = locale, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             today = hijriToday, todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider, dateProvider = hijriProvider,
@@ -371,7 +377,7 @@ private fun SampleWeek(
     val week: CalendarWeekData = when (calendar) {
         SampleCalendar.Gregorian -> gregorianWeekData(date, locale)
         SampleCalendar.Hijri -> hijriWeekData(
-            date = HijrahDate.from(date),
+            date = hijriProvider.dateForEpochDay(anchor),
             locale = locale,
             today = hijriToday,
             dateProvider = hijriProvider,

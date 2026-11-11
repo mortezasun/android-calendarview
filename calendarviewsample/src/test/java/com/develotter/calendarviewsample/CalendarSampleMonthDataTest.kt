@@ -30,6 +30,22 @@ class CalendarSampleMonthDataTest {
     }
 
     @Test
+    fun hijriMonthStartsAtTheProvidersAbsoluteMonthBoundary() {
+        val provider = OffsetHijriDateProvider(offsetDays = 1)
+        val first = HijrahDate.of(1448, 1, 1)
+        val firstEpochDay = provider.epochDayFor(first)
+        val data = sampleMonthData(
+            calendar = SampleCalendar.Hijri,
+            anchorEpochDay = firstEpochDay,
+            locale = locale,
+            hijriDateProvider = provider,
+        )
+
+        assertEquals(firstEpochDay, data.days.first().epochDay)
+        assertEquals(first, provider.dateForEpochDay(data.days.first().epochDay))
+    }
+
+    @Test
     fun weekNumberUsesTheLocaleWeekFields() {
         val weekNumber = sampleWeekNumber(LocalDate.of(2026, 1, 5).toEpochDay(), Locale.US)
         assertTrue(weekNumber.isNotBlank())

@@ -3,8 +3,11 @@ package com.develotter.calendarviewsample
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import com.develotter.calendarview.calendars.gregorian.compose.rememberGregorianMonthState
+import com.develotter.calendarview.calendars.hijri.HijriDateProvider
+import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.calendars.hijri.compose.rememberHijriMonthState
 import com.develotter.calendarview.calendars.solarHijri.compose.rememberSolarHijriMonthState
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
@@ -12,7 +15,6 @@ import com.develotter.calendarview.compose.CalendarMonthNavigationState
 import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
 import java.util.Locale
 
@@ -32,13 +34,16 @@ internal fun rememberSampleMonthNavigation(
     calendar: SampleCalendar,
     anchor: Long,
     locale: Locale,
+    hijriDateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
     onMonthChanged: (Long) -> Unit,
 ): SampleMonthNavigation {
     val date = LocalDate.ofEpochDay(anchor)
     val onChanged by rememberUpdatedState(onMonthChanged)
     return when (calendar) {
         SampleCalendar.Gregorian -> {
-            val state = rememberGregorianMonthState(YearMonth.from(date))
+            // Keep the state initializer stable; the anchor effect below is the controlled input.
+            val initialMonth = remember { YearMonth.from(date) }
+            val state = rememberGregorianMonthState(initialMonth)
             LaunchedEffect(state.month) {
                 val epochDay = state.month.atDay(1).toEpochDay()
                 if (epochDay != anchor) onChanged(epochDay)
@@ -50,19 +55,27 @@ internal fun rememberSampleMonthNavigation(
             SampleMonthNavigation(title = state.title(locale), state = state)
         }
         SampleCalendar.Hijri -> {
-            val state = rememberHijriMonthState(HijrahDate.from(date))
+            val initialMonth = remember(hijriDateProvider) {
+                hijriDateProvider.dateForEpochDay(anchor)
+            }
+            val state = rememberHijriMonthState(
+                initialMonth = initialMonth,
+                dateProvider = hijriDateProvider,
+            )
             LaunchedEffect(state.month) {
-                if (state.month.toEpochDay() != anchor) onChanged(state.month.toEpochDay())
+                val epochDay = hijriDateProvider.epochDayFor(state.month)
+                if (epochDay != anchor) onChanged(epochDay)
             }
             LaunchedEffect(anchor) {
-                val target = HijrahDate.from(LocalDate.ofEpochDay(anchor))
+                val target = hijriDateProvider.dateForEpochDay(anchor)
                     .with(ChronoField.DAY_OF_MONTH, 1)
                 if (state.month != target) state.goTo(target)
             }
             SampleMonthNavigation(title = state.title(locale), state = state)
         }
         SampleCalendar.SolarHijri -> {
-            val state = rememberSolarHijriMonthState(JalaliCalendar(date))
+            val initialMonth = remember { JalaliCalendar(date) }
+            val state = rememberSolarHijriMonthState(initialMonth)
             LaunchedEffect(state.year, state.monthNumber) {
                 val epochDay = solarHijriEpochDay(state.month)
                 if (epochDay != anchor) onChanged(epochDay)

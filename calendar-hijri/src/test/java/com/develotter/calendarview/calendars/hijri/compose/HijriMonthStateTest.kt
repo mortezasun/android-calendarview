@@ -4,6 +4,8 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import com.develotter.calendarview.calendars.hijri.OffsetHijriDateProvider
+import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.util.Locale
 
@@ -55,5 +57,16 @@ class HijriMonthStateTest {
     fun titleUsesTheHijriChronology() {
         val state = HijriMonthState(HijrahDate.of(1448, 1, 1))
         assertTrue(state.title(Locale.US).isNotBlank())
+    }
+
+    @Test
+    fun providerConstructorUsesTheProviderForToday() {
+        val provider = OffsetHijriDateProvider(offsetDays = 1)
+        val displayedToday = provider.dateForEpochDay(LocalDate.now().toEpochDay())
+        val state = HijriMonthState(displayedToday, dateProvider = provider)
+
+        assertTrue(state.canGoToday)
+        state.goToToday()
+        assertEquals(1, state.month.get(java.time.temporal.ChronoField.DAY_OF_MONTH))
     }
 }

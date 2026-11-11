@@ -47,7 +47,7 @@ fun sampleHeatmapYear(
             firstDayOfWeek = firstDayOfWeek ?: DayOfWeek.SATURDAY,
             today = hijriDateProvider.dateForEpochDay(today.toEpochDay()),
             dateProvider = hijriDateProvider,
-            isDateEnabled = { isDateEnabled(LocalDate.from(it)) },
+            isDateEnabled = { isDateEnabled(LocalDate.ofEpochDay(hijriDateProvider.epochDayFor(it))) },
         )
         data.toHeatmap { sampleHeatmapIntensity(it) }
     }
@@ -63,9 +63,13 @@ fun sampleHeatmapYear(
 }
 
 /** Current calendar year, used to reset navigation when the calendar changes. */
-fun sampleHeatmapCurrentYear(calendar: SampleCalendar, today: LocalDate = LocalDate.now()): Int = when (calendar) {
+fun sampleHeatmapCurrentYear(
+    calendar: SampleCalendar,
+    today: LocalDate = LocalDate.now(),
+    hijriDateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+): Int = when (calendar) {
     SampleCalendar.Gregorian -> today.year
-    SampleCalendar.Hijri -> HijrahDate.from(today).get(ChronoField.YEAR)
+    SampleCalendar.Hijri -> hijriDateProvider.dateForEpochDay(today.toEpochDay()).get(ChronoField.YEAR)
     SampleCalendar.SolarHijri -> JalaliCalendar(today).year
 }
 
