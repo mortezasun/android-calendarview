@@ -28,6 +28,29 @@ class CalendarSelectionStateTest {
     }
 
     @Test
+    fun directConstructionRejectsACompleteRangeOutsideThePolicy() {
+        var rejected = false
+        try {
+            CalendarSelectionState(
+                CalendarSelection.from(TypeSelectDay.Range, listOf(1L, 30L)),
+                CalendarRangePolicy(minRangeLength = 2, maxRangeLength = 14),
+            )
+        } catch (_: IllegalArgumentException) {
+            rejected = true
+        }
+        assertTrue(rejected)
+    }
+
+    @Test
+    fun incompleteInitialRangeIsAccepted() {
+        val state = CalendarSelectionState(
+            CalendarSelection.from(TypeSelectDay.Range, listOf(1L)),
+            CalendarRangePolicy(minRangeLength = 2, maxRangeLength = 14),
+        )
+        assertEquals(listOf(1L), state.selection.selectedDays)
+    }
+
+    @Test
     fun incompleteEndpointsAndNonRangeModesAreUnaffected() {
         val range = CalendarSelectionState(
             CalendarSelection.empty(TypeSelectDay.Range),

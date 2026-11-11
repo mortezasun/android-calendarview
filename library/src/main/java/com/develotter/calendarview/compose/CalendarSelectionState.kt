@@ -26,6 +26,13 @@ class CalendarSelectionState(
 ) {
     constructor(initialSelection: CalendarSelection) : this(initialSelection, CalendarRangePolicy())
 
+    init {
+        val days = initialSelection.selectedDays
+        require(
+            !initialSelection.isRangeComplete || rangePolicy.allows(days[0], days[1]),
+        ) { "initialSelection must satisfy rangePolicy" }
+    }
+
     var selection by mutableStateOf(initialSelection)
         private set
 
@@ -60,10 +67,11 @@ class CalendarSelectionState(
 /**
  * Remembers selection and saves a version, mode and explicit absolute-day keys.
  * An empty selection still has a nonempty snapshot and takes precedence over initial dates.
- * Changing mode during composition resets selection. Restoration separately checks mode;
- * incompatible or invalid snapshots fall back to initialization. Old unversioned snapshots
- * from development builds are not migrated. Initial dates are initializers, not controlled
- * inputs. Saved-state size still grows with explicit multiple selections.
+ * Changing mode during composition resets selection. Restoration separately checks mode and
+ * complete range policy; incompatible or invalid snapshots fall back to initialization. Old
+ * unversioned snapshots from development builds are not migrated. Initial dates are
+ * initializers, not controlled inputs. Saved-state size still grows with explicit multiple
+ * selections.
  */
 @Composable
 fun rememberCalendarSelectionState(
@@ -76,8 +84,13 @@ fun rememberCalendarSelectionState(
     saver = listSaver<CalendarSelectionState, String>(
         save = { CalendarSelectionSnapshot.encode(it.selection) },
         restore = { values ->
-            CalendarSelectionSnapshot.decode(mode, values)?.let {
-                CalendarSelectionState(it, rangePolicy)
+            CalendarSelectionSnapshot.decode(mode, values)?.let { restored ->
+                val days = restored.selectedDays
+                if (restored.isRangeComplete && !rangePolicy.allows(days[0], days[1])) {
+                    null
+                } else {
+                    CalendarSelectionState(restored, rangePolicy)
+                }
             }
         },
     ),
