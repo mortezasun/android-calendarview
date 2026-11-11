@@ -69,8 +69,8 @@ Building only the core library:
 ```
 
 `src/test` holds the JVM tests: selection engine and saved-state snapshots, month-cell building,
-heatmap data and style validation, the sample helpers and one month-data suite per calendar
-engine. `src/androidTest` holds the Compose UI tests (`CalendarSelectionComposeTest`,
+heatmap data and style validation, the sample helpers, the Hijri date-provider mapping and one
+month-data suite per calendar engine. `src/androidTest` holds the Compose UI tests (`CalendarSelectionComposeTest`,
 `CalendarHeatmapComposeTest`, `CalendarMonthHeaderComposeTest`,
 `CalendarProductViewsComposeTest`, plus the sample acceptance tests). Only the `ExampleUnitTest` /
 `ExampleInstrumentedTest` files are leftover templates. Instrumented tests require an emulator or
@@ -114,20 +114,26 @@ JVM signatures only, not Kotlin default values, annotations or source compatibil
 The four library modules apply `maven-publish` and publish their `release` variant with a sources
 jar as `com.github.mortezasun.android-calendarview:<module>:<version>`. The group and version are
 defined once in the root `build.gradle.kts`; the artifact id is the module name.
-`calendarviewsample` is not published. `jitpack.yml` pins JDK 17 for the JitPack build.
+`:calendar-bom` publishes a `java-platform` POM with constraints for all four modules.
+`calendarviewsample` is not published. `jitpack.yml` pins JDK 17 for the JitPack build and
+publishes the BOM together with the modules.
 
 ```bash
 ./gradlew \
   :library:publishToMavenLocal \
   :calendar-gregorian:publishToMavenLocal \
   :calendar-hijri:publishToMavenLocal \
-  :calendar-solarHijri:publishToMavenLocal
+  :calendar-solarHijri:publishToMavenLocal \
+  :calendar-bom:publishToMavenLocal
 ```
 
 Artifacts land in `~/.m2/repository/com/github/mortezasun/android-calendarview/`. Check the
-generated POMs: each `calendar-*` module must depend on `...:library` in compile scope, and
-`calendar-solarHijri` must additionally carry `ir.huri:jalalicalendar`. Publishing locally does not
-prove that JitPack can build the project; that needs a separate consumer test against JitPack.
+generated POMs: each `calendar-*` module must depend on `...:library` in compile scope,
+`calendar-solarHijri` must additionally carry `ir.huri:jalalicalendar`, and the BOM must list all
+four modules in `dependencyManagement` with the root version. The shared POM fields (name,
+description, URL, license, developer, SCM) come from the root build. Maven Central signing and
+upload are not configured. Publishing locally does not prove that JitPack can build the project;
+that needs a separate consumer test against JitPack.
 
 ## Known setup problems
 

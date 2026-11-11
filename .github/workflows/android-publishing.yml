@@ -38,13 +38,13 @@ jobs:
       - name: Install documented Android SDK packages
         run: sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;36.0.0"
 
-      - name: Publish all four library modules to an isolated Maven repository
+      - name: Publish all library modules and the BOM to an isolated Maven repository
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .ci-diagnostics
           git rev-parse HEAD | tee .ci-diagnostics/publishing-sha.txt
-          bash ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal \
+          bash ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal :calendar-bom:publishToMavenLocal \
             -Dmaven.repo.local="$RUNNER_TEMP/calendar-maven" \
             --no-daemon --stacktrace --console=plain 2>&1 | tee .ci-diagnostics/publishing.txt
 
@@ -66,6 +66,16 @@ jobs:
             done
             cp -R "$directory" .ci-diagnostics/publications/
           done
+          bom_base="$base/calendar-bom"
+          for suffix in .pom .module; do
+            file=$(find "$bom_base" -type f -name "calendar-bom-*${suffix}" -size +0c -print -quit)
+            if [ -z "$file" ]; then
+              echo "Missing nonempty BOM publication: calendar-bom $suffix" >&2
+              exit 1
+            fi
+            echo "Verified $file"
+          done
+          cp -R "$bom_base" .ci-diagnostics/publications/
 
       - name: Upload publishing diagnostics and artifacts
         if: always()

@@ -19,7 +19,8 @@ is not part of your task and never reset, stash or overwrite it without explicit
 - `:library` contains the Compose core: month grid, selection engine, scrolling containers and
   heatmaps.
 - `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` are calendar engines that depend
-  on `:library`. `:calendarviewsample` is the demo app and depends on all modules.
+  on `:library`. `:calendar-bom` is a `java-platform` publication that constrains their versions;
+  `:calendarviewsample` is the demo app and depends on all modules.
 - Public API lives in `com.develotter.calendarview.*`; calendar-specific types live in
   `com.develotter.calendarview.calendars.*`.
 - Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk` 37,
@@ -52,6 +53,9 @@ is not part of your task and never reset, stash or overwrite it without explicit
 - Marker, week, agenda and adaptive-month APIs are calendar-independent product views in
   `:library`. `CalendarWeekData` is implemented by each engine's `*WeekData`; range validation
   belongs in `CalendarRangePolicy`, while drag gestures and picker dialogs stay host concerns.
+- The Hijri method hook is engine-local: `HijriDateProvider` maps epoch days to `HijrahDate` and
+  back. Keep the Umm-al-Qura default and forward a caller-supplied provider through month data,
+  week data and `HijriCalendarMonth`; never put mutable provider state in `:library`.
 - Public composable signatures are API. Add options as defaulted parameters before the trailing
   `dayContent` (and, for heatmaps, `colorForIntensity`) lambda so existing calls keep compiling.
   Do not rename or remove parameters as a side effect of another change.
@@ -68,11 +72,12 @@ These commands were executed successfully with JDK 17 and Android SDK Platform 3
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew test                                    # 99 JVM unit tests, all modules
+./gradlew test                                    # 104 JVM unit tests, all modules
 ./gradlew :library:lintDebug                      # lint for the core library
 ./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
-  :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal  # into ~/.m2
+  :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal \
+  :calendar-bom:publishToMavenLocal  # into ~/.m2
 
 # After the four release AARs are built:
 bash scripts/api-check.sh          # public JVM API diff against api/*.api

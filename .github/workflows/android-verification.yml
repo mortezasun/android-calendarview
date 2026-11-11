@@ -24,7 +24,7 @@ jobs:
       matrix:
         include:
           - check: assemble
-            tasks: ':calendarviewsample:assembleDebug :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease'
+            tasks: ':calendarviewsample:assembleDebug :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease :calendar-bom:generatePomFileForCalendarBomPublication'
           - check: unit-tests
             tasks: 'test'
           - check: lint

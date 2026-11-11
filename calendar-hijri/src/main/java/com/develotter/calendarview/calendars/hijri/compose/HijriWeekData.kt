@@ -1,13 +1,14 @@
 package com.develotter.calendarview.calendars.hijri.compose
 
 import androidx.compose.runtime.Immutable
+import com.develotter.calendarview.calendars.hijri.HijriDateProvider
+import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
 import java.time.DayOfWeek
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
-import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
@@ -21,9 +22,8 @@ data class HijriWeekData(
 ) : CalendarWeekData
 
 /**
- * Builds a Hijri week around [date], aligned to [firstDayOfWeek].
- * The platform Hijrah chronology is Umm al-Qura; local moon-sighting adjustments are the
- * caller's responsibility. No Hijri week-number convention is assumed, so [weekNumber] is null.
+ * Builds a Hijri week with the platform Umm al-Qura chronology. Use the provider overload
+ * for a local date method. No Hijri week-number convention is assumed, so [weekNumber] is null.
  */
 fun hijriWeekData(
     date: HijrahDate,
@@ -31,23 +31,49 @@ fun hijriWeekData(
     firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
     today: HijrahDate = HijrahDate.now(),
     isDateEnabled: (HijrahDate) -> Boolean = { true },
+): HijriWeekData = hijriWeekData(
+    date = date,
+    locale = locale,
+    firstDayOfWeek = firstDayOfWeek,
+    today = today,
+    dateProvider = UmmAlQuraHijriDateProvider,
+    isDateEnabled = isDateEnabled,
+)
+
+/**
+ * Builds a Hijri week around [date], aligned to [firstDayOfWeek], using [dateProvider].
+ * Local moon-sighting adjustments come from an [HijriDateProvider]. No Hijri week-number
+ * convention is assumed, so [weekNumber] is null.
+ */
+fun hijriWeekData(
+    date: HijrahDate,
+    locale: Locale = Locale.getDefault(),
+    firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
+    today: HijrahDate = HijrahDate.now(),
+    dateProvider: HijriDateProvider,
+    isDateEnabled: (HijrahDate) -> Boolean = { true },
 ): HijriWeekData {
     val start = date.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
-    val end = start.plus(6, ChronoUnit.DAYS)
+    val startEpochDay = dateProvider.epochDayFor(start)
+    val dates = List(7) { offset ->
+        dateProvider.dateForEpochDay(startEpochDay + offset)
+    }
+    val days = dates.mapIndexed { offset, date ->
+        hijriDayCellForEpoch(
+            date = date,
+            epochDay = startEpochDay + offset,
+            locale = locale,
+            today = today,
+            isDateEnabled = isDateEnabled,
+        )
+    }
     val titleFormat = DateTimeFormatter.ofPattern("d MMM y G", locale)
         .withChronology(date.chronology)
     return HijriWeekData(
-        title = "${start.format(titleFormat)} – ${end.format(titleFormat)}",
+        title = "${dates.first().format(titleFormat)} – ${dates.last().format(titleFormat)}",
         weekdayLabels = List(7) { offset ->
             firstDayOfWeek.plus(offset.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale)
         },
-        days = List(7) { offset ->
-            hijriDayCell(
-                date = start.plus(offset.toLong(), ChronoUnit.DAYS),
-                locale = locale,
-                today = today,
-                isDateEnabled = isDateEnabled,
-            )
-        },
+        days = days,
     )
 }

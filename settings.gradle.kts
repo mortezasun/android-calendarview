@@ -25,6 +25,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "calendarview"
 include(":library")
+include(":calendar-bom")
 
 include(":calendarviewsample")
 include(":calendar-gregorian")

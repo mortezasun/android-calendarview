@@ -425,3 +425,72 @@ Remaining limitations:
 - The week-number callback is intentionally caller-owned; Gregorian data supplies a deterministic
   week number, while Hijri and Solar Hijri leave it null because no shared convention exists.
 
+---
+
+## Session 2026-11-11: Phase 3 - BOM, POM metadata and Hijri method hook
+
+Additive public work. Existing Hijri function signatures are retained as overloads; the new
+provider variants add declarations rather than removing or renaming existing calls.
+
+- Distribution:
+  - New `:calendar-bom` `java-platform` module with constraints for `library`,
+    `calendar-gregorian`, `calendar-hijri` and `calendar-solarHijri` at the root version.
+  - Root `build.gradle.kts` now supplies the shared Maven POM fields (name, description, URL,
+    Apache-2.0 license, developer, SCM) to every `maven-publish` publication.
+  - `settings.gradle.kts`, `jitpack.yml`, the publishing workflow and the verification workflow
+    include the BOM. Publishing CI verifies its `.pom` and `.module` artifacts separately from
+    the AAR modules.
+- Hijri method hook:
+  - `HijriDateProvider` maps absolute epoch days to `HijrahDate` and back.
+    `UmmAlQuraHijriDateProvider` is the default; `OffsetHijriDateProvider` applies a uniform
+    local-method offset.
+  - `hijriMonthData`, `hijriWeekData` and `HijriCalendarMonth` have provider overloads. The
+    original signatures remain as delegating overloads, so previously compiled callers keep
+    their JVM entry points.
+  - Provider-backed cells keep the absolute epoch-day identity separate from the displayed
+    Hijri date, so selection and click callbacks remain consistent under an offset.
+  - Tests cover round-trip mapping, positive and negative offsets, month/week generation and
+    default-provider equivalence.
+- Documentation: README, ARCHITECTURE, DEVELOPMENT, SETUP, AGENTS and ADR 0003 describe the BOM,
+  the provider and the deferred strategic decisions.
+
+Executed on 2026-11-11 locally (Temurin 17.0.21+9, Platform `android-37.0`, Build-Tools 36.0.0):
+
+| Check | Result |
+|-------|--------|
+| `test` (all modules) | 104 tests, 0 failures, 0 errors, 0 skipped |
+| `:calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
+| `:library:lintDebug`, `:calendar-gregorian:lintDebug`, `:calendar-hijri:lintDebug`, `:calendar-solarHijri:lintDebug`, `:calendarviewsample:lintDebug` | BUILD SUCCESSFUL, 0 errors |
+| Release AARs for all four library modules | BUILD SUCCESSFUL |
+| BOM `publishToMavenLocal` | BUILD SUCCESSFUL; `.pom` and `.module` present |
+| `bash scripts/api-check.sh` after `--update` | Public API matches the checked-in dumps |
+
+Remaining limitations:
+- No emulator or device was available, so the Compose instrumentation tests were not executed.
+- Maven Central signing, namespace verification and upload are not configured. The POM metadata
+  is present, but no Maven Central release was performed.
+- Kotlin Multiplatform `:core`, replacement of `ir.huri:jalalicalendar`, a Play demo and a hosted
+  documentation site were deferred pending their architectural/product decisions (ADR 0003).
+- The existing `2.0.1` release tag predates the BOM; it becomes consumable from JitPack only from a
+  newer tag or commit build.
+- No release tag or version bump was performed; the Phase 3 changes are committed and pushed to
+  `update`.
+
+### Next step: release and consumer-verify the BOM
+
+The immediate next step is a versioned release containing `:calendar-bom`, followed by an
+independent consumer build. The existing `2.0.1` tag cannot prove the BOM or the provider API.
+The proposed version is `2.1.0` because the change is additive but adds a public Hijri provider
+API and a new published artifact.
+
+Acceptance criteria:
+
+1. Decide and apply the version (`2.1.0` proposed), then create the annotated tag.
+2. Let JitPack build the tag and confirm the BOM POM, module POM and all AAR artifacts.
+3. Build a standalone consumer that imports the BOM without explicit calendar versions and uses
+   the Hijri provider overloads; verify against JitPack with no `mavenLocal()`.
+4. Only after that, add Maven Central signing, namespace verification and release credentials.
+
+KMP extraction, the Jalali replacement, the Play demo and the hosted documentation site remain
+later decisions; they are not part of the BOM release gate.
+

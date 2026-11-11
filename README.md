@@ -20,6 +20,7 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 - [Features](#-features)
 - [Modules](#-modules)
 - [Installation](#-installation)
+- [Bill of Materials](#-bill-of-materials)
 - [Quick start](#-quick-start)
 - [Selection modes](#-selection-modes)
 - [Month navigation](#-month-navigation)
@@ -40,7 +41,7 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 ## ✨ Features
 
 - **100% Jetpack Compose** – no XML layouts, ViewBinding or reflection.
-- **Multiple calendar systems** – Gregorian (`java.time`), Hijri (`java.time.chrono.HijrahDate`) and Solar Hijri (`ir.huri.jcal.JalaliCalendar`).
+- **Multiple calendar systems** – Gregorian (`java.time`), Hijri (`java.time.chrono.HijrahDate`, Umm al-Qura by default) and Solar Hijri (`ir.huri.jcal.JalaliCalendar`). Hijri month and week data accept a `HijriDateProvider` for local method adjustments.
 - **One selection engine for all calendars** – `None`, `Single`, `Multiple` and `Range`, keyed by absolute epoch days and saved across process death via `rememberSaveable`.
 - **Configurable month grid** – dynamic rows or fixed 6 rows (42 cells), independently toggleable previous/next-month days, header/weekday visibility, disabled dates and a customizable *today* border.
 - **Scrolling containers** – `CalendarMonthList` (`LazyColumn`/`LazyRow`) and `CalendarMonthPager` (`HorizontalPager`/`VerticalPager`).
@@ -64,9 +65,10 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 | `:calendar-gregorian` | `…calendars.gregorian` | `GregorianCalendarMonth`, backed by `java.time`. |
 | `:calendar-hijri` | `…calendars.hijri` | `HijriCalendarMonth`, backed by `HijrahDate`. |
 | `:calendar-solarHijri` | `…calendars.solarHijri` | `SolarHijriCalendarMonth`, backed by `ir.huri:jalalicalendar` (exposed as `api`). |
+| `:calendar-bom` | – | Version constraints for the four published library artifacts. No runtime code. |
 | `:calendarviewsample` | `com.develotter.calendarviewsample` | Interactive demo app (month views, containers, dialog, heatmaps). |
 
-Every calendar module depends on `:library` via `api`, so adding an engine is enough to get the core.
+Every calendar module depends on `:library` via `api`, so adding an engine is enough to get the core. `:calendar-bom` aligns the published versions but is not a runtime dependency.
 
 ---
 
@@ -98,6 +100,28 @@ dependencies {
     implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.0.1")
 }
 ```
+
+### Bill of Materials
+
+Import the BOM once instead of repeating the version on every artifact:
+
+```kotlin
+dependencies {
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.0.1"))
+    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
+    implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri")
+}
+```
+
+The BOM is part of the same publication set and is included by `jitpack.yml` and the
+publishing workflow. The existing `2.0.1` release tag predates the BOM, so it resolves
+from a newer tag or commit build that includes this revision. Maven Local works with the
+publish command below. The POM contains the metadata Maven Central requires, but signing,
+namespace verification and upload are not configured; JitPack remains the only configured
+remote repository.
+
+If you only need one engine, keep its explicit version and omit the BOM.
 
 ---
 
@@ -135,6 +159,26 @@ fun HijriScreen() {
     )
 }
 ```
+
+Umm al-Qura is the default method. To model a local adjustment, use a provider and pass
+the same provider's today value:
+
+```kotlin
+val hijriMethod = OffsetHijriDateProvider(offsetDays = 1)
+val hijriToday = hijriMethod.dateForEpochDay(LocalDate.now().toEpochDay())
+
+HijriCalendarMonth(
+    month = hijriToday,
+    selection = state.selection,
+    onDateClick = { date -> state.onDayClick(date.toEpochDay()) },
+    today = hijriToday,
+    dateProvider = hijriMethod,
+)
+```
+
+A provider maps epoch days to `HijrahDate` and back. `hijriMonthData` and `hijriWeekData`
+accept the same `dateProvider`; the provider affects labels and the displayed today, while
+selection remains keyed by absolute epoch day.
 
 ### Solar Hijri / Jalali (Persian)
 
@@ -308,6 +352,7 @@ All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHi
 | `todayBorderColor` | `null` → `LocalCalendarStyle`, then `MaterialTheme.colorScheme.tertiary` | Optional border color of the *today* indicator. |
 | `isDateEnabled` | `{ true }` | Disable dates (e.g. past days or weekends). |
 | `todayDescription` | `null` | Localized text appended to today's accessibility label (for example `"Today"` / `"Heute"`). |
+| `dateProvider` | `UmmAlQuraHijriDateProvider` | Hijri only: maps epoch days to the displayed method. Pass a matching `today` when using an offset. |
 | `markers` | `emptyMap()` | Epoch-day → `CalendarDayMarker` list; descriptions join the accessible label. |
 | `weekNumber` | `null` | Optional caller-formatted week-number column; the callback receives the week's first epoch day. |
 
@@ -469,6 +514,11 @@ cd android-calendarview
 ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
   :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease
 bash scripts/api-check.sh
+
+# Publish all artifacts, including the BOM, into the local Maven repository
+./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
+  :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal \
+  :calendar-bom:publishToMavenLocal
 ```
 
 CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
@@ -486,6 +536,7 @@ CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
 | [COMPOSE_MONTH_CONTAINERS.md](docs/COMPOSE_MONTH_CONTAINERS.md) | List and pager containers |
 | [SETUP.md](docs/SETUP.md) · [DEVELOPMENT.md](docs/DEVELOPMENT.md) | Local setup and development workflow |
 | [CI.md](docs/CI.md) · [COMPOSE_TESTS.md](docs/COMPOSE_TESTS.md) | CI pipelines and tests |
+| [decisions/0003-phase-3-distribution-and-hijri-method.md](docs/decisions/0003-phase-3-distribution-and-hijri-method.md) | BOM, POM metadata, Hijri provider and deferred Phase 3 decisions |
 | [docs/decisions/](docs/decisions) | Architecture decision records |
 | [AGENTS.md](AGENTS.md) | Working rules for coding agents |
 

@@ -79,7 +79,7 @@ for module in "${MODULES[@]}"; do
         # part of the Kotlin public surface but are public in the JVM bytecode.
         grep -E '^(public |  |\})' <<<"$output" \
             | grep -vE '\$stable|DefaultConstructorMarker|\$default|access\$|synthetic' \
-            | grep -vE 'solarHijriMonthTitle' \
+            | grep -vE 'solarHijriMonthTitle|hijriDayCellForEpoch' \
             | sed -E 's/([A-Za-z0-9_]+)-[A-Za-z0-9_]+\(/\1(/' \
             >> "$dump"
         printf '\n' >> "$dump"

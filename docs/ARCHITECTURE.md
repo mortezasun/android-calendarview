@@ -23,6 +23,7 @@ The architecture follows standard Compose state and rendering patterns:
 | `:calendar-gregorian` | Gregorian calendar engine backed by `java.time.YearMonth` and `java.time.LocalDate`. Provides `GregorianCalendarMonth`, month/week data builders and day cells. |
 | `:calendar-hijri` | Islamic Hijri calendar engine backed by `java.time.chrono.HijrahDate`. Provides `HijriCalendarMonth`, month/week data builders and day cells. |
 | `:calendar-solarHijri` | Solar Hijri / Jalali calendar engine backed by `ir.huri:jalalicalendar`. Provides `SolarHijriCalendarMonth`, month/week data builders and day cells. |
+| `:calendar-bom` | `java-platform` constraints for the four published library artifacts; no runtime classes. |
 | `:calendarviewsample` | Interactive Compose demo app illustrating configuration, selection modes, navigation, dialogs, and heatmaps. |
 
 ### Dependency Rules
@@ -30,6 +31,8 @@ The architecture follows standard Compose state and rendering patterns:
 - The dependency graph is strictly one-way: `calendar-* -> library`, `calendarviewsample -> all`.
 - `:library` does not depend on any specific calendar engine or third-party calendar library (such as `jcal`).
 - `calendar-solarHijri` is the only module that declares and encapsulates the `ir.huri:jalalicalendar` dependency.
+- `:calendar-bom` constrains published versions but is not a dependency of the modules.
+- Root POM metadata is shared by all `maven-publish` publications; module publication blocks only choose the component and artifact.
 
 ---
 
@@ -66,11 +69,18 @@ State is managed declaratively and cleanly separated from UI rendering:
 ## Month Data and Navigation
 
 - **Shared month contract:** every engine month snapshot (`GregorianMonthData`, `HijriMonthData`, `SolarHijriMonthData`) implements `CalendarMonthData`. The contract carries the localized title, seven weekday labels, the leading offset and the current-month `CalendarDayCell` list. `toHeatmap()` builds a `HeatmapMonthData` block from it, including full-week padding, `isToday`/`enabled` forwarding and intensity normalization, so the README no longer needs a hand-written adapter.
+- **Hijri method:** `HijriDateProvider` maps an absolute epoch day to the displayed `HijrahDate` and back. `UmmAlQuraHijriDateProvider` is the default; `OffsetHijriDateProvider` shifts a local method by whole days. Month/week builders derive the cell epoch from the provider's reverse mapping, so labels and selection identity stay consistent. The month state's `goToToday()` still uses the platform `HijrahDate.now()`; callers using an offset supply the provider-adjusted today to the view and state initializer.
 - **View model states:** `GregorianMonthState`, `HijriMonthState` and `SolarHijriMonthState` are observable, saveable state holders that keep the visible month, normalize it to the first day, enforce inclusive `minMonth`/`maxMonth` bounds and expose `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`. They live in the calendar modules because month arithmetic is calendar-specific.
 - **Header:** `CalendarMonthHeader` is calendar-independent and stateless. It renders the title as a heading, exposes optional today/previous/next actions, and takes localized content descriptions from the caller because the library ships no UI strings.
 - **Semantics:** month titles are headings; each week exposes `CollectionInfo` and each day `CollectionItemInfo`, so screen readers can announce the grid position. `todayDescription` is an optional caller-localized suffix for today's accessibility label; the default keeps the date-only label.
 
 ---
+
+## Distribution
+
+- `:calendar-bom` is a `java-platform` publication. Its POM has `dependencyManagement` constraints for `library`, `calendar-gregorian`, `calendar-hijri` and `calendar-solarHijri` at the root version.
+- Root `build.gradle.kts` owns group, version and the shared POM block (name, description, URL, Apache-2.0 license, developer, SCM). Module POMs inherit it.
+- JitPack and the publishing CI publish the BOM together with the four AAR modules. Maven Central signing, namespace verification and upload are not configured; the metadata is a prerequisite only.
 
 ## Product views, markers and styling
 
@@ -81,6 +91,7 @@ State is managed declaratively and cleanly separated from UI rendering:
 - **Adaptive months:** `CalendarMonthColumns` derives one or more columns from the available width and exposes `LazyGridState`. It is a layout container, not a new calendar engine.
 - **Styling:** `LocalCalendarStyle` carries optional selected/surface/content/today colors and marker geometry. Null colors fall back to MaterialTheme; explicit `todayBorderColor` arguments still take precedence.
 - **Range policy:** `CalendarRangePolicy` validates complete ranges by inclusive length. `CalendarSelectionState` applies it to taps and exposes `selectRange` for a caller-owned drag layer; it does not install a gesture or enumerate range interiors.
+- **Hijri provider:** `HijriDateProvider`, `UmmAlQuraHijriDateProvider` and `OffsetHijriDateProvider` live in `:calendar-hijri` (not `:library`), because they depend on `HijrahDate`. The view, month data and week data take the provider as a defaulted parameter; no provider state is hidden in a composition local.
 
 ---
 

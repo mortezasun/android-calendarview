@@ -10,6 +10,7 @@
 | Change month grid geometry | `library/.../compose/CalendarMonthGrid.kt` and `CalendarMonthCells.kt` (`buildCalendarMonthCells`, `fixedSixRows`) |
 | Add a calendar system | New Gradle module with a `*MonthData` builder and a `*CalendarMonth` composable, modeled on `:calendar-gregorian` |
 | Change day formatting | The engine's `*MonthData.kt` / `*DayCell` code in its own module; the grid only renders `CalendarDayCell` |
+| Change the Hijri method | `calendar-hijri/.../HijriDateProvider.kt`; pass the provider through `hijriMonthData`, `hijriWeekData` and `HijriCalendarMonth` |
 | Change heatmap rendering | `library/.../compose/CalendarHeatmap.kt` (`HeatmapBlock`, `HeatmapCell`) |
 | Change heatmap data handling | `heatmapQuarterData` (Gregorian) / `CalendarMonthData.toHeatmap()`; see `calendarviewsample/.../CalendarSampleHeatmap.kt` |
 | Add month navigation | `:library` `compose/CalendarMonthHeader.kt` (state contract and header); the engine's `compose/*MonthState.kt` (month arithmetic and saved state) |
@@ -42,6 +43,9 @@ or from the sample. Calendar-specific code stays in its module.
    inclusive bounds and `CalendarMonthNavigationState`; the shared header stays in `:library`.
 5. Add the module to `settings.gradle.kts` and to the consumer's dependencies.
 6. Add `*MonthDataTest` coverage next to the existing engine tests.
+7. If the engine has an alternative date method, expose a stateless provider as
+   `:calendar-hijri` does with `HijriDateProvider`; do not put method-specific state in
+   `:library` or a composition local.
 
 Epoch days are the only identity shared across engines, and the month arithmetic is called for
 every month in the window, so it must be pure and must not depend on the day currently selected.
@@ -53,7 +57,8 @@ are controlled and stateless. To add an option:
 
 1. Add it as a defaulted parameter on the public composable, before the trailing `dayContent`
    slot (and before `colorForIntensity` for heatmaps), so existing trailing-lambda calls keep
-   compiling.
+   compiling. For a function with a trailing predicate, keep the predicate last and place the
+   new parameter before it.
 2. Forward it in the engine wrapper and, for heatmaps, through `HeatmapRenderConfig`; forward
    week/marker options through `CalendarWeekGrid` and `CalendarAgenda` where they apply.
 3. Geometry belongs in `HeatmapStyle` (validated in its `init`) or the marker/style properties;
@@ -129,6 +134,11 @@ values, annotations or source compatibility. Review `git diff api/` together wit
   `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`.
 - The four library modules apply `maven-publish` and publish their `release` variant with a sources
   jar under `com.github.mortezasun.android-calendarview`. `:calendarviewsample` is not published.
+- `:calendar-bom` is a `java-platform` publication whose constraints use the same root version.
+  Publish it together with the modules and update `jitpack.yml`/CI if the module set changes.
+- The shared POM block in the root build supplies name, description, URL, Apache-2.0 license,
+  developer and SCM. Do not duplicate or diverge these fields per module. Maven Central signing
+  and upload are separate release operations and are not configured.
 - JitPack builds from Git tags and commit hashes; `jitpack.yml` pins the JDK because AGP 9.5 needs
   JDK 17. Verify with `./gradlew publishToMavenLocal` and inspect the generated POMs before tagging.
 - The sample declares its own `versionCode`/`versionName` in `calendarviewsample/build.gradle.kts`.
