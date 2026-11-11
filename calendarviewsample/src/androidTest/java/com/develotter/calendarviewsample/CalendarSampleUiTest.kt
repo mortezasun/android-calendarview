@@ -57,7 +57,8 @@ class CalendarSampleUiTest {
     }
 
     private fun assertMonth(month: YearMonth) {
-        compose.onNodeWithText(caption(month)).performScrollTo().assertIsDisplayed()
+        showViewport()
+        compose.onNodeWithText(caption(month)).assertIsDisplayed()
     }
 
     @Test
@@ -152,7 +153,7 @@ class CalendarSampleUiTest {
                     SampleCalendar.Hijri -> hijriMonthData(HijrahDate.from(today), locale).title
                     SampleCalendar.SolarHijri -> solarHijriMonthData(JalaliCalendar(today), locale).title
                 }
-                compose.onNodeWithText(title).assertIsDisplayed()
+                compose.onNodeWithText(title).performScrollTo().assertIsDisplayed()
             }
         }
     }
