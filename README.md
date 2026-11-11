@@ -124,6 +124,41 @@ only configured remote repository.
 
 If you only need one engine, keep its explicit version and omit the BOM.
 
+### Upgrading from 2.0.1
+
+The 2.1.0 release is binary-compatible with 2.0.1. If your 2.0.1 build pinned module versions
+directly, move them to the BOM and bump the platform:
+
+```kotlin
+dependencies {
+    // Replace e.g. "...:calendar-hijri:2.0.1"
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.1.0"))
+    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
+    implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
+}
+```
+
+The Hijri engine's provider parameter is optional; omit it to keep Umm al-Qura. To use a local
+offset, pass the same provider to the month state, the month view and the click mapping:
+
+```kotlin
+val selectionState = rememberCalendarSelectionState(TypeSelectDay.Single)
+val hijriMethod = OffsetHijriDateProvider(offsetDays = 1)
+val hijriToday = hijriMethod.dateForEpochDay(LocalDate.now().toEpochDay())
+val monthState = rememberHijriMonthState(
+    initialMonth = hijriToday,
+    dateProvider = hijriMethod,
+)
+
+HijriCalendarMonth(
+    month = monthState.month,
+    selection = selectionState.selection,
+    onDateClick = { date -> selectionState.onDayClick(hijriMethod.epochDayFor(date)) },
+    today = hijriToday,
+    dateProvider = hijriMethod,
+)
+```
+
 ---
 
 ## 🚀 Quick start
