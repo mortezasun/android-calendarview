@@ -1,5 +1,40 @@
 # Changelog
 
+## 2.0.1 - 2026-11-11
+
+Publishing patch for the Compose 2.0 release. No calendar rendering, selection API or
+minimum Android version changes are introduced by this patch.
+
+### Fixed
+
+- Invoke the Gradle wrapper through Bash on JitPack instead of relying on its executable bit.
+- Explicitly publish the core and all three calendar engines in the JitPack install step.
+- Correct release verification documentation and the historical candidate SHA reference.
+
+### Added
+
+- Publishing verification CI with an isolated Maven repository and checks for nonempty
+  AAR, POM, Gradle module metadata and sources artifacts for all four modules.
+
+### Release verification
+
+- Release commit `068c57ff90bd8a7e503788a7d951dca65f8f3953` is tagged `2.0.1`; the
+  GitHub Release `2.0.1` is published.
+- The JitPack build log for the tag
+  (`https://jitpack.io/com/github/mortezasun/android-calendarview/2.0.1/build.log`)
+  reports `BUILD SUCCESSFUL in 1m` and lists AAR, POM, Gradle module metadata and
+  sources artifacts for all four modules.
+- An independent consumer project (separate Gradle build, no `mavenLocal()`, no
+  `project(...)` or `includeBuild(...)`) built all four configurations from JitPack:
+  Gregorian only, Hijri only, Solar Hijri only and all three engines. The shared
+  `library:2.0.1` resolved transitively, and the Solar Hijri configuration also resolved
+  `ir.huri:jalalicalendar:2.0.0`.
+- A runtime smoke test on an API 29 emulator rendered all three calendars and selected
+  one day in each (`OK (1 test)`).
+
+The smoke test used a software-emulated x86_64 image. Physical-device acceptance remains
+waived; see [the release checklist](docs/RELEASE_CHECKLIST.md).
+
 ## 2.0.0 - 2026-11-10
 
 Native Jetpack Compose release of `android-calendarview`. See [release checklist](docs/RELEASE_CHECKLIST.md)

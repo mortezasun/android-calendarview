@@ -80,12 +80,12 @@ Add the engines you need to your module's `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core only (needed if you build your own calendar on top of CalendarMonthGrid)
-    implementation("com.github.mortezasun.android-calendarview:library:2.0.0")
+    implementation("com.github.mortezasun.android-calendarview:library:2.0.1")
 
     // Calendar engines (each one already includes :library)
-    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.0.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.0.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.0.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.0.1")
+    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.0.1")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.0.1")
 }
 ```
 
@@ -319,7 +319,7 @@ Requirements: JDK 17, Android SDK Platform 37, Build-Tools 36.0.0.
 Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 27.
 
 ```bash
-git clone -b update https://github.com/mortezasun/android-calendarview.git
+git clone --branch 2.0.1 https://github.com/mortezasun/android-calendarview.git
 cd android-calendarview
 ./gradlew :calendarviewsample:assembleDebug   # build the demo app
 ./gradlew test                                # JVM unit tests (all modules)
