@@ -596,7 +596,8 @@ Branch `update`; no release version, tag or publication was changed in this sess
 - `7320fe2` scoped the failure reporter to `steps.instrumentation.outcome == 'failure'`, added a
   repeatable Python test suite for the reporter and added public JUnit count annotations.
   Android verification `43068767081` and Android publishing verification `43068767401` succeeded
-  for this commit.
+  for this commit. The subsequent final instrumentation run `43070445246` confirmed the count:
+  16 library and 10 sample tests, 0 failures, 0 errors and 0 skips (7 classes).
 - The checked-in instrumentation inventory is 26 tests (16 library, 10 sample). The sample suite
   keeps the dialog path and the main-viewport path as separate contracts; the main-viewport tests
   use the real `onDayClick` callback and check both `Selected` semantics and the selection
@@ -611,10 +612,9 @@ Local checks for `7320fe2` (Temurin 17.0.21+9, Platform `android-37.0`, Build-To
 | `:library:assembleDebugAndroidTest` and `:calendarviewsample:assembleDebugAndroidTest` | BUILD SUCCESSFUL |
 | `lintDebug` for library, Gregorian, Hijri, Solar Hijri and sample | BUILD SUCCESSFUL, 0 errors |
 | Python reporter suite (`scripts/test_report_instrumented_failures.py`) | 8 tests, OK |
-| Instrumentation on API 29 | full CI run `43065898948` successful; second run for `7320fe2` recorded separately above |
+| Instrumentation on API 29 | run `43065898948` (f7010a5) successful; final run `43070445246` (d8524da): 26 tests, 0 failures, 0 errors, 0 skipped (16 library, 10 sample) |
 
-Remaining limits: the second full run's exact XML counts must be taken from its summary
-annotations; no local emulator or physical device was available; API 29 is not a full device
+Remaining limits: no local emulator or physical device was available; API 29 is not a full device
 matrix; the main-viewport tests use the current month's first day and do not cover drag-range
 selection.
 

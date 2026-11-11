@@ -105,9 +105,10 @@ emulator step succeeded, and the two main-viewport tests, the dialog restoration
 the caption tests were part of the executed suite. That run predates the test-count
 summary step; the checked-in inventory is 16 library plus 10 sample tests.
 
-A second full run was started for the follow-up commit that added the diagnosis scope and
-count summary. The final exact counts must be read from that run's annotations rather than
-inferred from the green job icon.
+Final instrumentation run **43070445246** for commit
+`d8524da600f680c946ee14c8831eea7c6f6e15f6` published the exact XML summary:
+**26 tests (16 library, 10 sample), 0 failures, 0 errors, 0 skipped, 7 classes**.
+Both module reports were present.
 
 Remaining limits:
 
