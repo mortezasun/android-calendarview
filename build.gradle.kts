@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.compose) apply false
+    `maven-publish`
 }
 
 // Single source of truth for the published coordinates. JitPack resolves multi-module
