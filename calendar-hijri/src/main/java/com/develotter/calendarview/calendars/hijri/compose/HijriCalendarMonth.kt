@@ -14,6 +14,7 @@ import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.selection.CalendarSelection
 import java.text.NumberFormat
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -39,7 +40,7 @@ fun hijriDayCell(
     date = date,
     epochDay = date.toEpochDay(),
     locale = locale,
-    today = today,
+    todayEpochDay = today.toEpochDay(),
     isDateEnabled = isDateEnabled,
 )
 
@@ -48,7 +49,7 @@ internal fun hijriDayCellForEpoch(
     date: HijrahDate,
     epochDay: Long,
     locale: Locale,
-    today: HijrahDate,
+    todayEpochDay: Long,
     isDateEnabled: (HijrahDate) -> Boolean,
 ): CalendarDayCell {
     val numbers = NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }
@@ -56,7 +57,7 @@ internal fun hijriDayCellForEpoch(
     return CalendarDayCell(
         epochDay = epochDay, label = numbers.format(date.get(ChronoField.DAY_OF_MONTH)),
         accessibilityLabel = date.format(format), enabled = isDateEnabled(date),
-        isToday = date.toEpochDay() == today.toEpochDay(),
+        isToday = epochDay == todayEpochDay,
     )
 }
 
@@ -93,16 +94,21 @@ fun hijriMonthData(
 ): HijriMonthData {
     val first = month.with(ChronoField.DAY_OF_MONTH, 1)
     val firstEpochDay = dateProvider.epochDayFor(first)
+    val todayEpochDay = dateProvider.epochDayFor(today)
     return HijriMonthData(
         title = first.format(DateTimeFormatter.ofPattern("MMMM y G", locale).withChronology(first.chronology)),
         weekdayLabels = List(7) { firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale) },
-        firstDayOffset = Math.floorMod(first.get(ChronoField.DAY_OF_WEEK) - firstDayOfWeek.value, 7),
+        // The displayed Hijri date may be offset from its absolute timeline weekday.
+        firstDayOffset = Math.floorMod(
+            LocalDate.ofEpochDay(firstEpochDay).dayOfWeek.value - firstDayOfWeek.value,
+            7,
+        ),
         days = (0 until first.lengthOfMonth()).map { offset ->
             hijriDayCellForEpoch(
                 date = dateProvider.dateForEpochDay(firstEpochDay + offset),
                 epochDay = firstEpochDay + offset,
                 locale = locale,
-                today = today,
+                todayEpochDay = todayEpochDay,
                 isDateEnabled = isDateEnabled,
             )
         },
@@ -158,8 +164,10 @@ fun HijriCalendarMonth(
 
 /**
  * Controlled Hijri month UI using [dateProvider]. Adjacent cells retain input chronology and
- * use the same enabled predicate and click callback. Visibility is independent and defaults
- * to blank padding. Engine date-range errors propagate. Locale does not set layout direction.
+ * use the same enabled predicate and click callback. [onDateClick] receives the provider's
+ * displayed date; map it back with [HijriDateProvider.epochDayFor] when storing absolute-day
+ * selection. Visibility is independent and defaults to blank padding. Engine date-range errors
+ * propagate. Locale does not set layout direction.
  */
 @Composable
 fun HijriCalendarMonth(
@@ -186,6 +194,7 @@ fun HijriCalendarMonth(
         month = month, locale = locale, firstDayOfWeek = firstDayOfWeek, today = today,
         dateProvider = dateProvider, isDateEnabled = isDateEnabled,
     )
+    val todayEpochDay = dateProvider.epochDayFor(today)
     CalendarMonthGrid(
         title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
         days = data.days, selection = selection, modifier = modifier,
@@ -199,7 +208,7 @@ fun HijriCalendarMonth(
         adjacentDayProvider = {
             hijriDayCellForEpoch(
                 date = dateProvider.dateForEpochDay(it), epochDay = it, locale = locale,
-                today = today, isDateEnabled = isDateEnabled,
+                todayEpochDay = todayEpochDay, isDateEnabled = isDateEnabled,
             )
         },
     )

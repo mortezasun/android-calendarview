@@ -6,8 +6,10 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
 class HijriDateProviderTest {
@@ -39,6 +41,11 @@ class HijriDateProviderTest {
         assertTrue(data.days.zipWithNext().all { (a, b) -> b.epochDay == a.epochDay + 1 })
         assertEquals(first, provider.dateForEpochDay(data.days.first().epochDay))
         assertEquals(first.plus((first.lengthOfMonth() - 1).toLong(), ChronoUnit.DAYS), provider.dateForEpochDay(data.days.last().epochDay))
+        val expectedOffset = Math.floorMod(
+            LocalDate.ofEpochDay(data.days.first().epochDay).dayOfWeek.value - DayOfWeek.SATURDAY.value,
+            7,
+        )
+        assertEquals(expectedOffset, data.firstDayOffset)
         assertTrue(data.days.first().isToday)
     }
 
@@ -54,9 +61,34 @@ class HijriDateProviderTest {
         )
 
         assertEquals(7, week.days.size)
-        assertEquals(date.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY)).toEpochDay() - 1, week.days.first().epochDay)
+        val expectedStart = LocalDate.ofEpochDay(provider.epochDayFor(date))
+            .with(TemporalAdjusters.previousOrSame(DayOfWeek.SATURDAY))
+            .toEpochDay()
+        assertEquals(expectedStart, week.days.first().epochDay)
+        assertEquals(DayOfWeek.SATURDAY, LocalDate.ofEpochDay(week.days.first().epochDay).dayOfWeek)
         assertTrue(week.days.zipWithNext().all { (a, b) -> b.epochDay == a.epochDay + 1 })
         assertTrue(week.title.isNotBlank())
+    }
+
+    @Test
+    fun monthOffsetAlignsTheFirstCellToTheAbsoluteWeekday() {
+        val first = HijrahDate.of(1447, 9, 1)
+        val provider = OffsetHijriDateProvider(offsetDays = 1)
+        val firstEpochDay = provider.epochDayFor(first)
+        val data = hijriMonthData(
+            month = first,
+            locale = Locale.US,
+            today = provider.dateForEpochDay(firstEpochDay),
+            dateProvider = provider,
+        )
+
+        val expectedOffset = Math.floorMod(
+            LocalDate.ofEpochDay(firstEpochDay).dayOfWeek.value - DayOfWeek.SATURDAY.value,
+            7,
+        )
+        assertEquals(expectedOffset, data.firstDayOffset)
+        assertEquals(firstEpochDay, data.days.first().epochDay)
+        assertTrue(data.days.first().isToday)
     }
 
     @Test

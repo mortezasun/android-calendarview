@@ -6,6 +6,7 @@ import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.chrono.HijrahDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -53,8 +54,12 @@ fun hijriWeekData(
     dateProvider: HijriDateProvider,
     isDateEnabled: (HijrahDate) -> Boolean = { true },
 ): HijriWeekData {
-    val start = date.with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
-    val startEpochDay = dateProvider.epochDayFor(start)
+    // Align the week on the absolute timeline before mapping it back to displayed dates.
+    val dateEpochDay = dateProvider.epochDayFor(date)
+    val startEpochDay = LocalDate.ofEpochDay(dateEpochDay)
+        .with(TemporalAdjusters.previousOrSame(firstDayOfWeek))
+        .toEpochDay()
+    val todayEpochDay = dateProvider.epochDayFor(today)
     val dates = List(7) { offset ->
         dateProvider.dateForEpochDay(startEpochDay + offset)
     }
@@ -63,7 +68,7 @@ fun hijriWeekData(
             date = date,
             epochDay = startEpochDay + offset,
             locale = locale,
-            today = today,
+            todayEpochDay = todayEpochDay,
             isDateEnabled = isDateEnabled,
         )
     }
