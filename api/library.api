@@ -78,6 +78,7 @@ public final class com.develotter.calendarview.compose.CalendarMonthDataKt {
 }
 
 public final class com.develotter.calendarview.compose.CalendarMonthGridKt {
+  public static final void CalendarMonthGrid(java.lang.String, java.util.List, int, java.util.List, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1, androidx.compose.ui.Modifier, kotlin.jvm.functions.Function3, kotlin.jvm.functions.Function3, kotlin.jvm.functions.Function5, boolean, boolean, kotlin.jvm.functions.Function1, boolean, boolean, boolean, long, androidx.compose.runtime.Composer, int, int, int);
   public static final void CalendarMonthGrid(java.lang.String, java.util.List<java.lang.String>, int, java.util.List<com.develotter.calendarview.compose.CalendarDayCell>, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super java.lang.Long, kotlin.Unit>, androidx.compose.ui.Modifier, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function5<? super com.develotter.calendarview.compose.CalendarDayCell, ? super java.lang.Boolean, ? super java.lang.Boolean, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, boolean, boolean, kotlin.jvm.functions.Function1<? super java.lang.Long, com.develotter.calendarview.compose.CalendarDayCell>, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map<java.lang.Long, ? extends java.util.List<com.develotter.calendarview.compose.CalendarDayMarker>>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int, int, int);
 }
 
@@ -113,6 +114,7 @@ public final class com.develotter.calendarview.compose.CalendarSelectionState {
 }
 
 public final class com.develotter.calendarview.compose.CalendarSelectionStateKt {
+  public static final com.develotter.calendarview.compose.CalendarSelectionState rememberCalendarSelectionState(com.develotter.calendarview.enums.TypeSelectDay, java.util.List, androidx.compose.runtime.Composer, int, int);
   public static final com.develotter.calendarview.compose.CalendarSelectionState rememberCalendarSelectionState(com.develotter.calendarview.enums.TypeSelectDay, java.util.List<java.lang.Long>, com.develotter.calendarview.selection.CalendarRangePolicy, androidx.compose.runtime.Composer, int, int);
 }
 

@@ -1,7 +1,24 @@
 # Release acceptance
 
 Status: `2.0.1` is released, built successfully by JitPack and consumed from JitPack by
-an independent project. The 2.0.0 material at the end is a historical record.
+an independent project. A `2.1.0` release candidate is prepared locally but is not tagged
+or published. The 2.0.0 material at the end remains a historical record.
+
+## 0. Release candidate: 2.1.0 (not released)
+
+- [x] Root version and sample version set to `2.1.0`.
+- [x] Published `2.0.1` AARs compared with the candidate; all 248 public/protected JVM
+  members retain identical descriptors.
+- [x] Hidden delegation overloads added for the changed selection state, month grid and
+  three engine month composables.
+- [x] Standalone consumer built against published `2.0.1` and the local `2.1.0` candidate,
+  including the provider/range-policy source and the BOM path, without `mavenLocal()`.
+- [x] Local publication contains the BOM and all four constrained artifacts; the BOM
+  resolves the four modules at `2.1.0`.
+- [ ] Commit and push, then run the full remote verification, instrumentation and
+  publishing checks.
+- [ ] Obtain explicit approval, create tag `2.1.0` without moving `2.0.1`, publish the
+  GitHub Release, and verify the JitPack build and an independent JitPack consumer.
 
 ## 1. Current release: 2.0.1 (2026-11-11)
 

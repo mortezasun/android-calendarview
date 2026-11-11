@@ -120,6 +120,49 @@ fun hijriMonthData(
  * input chronology and use the same enabled predicate and click callback. Use the provider
  * overload for a local date method.
  */
+/** Binary-compatible overload for callers compiled against 2.0.1. */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 2.0.1.",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+fun HijriCalendarMonth(
+    month: HijrahDate,
+    selection: CalendarSelection,
+    onDateClick: (HijrahDate) -> Unit,
+    modifier: Modifier = Modifier,
+    locale: Locale = Locale.getDefault(),
+    firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    today: HijrahDate = HijrahDate.now(),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    isDateEnabled: (HijrahDate) -> Boolean = { true },
+) {
+    HijriCalendarMonth(
+        month = month,
+        selection = selection,
+        onDateClick = onDateClick,
+        modifier = modifier,
+        locale = locale,
+        firstDayOfWeek = firstDayOfWeek,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        today = today,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = null,
+        markers = emptyMap(),
+        weekNumber = null,
+        isDateEnabled = isDateEnabled,
+    )
+}
+
 @Composable
 fun HijriCalendarMonth(
     month: HijrahDate,

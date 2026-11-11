@@ -65,6 +65,49 @@ fun gregorianMonthData(
  * Locale does not set layout direction. For custom slots use month/day builders with
  * CalendarMonthGrid. Date-range errors propagate rather than displaying incorrect dates.
  */
+/** Binary-compatible overload for callers compiled against 2.0.1. */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 2.0.1.",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+fun GregorianCalendarMonth(
+    month: YearMonth,
+    selection: CalendarSelection,
+    onDateClick: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier,
+    locale: Locale = Locale.getDefault(),
+    firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek,
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    today: LocalDate = LocalDate.now(),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    isDateEnabled: (LocalDate) -> Boolean = { true },
+) {
+    GregorianCalendarMonth(
+        month = month,
+        selection = selection,
+        onDateClick = onDateClick,
+        modifier = modifier,
+        locale = locale,
+        firstDayOfWeek = firstDayOfWeek,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        today = today,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = null,
+        markers = emptyMap(),
+        weekNumber = null,
+        isDateEnabled = isDateEnabled,
+    )
+}
+
 @Composable
 fun GregorianCalendarMonth(
     month: YearMonth,

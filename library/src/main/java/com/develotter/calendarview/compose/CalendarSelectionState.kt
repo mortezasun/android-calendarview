@@ -65,6 +65,24 @@ class CalendarSelectionState(
 }
 
 /**
+ * Binary-compatible overload for callers compiled against 2.0.1.
+ * The current overload adds [CalendarRangePolicy]; source callers should use it.
+ */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 2.0.1.",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+fun rememberCalendarSelectionState(
+    mode: TypeSelectDay = TypeSelectDay.Single,
+    initialEpochDays: List<Long> = emptyList(),
+): CalendarSelectionState = rememberCalendarSelectionState(
+    mode = mode,
+    initialEpochDays = initialEpochDays,
+    rangePolicy = CalendarRangePolicy(),
+)
+
+/**
  * Remembers selection and saves a version, mode and explicit absolute-day keys.
  * An empty selection still has a nonempty snapshot and takes precedence over initial dates.
  * Changing mode during composition resets selection. Restoration separately checks mode and

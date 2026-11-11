@@ -1,8 +1,8 @@
 # Project status
 
 Last updated: 2026-11-11
-Version: `2.0.1` (published)
-Branch: `master`
+Version: `2.0.1` (published); `2.1.0` (release candidate)
+Branch: `update`
 
 ## Current release status: 2.0.1 (published)
 
@@ -15,6 +15,26 @@ Branch: `master`
   `calendar-solarHijri` at `2.0.1`.
 - Physical device acceptance remains waived as recorded below. No new physical-device
   testing is claimed.
+
+## 2.1.0 release candidate (not published)
+
+- Root version is `2.1.0`; the sample is `2.1.0` (version code `20100`). `2.0.1` remains
+  the current published release.
+- API compatibility check: the published `2.0.1` JitPack AARs were compared with the
+  candidate. All 248 public/protected JVM members from those AARs are present with
+  identical descriptors. Hidden delegation overloads preserve the old
+  `rememberCalendarSelectionState`, `CalendarMonthGrid`, Gregorian, Hijri and Solar Hijri
+  month-composable signatures.
+- Independent consumer: a standalone Gradle app (not a repository module) built the same
+  `2.0.1`-compatible Compose screen against published `2.0.1` and against a local `2.1.0`
+  publication. Candidate-only source also compiled the Hijri provider and range-policy
+  APIs. `mavenLocal()` is absent from the consumer.
+- BOM: a local publication contains the BOM plus `library`, `calendar-gregorian`,
+  `calendar-hijri` and `calendar-solarHijri`. Versionless consumer dependencies resolved
+  all four modules at `2.1.0` through the BOM. The Solar Hijri transitive dependency
+  `ir.huri:jalalicalendar:2.0.0` also resolved.
+- Pending for release: commit and push, remote CI, tag `2.1.0`, GitHub Release and JitPack
+  build/consumer verification. No remote CI or JitPack result is claimed for this candidate.
 
 ### Independent consumer verification
 

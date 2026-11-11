@@ -95,6 +95,49 @@ fun solarHijriMonthData(
  * Adjacent dates use checked Jalali conversion and the same enabled predicate. Clicking
  * selects/calls back without navigation. Locale does not set layout direction.
  */
+/** Binary-compatible overload for callers compiled against 2.0.1. */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 2.0.1.",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+fun SolarHijriCalendarMonth(
+    month: JalaliCalendar,
+    selection: CalendarSelection,
+    onDateClick: (JalaliCalendar) -> Unit,
+    modifier: Modifier = Modifier,
+    locale: Locale = Locale.getDefault(),
+    firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    today: JalaliCalendar = JalaliCalendar(LocalDate.now()),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    isDateEnabled: (JalaliCalendar) -> Boolean = { true },
+) {
+    SolarHijriCalendarMonth(
+        month = month,
+        selection = selection,
+        onDateClick = onDateClick,
+        modifier = modifier,
+        locale = locale,
+        firstDayOfWeek = firstDayOfWeek,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        today = today,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = null,
+        markers = emptyMap(),
+        weekNumber = null,
+        isDateEnabled = isDateEnabled,
+    )
+}
+
 @Composable
 fun SolarHijriCalendarMonth(
     month: JalaliCalendar,

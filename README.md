@@ -101,11 +101,12 @@ dependencies {
 }
 ```
 
-### Bill of Materials (unreleased)
+### Bill of Materials (2.1.0 release candidate)
 
-The BOM is not part of the published `2.0.1` tag. Use the explicit `2.0.1` versions above
-until a release containing the BOM is published. The proposed `2.1.0` BOM can be tested
-from a local publication or a commit build:
+`2.0.1` remains the current published release. The BOM is part of the `2.1.0` release
+candidate, which is not tagged or published yet; the `2.1.0` coordinates below are for a
+local publication or a candidate commit build. Until then, use the explicit `2.0.1`
+versions above.
 
 ```kotlin
 dependencies {
@@ -119,10 +120,11 @@ dependencies {
 
 The BOM is part of the same publication set and is included by `jitpack.yml` and the
 publishing workflow. The existing `2.0.1` release tag predates the BOM, so it resolves
-from a newer tag or commit build that includes this revision. Maven Local works with the
-publish command below; the version must match the next released tag. The POM contains the metadata Maven Central requires, but signing,
-namespace verification and upload are not configured; JitPack remains the only configured
-remote repository.
+from a newer tag or commit build that includes this revision. The candidate publication
+has been verified locally with the BOM plus all four constrained artifacts. Maven Local
+works with the publish command below; the version must match the next released tag. The
+POM contains the metadata Maven Central requires, but signing, namespace verification and
+upload are not configured; JitPack remains the only configured remote repository.
 
 If you only need one engine, keep its explicit version and omit the BOM.
 

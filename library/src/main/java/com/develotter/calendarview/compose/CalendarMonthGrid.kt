@@ -33,6 +33,58 @@ import com.develotter.calendarview.selection.CalendarSelection
 private val WeekNumberWidth = 40.dp
 
 /**
+ * Binary-compatible overload for callers compiled against 2.0.1. It keeps the old JVM
+ * signature, including the non-null today color, and delegates to the current overload.
+ */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 2.0.1.",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+fun CalendarMonthGrid(
+    title: String,
+    weekdayLabels: List<String>,
+    firstDayOffset: Int,
+    days: List<CalendarDayCell>,
+    selection: CalendarSelection,
+    onDayClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    header: @Composable (String) -> Unit = { Text(it, style = MaterialTheme.typography.titleMedium) },
+    weekdayContent: @Composable (String) -> Unit = { Text(it) },
+    dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    adjacentDayProvider: ((Long) -> CalendarDayCell)? = null,
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+) {
+    CalendarMonthGrid(
+        title = title,
+        weekdayLabels = weekdayLabels,
+        firstDayOffset = firstDayOffset,
+        days = days,
+        selection = selection,
+        onDayClick = onDayClick,
+        modifier = modifier,
+        header = header,
+        weekdayContent = weekdayContent,
+        dayContent = dayContent,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        adjacentDayProvider = adjacentDayProvider,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = null,
+        markers = emptyMap(),
+        weekNumber = null,
+    )
+}
+
+/**
  * Native stateless calendar grid with optional independently visible adjacent-month days.
  * Supply chronological current-month cells, ordered weekday labels and a matching offset.
  * Adjacent formatting/availability comes from the caller's calendar-specific provider.

@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 2.1.0 - 2026-11-11
+
+Release candidate; the tag and JitPack publication are pending owner approval.
 
 ### Added
 
@@ -19,6 +21,19 @@
 - `CalendarStyle` / `LocalCalendarStyle` color overrides with MaterialTheme fallbacks.
 - `CalendarRangePolicy` and `CalendarSelectionState.selectRange()` for inclusive min/max range limits.
 - Dependency-free public JVM API guard: `scripts/api-check.sh`, `api/*.api` and a CI check.
+
+### Compatibility
+
+- Compared the published `2.0.1` JitPack AARs with the release candidate: all 248
+  public/protected JVM members are present with identical descriptors.
+- Added hidden delegation overloads for `rememberCalendarSelectionState`,
+  `CalendarMonthGrid` and the three engine month composables. They retain the pre-BOM
+  parameter lists and default-argument shapes while new source resolves the current APIs.
+- A standalone consumer compiles the same `2.0.1`-compatible screen against `2.0.1` and
+  the `2.1.0` candidate, and additionally compiles the Hijri provider and range-policy APIs.
+- Verified a local five-artifact publication: the BOM plus `library` and all three engines.
+  The BOM resolves all four library modules at `2.1.0`; `mavenLocal()` is absent from the
+  consumer and the candidate repository is isolated under `artifacts/`.
 
 ### Changed
 
