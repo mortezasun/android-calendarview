@@ -57,8 +57,7 @@ class CalendarSampleUiTest {
     }
 
     private fun assertMonth(month: YearMonth) {
-        showViewport()
-        compose.onNodeWithText(caption(month)).assertIsDisplayed()
+        compose.onNodeWithText(caption(month)).performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -105,7 +104,8 @@ class CalendarSampleUiTest {
         } catch (_: AssertionError) {
         }
         compose.onNodeWithContentDescription(description, substring = true).performClick()
-        compose.onNodeWithText(selected.toString()).assertExists()
+        compose.waitForIdle()
+        compose.onNodeWithText(selected.toString()).performScrollTo().assertIsDisplayed()
         click("Next")
         assertMonth(initial.plusMonths(1))
         compose.activityRule.scenario.recreate()
