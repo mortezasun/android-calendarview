@@ -1,0 +1,85 @@
+name: Publish approved 2.0.1 release
+
+on:
+  push:
+    branches: [master]
+    paths: ['.github/workflows/publish-2-0-1.yml']
+
+concurrency:
+  group: publish-approved-2-0-1
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  checks: read
+
+jobs:
+  release:
+    if: github.repository == 'mortezasun/android-calendarview'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: mortezasun/android-calendarview
+      BASE_SHA: 80caa72f350ec97a465104954b24b473d877fae2
+    steps:
+      - name: Verify approved baseline and automation-only change
+        shell: bash
+        run: |
+          set -euo pipefail
+          head=$(gh api "repos/$GH_REPO/branches/master" --jq '.commit.sha')
+          test "$head" = "$GITHUB_SHA"
+          gh api "repos/$GH_REPO/compare/$BASE_SHA...$GITHUB_SHA" > comparison.json
+          jq -e '.status == "ahead" and .ahead_by == 1 and (.files | length == 1) and .files[0].filename == ".github/workflows/publish-2-0-1.yml" and .files[0].status == "added"' comparison.json
+
+      - name: Require all five approved candidate checks to be successful
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GH_REPO/commits/$BASE_SHA/check-runs?per_page=100" > checks.json
+          jq -e --arg sha "$BASE_SHA" '
+            .check_runs
+            | map(select(.app.slug == "github-actions" and .head_sha == $sha))
+            | group_by(.name) | map(max_by(.id))
+            | . as $runs
+            | all(["assemble", "unit-tests", "lint", "publishing", "Core and sample instrumentation"][];
+                . as $name | any($runs[]; .name == $name and .status == "completed" and .conclusion == "success"))
+          ' checks.json
+
+      - name: Refuse to overwrite an existing tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GH_REPO/git/matching-refs/tags/2.0.1" > refs.json
+          jq -e '[.[] | select(.ref == "refs/tags/2.0.1")] | length == 0' refs.json
+
+      - name: Create approved tag and public release
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > release-notes.md <<'NOTES'
+          Publishing patch for the native Jetpack Compose calendar library.
+
+          ### Fixed
+          - Invoke Gradle through Bash on JitPack, avoiding reliance on the wrapper executable bit.
+          - Explicitly publish the shared core and all three calendar engines.
+          - Correct the historical release candidate reference and verification documentation.
+
+          ### Added
+          - Isolated Maven publishing verification in CI, including AAR, POM, Gradle module metadata and sources artifacts.
+
+          ### Compatibility
+          No calendar rendering or selection API changes. Build baseline and Android minimum version are unchanged.
+
+          ### Verification
+          The release workflow requires successful assemble, JVM test, lint, publishing and instrumentation checks for candidate 80caa72f350ec97a465104954b24b473d877fae2. The tagged commit differs only by the release automation workflow; library code and version metadata are unchanged. JitPack built publishing fix 4b570f2 successfully according to the repository owner. Final-tag JitPack consumption is not claimed by this release workflow.
+
+          ### Intended JitPack coordinates
+          - com.github.mortezasun.android-calendarview:library:2.0.1
+          - com.github.mortezasun.android-calendarview:calendar-gregorian:2.0.1
+          - com.github.mortezasun.android-calendarview:calendar-hijri:2.0.1
+          - com.github.mortezasun.android-calendarview:calendar-solarHijri:2.0.1
+
+          Each calendar engine includes the shared core transitively. See README.md and docs/V2_MIGRATION_MAPPING.md in the tagged source for integration and migration. The 2.0.0 tag remains unchanged.
+          NOTES
+          gh release create 2.0.1 --repo "$GH_REPO" --target "$GITHUB_SHA" --title "2.0.1 - Publishing fixes" --notes-file release-notes.md --latest
