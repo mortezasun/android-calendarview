@@ -1,4 +1,4 @@
 jdk:
   - openjdk17
 install:
-  - ./gradlew publishToMavenLocal
+  - bash ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal --no-daemon --stacktrace --console=plain
