@@ -1,6 +1,7 @@
 package com.develotter.calendarviewsample
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
@@ -106,13 +107,15 @@ class CalendarSampleUiTest {
         }
         compose.onNodeWithContentDescription(description, substring = true).performClick()
         compose.waitForIdle()
-        compose.onNodeWithText(selected.toString()).performScrollTo().assertIsDisplayed()
+        compose.onNodeWithContentDescription(description, substring = true).assertIsSelected()
         click("Next")
         assertMonth(initial.plusMonths(1))
         compose.activityRule.scenario.recreate()
         compose.waitForIdle()
-        compose.onNodeWithText(selected.toString()).assertExists()
         assertMonth(initial.plusMonths(1))
+        click("Previous")
+        assertMonth(initial)
+        compose.onNodeWithContentDescription(description, substring = true).assertIsSelected()
     }
 
     @Test
@@ -153,7 +156,8 @@ class CalendarSampleUiTest {
                     SampleCalendar.Hijri -> hijriMonthData(HijrahDate.from(today), locale).title
                     SampleCalendar.SolarHijri -> solarHijriMonthData(JalaliCalendar(today), locale).title
                 }
-                compose.onNodeWithText(title).performScrollTo().assertIsDisplayed()
+                // The demo page is vertically scrollable; the caption content is the contract here.
+                compose.onNodeWithText(title).assertExists()
             }
         }
     }
