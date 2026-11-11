@@ -12,6 +12,12 @@
 - `todayDescription` on the month grid and all engine month composables, appending a caller-localized
   *today* label to the accessibility description.
 - Heading and grid-collection semantics for month titles and day cells.
+- `CalendarWeekGrid`, `CalendarWeekData` and engine `*WeekData` builders for seven-day views.
+- `CalendarAgenda` for a bounded vertical day list with selection and markers.
+- `CalendarDayMarker`, marker rendering and accessible marker descriptions; optional week-number columns on month and week grids.
+- `CalendarMonthColumns` for width-adaptive multi-month layouts.
+- `CalendarStyle` / `LocalCalendarStyle` color overrides with MaterialTheme fallbacks.
+- `CalendarRangePolicy` and `CalendarSelectionState.selectRange()` for inclusive min/max range limits.
 - Dependency-free public JVM API guard: `scripts/api-check.sh`, `api/*.api` and a CI check.
 
 ### Changed
@@ -19,6 +25,7 @@
 - `CalendarSelection` has structural equality and is marked `@Immutable`; `CalendarSelectionState`
   is `@Stable` and month/heatmap data classes are `@Immutable`, improving Compose skipping.
 - `CalendarSelection.contains` uses an internal set for membership on multiple selections.
+- `todayBorderColor` is optional; month, week and agenda views fall back through `LocalCalendarStyle` to MaterialTheme.
 - Seven-column month grids now document the 48 dp width caveat for very narrow windows.
 
 ## 2.0.1 - 2026-11-11

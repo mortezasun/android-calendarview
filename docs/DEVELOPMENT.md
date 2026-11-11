@@ -14,6 +14,11 @@
 | Change heatmap data handling | `heatmapQuarterData` (Gregorian) / `CalendarMonthData.toHeatmap()`; see `calendarviewsample/.../CalendarSampleHeatmap.kt` |
 | Add month navigation | `:library` `compose/CalendarMonthHeader.kt` (state contract and header); the engine's `compose/*MonthState.kt` (month arithmetic and saved state) |
 | Add a shared month field | `:library` `compose/CalendarMonthData.kt` and every engine `*MonthData` implementation |
+| Add a week or agenda view | `:library` `compose/CalendarWeekGrid.kt` / `CalendarAgenda.kt`; engine `compose/*WeekData.kt` |
+| Add a marker or week-number column | `:library` `compose/CalendarMarkers.kt` and `CalendarMonthGrid.kt` |
+| Add an adaptive month container | `:library` `compose/CalendarMonthColumns.kt` |
+| Change range validation | `:library` `selection/CalendarRangePolicy.kt` and `compose/CalendarSelectionState.kt` |
+| Change optional cell colors | `:library` `compose/CalendarStyle.kt` and the grid/agenda fallbacks |
 | Change sample screen wiring | `calendarviewsample/.../CalendarSampleWindow.kt`, `CalendarSampleNavigation.kt`, `CalendarSampleViewport.kt`; entry points `LauncherActivity.kt` and `HeatMapViewActivity.kt` |
 
 Keep the dependency direction intact: `:library` must not import classes from the calendar modules
@@ -43,16 +48,19 @@ every month in the window, so it must be pure and must not depend on the day cur
 
 ### New composable option
 
-`CalendarMonthGrid`, the three engine month composables and the heatmaps are controlled and
-stateless. To add an option:
+`CalendarMonthGrid`, the three engine month composables, the week/agenda views and the heatmaps
+are controlled and stateless. To add an option:
 
 1. Add it as a defaulted parameter on the public composable, before the trailing `dayContent`
    slot (and before `colorForIntensity` for heatmaps), so existing trailing-lambda calls keep
    compiling.
-2. Forward it in the engine wrapper and, for heatmaps, through `HeatmapRenderConfig`.
-3. Geometry belongs in `HeatmapStyle` (validated in its `init`); per-day state belongs in
-   `CalendarDayCell` / `HeatmapDayData` with a default value.
-4. Do not add internal mutable state for a value the caller already owns.
+2. Forward it in the engine wrapper and, for heatmaps, through `HeatmapRenderConfig`; forward
+   week/marker options through `CalendarWeekGrid` and `CalendarAgenda` where they apply.
+3. Geometry belongs in `HeatmapStyle` (validated in its `init`) or the marker/style properties;
+   per-day state belongs in `CalendarDayCell` / `HeatmapDayData` with a default value.
+4. Do not add internal mutable state for a value the caller already owns. Range limits belong in
+   `CalendarRangePolicy`; a drag gesture remains the host's responsibility and calls
+   `CalendarSelectionState.selectRange`.
 
 ### Error handling and logging
 

@@ -49,6 +49,9 @@ is not part of your task and never reset, stash or overwrite it without explicit
   month-to-heatmap adapter. Month arithmetic and saveable visible-month state live in the engine
   modules (`*MonthState.kt`); `CalendarMonthNavigationState` and `CalendarMonthHeader` stay
   calendar-independent in `:library`.
+- Marker, week, agenda and adaptive-month APIs are calendar-independent product views in
+  `:library`. `CalendarWeekData` is implemented by each engine's `*WeekData`; range validation
+  belongs in `CalendarRangePolicy`, while drag gestures and picker dialogs stay host concerns.
 - Public composable signatures are API. Add options as defaulted parameters before the trailing
   `dayContent` (and, for heatmaps, `colorForIntensity`) lambda so existing calls keep compiling.
   Do not rename or remove parameters as a side effect of another change.
@@ -65,7 +68,7 @@ These commands were executed successfully with JDK 17 and Android SDK Platform 3
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew test                                    # 87 JVM unit tests, all modules
+./gradlew test                                    # 99 JVM unit tests, all modules
 ./gradlew :library:lintDebug                      # lint for the core library
 ./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \

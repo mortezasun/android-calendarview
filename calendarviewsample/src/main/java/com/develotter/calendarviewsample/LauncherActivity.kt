@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,10 +38,16 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.calendars.gregorian.compose.GregorianCalendarMonth
+import com.develotter.calendarview.calendars.gregorian.compose.gregorianWeekData
 import com.develotter.calendarview.calendars.hijri.compose.HijriCalendarMonth
+import com.develotter.calendarview.calendars.hijri.compose.hijriWeekData
 import com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriCalendarMonth
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
+import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriWeekData
+import com.develotter.calendarview.compose.CalendarDayMarker
 import com.develotter.calendarview.compose.CalendarSelectionState
+import com.develotter.calendarview.compose.CalendarWeekData
+import com.develotter.calendarview.compose.CalendarWeekGrid
 import com.develotter.calendarview.compose.rememberCalendarSelectionState
 import com.develotter.calendarview.enums.TypeSelectDay
 import ir.huri.jcal.JalaliCalendar
@@ -73,6 +80,7 @@ private fun CalendarSample(onHeatmap: () -> Unit) {
     var previousDays by rememberSaveable { mutableStateOf(false) }
     var nextDays by rememberSaveable { mutableStateOf(false) }
     var fixedSixRows by rememberSaveable { mutableStateOf(false) }
+    var showWeek by rememberSaveable { mutableStateOf(false) }
     var anchor by rememberSaveable { mutableStateOf(LocalDate.now().toEpochDay()) }
     var showDialog by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
@@ -120,6 +128,8 @@ private fun CalendarSample(onHeatmap: () -> Unit) {
                     Switch(checked = nextDays, onCheckedChange = { nextDays = it })
                     Text("Fixed 6 rows")
                     Switch(checked = fixedSixRows, onCheckedChange = { fixedSixRows = it })
+                    Text("Week view")
+                    Switch(checked = showWeek, onCheckedChange = { showWeek = it })
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Button(onClick = { move(-1) }) { Text("Previous") }
@@ -132,6 +142,9 @@ private fun CalendarSample(onHeatmap: () -> Unit) {
                     onVisibleMonthChanged = { anchor = it; error = null },
                 ) { monthAnchor ->
                     SampleMonth(calendar, monthAnchor, locale, state, previousDays, nextDays, fixedSixRows)
+                }
+                if (showWeek) {
+                    SampleWeek(calendar, anchor, locale, state)
                 }
                 Text("Selected dates / range endpoints (ISO):")
                 Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
@@ -177,20 +190,50 @@ private fun SampleMonth(
             month = YearMonth.from(date), selection = state.selection,
             onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
-            todayDescription = todayDescription,
+            todayDescription = todayDescription, markers = sampleMarkers(date),
         )
         SampleCalendar.Hijri -> HijriCalendarMonth(
             month = HijrahDate.from(date), selection = state.selection,
             onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
-            todayDescription = todayDescription,
+            todayDescription = todayDescription, markers = sampleMarkers(date),
         )
         SampleCalendar.SolarHijri -> SolarHijriCalendarMonth(
             month = JalaliCalendar(date), selection = state.selection,
             onDateClick = { state.onDayClick(solarHijriEpochDay(it)) }, locale = locale, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
-            todayDescription = todayDescription,
+            todayDescription = todayDescription, markers = sampleMarkers(date),
         )
+    }
+}
+
+/** Demo-only weekly view sharing the month selection and event markers. */
+@Composable
+private fun SampleWeek(calendar: SampleCalendar, anchor: Long, locale: Locale, state: CalendarSelectionState) {
+    val date = LocalDate.ofEpochDay(anchor)
+    val week: CalendarWeekData = when (calendar) {
+        SampleCalendar.Gregorian -> gregorianWeekData(date, locale)
+        SampleCalendar.Hijri -> hijriWeekData(HijrahDate.from(date), locale)
+        SampleCalendar.SolarHijri -> solarHijriWeekData(JalaliCalendar(date), locale)
+    }
+    CalendarWeekGrid(
+        title = week.title, weekdayLabels = week.weekdayLabels, days = week.days,
+        selection = state.selection, onDayClick = { state.onDayClick(it) },
+        weekNumber = week.weekNumber, todayDescription = sampleTodayDescription(locale),
+        markers = sampleMarkers(date),
+    )
+}
+
+/** Demo-only marker every week; the library leaves event semantics to the host. */
+@Composable
+private fun sampleMarkers(date: LocalDate): Map<Long, List<CalendarDayMarker>> {
+    val color = MaterialTheme.colorScheme.secondary
+    return remember(date.toEpochDay(), color) {
+        val first = date.withDayOfMonth(1)
+        (0 until date.lengthOfMonth() step 7).associate { offset ->
+            first.plusDays(offset.toLong()).toEpochDay() to
+                listOf(CalendarDayMarker(color, "Sample event"))
+        }
     }
 }
 

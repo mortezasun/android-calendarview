@@ -4,9 +4,12 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +30,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.selection.CalendarSelection
 
+private val WeekNumberWidth = 40.dp
+
 /**
  * Native stateless calendar grid with optional independently visible adjacent-month days.
  * Supply chronological current-month cells, ordered weekday labels and a matching offset.
@@ -39,6 +44,11 @@ import com.develotter.calendarview.selection.CalendarSelection
  * the accessibility description of today's cell; the default null keeps the date-only label.
  * The header is exposed as a heading and every week/cell carries collection semantics so
  * screen readers can announce the grid position.
+ *
+ * [markers] are keyed by epoch day and render up to four dots below the day content. Their
+ * localized descriptions are appended to the day's accessibility label. [weekNumber] adds a
+ * leading, caller-formatted week column when non-null; it receives the first day of the week.
+ * [LocalCalendarStyle] supplies optional colors; null colors fall back to MaterialTheme.
  */
 @Composable
 fun CalendarMonthGrid(
@@ -58,8 +68,11 @@ fun CalendarMonthGrid(
     showHeader: Boolean = true,
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
-    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    todayBorderColor: Color? = null,
     todayDescription: String? = null,
+    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
+    weekNumber: ((Long) -> String?)? = null,
+    weekNumberContent: @Composable (String) -> Unit = { Text(it) },
 ) {
     require(weekdayLabels.size == 7) { "Exactly seven weekday labels are required" }
     val cells = buildCalendarMonthCells(
@@ -70,6 +83,11 @@ fun CalendarMonthGrid(
         fixedSixRows = fixedSixRows,
         adjacentDayProvider = adjacentDayProvider,
     )
+    val style = LocalCalendarStyle.current
+    val effectiveTodayBorderColor = todayBorderColor
+        ?: style.todayBorderColor
+        ?: MaterialTheme.colorScheme.tertiary
+    val showWeekNumbers = weekNumber != null
     Column(modifier) {
         if (showHeader) {
             Box(Modifier.semantics(mergeDescendants = true) { heading() }) {
@@ -78,6 +96,9 @@ fun CalendarMonthGrid(
         }
         if (showWeekdayLabels) {
             Row(Modifier.fillMaxWidth()) {
+                if (showWeekNumbers) {
+                    Spacer(Modifier.width(WeekNumberWidth))
+                }
                 weekdayLabels.forEach { label ->
                     Box(Modifier.weight(1f).padding(vertical = 8.dp), contentAlignment = Alignment.Center) {
                         weekdayContent(label)
@@ -86,22 +107,38 @@ fun CalendarMonthGrid(
             }
         }
         val weeks = cells.chunked(7)
+        val columnCount = if (showWeekNumbers) 8 else 7
         weeks.forEachIndexed { rowIndex, week ->
+            val weekNumberLabel = if (showWeekNumbers) {
+                week.firstNotNullOfOrNull { it }?.let { day -> weekNumber?.invoke(day.epochDay) }
+            } else {
+                null
+            }
             Row(
                 Modifier.fillMaxWidth().semantics {
-                    collectionInfo = CollectionInfo(rowCount = weeks.size, columnCount = 7)
+                    collectionInfo = CollectionInfo(rowCount = weeks.size, columnCount = columnCount)
                 },
             ) {
+                if (showWeekNumbers) {
+                    Box(
+                        Modifier.width(WeekNumberWidth).heightIn(min = 48.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        if (weekNumberLabel != null) weekNumberContent(weekNumberLabel)
+                    }
+                }
                 week.forEachIndexed { columnIndex, day ->
                     val cellModifier = Modifier.weight(1f).heightIn(min = 48.dp)
                     if (day == null) {
                         Box(cellModifier)
                     } else {
                         val selected = day.epochDay in selection
-                        val description = if (day.isToday && todayDescription != null) {
-                            "${day.accessibilityLabel}, $todayDescription"
-                        } else {
+                        val dayMarkers = markers[day.epochDay].orEmpty()
+                        val suffix = calendarMarkerDescription(dayMarkers, day.isToday, todayDescription)
+                        val description = if (suffix == null) {
                             day.accessibilityLabel
+                        } else {
+                            "${day.accessibilityLabel}, $suffix"
                         }
                         Surface(
                             modifier = cellModifier
@@ -110,7 +147,7 @@ fun CalendarMonthGrid(
                                     collectionItemInfo = CollectionItemInfo(
                                         rowIndex = rowIndex,
                                         rowSpan = 1,
-                                        columnIndex = columnIndex,
+                                        columnIndex = columnIndex + if (showWeekNumbers) 1 else 0,
                                         columnSpan = 1,
                                     )
                                 }
@@ -118,17 +155,34 @@ fun CalendarMonthGrid(
                                     selected = selected, enabled = day.enabled, role = Role.Button,
                                     onClick = { onDayClick(day.epochDay) },
                                 ),
-                            color = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-                            contentColor = when {
-                                selected -> MaterialTheme.colorScheme.onPrimaryContainer
-                                !day.isCurrentMonth -> MaterialTheme.colorScheme.onSurfaceVariant
-                                else -> MaterialTheme.colorScheme.onSurface
+                            color = when {
+                                selected -> style.selectedContainerColor
+                                    ?: MaterialTheme.colorScheme.primaryContainer
+                                else -> style.surfaceColor ?: MaterialTheme.colorScheme.surface
                             },
-                            border = if (day.isToday) BorderStroke(1.5.dp, todayBorderColor) else null,
+                            contentColor = when {
+                                selected -> style.selectedContentColor
+                                    ?: MaterialTheme.colorScheme.onPrimaryContainer
+                                !day.isCurrentMonth -> style.adjacentContentColor
+                                    ?: MaterialTheme.colorScheme.onSurfaceVariant
+                                else -> style.contentColor ?: MaterialTheme.colorScheme.onSurface
+                            },
+                            border = if (day.isToday) {
+                                BorderStroke(1.5.dp, effectiveTodayBorderColor)
+                            } else {
+                                null
+                            },
                             shape = RoundedCornerShape(8.dp),
                         ) {
-                            Box(Modifier.padding(8.dp), contentAlignment = Alignment.Center) {
+                            Column(
+                                Modifier.padding(8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
                                 dayContent(day, selected, selection.isRangeEndpoint(day.epochDay))
+                                if (dayMarkers.isNotEmpty()) {
+                                    Spacer(Modifier.height(2.dp))
+                                    CalendarMarkerRow(dayMarkers)
+                                }
                             }
                         }
                     }

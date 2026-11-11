@@ -71,8 +71,8 @@ Building only the core library:
 `src/test` holds the JVM tests: selection engine and saved-state snapshots, month-cell building,
 heatmap data and style validation, the sample helpers and one month-data suite per calendar
 engine. `src/androidTest` holds the Compose UI tests (`CalendarSelectionComposeTest`,
-`CalendarHeatmapComposeTest`, `CalendarMonthHeaderComposeTest`, plus the sample acceptance
-tests). Only the `ExampleUnitTest` /
+`CalendarHeatmapComposeTest`, `CalendarMonthHeaderComposeTest`,
+`CalendarProductViewsComposeTest`, plus the sample acceptance tests). Only the `ExampleUnitTest` /
 `ExampleInstrumentedTest` files are leftover templates. Instrumented tests require an emulator or
 device and were not part of the CLI verification.
 

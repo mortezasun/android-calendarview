@@ -378,3 +378,50 @@ Remaining limitations:
   excluded as Kotlin-internal.
 - No version bump, tag, JitPack consumer build or physical-device acceptance was performed.
 
+---
+
+## Session 2026-11-11: Phase 2 - week, agenda, markers and adaptive product surface
+
+Additive public work; existing names, parameters and source calls remain valid.
+
+- `:library`:
+  - `CalendarWeekData` / `CalendarWeekGrid`: seven-day view with week-number and marker support.
+  - `CalendarAgenda`: bounded vertical day list with selection, markers, today styling and
+    accessible day descriptions.
+  - `CalendarDayMarker` plus a `markers` map on the month, week and agenda views. Descriptions
+    join the day's accessibility label; at most four dots are drawn per cell.
+  - Optional `weekNumber` callback on the month grid and a caller-formatted week number for the
+    week grid. No week-number convention is imposed by the library.
+  - `CalendarMonthColumns`: width-adaptive multi-month layout with a caller-owned `LazyGridState`.
+  - `CalendarStyle` / `LocalCalendarStyle`: optional selected/surface/content/today colors and
+    marker geometry, falling back to MaterialTheme. `todayBorderColor` is now nullable.
+  - `CalendarRangePolicy` and `CalendarSelectionState.selectRange()`: inclusive min/max range
+    validation shared by taps and a future/caller-owned drag layer.
+- Engines:
+  - `GregorianWeekData` / `gregorianWeekData`, `HijriWeekData` / `hijriWeekData` and
+    `SolarHijriWeekData` / `solarHijriWeekData`; all return seven consecutive epoch days.
+  - Engine month wrappers forward `markers` and `weekNumber` and accept nullable today colors.
+- Sample: month views include event markers; a switch adds the matching engine week view.
+- Tests: range-policy/state, marker descriptions, adaptive column calculation and all three week
+  builders; one compile-only Compose class covers week/agenda rendering and clicks.
+
+Executed locally on 2026-11-11 (Temurin 17.0.21+9, Platform `android-37.0`, Build-Tools 36.0.0):
+
+| Check | Result |
+|-------|--------|
+| `test` (all modules) | 99 tests, 0 failures, 0 errors |
+| `:calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
+| `:library:compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL (compiled only, not executed) |
+| `:library:lintDebug`, `:calendar-gregorian:lintDebug`, `:calendar-hijri:lintDebug`, `:calendar-solarHijri:lintDebug`, `:calendarviewsample:lintDebug` | BUILD SUCCESSFUL, 0 errors |
+| Release AARs for all four library modules | BUILD SUCCESSFUL |
+| `bash scripts/api-check.sh` | Public API matches the checked-in dumps |
+
+Remaining limitations:
+- No emulator or device was available. `CalendarProductViewsComposeTest` and the existing
+  instrumentation suites were compiled but not executed.
+- Drag-range gestures, date/month picker dialogs, an infinite pager, a separate test artifact,
+  screenshot tests and Baseline Profiles are not part of this slice. They need new dependencies
+  and/or an emulator and remain future Phase 2 work.
+- The week-number callback is intentionally caller-owned; Gregorian data supplies a deterministic
+  week number, while Hijri and Solar Hijri leave it null because no shared convention exists.
+

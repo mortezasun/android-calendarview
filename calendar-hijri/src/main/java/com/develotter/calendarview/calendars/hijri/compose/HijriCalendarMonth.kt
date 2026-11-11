@@ -6,6 +6,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.develotter.calendarview.compose.CalendarDayCell
+import com.develotter.calendarview.compose.CalendarDayMarker
 import com.develotter.calendarview.compose.CalendarMonthData
 import com.develotter.calendarview.compose.CalendarMonthGrid
 import com.develotter.calendarview.selection.CalendarSelection
@@ -79,8 +80,10 @@ fun HijriCalendarMonth(
     showHeader: Boolean = true,
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
-    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    todayBorderColor: Color? = null,
     todayDescription: String? = null,
+    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
+    weekNumber: ((Long) -> String?)? = null,
     isDateEnabled: (HijrahDate) -> Boolean = { true },
 ) {
     val data = hijriMonthData(
@@ -94,6 +97,8 @@ fun HijriCalendarMonth(
         showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
         todayBorderColor = todayBorderColor,
         todayDescription = todayDescription,
+        markers = markers,
+        weekNumber = weekNumber,
         adjacentDayProvider = { hijriDayCell(date = month.chronology.dateEpochDay(it), locale = locale, today = today, isDateEnabled = isDateEnabled) },
     )
 }

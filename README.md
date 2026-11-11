@@ -23,6 +23,9 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 - [Quick start](#-quick-start)
 - [Selection modes](#-selection-modes)
 - [Month navigation](#-month-navigation)
+- [Week and agenda](#-week-and-agenda)
+- [Markers and week numbers](#-markers-and-week-numbers)
+- [Adaptive months](#-adaptive-months)
 - [Customization](#-customization)
 - [Scrolling containers](#-scrolling-containers)
 - [Heatmaps](#-heatmaps)
@@ -43,6 +46,10 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 - **Scrolling containers** – `CalendarMonthList` (`LazyColumn`/`LazyRow`) and `CalendarMonthPager` (`HorizontalPager`/`VerticalPager`).
 - **Month navigation** – `CalendarMonthHeader` plus saveable engine month states (`rememberGregorianMonthState`, `rememberHijriMonthState`, `rememberSolarHijriMonthState`) with inclusive bounds and a today action.
 - **Shared month data** – every engine month snapshot implements `CalendarMonthData`; `toHeatmap()` turns any month into the calendar-agnostic year-heatmap format.
+- **Week and agenda** – `CalendarWeekGrid` renders a seven-day week from engine `*WeekData`; `CalendarAgenda` renders a bounded vertical day list with the same selection and marker semantics.
+- **Markers and week numbers** – caller-owned epoch-day markers render as accessible event dots; an optional caller-formatted week-number column is available on month and week grids.
+- **Adaptive months** – `CalendarMonthColumns` derives one or more month columns from the available width for tablets, split screen and foldables.
+- **Style and range limits** – `CalendarStyle` provides optional cell colors, while `CalendarRangePolicy` enforces inclusive minimum/maximum range lengths in the selection state.
 - **Heatmaps** – Gregorian quarter/year heatmaps plus a calendar-agnostic year heatmap for any engine, with the same options as the month views (colors, today border, disabled dates, selection, RTL) and switchable orientation and cell style.
 - **Accessibility & RTL** – localized content descriptions, heading and grid-collection semantics, an optional localized *today* description, and a layout that follows the ambient `LayoutDirection`. Day cells keep a 48 dp minimum height; the seven-column row shares the width, so very narrow windows (for example a 320 dp split screen) can fall below 48 dp per column.
 - **Controlled & stateless** – the caller owns selection and navigation; the library only renders and reports clicks.
@@ -205,6 +212,87 @@ The content descriptions and the today label are caller-supplied because the lib
 
 ---
 
+## 📅 Week and agenda
+
+`CalendarWeekGrid` is a seven-day view built on the shared grid. Engine `*WeekData` builders align the week to the configured first day and supply consecutive cells; the week number is optional because Hijri and Solar Hijri do not share one week-number convention.
+
+```kotlin
+val week = gregorianWeekData(LocalDate.now(), firstDayOfWeek = DayOfWeek.MONDAY)
+
+CalendarWeekGrid(
+    title = week.title,
+    weekdayLabels = week.weekdayLabels,
+    days = week.days,
+    selection = state.selection,
+    onDayClick = { state.onDayClick(it) },
+    weekNumber = week.weekNumber,
+)
+```
+
+Use `hijriWeekData(HijrahDate.now())` or `solarHijriWeekData(JalaliCalendar())` for the other engines. `CalendarAgenda` is a bounded, vertically scrolling day list; it shares markers, selection, today styling and accessibility descriptions with the grids:
+
+```kotlin
+CalendarAgenda(
+    days = gregorianMonthData(YearMonth.now()).days,
+    selection = state.selection,
+    onDayClick = { state.onDayClick(it) },
+    markers = markers,
+    modifier = Modifier.height(420.dp), // the list needs a bounded height
+)
+```
+
+---
+
+## 📌 Markers and week numbers
+
+Markers are keyed by absolute epoch day, so one map works across all engines. Their descriptions are appended to the day's accessible label; at most four dots are drawn per cell.
+
+```kotlin
+val markers = mapOf(
+    LocalDate.of(2026, 11, 11).toEpochDay() to listOf(
+        CalendarDayMarker(Color(0xFFD32F2F), "Holiday"),
+        CalendarDayMarker(Color(0xFF1565C0), "Team event"),
+    ),
+)
+
+GregorianCalendarMonth(
+    month = YearMonth.now(),
+    selection = state.selection,
+    onDateClick = { state.onDayClick(it.toEpochDay()) },
+    markers = markers,
+    weekNumber = { epochDay ->
+        LocalDate.ofEpochDay(epochDay)
+            .get(WeekFields.of(DayOfWeek.MONDAY, 1).weekOfWeekBasedYear())
+            .toString()
+    },
+)
+```
+
+The `weekNumber` callback receives the first day of each rendered week; return `null` to hide a particular label. The library does not impose ISO, Hijri or Jalali week conventions.
+
+---
+
+## 🖥️ Adaptive months
+
+`CalendarMonthColumns` uses the available width to fit one or more months per row. It exposes the native `LazyGridState`, so the caller still controls scrolling and restoration.
+
+```kotlin
+CalendarMonthColumns(
+    monthCount = months.size,
+    minMonthWidth = 320.dp,
+    modifier = Modifier.height(520.dp),
+    monthKey = { months[it].toString() },
+) { index ->
+    GregorianCalendarMonth(
+        month = months[index],
+        selection = state.selection,
+        onDateClick = { state.onDayClick(it.toEpochDay()) },
+    )
+}
+```
+
+---
+
 ## 🎨 Customization
 
 All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHijriCalendarMonth`) share these optional parameters:
@@ -217,9 +305,11 @@ All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHi
 | `fixedSixRows` | `false` | Always render 42 cells to avoid height jumps between months. |
 | `showHeader` / `showWeekdayLabels` | `true` | Toggle the month title and weekday row. |
 | `today` | now | Date highlighted as *today*. |
-| `todayBorderColor` | `MaterialTheme.colorScheme.tertiary` | Border color of the *today* indicator. |
+| `todayBorderColor` | `null` → `LocalCalendarStyle`, then `MaterialTheme.colorScheme.tertiary` | Optional border color of the *today* indicator. |
 | `isDateEnabled` | `{ true }` | Disable dates (e.g. past days or weekends). |
 | `todayDescription` | `null` | Localized text appended to today's accessibility label (for example `"Today"` / `"Heute"`). |
+| `markers` | `emptyMap()` | Epoch-day → `CalendarDayMarker` list; descriptions join the accessible label. |
+| `weekNumber` | `null` | Optional caller-formatted week-number column; the callback receives the week's first epoch day. |
 
 ```kotlin
 GregorianCalendarMonth(
@@ -230,6 +320,30 @@ GregorianCalendarMonth(
     todayBorderColor = Color(0xFF00897B),
     isDateEnabled = { it >= LocalDate.now() },
 )
+```
+
+`CalendarStyle` supplies optional cell colors through a composition local; null colors keep the MaterialTheme defaults:
+
+```kotlin
+CompositionLocalProvider(
+    LocalCalendarStyle provides CalendarStyle(
+        selectedContainerColor = Color(0xFFE3F2FD),
+        markerSize = 8.dp,
+    ),
+) {
+    GregorianCalendarMonth(/* ... */)
+}
+```
+
+`CalendarRangePolicy` limits complete range selections without enumerating the interior. The one-argument `CalendarSelectionState` constructor uses the unrestricted default; pass a policy to `rememberCalendarSelectionState` or the state constructor:
+
+```kotlin
+val state = rememberCalendarSelectionState(
+    mode = TypeSelectDay.Range,
+    rangePolicy = CalendarRangePolicy(minRangeLength = 2, maxRangeLength = 14),
+)
+
+state.selectRange(startEpochDay, endEpochDay) // for a caller-owned drag layer
 ```
 
 ---

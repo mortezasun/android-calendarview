@@ -19,10 +19,10 @@ The architecture follows standard Compose state and rendering patterns:
 
 | Module | Responsibility |
 |--------|----------------|
-| `:library` | Core Compose views (`CalendarMonthGrid`, `CalendarQuarterHeatmap`, `CalendarYearHeatmap`), month containers (`CalendarMonthList`, `CalendarMonthPager`), selection state machine (`CalendarSelection`, `CalendarSelectionState`, `TypeSelectDay`), shared month data (`CalendarMonthData`, `toHeatmap()`), month navigation (`CalendarMonthNavigationState`, `CalendarMonthHeader`), and cell data models. |
-| `:calendar-gregorian` | Gregorian calendar engine backed by `java.time.YearMonth` and `java.time.LocalDate`. Provides `GregorianCalendarMonth`, `gregorianMonthData`, and `gregorianDayCell`. |
-| `:calendar-hijri` | Islamic Hijri calendar engine backed by `java.time.chrono.HijrahDate`. Provides `HijriCalendarMonth`, `hijriMonthData`, and `hijriDayCell`. |
-| `:calendar-solarHijri` | Solar Hijri / Jalali calendar engine backed by `ir.huri:jalalicalendar`. Provides `SolarHijriCalendarMonth`, `solarHijriMonthData`, and `solarHijriDayCell`. |
+| `:library` | Core Compose views (`CalendarMonthGrid`, `CalendarWeekGrid`, `CalendarAgenda`, `CalendarQuarterHeatmap`, `CalendarYearHeatmap`), month containers (`CalendarMonthList`, `CalendarMonthPager`, `CalendarMonthColumns`), selection state machine (`CalendarSelection`, `CalendarSelectionState`, `CalendarRangePolicy`, `TypeSelectDay`), shared month/week data, markers, styling, month navigation, and cell data models. |
+| `:calendar-gregorian` | Gregorian calendar engine backed by `java.time.YearMonth` and `java.time.LocalDate`. Provides `GregorianCalendarMonth`, month/week data builders and day cells. |
+| `:calendar-hijri` | Islamic Hijri calendar engine backed by `java.time.chrono.HijrahDate`. Provides `HijriCalendarMonth`, month/week data builders and day cells. |
+| `:calendar-solarHijri` | Solar Hijri / Jalali calendar engine backed by `ir.huri:jalalicalendar`. Provides `SolarHijriCalendarMonth`, month/week data builders and day cells. |
 | `:calendarviewsample` | Interactive Compose demo app illustrating configuration, selection modes, navigation, dialogs, and heatmaps. |
 
 ### Dependency Rules
@@ -69,6 +69,18 @@ State is managed declaratively and cleanly separated from UI rendering:
 - **View model states:** `GregorianMonthState`, `HijriMonthState` and `SolarHijriMonthState` are observable, saveable state holders that keep the visible month, normalize it to the first day, enforce inclusive `minMonth`/`maxMonth` bounds and expose `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`. They live in the calendar modules because month arithmetic is calendar-specific.
 - **Header:** `CalendarMonthHeader` is calendar-independent and stateless. It renders the title as a heading, exposes optional today/previous/next actions, and takes localized content descriptions from the caller because the library ships no UI strings.
 - **Semantics:** month titles are headings; each week exposes `CollectionInfo` and each day `CollectionItemInfo`, so screen readers can announce the grid position. `todayDescription` is an optional caller-localized suffix for today's accessibility label; the default keeps the date-only label.
+
+---
+
+## Product views, markers and styling
+
+- **Week view:** `CalendarWeekData` is the seven-day contract; each engine has a `*WeekData` builder that aligns to the configured first day and returns consecutive cells. `CalendarWeekGrid` reuses the month grid renderer, so selection, markers, week numbers and accessibility stay identical.
+- **Agenda:** `CalendarAgenda` is a bounded `LazyColumn` over `CalendarDayCell` values. It keeps selection and markers caller-owned and appends marker/today descriptions to the accessible day label.
+- **Markers:** `CalendarDayMarker` is keyed by epoch day in a caller-owned map. The renderer draws at most four decorative dots; content descriptions are merged into the day label, so markers add information without creating noisy focus targets.
+- **Week numbers:** an optional callback on `CalendarMonthGrid` receives the first epoch day of each week. The library deliberately does not choose a week-numbering convention; engines and hosts localize it.
+- **Adaptive months:** `CalendarMonthColumns` derives one or more columns from the available width and exposes `LazyGridState`. It is a layout container, not a new calendar engine.
+- **Styling:** `LocalCalendarStyle` carries optional selected/surface/content/today colors and marker geometry. Null colors fall back to MaterialTheme; explicit `todayBorderColor` arguments still take precedence.
+- **Range policy:** `CalendarRangePolicy` validates complete ranges by inclusive length. `CalendarSelectionState` applies it to taps and exposes `selectRange` for a caller-owned drag layer; it does not install a gesture or enumerate range interiors.
 
 ---
 

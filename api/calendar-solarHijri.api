@@ -12,7 +12,7 @@ public final class com.develotter.calendarview.calendars.solarHijri.compose.Sola
   public static final long solarHijriEpochDay(ir.huri.jcal.JalaliCalendar);
   public static final com.develotter.calendarview.compose.CalendarDayCell solarHijriDayCell(ir.huri.jcal.JalaliCalendar, java.util.Locale, ir.huri.jcal.JalaliCalendar, kotlin.jvm.functions.Function1<? super ir.huri.jcal.JalaliCalendar, java.lang.Boolean>);
   public static final com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriMonthData solarHijriMonthData(ir.huri.jcal.JalaliCalendar, java.util.Locale, java.time.DayOfWeek, ir.huri.jcal.JalaliCalendar, kotlin.jvm.functions.Function1<? super ir.huri.jcal.JalaliCalendar, java.lang.Boolean>);
-  public static final void SolarHijriCalendarMonth(ir.huri.jcal.JalaliCalendar, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super ir.huri.jcal.JalaliCalendar, kotlin.Unit>, androidx.compose.ui.Modifier, java.util.Locale, java.time.DayOfWeek, boolean, boolean, ir.huri.jcal.JalaliCalendar, boolean, boolean, boolean, long, java.lang.String, kotlin.jvm.functions.Function1<? super ir.huri.jcal.JalaliCalendar, java.lang.Boolean>, androidx.compose.runtime.Composer, int, int, int);
+  public static final void SolarHijriCalendarMonth--t4yqeQ(ir.huri.jcal.JalaliCalendar, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super ir.huri.jcal.JalaliCalendar, kotlin.Unit>, androidx.compose.ui.Modifier, java.util.Locale, java.time.DayOfWeek, boolean, boolean, ir.huri.jcal.JalaliCalendar, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map<java.lang.Long, ? extends java.util.List<com.develotter.calendarview.compose.CalendarDayMarker>>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, kotlin.jvm.functions.Function1<? super ir.huri.jcal.JalaliCalendar, java.lang.Boolean>, androidx.compose.runtime.Composer, int, int, int);
 }
 
 public final class com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriMonthData implements com.develotter.calendarview.compose.CalendarMonthData {
@@ -50,4 +50,24 @@ public final class com.develotter.calendarview.calendars.solarHijri.compose.Sola
 
 public final class com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriMonthStateKt {
   public static final com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriMonthState rememberSolarHijriMonthState(ir.huri.jcal.JalaliCalendar, ir.huri.jcal.JalaliCalendar, ir.huri.jcal.JalaliCalendar, androidx.compose.runtime.Composer, int, int);
+}
+
+public final class com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriWeekData implements com.develotter.calendarview.compose.CalendarWeekData {
+  public com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriWeekData(java.lang.String, java.util.List<java.lang.String>, java.util.List<com.develotter.calendarview.compose.CalendarDayCell>, java.lang.String);
+  public java.lang.String getTitle();
+  public java.util.List<java.lang.String> getWeekdayLabels();
+  public java.util.List<com.develotter.calendarview.compose.CalendarDayCell> getDays();
+  public java.lang.String getWeekNumber();
+  public final java.lang.String component1();
+  public final java.util.List<java.lang.String> component2();
+  public final java.util.List<com.develotter.calendarview.compose.CalendarDayCell> component3();
+  public final java.lang.String component4();
+  public final com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriWeekData copy(java.lang.String, java.util.List<java.lang.String>, java.util.List<com.develotter.calendarview.compose.CalendarDayCell>, java.lang.String);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+
+public final class com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriWeekDataKt {
+  public static final com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriWeekData solarHijriWeekData(ir.huri.jcal.JalaliCalendar, java.util.Locale, java.time.DayOfWeek, ir.huri.jcal.JalaliCalendar, kotlin.jvm.functions.Function1<? super ir.huri.jcal.JalaliCalendar, java.lang.Boolean>);
 }
