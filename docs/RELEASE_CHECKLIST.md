@@ -25,6 +25,8 @@ remains a historical record.
   `mavenLocal()` is absent from the consumer build.
 - [x] README installation coordinates, CHANGELOG, PROJECT_STATUS, ARCHITECTURE, SETUP and
   [release notes](releases/2.1.0.md) updated for `2.1.0`.
+- [x] GitHub Release body updated from the source release notes by the release-notes
+  workflow (run `43086799069`).
 
 ## 2. Previous release: 2.0.1 (2026-11-11)
 
