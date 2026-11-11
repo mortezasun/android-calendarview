@@ -101,10 +101,10 @@ class CalendarSampleUiTest {
         val description = selected.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.ENGLISH))
         showViewport()
         try {
-            compose.onNodeWithContentDescription(description).performScrollTo()
+            compose.onNodeWithContentDescription(description, substring = true).performScrollTo()
         } catch (_: AssertionError) {
         }
-        compose.onNodeWithContentDescription(description).performClick()
+        compose.onNodeWithContentDescription(description, substring = true).performClick()
         compose.onNodeWithText(selected.toString()).assertExists()
         click("Next")
         assertMonth(initial.plusMonths(1))
@@ -119,7 +119,7 @@ class CalendarSampleUiTest {
         val selected = YearMonth.now().atDay(1)
         val description = selected.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.ENGLISH))
         click("Open dialog")
-        compose.onNode(hasContentDescription(description) and hasAnyAncestor(isDialog())).performClick()
+        compose.onNode(hasContentDescription(description, substring = true) and hasAnyAncestor(isDialog())).performClick()
         clickDialog("Close")
         compose.onNodeWithText(selected.toString()).assertExists()
         click("Clear selection")
