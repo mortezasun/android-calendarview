@@ -171,21 +171,33 @@ private fun SampleMonth(
     previousDays: Boolean, nextDays: Boolean, fixedSixRows: Boolean = false,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
+    val todayDescription = sampleTodayDescription(locale)
     when (calendar) {
         SampleCalendar.Gregorian -> GregorianCalendarMonth(
             month = YearMonth.from(date), selection = state.selection,
             onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
+            todayDescription = todayDescription,
         )
         SampleCalendar.Hijri -> HijriCalendarMonth(
             month = HijrahDate.from(date), selection = state.selection,
             onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
+            todayDescription = todayDescription,
         )
         SampleCalendar.SolarHijri -> SolarHijriCalendarMonth(
             month = JalaliCalendar(date), selection = state.selection,
             onDateClick = { state.onDayClick(solarHijriEpochDay(it)) }, locale = locale, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
+            todayDescription = todayDescription,
         )
     }
+}
+
+/** Demo-only localized "today" description; the library deliberately ships no UI strings. */
+private fun sampleTodayDescription(locale: Locale): String = when (locale.language) {
+    "de" -> "Heute"
+    "fa" -> "امروز"
+    "ar" -> "اليوم"
+    else -> "Today"
 }

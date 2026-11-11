@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- `CalendarMonthData`, the calendar-independent month contract implemented by all three engines.
+- `CalendarMonthData.toHeatmap()` and the map-based overload, replacing hand-written adapters.
+- `CalendarMonthHeader` and the engine month states `GregorianMonthState`, `HijriMonthState`
+  and `SolarHijriMonthState`, including saveable visible-month state, inclusive bounds,
+  today navigation and per-engine titles.
+- `todayDescription` on the month grid and all engine month composables, appending a caller-localized
+  *today* label to the accessibility description.
+- Heading and grid-collection semantics for month titles and day cells.
+- Dependency-free public JVM API guard: `scripts/api-check.sh`, `api/*.api` and a CI check.
+
+### Changed
+
+- `CalendarSelection` has structural equality and is marked `@Immutable`; `CalendarSelectionState`
+  is `@Stable` and month/heatmap data classes are `@Immutable`, improving Compose skipping.
+- `CalendarSelection.contains` uses an internal set for membership on multiple selections.
+- Seven-column month grids now document the 48 dp width caveat for very narrow windows.
+
 ## 2.0.1 - 2026-11-11
 
 Publishing patch for the Compose 2.0 release. No calendar rendering, selection API or

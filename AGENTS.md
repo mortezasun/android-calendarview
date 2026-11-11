@@ -45,6 +45,10 @@ is not part of your task and never reset, stash or overwrite it without explicit
 - Public composables are **controlled and stateless**. The caller owns selection, navigation and
   the visible month; the library only renders and reports clicks. Do not add internal mutable
   state for values the caller already owns.
+- Every engine month snapshot implements `CalendarMonthData`; `toHeatmap()` is the shared
+  month-to-heatmap adapter. Month arithmetic and saveable visible-month state live in the engine
+  modules (`*MonthState.kt`); `CalendarMonthNavigationState` and `CalendarMonthHeader` stay
+  calendar-independent in `:library`.
 - Public composable signatures are API. Add options as defaulted parameters before the trailing
   `dayContent` (and, for heatmaps, `colorForIntensity`) lambda so existing calls keep compiling.
   Do not rename or remove parameters as a side effect of another change.
@@ -55,17 +59,21 @@ is not part of your task and never reset, stash or overwrite it without explicit
 
 ## Verified commands
 
-These commands were executed successfully on 2026-11-10 with JDK 17 and Android SDK Platform 37
-(package `platforms;android-37.0`):
+These commands were executed successfully with JDK 17 and Android SDK Platform 37
+(package `platforms;android-37.0`); the API guard was verified on 2026-11-11:
 
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew test                                    # 70 JVM unit tests, all modules
+./gradlew test                                    # 87 JVM unit tests, all modules
 ./gradlew :library:lintDebug                      # lint for the core library
 ./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
   :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal  # into ~/.m2
+
+# After the four release AARs are built:
+bash scripts/api-check.sh          # public JVM API diff against api/*.api
+bash scripts/api-check.sh --update # intentional API change: regenerate the dumps
 ```
 
 Single-module compile checks, for example `./gradlew :library:compileDebugKotlin`, are acceptable
@@ -106,6 +114,7 @@ for smaller changes. Report any command that could not be run and why.
 | Toolchain, SDK, build or test setup | `docs/SETUP.md` |
 | New recurring implementation pattern | `docs/DEVELOPMENT.md` |
 | Any completed session or verified state change | `docs/PROJECT_STATUS.md` |
+| Public API change | `api/*.api` via `bash scripts/api-check.sh --update`, plus README/KDoc |
 | Irreversible or structural architecture decision | new file in `docs/decisions/` |
 
 Comments explain local *why*, documents explain the overview. Do not duplicate the same
@@ -114,6 +123,7 @@ explanation in both places.
 ## Definition of done
 
 - The requested behaviour is implemented completely; no placeholder code remains.
+- Public API changes have an updated checked-in `api/*.api` dump.
 - The smallest relevant build/compile check passes; tests and lint were run when they cover the
   change, or their absence is reported explicitly.
 - Documentation and KDoc affected by the change are updated.

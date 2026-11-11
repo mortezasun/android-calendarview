@@ -58,6 +58,10 @@ jobs:
       - name: Run ${{ matrix.check }}
         run: bash ./gradlew ${{ matrix.tasks }} --no-daemon --stacktrace --console=plain
 
+      - name: Check the public API surface
+        if: matrix.check == 'assemble'
+        run: bash scripts/api-check.sh
+
       - name: Upload reports and available APK
         if: always()
         uses: actions/upload-artifact@v7

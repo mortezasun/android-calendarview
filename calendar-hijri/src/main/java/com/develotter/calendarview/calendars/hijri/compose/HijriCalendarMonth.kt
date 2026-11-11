@@ -2,9 +2,11 @@ package com.develotter.calendarview.calendars.hijri.compose
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.develotter.calendarview.compose.CalendarDayCell
+import com.develotter.calendarview.compose.CalendarMonthData
 import com.develotter.calendarview.compose.CalendarMonthGrid
 import com.develotter.calendarview.selection.CalendarSelection
 import java.text.NumberFormat
@@ -17,7 +19,13 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 /** Localized month snapshot; treat lists as read-only. */
-data class HijriMonthData(val title: String, val weekdayLabels: List<String>, val firstDayOffset: Int, val days: List<CalendarDayCell>)
+@Immutable
+data class HijriMonthData(
+    override val title: String,
+    override val weekdayLabels: List<String>,
+    override val firstDayOffset: Int,
+    override val days: List<CalendarDayCell>,
+) : CalendarMonthData
 
 /** Formats a Hijri day with its own chronology, including dates in adjacent months. */
 fun hijriDayCell(
@@ -72,6 +80,7 @@ fun HijriCalendarMonth(
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
     todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    todayDescription: String? = null,
     isDateEnabled: (HijrahDate) -> Boolean = { true },
 ) {
     val data = hijriMonthData(
@@ -84,6 +93,7 @@ fun HijriCalendarMonth(
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
         showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
         todayBorderColor = todayBorderColor,
+        todayDescription = todayDescription,
         adjacentDayProvider = { hijriDayCell(date = month.chronology.dateEpochDay(it), locale = locale, today = today, isDateEnabled = isDateEnabled) },
     )
 }

@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -44,9 +45,11 @@ import java.time.temporal.ChronoUnit
 import java.util.Locale
 
 /** Heatmap cell snapshot with intensity normalized into 0..1. */
+@Immutable
 data class HeatmapDay(val date: LocalDate, val intensity: Float)
 
 /** Weeks are chronological columns; null entries are padding outside the quarter. */
+@Immutable
 data class HeatmapQuarterData(
     val start: LocalDate,
     val end: LocalDate,
@@ -58,6 +61,7 @@ data class HeatmapQuarterData(
  * [isToday] draws the today border and [enabled] = false renders the cell dimmed and
  * not clickable, mirroring [CalendarDayCell] of the month grid.
  */
+@Immutable
 data class HeatmapDayData(
     val epochDay: Long,
     val label: String,
@@ -67,6 +71,7 @@ data class HeatmapDayData(
 )
 
 /** Calendar-agnostic month block: seven weekday rows, one column per week. */
+@Immutable
 data class HeatmapMonthData(
     val title: String,
     val weekdayLabels: List<String>,
@@ -379,7 +384,9 @@ private fun <T : Any> HeatmapBlock(
     val slotSize = maxOf(style.cellSize, LocalMinimumInteractiveComponentSize.current)
     Column(modifier, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         if (config.showHeader) {
-            config.header(title)
+            Box(Modifier.semantics(mergeDescendants = true) { heading() }) {
+                config.header(title)
+            }
         }
         when (config.orientation) {
             HeatmapOrientation.WeeksAsColumns -> Row {

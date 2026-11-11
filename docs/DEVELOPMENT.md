@@ -11,7 +11,9 @@
 | Add a calendar system | New Gradle module with a `*MonthData` builder and a `*CalendarMonth` composable, modeled on `:calendar-gregorian` |
 | Change day formatting | The engine's `*MonthData.kt` / `*DayCell` code in its own module; the grid only renders `CalendarDayCell` |
 | Change heatmap rendering | `library/.../compose/CalendarHeatmap.kt` (`HeatmapBlock`, `HeatmapCell`) |
-| Change heatmap data handling | `heatmapQuarterData` (Gregorian) / `HeatmapMonthData` built in the caller, see `calendarviewsample/.../CalendarSampleHeatmap.kt` |
+| Change heatmap data handling | `heatmapQuarterData` (Gregorian) / `CalendarMonthData.toHeatmap()`; see `calendarviewsample/.../CalendarSampleHeatmap.kt` |
+| Add month navigation | `:library` `compose/CalendarMonthHeader.kt` (state contract and header); the engine's `compose/*MonthState.kt` (month arithmetic and saved state) |
+| Add a shared month field | `:library` `compose/CalendarMonthData.kt` and every engine `*MonthData` implementation |
 | Change sample screen wiring | `calendarviewsample/.../CalendarSampleWindow.kt`, `CalendarSampleNavigation.kt`, `CalendarSampleViewport.kt`; entry points `LauncherActivity.kt` and `HeatMapViewActivity.kt` |
 
 Keep the dependency direction intact: `:library` must not import classes from the calendar modules
@@ -27,11 +29,14 @@ or from the sample. Calendar-specific code stays in its module.
    - localized month caption and weekday labels,
    - `firstDayOffset` relative to the configured `firstDayOfWeek`,
    - month length and one `CalendarDayCell` per day with epoch day, label, accessibility text,
-     `isToday` and `enabled`.
+     `isToday` and `enabled`,
+   - implement `CalendarMonthData` so `toHeatmap()` and generic helpers work without adapters.
 3. Implement the public composable (`*CalendarMonth.kt`): a thin wrapper around
    `CalendarMonthGrid` that forwards every configuration parameter.
-4. Add the module to `settings.gradle.kts` and to the consumer's dependencies.
-5. Add `*MonthDataTest` coverage next to the existing engine tests.
+4. Add a saveable `*MonthState` in the same module with the engine's month arithmetic,
+   inclusive bounds and `CalendarMonthNavigationState`; the shared header stays in `:library`.
+5. Add the module to `settings.gradle.kts` and to the consumer's dependencies.
+6. Add `*MonthDataTest` coverage next to the existing engine tests.
 
 Epoch days are the only identity shared across engines, and the month arithmetic is called for
 every month in the window, so it must be pure and must not depend on the day currently selected.
@@ -92,6 +97,22 @@ The library is deliberately small:
 
 If a change affects rendering, a manual check in the sample app is required; CLI builds do not
 verify layout, RTL behaviour or selection visuals.
+
+## Public API guard
+
+The published AARs have a checked-in public JVM API dump in `api/*.api`. After changing a public
+declaration, assemble the release AARs and run:
+
+```bash
+./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
+  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease
+bash scripts/api-check.sh          # fails on an unexpected API diff
+bash scripts/api-check.sh --update # regenerates api/*.api after an intentional change
+```
+
+CI runs the same check in the `assemble` job. The dump is generated with `javap` from the release
+AARs: it covers public JVM classes, constructors, methods and fields, but not Kotlin default
+values, annotations or source compatibility. Review `git diff api/` together with the public KDoc.
 
 ## Release and versioning notes
 

@@ -101,6 +101,16 @@ class CalendarSelectionTest {
     }
 
     @Test
+    fun selectionUsesStructuralValueEquality() {
+        assertEquals(range(10L, 20L), range(10L, 20L))
+        assertEquals(range(10L, 20L).hashCode(), range(10L, 20L).hashCode())
+        assertFalse(range(10L, 20L) == range(10L, 21L))
+        assertFalse(
+            CalendarSelection.from(TypeSelectDay.Multiple, listOf(10L, 20L)) == range(10L, 20L),
+        )
+    }
+
+    @Test
     fun clearPreservesModeAndDoesNotMutateOriginal() {
         val selection = range(10L, 20L)
         val cleared = selection.clear()

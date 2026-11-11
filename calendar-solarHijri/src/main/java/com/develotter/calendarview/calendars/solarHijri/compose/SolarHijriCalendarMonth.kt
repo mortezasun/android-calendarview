@@ -2,10 +2,12 @@ package com.develotter.calendarview.calendars.solarHijri.compose
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.develotter.calendarview.calendars.solarHijri.fromSolarHijriToLocalDate
 import com.develotter.calendarview.compose.CalendarDayCell
+import com.develotter.calendarview.compose.CalendarMonthData
 import com.develotter.calendarview.compose.CalendarMonthGrid
 import com.develotter.calendarview.selection.CalendarSelection
 import ir.huri.jcal.JalaliCalendar
@@ -16,7 +18,13 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 /** Localized month snapshot; treat lists as read-only. */
-data class SolarHijriMonthData(val title: String, val weekdayLabels: List<String>, val firstDayOffset: Int, val days: List<CalendarDayCell>)
+@Immutable
+data class SolarHijriMonthData(
+    override val title: String,
+    override val weekdayLabels: List<String>,
+    override val firstDayOffset: Int,
+    override val days: List<CalendarDayCell>,
+) : CalendarMonthData
 
 /** Checked existing conversion to the shared timeline; no broader year range is promised. */
 fun solarHijriEpochDay(date: JalaliCalendar): Long {
@@ -33,6 +41,12 @@ private fun solarMonthName(date: JalaliCalendar, locale: Locale): String =
         "Farvardin", "Ordibehesht", "Khordad", "Tir", "Mordad", "Shahrivar",
         "Mehr", "Aban", "Azar", "Dey", "Bahman", "Esfand",
     )[date.month - 1]
+
+/** Shared month caption; the state holder and the month data use the same formatting. */
+internal fun solarHijriMonthTitle(date: JalaliCalendar, locale: Locale): String {
+    val numbers = NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }
+    return "${solarMonthName(date, locale)} ${numbers.format(date.year)}"
+}
 
 /** Formats one checked Jalali date; consumer predicates receive a separate mutable instance. */
 fun solarHijriDayCell(
@@ -63,9 +77,8 @@ fun solarHijriMonthData(
 ): SolarHijriMonthData {
     val first = JalaliCalendar(month.year, month.month, 1)
     val epoch = solarHijriEpochDay(first)
-    val numbers = NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }
     return SolarHijriMonthData(
-        title = "${solarMonthName(first, locale)} ${numbers.format(first.year)}",
+        title = solarHijriMonthTitle(first, locale),
         weekdayLabels = List(7) { firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale) },
         firstDayOffset = Math.floorMod(LocalDate.ofEpochDay(epoch).dayOfWeek.value - firstDayOfWeek.value, 7),
         days = (1..first.monthLength).map { day ->
@@ -96,6 +109,7 @@ fun SolarHijriCalendarMonth(
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
     todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    todayDescription: String? = null,
     isDateEnabled: (JalaliCalendar) -> Boolean = { true },
 ) {
     val data = solarHijriMonthData(
@@ -108,6 +122,7 @@ fun SolarHijriCalendarMonth(
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
         showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
         todayBorderColor = todayBorderColor,
+        todayDescription = todayDescription,
         adjacentDayProvider = { solarHijriDayCell(date = JalaliCalendar(LocalDate.ofEpochDay(it)), locale = locale, today = today, isDateEnabled = isDateEnabled) },
     )
 }

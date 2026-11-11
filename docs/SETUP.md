@@ -71,7 +71,8 @@ Building only the core library:
 `src/test` holds the JVM tests: selection engine and saved-state snapshots, month-cell building,
 heatmap data and style validation, the sample helpers and one month-data suite per calendar
 engine. `src/androidTest` holds the Compose UI tests (`CalendarSelectionComposeTest`,
-`CalendarHeatmapComposeTest`, plus the sample acceptance tests). Only the `ExampleUnitTest` /
+`CalendarHeatmapComposeTest`, `CalendarMonthHeaderComposeTest`, plus the sample acceptance
+tests). Only the `ExampleUnitTest` /
 `ExampleInstrumentedTest` files are leftover templates. Instrumented tests require an emulator or
 device and were not part of the CLI verification.
 
@@ -93,6 +94,20 @@ of it.
 The project needs no API keys, tokens or signing secrets for debug builds. Release signing is not
 configured in the repository. Never commit keystores, `local.properties`, credentials or private
 keys.
+
+## Public API guard
+
+The release AARs have a checked-in public JVM API dump in `api/`. After assembling them, run:
+
+```bash
+./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
+  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease
+bash scripts/api-check.sh
+```
+
+`bash scripts/api-check.sh --update` regenerates the dumps after an intentional API change. The
+script needs a JDK (`javap`, `jar`) and `unzip`; CI runs it in the assemble job. It compares public
+JVM signatures only, not Kotlin default values, annotations or source compatibility.
 
 ## Publishing
 

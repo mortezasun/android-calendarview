@@ -16,8 +16,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.CollectionInfo
+import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.collectionInfo
+import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.selection.CalendarSelection
@@ -30,7 +35,10 @@ import com.develotter.calendarview.selection.CalendarSelection
  * Slots receive cells with isCurrentMonth plus selection/endpoint flags. Do not install
  * competing click handlers in slots. Layout follows ambient direction, including RTL.
  * Today indicator uses [todayBorderColor] (defaults to tertiary) so it never clashes
- * with the primary selection highlight.
+ * with the primary selection highlight. Pass a localized [todayDescription] to append it to
+ * the accessibility description of today's cell; the default null keeps the date-only label.
+ * The header is exposed as a heading and every week/cell carries collection semantics so
+ * screen readers can announce the grid position.
  */
 @Composable
 fun CalendarMonthGrid(
@@ -51,6 +59,7 @@ fun CalendarMonthGrid(
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
     todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    todayDescription: String? = null,
 ) {
     require(weekdayLabels.size == 7) { "Exactly seven weekday labels are required" }
     val cells = buildCalendarMonthCells(
@@ -63,7 +72,9 @@ fun CalendarMonthGrid(
     )
     Column(modifier) {
         if (showHeader) {
-            header(title)
+            Box(Modifier.semantics(mergeDescendants = true) { heading() }) {
+                header(title)
+            }
         }
         if (showWeekdayLabels) {
             Row(Modifier.fillMaxWidth()) {
@@ -74,17 +85,35 @@ fun CalendarMonthGrid(
                 }
             }
         }
-        cells.chunked(7).forEach { week ->
-            Row(Modifier.fillMaxWidth()) {
-                week.forEach { day ->
+        val weeks = cells.chunked(7)
+        weeks.forEachIndexed { rowIndex, week ->
+            Row(
+                Modifier.fillMaxWidth().semantics {
+                    collectionInfo = CollectionInfo(rowCount = weeks.size, columnCount = 7)
+                },
+            ) {
+                week.forEachIndexed { columnIndex, day ->
                     val cellModifier = Modifier.weight(1f).heightIn(min = 48.dp)
                     if (day == null) {
                         Box(cellModifier)
                     } else {
                         val selected = day.epochDay in selection
+                        val description = if (day.isToday && todayDescription != null) {
+                            "${day.accessibilityLabel}, $todayDescription"
+                        } else {
+                            day.accessibilityLabel
+                        }
                         Surface(
                             modifier = cellModifier
-                                .semantics { contentDescription = day.accessibilityLabel }
+                                .semantics {
+                                    contentDescription = description
+                                    collectionItemInfo = CollectionItemInfo(
+                                        rowIndex = rowIndex,
+                                        rowSpan = 1,
+                                        columnIndex = columnIndex,
+                                        columnSpan = 1,
+                                    )
+                                }
                                 .selectable(
                                     selected = selected, enabled = day.enabled, role = Role.Button,
                                     onClick = { onDayClick(day.epochDay) },

@@ -334,3 +334,47 @@ the historical run-to-SHA mapping still needs direct confirmation):
   - Version `2.0.0` tagged on the release commit.
   - GitHub Release published.
 
+---
+
+## Session 2026-11-11: Phase 1 - shared month data, navigation and SDK guard
+
+Additive public work; no existing public name or parameter was removed or renamed.
+
+- `:library`:
+  - `CalendarMonthData` contract and `toHeatmap()` adapters (intensity lambda and map overload).
+  - `CalendarMonthNavigationState` and `CalendarMonthHeader` with heading semantics,
+    caller-localized content descriptions, an optional today action and bounds-aware enabled states.
+  - `CalendarSelection` has structural `equals`/`hashCode`/`toString` and is `@Immutable`;
+    membership uses an internal set. `CalendarSelectionState` is `@Stable`; month and heatmap data
+    classes are `@Immutable`.
+  - `CalendarMonthGrid` adds optional `todayDescription`, heading semantics and
+    `CollectionInfo`/`CollectionItemInfo` per week and cell.
+- Engines:
+  - `GregorianMonthData`, `HijriMonthData` and `SolarHijriMonthData` implement
+    `CalendarMonthData` and are `@Immutable`.
+  - `GregorianMonthState`, `HijriMonthState` and `SolarHijriMonthState` plus saveable
+    `remember*MonthState`; inclusive bounds, first-day normalization, titles and today navigation.
+  - Engine month composables forward `todayDescription`; the sample supplies localized demo text.
+- API guard: `scripts/api-check.sh` compares `javap` dumps of the four release AARs against
+  `api/*.api`; CI runs it in the assemble job. The binary-compatibility-validator plugin was
+  evaluated but creates no tasks with AGP 9 built-in Kotlin, so it is not used.
+
+Executed on 2026-11-11 locally (Temurin 17.0.21+9, Platform `android-37.0`, Build-Tools 36.0.0):
+
+| Check | Result |
+|-------|--------|
+| `test` (all modules) | 87 tests, 0 failures, 0 errors |
+| `:calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
+| `:library:lintDebug`, `:calendar-gregorian:lintDebug`, `:calendar-hijri:lintDebug`, `:calendar-solarHijri:lintDebug` | BUILD SUCCESSFUL, 0 errors |
+| `:library:compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL (compiled only, not executed) |
+| Release AARs for all four library modules | BUILD SUCCESSFUL |
+| `bash scripts/api-check.sh` | Public API matches the checked-in dumps |
+
+Remaining limitations:
+- No emulator or device was available. The new `CalendarMonthHeaderComposeTest` (2 tests) and the
+  existing instrumentation suites were compiled but not executed.
+- The API guard covers public JVM signatures only, not Kotlin default values, annotations or
+  source compatibility. `CalendarSelectionSnapshot` and `solarHijriMonthTitle` are intentionally
+  excluded as Kotlin-internal.
+- No version bump, tag, JitPack consumer build or physical-device acceptance was performed.
+

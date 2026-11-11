@@ -2,9 +2,11 @@ package com.develotter.calendarview.calendars.gregorian.compose
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.develotter.calendarview.compose.CalendarDayCell
+import com.develotter.calendarview.compose.CalendarMonthData
 import com.develotter.calendarview.compose.CalendarMonthGrid
 import com.develotter.calendarview.selection.CalendarSelection
 import java.text.NumberFormat
@@ -18,7 +20,13 @@ import java.time.temporal.WeekFields
 import java.util.Locale
 
 /** Localized month snapshot; treat lists as read-only. */
-data class GregorianMonthData(val title: String, val weekdayLabels: List<String>, val firstDayOffset: Int, val days: List<CalendarDayCell>)
+@Immutable
+data class GregorianMonthData(
+    override val title: String,
+    override val weekdayLabels: List<String>,
+    override val firstDayOffset: Int,
+    override val days: List<CalendarDayCell>,
+) : CalendarMonthData
 
 /** Formats one Gregorian date for either current or adjacent month rendering. */
 fun gregorianDayCell(
@@ -71,6 +79,7 @@ fun GregorianCalendarMonth(
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
     todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
+    todayDescription: String? = null,
     isDateEnabled: (LocalDate) -> Boolean = { true },
 ) {
     val data = gregorianMonthData(
@@ -83,6 +92,7 @@ fun GregorianCalendarMonth(
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
         showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
         todayBorderColor = todayBorderColor,
+        todayDescription = todayDescription,
         adjacentDayProvider = { gregorianDayCell(date = LocalDate.ofEpochDay(it), locale = locale, today = today, isDateEnabled = isDateEnabled) },
     )
 }

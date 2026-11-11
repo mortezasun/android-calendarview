@@ -1,6 +1,7 @@
 package com.develotter.calendarview.compose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,6 +12,7 @@ import com.develotter.calendarview.selection.CalendarSelection
 import com.develotter.calendarview.selection.CalendarSelectionSnapshot
 
 /** Observable owner of the UI-independent selection engine. Mutate on the UI thread. */
+@Stable
 class CalendarSelectionState(initialSelection: CalendarSelection) {
     var selection by mutableStateOf(initialSelection)
         private set

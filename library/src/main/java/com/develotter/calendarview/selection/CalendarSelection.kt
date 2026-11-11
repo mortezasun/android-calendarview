@@ -1,5 +1,6 @@
 package com.develotter.calendarview.selection
 
+import androidx.compose.runtime.Immutable
 import com.develotter.calendarview.enums.TypeSelectDay
 
 /**
@@ -10,11 +11,16 @@ import com.develotter.calendarview.enums.TypeSelectDay
  * Only explicit selections are stored: range interiors are computed without enumeration.
  * Instances expose no mutable collections; publish the returned value through Compose state.
  * This class does not itself provide observable state or persistence.
+ *
+ * Instances are immutable values with structural equality, so they can be used as Compose
+ * parameters and as `remember`/`rememberSaveable` keys without spurious invalidation.
  */
+@Immutable
 class CalendarSelection private constructor(
     val mode: TypeSelectDay,
     private val days: List<Long>,
 ) {
+    private val selectedDaySet: Set<Long> = days.toSet()
     /** Sorted explicit selections; for ranges these are zero, one or two endpoints. */
     val selectedDays: List<Long>
         get() = days.toList()
@@ -26,12 +32,12 @@ class CalendarSelection private constructor(
     /** Includes range interiors, even for days that have never been rendered. */
     operator fun contains(epochDay: Long): Boolean = when {
         isRangeComplete -> epochDay >= days[0] && epochDay <= days[1]
-        else -> epochDay in days
+        else -> epochDay in selectedDaySet
     }
 
     /** Whether this day is an explicit range endpoint, including an incomplete range. */
     fun isRangeEndpoint(epochDay: Long): Boolean =
-        mode == TypeSelectDay.Range && epochDay in days
+        mode == TypeSelectDay.Range && epochDay in selectedDaySet
 
     /** Returns an empty selection of the same mode without mutating this value. */
     fun clear(): CalendarSelection = empty(mode)
@@ -58,6 +64,13 @@ class CalendarSelection private constructor(
         }
         return from(mode, next)
     }
+
+    override fun equals(other: Any?): Boolean =
+        other is CalendarSelection && mode == other.mode && days == other.days
+
+    override fun hashCode(): Int = 31 * mode.hashCode() + days.hashCode()
+
+    override fun toString(): String = "CalendarSelection(mode=$mode, days=$days)"
 
     companion object {
         /** Creates an empty value in the requested mode. */

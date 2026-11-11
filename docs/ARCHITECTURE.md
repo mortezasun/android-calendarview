@@ -9,6 +9,8 @@ The architecture follows standard Compose state and rendering patterns:
 - **Calendar abstraction:** Calendar engines supply month data snapshots (`GregorianMonthData`, `HijriMonthData`, `SolarHijriMonthData`) and day cells (`CalendarDayCell`).
 - **Unified selection engine:** `CalendarSelection` and `CalendarSelectionState` operate on universal epoch-day identities (`Long`).
 - **Containers:** Compose foundational lists and pagers (`HorizontalPager`, `VerticalPager`, `LazyRow`, `LazyColumn`) provide smooth scrolling and month navigation.
+- **Month data:** every engine month snapshot implements `CalendarMonthData`; `toHeatmap()` converts any month into the calendar-independent heatmap block format.
+- **Month navigation:** `CalendarMonthNavigationState` and `CalendarMonthHeader` live in `:library`; each engine owns a saveable `*MonthState` with its month arithmetic and inclusive bounds.
 - **Heatmaps:** `CalendarQuarterHeatmap` and `CalendarYearHeatmap` render activity intensities as a grid of Compose cells, configurable like the month grid.
 
 ---
@@ -17,7 +19,7 @@ The architecture follows standard Compose state and rendering patterns:
 
 | Module | Responsibility |
 |--------|----------------|
-| `:library` | Core Compose views (`CalendarMonthGrid`, `CalendarQuarterHeatmap`, `CalendarYearHeatmap`), month containers (`CalendarMonthList`, `CalendarMonthPager`), selection state machine (`CalendarSelection`, `CalendarSelectionState`, `TypeSelectDay`), and cell data models. |
+| `:library` | Core Compose views (`CalendarMonthGrid`, `CalendarQuarterHeatmap`, `CalendarYearHeatmap`), month containers (`CalendarMonthList`, `CalendarMonthPager`), selection state machine (`CalendarSelection`, `CalendarSelectionState`, `TypeSelectDay`), shared month data (`CalendarMonthData`, `toHeatmap()`), month navigation (`CalendarMonthNavigationState`, `CalendarMonthHeader`), and cell data models. |
 | `:calendar-gregorian` | Gregorian calendar engine backed by `java.time.YearMonth` and `java.time.LocalDate`. Provides `GregorianCalendarMonth`, `gregorianMonthData`, and `gregorianDayCell`. |
 | `:calendar-hijri` | Islamic Hijri calendar engine backed by `java.time.chrono.HijrahDate`. Provides `HijriCalendarMonth`, `hijriMonthData`, and `hijriDayCell`. |
 | `:calendar-solarHijri` | Solar Hijri / Jalali calendar engine backed by `ir.huri:jalalicalendar`. Provides `SolarHijriCalendarMonth`, `solarHijriMonthData`, and `solarHijriDayCell`. |
@@ -61,6 +63,15 @@ State is managed declaratively and cleanly separated from UI rendering:
 
 ---
 
+## Month Data and Navigation
+
+- **Shared month contract:** every engine month snapshot (`GregorianMonthData`, `HijriMonthData`, `SolarHijriMonthData`) implements `CalendarMonthData`. The contract carries the localized title, seven weekday labels, the leading offset and the current-month `CalendarDayCell` list. `toHeatmap()` builds a `HeatmapMonthData` block from it, including full-week padding, `isToday`/`enabled` forwarding and intensity normalization, so the README no longer needs a hand-written adapter.
+- **View model states:** `GregorianMonthState`, `HijriMonthState` and `SolarHijriMonthState` are observable, saveable state holders that keep the visible month, normalize it to the first day, enforce inclusive `minMonth`/`maxMonth` bounds and expose `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`. They live in the calendar modules because month arithmetic is calendar-specific.
+- **Header:** `CalendarMonthHeader` is calendar-independent and stateless. It renders the title as a heading, exposes optional today/previous/next actions, and takes localized content descriptions from the caller because the library ships no UI strings.
+- **Semantics:** month titles are headings; each week exposes `CollectionInfo` and each day `CollectionItemInfo`, so screen readers can announce the grid position. `todayDescription` is an optional caller-localized suffix for today's accessibility label; the default keeps the date-only label.
+
+---
+
 ## Heatmap Architecture
 
 The heatmap is decoupled from month grid calculations but shares its configuration model:
@@ -68,7 +79,8 @@ The heatmap is decoupled from month grid calculations but shares its configurati
   the Gregorian `CalendarYearHeatmap(year, ...)` stacks four quarters.
 - The calendar-agnostic `CalendarYearHeatmap(months: List<HeatmapMonthData>, ...)` renders
   month blocks built by the caller with any engine (`gregorianMonthData`, `hijriMonthData`,
-  `solarHijriMonthData`), so `:library` stays independent of calendar engines.
+  `solarHijriMonthData`) through `CalendarMonthData.toHeatmap()`, so `:library` stays independent
+  of calendar engines.
   `HeatmapDayData.isToday` / `enabled` carry the engine's `CalendarDayCell` state.
 - All three composables share one private renderer (`HeatmapBlock` / `HeatmapCell`) and the
   same options as `CalendarMonthGrid`: `showHeader`, `showWeekdayLabels`, `header` and

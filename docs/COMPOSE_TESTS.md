@@ -5,6 +5,7 @@ Test classes:
 
 - com.develotter.calendarview.compose.CalendarSelectionComposeTest
 - com.develotter.calendarview.compose.CalendarHeatmapComposeTest
+- com.develotter.calendarview.compose.CalendarMonthHeaderComposeTest
 
 Five selection tests cover cleared-selection restoration, range restoration, mode changes
 and disabled/selected grid-cell semantics. StateRestorationTester simulates Compose
@@ -14,6 +15,10 @@ Six heatmap tests cover both orientations, click reporting by epoch day, RTL wee
 mirroring, caller-owned selection semantics, disabled days and the minimum touch target
 when `HeatmapStyle.cellSize` is below 48 dp. They render the composables directly, not a
 heatmap screen inside the sample app.
+
+Two header tests cover navigation dispatch with disabled bounds and the optional localized
+today suffix appended to a day cell's accessibility description. They render the composables
+directly and were compiled but not executed in the 2026-11-11 session.
 
 ## Emulator workflow
 
@@ -51,9 +56,10 @@ existing verification workflow, not this new emulator workflow. The assistant co
 retrieve the linked run and has not independently checked job conclusions or test counts.
 The instrumented tests and the emulator setup remain unverified until execution.
 
-Still open: actual emulator results for both classes, real activity/process recreation,
-list/pager gestures and restoration, window identity, font scaling, additional runtime API
-levels, Android calendar conversions and end-to-end sample checks.
+Still open: actual emulator results for the selection, heatmap and header classes, real
+activity/process recreation, list/pager gestures and restoration, window identity, font
+scaling, additional runtime API levels, Android calendar conversions and end-to-end sample
+checks.
 
 References:
 

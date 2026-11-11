@@ -1,6 +1,9 @@
 package com.develotter.calendarview.compose
 
+import androidx.compose.runtime.Immutable
+
 /** Display label plus absolute-day identity. Adjacent cells are marked by the grid builder. */
+@Immutable
 data class CalendarDayCell(
     val epochDay: Long,
     val label: String,

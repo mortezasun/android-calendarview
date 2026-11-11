@@ -22,6 +22,7 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 - [Installation](#-installation)
 - [Quick start](#-quick-start)
 - [Selection modes](#-selection-modes)
+- [Month navigation](#-month-navigation)
 - [Customization](#-customization)
 - [Scrolling containers](#-scrolling-containers)
 - [Heatmaps](#-heatmaps)
@@ -40,8 +41,10 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 - **One selection engine for all calendars** – `None`, `Single`, `Multiple` and `Range`, keyed by absolute epoch days and saved across process death via `rememberSaveable`.
 - **Configurable month grid** – dynamic rows or fixed 6 rows (42 cells), independently toggleable previous/next-month days, header/weekday visibility, disabled dates and a customizable *today* border.
 - **Scrolling containers** – `CalendarMonthList` (`LazyColumn`/`LazyRow`) and `CalendarMonthPager` (`HorizontalPager`/`VerticalPager`).
+- **Month navigation** – `CalendarMonthHeader` plus saveable engine month states (`rememberGregorianMonthState`, `rememberHijriMonthState`, `rememberSolarHijriMonthState`) with inclusive bounds and a today action.
+- **Shared month data** – every engine month snapshot implements `CalendarMonthData`; `toHeatmap()` turns any month into the calendar-agnostic year-heatmap format.
 - **Heatmaps** – Gregorian quarter/year heatmaps plus a calendar-agnostic year heatmap for any engine, with the same options as the month views (colors, today border, disabled dates, selection, RTL) and switchable orientation and cell style.
-- **Accessibility & RTL** – localized content descriptions, 48 dp touch targets, and layout that follows the ambient `LayoutDirection`.
+- **Accessibility & RTL** – localized content descriptions, heading and grid-collection semantics, an optional localized *today* description, and a layout that follows the ambient `LayoutDirection`. Day cells keep a 48 dp minimum height; the seven-column row shares the width, so very narrow windows (for example a 320 dp split screen) can fall below 48 dp per column.
 - **Controlled & stateless** – the caller owns selection and navigation; the library only renders and reports clicks.
 
 ---
@@ -50,7 +53,7 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 
 | Module | Package | Purpose |
 |--------|---------|---------|
-| `:library` | `com.develotter.calendarview` | Core: `CalendarMonthGrid`, selection engine, containers, heatmaps. No calendar-engine dependencies. |
+| `:library` | `com.develotter.calendarview` | Core: `CalendarMonthGrid`, selection engine, containers, heatmaps, shared month data and the month header. No calendar-engine dependencies. |
 | `:calendar-gregorian` | `…calendars.gregorian` | `GregorianCalendarMonth`, backed by `java.time`. |
 | `:calendar-hijri` | `…calendars.hijri` | `HijriCalendarMonth`, backed by `HijrahDate`. |
 | `:calendar-solarHijri` | `…calendars.solarHijri` | `SolarHijriCalendarMonth`, backed by `ir.huri:jalalicalendar` (exposed as `api`). |
@@ -172,6 +175,36 @@ state.clear()
 
 ---
 
+## 🧭 Month navigation
+
+Engine month states own the visible month, the inclusive bounds and month arithmetic; the shared header only renders and dispatches. All three states are saveable and expose `month`, `title(locale)`, `canGoPrevious`, `canGoNext`, `canGoToday`, `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`.
+
+```kotlin
+val monthState = rememberGregorianMonthState(
+    initialMonth = YearMonth.now(),
+    minMonth = YearMonth.of(2026, 1),
+    maxMonth = YearMonth.of(2026, 12),
+)
+
+CalendarMonthHeader(
+    title = monthState.title(),
+    state = monthState,
+    previousMonthContentDescription = "Previous month",
+    nextMonthContentDescription = "Next month",
+    todayLabel = "Today", // omit for no today button
+)
+
+GregorianCalendarMonth(
+    month = monthState.month,
+    selection = state.selection,
+    onDateClick = { state.onDayClick(it.toEpochDay()) },
+)
+```
+
+The content descriptions and the today label are caller-supplied because the library ships no localized UI strings. Tapping previous/next at a bound does nothing; `goTo` rejects out-of-range targets instead of clamping.
+
+---
+
 ## 🎨 Customization
 
 All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHijriCalendarMonth`) share these optional parameters:
@@ -186,6 +219,7 @@ All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHi
 | `today` | now | Date highlighted as *today*. |
 | `todayBorderColor` | `MaterialTheme.colorScheme.tertiary` | Border color of the *today* indicator. |
 | `isDateEnabled` | `{ true }` | Disable dates (e.g. past days or weekends). |
+| `todayDescription` | `null` | Localized text appended to today's accessibility label (for example `"Today"` / `"Heute"`). |
 
 ```kotlin
 GregorianCalendarMonth(
@@ -247,21 +281,12 @@ CalendarYearHeatmap(
 
 ### Any calendar (Hijri, Jalali, …)
 
-The calendar-agnostic overload takes pre-built `HeatmapMonthData` blocks, so `:library` stays free of engine dependencies. Build them from the engine's month data (`gregorianMonthData`, `hijriMonthData`, `solarHijriMonthData`); `isToday` and `enabled` come straight from the engine's `CalendarDayCell`:
+The calendar-agnostic overload takes pre-built `HeatmapMonthData` blocks, so `:library` stays free of engine dependencies. Build them from the engine's month data (`gregorianMonthData`, `hijriMonthData`, `solarHijriMonthData`) with `toHeatmap()`; `isToday` and `enabled` come straight from the engine's `CalendarDayCell`:
 
 ```kotlin
-fun SolarHijriMonthData.toHeatmap(intensity: (Long) -> Float): HeatmapMonthData {
-    val cells = buildList<HeatmapDayData?> {
-        repeat(firstDayOffset) { add(null) }
-        days.forEach {
-            add(HeatmapDayData(it.epochDay, it.accessibilityLabel, intensity(it.epochDay), it.isToday, it.enabled))
-        }
-        while (size % 7 != 0) add(null)
-    }
-    return HeatmapMonthData(title, weekdayLabels, cells.chunked(7))
+val months = (1..12).map { month ->
+    solarHijriMonthData(JalaliCalendar(1405, month, 1)).toHeatmap { 0.5f }
 }
-
-val months = (1..12).map { m -> solarHijriMonthData(JalaliCalendar(1405, m, 1)).toHeatmap { 0.5f } }
 
 CalendarYearHeatmap(
     months = months,
@@ -325,6 +350,11 @@ cd android-calendarview
 ./gradlew test                                # JVM unit tests (all modules)
 ./gradlew lintDebug                           # Android Lint
 ./gradlew connectedDebugAndroidTest           # instrumentation tests (device/emulator)
+
+# Public JVM API guard (after the release AARs are built)
+./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
+  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease
+bash scripts/api-check.sh
 ```
 
 CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
