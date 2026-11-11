@@ -1,10 +1,25 @@
 # Project status
 
 Last updated: 2026-11-11
-Version: `2.0.1` (published); `2.1.0` (release candidate)
+Version: `2.1.0` (published)
 Branch: `update`
 
-## Current release status: 2.0.1 (published)
+## Current release status: 2.1.0 (published)
+
+- Release commit `bd046a188d9a661e657affe580c7a7fa1a3e98ba` is tagged `2.1.0` and the
+  GitHub Release `2.1.0` is published.
+- Two complete API 29 instrumentation runs passed on the identical release tree:
+  `2eb0fdbc5c1ec9d5cfbeae1570eddd7e9bf37a41` (run 43081287870) and
+  `bd046a188d9a661e657affe580c7a7fa1a3e98ba` (run 43082385555). Remote verification,
+  JVM tests, lint, publishing verification and the public API guard were green.
+- JitPack built tag `2.1.0` successfully. Its build log reports `BUILD SUCCESSFUL` and
+  lists AAR, POM, module metadata and sources for `library`, `calendar-gregorian`,
+  `calendar-hijri` and `calendar-solarHijri`, plus the BOM POM/module metadata.
+- A JitPack-only consumer resolved all four constrained modules at `2.1.0`; the BOM
+  constraints match `2.1.0`, and `mavenLocal()` is absent from the consumer build.
+- The `2.0.1` tag remains at `068c57ff90bd8a7e503788a7d951dca65f8f3953` and was not moved.
+
+## Previous release: 2.0.1 (2026-11-11)
 
 - Release commit `068c57ff90bd8a7e503788a7d951dca65f8f3953` is tagged `2.0.1` and the
   GitHub Release `2.0.1` is published.
@@ -16,25 +31,15 @@ Branch: `update`
 - Physical device acceptance remains waived as recorded below. No new physical-device
   testing is claimed.
 
-## 2.1.0 release candidate (not published)
+## 2.1.0 API compatibility evidence
 
-- Root version is `2.1.0`; the sample is `2.1.0` (version code `20100`). `2.0.1` remains
-  the current published release.
-- API compatibility check: the published `2.0.1` JitPack AARs were compared with the
-  candidate. All 248 public/protected JVM members from those AARs are present with
-  identical descriptors. Hidden delegation overloads preserve the old
-  `rememberCalendarSelectionState`, `CalendarMonthGrid`, Gregorian, Hijri and Solar Hijri
-  month-composable signatures.
-- Independent consumer: a standalone Gradle app (not a repository module) built the same
-  `2.0.1`-compatible Compose screen against published `2.0.1` and against a local `2.1.0`
-  publication. Candidate-only source also compiled the Hijri provider and range-policy
-  APIs. `mavenLocal()` is absent from the consumer.
-- BOM: a local publication contains the BOM plus `library`, `calendar-gregorian`,
-  `calendar-hijri` and `calendar-solarHijri`. Versionless consumer dependencies resolved
-  all four modules at `2.1.0` through the BOM. The Solar Hijri transitive dependency
-  `ir.huri:jalalicalendar:2.0.0` also resolved.
-- Pending for release: commit and push, remote CI, tag `2.1.0`, GitHub Release and JitPack
-  build/consumer verification. No remote CI or JitPack result is claimed for this candidate.
+- The published `2.0.1` JitPack AARs were compared with the release: all 248
+  public/protected JVM members from those AARs are present with identical descriptors.
+  Hidden delegation overloads preserve the old `rememberCalendarSelectionState`,
+  `CalendarMonthGrid`, Gregorian, Hijri and Solar Hijri month-composable signatures.
+- The independent consumer compiles the same `2.0.1`-compatible screen against published
+  `2.0.1` and against JitPack `2.1.0`; candidate-only source also compiles the Hijri
+  provider and range-policy APIs.
 
 ### Independent consumer verification
 

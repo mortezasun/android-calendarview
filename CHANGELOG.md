@@ -2,7 +2,8 @@
 
 ## 2.1.0 - 2026-11-11
 
-Release candidate; the tag and JitPack publication are pending owner approval.
+Released. Tag `2.1.0` points to `bd046a188d9a661e657affe580c7a7fa1a3e98ba`;
+the GitHub Release and JitPack tag build are published.
 
 ### Added
 
@@ -24,16 +25,16 @@ Release candidate; the tag and JitPack publication are pending owner approval.
 
 ### Compatibility
 
-- Compared the published `2.0.1` JitPack AARs with the release candidate: all 248
-  public/protected JVM members are present with identical descriptors.
+- Compared the published `2.0.1` JitPack AARs with the release: all 248 public/protected
+  JVM members are present with identical descriptors.
 - Added hidden delegation overloads for `rememberCalendarSelectionState`,
   `CalendarMonthGrid` and the three engine month composables. They retain the pre-BOM
   parameter lists and default-argument shapes while new source resolves the current APIs.
-- A standalone consumer compiles the same `2.0.1`-compatible screen against `2.0.1` and
-  the `2.1.0` candidate, and additionally compiles the Hijri provider and range-policy APIs.
-- Verified a local five-artifact publication: the BOM plus `library` and all three engines.
-  The BOM resolves all four library modules at `2.1.0`; `mavenLocal()` is absent from the
-  consumer and the candidate repository is isolated under `artifacts/`.
+- The standalone consumer compiles the same `2.0.1`-compatible screen against published
+  `2.0.1` and the JitPack `2.1.0` release, and additionally compiles the Hijri provider and
+  range-policy APIs.
+- The JitPack build publishes the BOM plus `library` and all three engines. A JitPack-only
+  consumer resolved all four constrained modules at `2.1.0` without `mavenLocal()`.
 
 ### Changed
 
@@ -42,6 +43,17 @@ Release candidate; the tag and JitPack publication are pending owner approval.
 - `CalendarSelection.contains` uses an internal set for membership on multiple selections.
 - `todayBorderColor` is optional; month, week and agenda views fall back through `LocalCalendarStyle` to MaterialTheme.
 - Seven-column month grids now document the 48 dp width caveat for very narrow windows.
+
+### Release verification
+
+- Two complete API 29 instrumentation runs passed on the identical release tree:
+  `2eb0fdbc5c1ec9d5cfbeae1570eddd7e9bf37a41` (run 43081287870) and
+  `bd046a188d9a661e657affe580c7a7fa1a3e98ba` (run 43082385555).
+- Remote verification, JVM tests, lint, publishing verification and the public API guard
+  were green for the release commit.
+- Tag `2.1.0` and the GitHub Release are published. The JitPack build log reports
+  `BUILD SUCCESSFUL` and lists AAR, POM, module metadata and sources for all four modules,
+  plus the BOM POM/module metadata. The 2.0.1 tag remains unchanged.
 
 ## 2.0.1 - 2026-11-11
 

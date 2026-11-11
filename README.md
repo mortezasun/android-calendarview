@@ -92,25 +92,21 @@ Add the engines you need to your module's `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core only (needed if you build your own calendar on top of CalendarMonthGrid)
-    implementation("com.github.mortezasun.android-calendarview:library:2.0.1")
+    implementation("com.github.mortezasun.android-calendarview:library:2.1.0")
 
     // Calendar engines (each one already includes :library)
-    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.0.1")
-    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.0.1")
-    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.0.1")
+    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.1.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.1.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.1.0")
 }
 ```
 
-### Bill of Materials (2.1.0 release candidate)
+### Bill of Materials (2.1.0)
 
-`2.0.1` remains the current published release. The BOM is part of the `2.1.0` release
-candidate, which is not tagged or published yet; the `2.1.0` coordinates below are for a
-local publication or a candidate commit build. Until then, use the explicit `2.0.1`
-versions above.
+The BOM is published with `2.1.0` and constrains the core and all three engines:
 
 ```kotlin
 dependencies {
-    // Not yet published: 2.1.0 is the proposed next release.
     implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.1.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
@@ -119,12 +115,10 @@ dependencies {
 ```
 
 The BOM is part of the same publication set and is included by `jitpack.yml` and the
-publishing workflow. The existing `2.0.1` release tag predates the BOM, so it resolves
-from a newer tag or commit build that includes this revision. The candidate publication
-has been verified locally with the BOM plus all four constrained artifacts. Maven Local
-works with the publish command below; the version must match the next released tag. The
-POM contains the metadata Maven Central requires, but signing, namespace verification and
-upload are not configured; JitPack remains the only configured remote repository.
+publishing workflow. A JitPack-only consumer resolved all four constrained modules at
+`2.1.0` without `mavenLocal()`. The POM contains the metadata Maven Central requires,
+but signing, namespace verification and upload are not configured; JitPack remains the
+only configured remote repository.
 
 If you only need one engine, keep its explicit version and omit the BOM.
 
@@ -509,7 +503,7 @@ Requirements: JDK 17, Android SDK Platform 37, Build-Tools 36.0.0.
 Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 27.
 
 ```bash
-git clone --branch 2.0.1 https://github.com/mortezasun/android-calendarview.git
+git clone --branch 2.1.0 https://github.com/mortezasun/android-calendarview.git
 cd android-calendarview
 ./gradlew :calendarviewsample:assembleDebug   # build the demo app
 ./gradlew test                                # JVM unit tests (all modules)

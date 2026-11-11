@@ -1,26 +1,31 @@
 # Release acceptance
 
-Status: `2.0.1` is released, built successfully by JitPack and consumed from JitPack by
-an independent project. A `2.1.0` release candidate is prepared locally but is not tagged
-or published. The 2.0.0 material at the end remains a historical record.
+Status: `2.1.0` is released, built successfully by JitPack and consumed from JitPack by
+an independent project. `2.0.1` remains the previous release. The 2.0.0 material at the end
+remains a historical record.
 
-## 0. Release candidate: 2.1.0 (not released)
+## 1. Current release: 2.1.0 (2026-11-11)
 
 - [x] Root version and sample version set to `2.1.0`.
-- [x] Published `2.0.1` AARs compared with the candidate; all 248 public/protected JVM
+- [x] Release commit `bd046a188d9a661e657affe580c7a7fa1a3e98ba` is tagged `2.1.0`;
+  the published `2.0.1` tag was not moved.
+- [x] GitHub Release `2.1.0` is published.
+- [x] Published `2.0.1` AARs compared with the release; all 248 public/protected JVM
   members retain identical descriptors.
-- [x] Hidden delegation overloads added for the changed selection state, month grid and
-  three engine month composables.
-- [x] Standalone consumer built against published `2.0.1` and the local `2.1.0` candidate,
-  including the provider/range-policy source and the BOM path, without `mavenLocal()`.
-- [x] Local publication contains the BOM and all four constrained artifacts; the BOM
-  resolves the four modules at `2.1.0`.
-- [ ] Commit and push, then run the full remote verification, instrumentation and
-  publishing checks.
-- [ ] Obtain explicit approval, create tag `2.1.0` without moving `2.0.1`, publish the
-  GitHub Release, and verify the JitPack build and an independent JitPack consumer.
+- [x] Hidden delegation overloads preserve the changed selection state, month grid and
+  three engine month composable signatures.
+- [x] Remote verification, JVM tests, lint, publishing verification and public API guard
+  passed for the release commit.
+- [x] Two complete API 29 instrumentation runs passed on the identical release tree:
+  `2eb0fdbc5c1ec9d5cfbeae1570eddd7e9bf37a41` (run 43081287870) and
+  `bd046a188d9a661e657affe580c7a7fa1a3e98ba` (run 43082385555).
+- [x] JitPack built tag `2.1.0`; its log lists AAR, POM, module metadata and sources for
+  all four modules, plus the BOM POM/module metadata.
+- [x] JitPack-only consumer resolved the BOM and all four constrained modules at `2.1.0`;
+  `mavenLocal()` is absent from the consumer build.
+- [x] README installation coordinates, CHANGELOG and PROJECT_STATUS updated for `2.1.0`.
 
-## 1. Current release: 2.0.1 (2026-11-11)
+## 2. Previous release: 2.0.1 (2026-11-11)
 
 - [x] Release commit `068c57ff90bd8a7e503788a7d951dca65f8f3953` is tagged `2.0.1`.
   The published tag was not moved.
@@ -45,12 +50,12 @@ Residual limitation: the runtime test used a software-emulated x86_64 image and 
 one API level, default locale and one selection per calendar. It does not replace the
 full manual acceptance matrix.
 
-## 2. Historical 2.0.0 acceptance record
+## 3. Historical 2.0.0 acceptance record
 
 Checkbox states in this section are the states recorded at the end of the 2.0.0 session.
-The 2.0.1 section above is the current status.
+The 2.1.0 section above is the current status; the 2.0.1 section is the previous release.
 
-### 2.1 Candidate and CI evidence
+### 3.1 Candidate and CI evidence
 
 The previous version of this checklist and PROJECT_STATUS.md used the incorrect full
 SHA `d552dec886daea64fe23c347b97364b63ee2d770`. The actual commit in the repository
@@ -73,7 +78,7 @@ PROJECT_STATUS.md records the following results for candidate `d552dec`:
 The release SHA includes a publishing configuration change after the recorded candidate.
 Historical success is not automatically proof for this later configuration.
 
-### 2.2 Publishing and JitPack (2.0.0 session)
+### 3.2 Publishing and JitPack (2.0.0 session)
 
 - [x] Local publishing and independent consumer builds in four configurations are recorded
   in PROJECT_STATUS.md (Maven Local baseline only).
@@ -99,21 +104,21 @@ That CI job is not a substitute for a JitPack consumer build.
 The items in this subsection were closed by the 2.0.1 release section above: the tag
 build log was retrieved, and all four consumer configurations were built from JitPack.
 
-### 2.3 Manual acceptance (2.0.0)
+### 3.3 Manual acceptance (2.0.0)
 
 - [x] API 29 instrumentation results are recorded for selection, navigation, dialogs,
   heatmaps, RTL and activity recreation. Exact coverage is determined by the test reports;
   a passing suite is not exhaustive verification of every locale, font scale or runtime.
 - [x] Physical device testing was waived with documented residual risk in PROJECT_STATUS.md.
 
-### 2.4 Documentation (2.0.0 session)
+### 3.4 Documentation (2.0.0 session)
 
 - [x] Changelog and migration guide exist.
 - [x] Historical status files are retained.
 - [ ] Correct historical run-to-SHA references after inspecting the run metadata.
 - [ ] Record final remote-consumer evidence; do not equate Maven Local success with JitPack success.
 
-### 2.5 Publication (2.0.0)
+### 3.5 Publication (2.0.0)
 
 - [x] Tag `2.0.0` exists.
 - [x] GitHub Release `2.0.0` is published.
