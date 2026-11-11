@@ -1,12 +1,13 @@
 package com.develotter.calendarviewsample
 
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthData
+import com.develotter.calendarview.calendars.hijri.HijriDateProvider
+import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.calendars.hijri.compose.hijriMonthData
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthData
-import com.develotter.calendarview.compose.CalendarDayCell
-import com.develotter.calendarview.compose.HeatmapDayData
 import com.develotter.calendarview.compose.HeatmapMonthData
+import com.develotter.calendarview.compose.toHeatmap
 import ir.huri.jcal.JalaliCalendar
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -29,6 +30,7 @@ fun sampleHeatmapYear(
     locale: Locale,
     today: LocalDate = LocalDate.now(),
     firstDayOfWeek: DayOfWeek? = null,
+    hijriDateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
     isDateEnabled: (LocalDate) -> Boolean = { true },
 ): List<HeatmapMonthData> = when (calendar) {
     SampleCalendar.Gregorian -> (1..12).map { month ->
@@ -37,15 +39,17 @@ fun sampleHeatmapYear(
             firstDayOfWeek = firstDayOfWeek ?: WeekFields.of(locale).firstDayOfWeek,
             today = today, isDateEnabled = isDateEnabled,
         )
-        data.toHeatmapMonth()
+        data.toHeatmap { sampleHeatmapIntensity(it) }
     }
     SampleCalendar.Hijri -> (1..12).map { month ->
         val data = hijriMonthData(
             HijrahDate.of(year, month, 1), locale,
             firstDayOfWeek = firstDayOfWeek ?: DayOfWeek.SATURDAY,
-            today = HijrahDate.from(today), isDateEnabled = { isDateEnabled(LocalDate.from(it)) },
+            today = hijriDateProvider.dateForEpochDay(today.toEpochDay()),
+            dateProvider = hijriDateProvider,
+            isDateEnabled = { isDateEnabled(LocalDate.from(it)) },
         )
-        data.toHeatmapMonth()
+        data.toHeatmap { sampleHeatmapIntensity(it) }
     }
     SampleCalendar.SolarHijri -> (1..12).map { month ->
         val data = solarHijriMonthData(
@@ -54,7 +58,7 @@ fun sampleHeatmapYear(
             today = JalaliCalendar(today),
             isDateEnabled = { isDateEnabled(LocalDate.ofEpochDay(solarHijriEpochDay(it))) },
         )
-        data.toHeatmapMonth()
+        data.toHeatmap { sampleHeatmapIntensity(it) }
     }
 }
 
@@ -70,39 +74,6 @@ fun sampleHeatmapYearRange(calendar: SampleCalendar): IntRange = when (calendar)
     SampleCalendar.Gregorian -> 1900..2100
     SampleCalendar.Hijri -> 1300..1600
     SampleCalendar.SolarHijri -> 1200..1600
-}
-
-private fun com.develotter.calendarview.calendars.gregorian.compose.GregorianMonthData.toHeatmapMonth() =
-    heatmapMonth(title, weekdayLabels, firstDayOffset, days)
-
-private fun com.develotter.calendarview.calendars.hijri.compose.HijriMonthData.toHeatmapMonth() =
-    heatmapMonth(title, weekdayLabels, firstDayOffset, days)
-
-private fun com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriMonthData.toHeatmapMonth() =
-    heatmapMonth(title, weekdayLabels, firstDayOffset, days)
-
-private fun heatmapMonth(
-    title: String,
-    weekdayLabels: List<String>,
-    firstDayOffset: Int,
-    days: List<CalendarDayCell>,
-): HeatmapMonthData {
-    val cells = buildList<HeatmapDayData?> {
-        repeat(firstDayOffset) { add(null) }
-        days.forEach { day ->
-            add(
-                HeatmapDayData(
-                    epochDay = day.epochDay,
-                    label = day.accessibilityLabel,
-                    intensity = sampleHeatmapIntensity(day.epochDay),
-                    isToday = day.isToday,
-                    enabled = day.enabled,
-                ),
-            )
-        }
-        while (size % 7 != 0) add(null)
-    }
-    return HeatmapMonthData(title, weekdayLabels, cells.chunked(7))
 }
 
 /** Deterministic synthetic values in 0..0.9, matching the previous demo's rhythm. */

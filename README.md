@@ -66,7 +66,7 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 | `:calendar-hijri` | `…calendars.hijri` | `HijriCalendarMonth`, backed by `HijrahDate`. |
 | `:calendar-solarHijri` | `…calendars.solarHijri` | `SolarHijriCalendarMonth`, backed by `ir.huri:jalalicalendar` (exposed as `api`). |
 | `:calendar-bom` | – | Version constraints for the four published library artifacts. No runtime code. |
-| `:calendarviewsample` | `com.develotter.calendarviewsample` | Interactive demo app (month views, containers, dialog, heatmaps). |
+| `:calendarviewsample` | `com.develotter.calendarviewsample` | Interactive demo app (month views, containers, agenda, adaptive columns, markers, week numbers, styles, range policy, month header and Hijri method offset, heatmaps). |
 
 Every calendar module depends on `:library` via `api`, so adding an engine is enough to get the core. `:calendar-bom` aligns the published versions but is not a runtime dependency.
 

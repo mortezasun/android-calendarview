@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
@@ -28,6 +29,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -39,17 +41,24 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.calendars.gregorian.compose.GregorianCalendarMonth
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianWeekData
+import com.develotter.calendarview.calendars.hijri.HijriDateProvider
+import com.develotter.calendarview.calendars.hijri.OffsetHijriDateProvider
 import com.develotter.calendarview.calendars.hijri.compose.HijriCalendarMonth
 import com.develotter.calendarview.calendars.hijri.compose.hijriWeekData
 import com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriCalendarMonth
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriWeekData
+import com.develotter.calendarview.compose.CalendarAgenda
 import com.develotter.calendarview.compose.CalendarDayMarker
+import com.develotter.calendarview.compose.CalendarMonthHeader
 import com.develotter.calendarview.compose.CalendarSelectionState
+import com.develotter.calendarview.compose.CalendarStyle
 import com.develotter.calendarview.compose.CalendarWeekData
 import com.develotter.calendarview.compose.CalendarWeekGrid
+import com.develotter.calendarview.compose.LocalCalendarStyle
 import com.develotter.calendarview.compose.rememberCalendarSelectionState
 import com.develotter.calendarview.enums.TypeSelectDay
+import com.develotter.calendarview.selection.CalendarRangePolicy
 import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
 import java.time.YearMonth
@@ -81,12 +90,38 @@ private fun CalendarSample(onHeatmap: () -> Unit) {
     var nextDays by rememberSaveable { mutableStateOf(false) }
     var fixedSixRows by rememberSaveable { mutableStateOf(false) }
     var showWeek by rememberSaveable { mutableStateOf(false) }
+    var showAgenda by rememberSaveable { mutableStateOf(false) }
+    var showWeekNumbers by rememberSaveable { mutableStateOf(false) }
+    var customStyle by rememberSaveable { mutableStateOf(false) }
+    var useHeaderApi by rememberSaveable { mutableStateOf(false) }
+    var limitRange by rememberSaveable { mutableStateOf(false) }
+    var hijriOffset by rememberSaveable { mutableIntStateOf(0) }
     var anchor by rememberSaveable { mutableStateOf(LocalDate.now().toEpochDay()) }
     var showDialog by rememberSaveable { mutableStateOf(false) }
     var error by rememberSaveable { mutableStateOf<String?>(null) }
     val calendar = SampleCalendar.valueOf(calendarName)
-    val state = rememberCalendarSelectionState(TypeSelectDay.valueOf(modeName))
     val locale = Locale.forLanguageTag(localeTag)
+    val hijriProvider: HijriDateProvider = remember(hijriOffset) { OffsetHijriDateProvider(hijriOffset) }
+    val hijriToday = remember(hijriOffset) {
+        hijriProvider.dateForEpochDay(LocalDate.now().toEpochDay())
+    }
+    val rangePolicy = remember(limitRange) {
+        if (limitRange) CalendarRangePolicy(minRangeLength = 2, maxRangeLength = 14) else CalendarRangePolicy()
+    }
+    val state = rememberCalendarSelectionState(
+        mode = TypeSelectDay.valueOf(modeName),
+        rangePolicy = rangePolicy,
+    )
+    val calendarStyle = if (customStyle) {
+        CalendarStyle(
+            selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            todayBorderColor = MaterialTheme.colorScheme.tertiary,
+            markerSize = 8.dp,
+        )
+    } else {
+        CalendarStyle()
+    }
 
     fun move(offset: Int) {
         try {
@@ -97,7 +132,10 @@ private fun CalendarSample(onHeatmap: () -> Unit) {
         }
     }
 
-    CompositionLocalProvider(LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr) {
+    CompositionLocalProvider(
+        LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
+        LocalCalendarStyle provides calendarStyle,
+    ) {
         Surface(Modifier.fillMaxSize()) {
             Column(
                 Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(16.dp),
@@ -131,25 +169,108 @@ private fun CalendarSample(onHeatmap: () -> Unit) {
                     Text("Week view")
                     Switch(checked = showWeek, onCheckedChange = { showWeek = it })
                 }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(onClick = { move(-1) }) { Text("Previous") }
-                    Button(onClick = { anchor = LocalDate.now().toEpochDay(); error = null }) { Text("Today") }
-                    Button(onClick = { move(1) }) { Text("Next") }
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Agenda")
+                    Switch(checked = showAgenda, onCheckedChange = { showAgenda = it })
+                    Text("Week numbers")
+                    Switch(checked = showWeekNumbers, onCheckedChange = { showWeekNumbers = it })
+                    Text("Custom style")
+                    Switch(checked = customStyle, onCheckedChange = { customStyle = it })
+                }
+                Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("Library month header")
+                    Switch(checked = useHeaderApi, onCheckedChange = { useHeaderApi = it })
+                    Text("Range 2–14 days")
+                    Switch(checked = limitRange, onCheckedChange = { limitRange = it })
+                }
+                if (calendar == SampleCalendar.Hijri) {
+                    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text("Hijri method")
+                        listOf(-1, 0, 1).forEach { offset ->
+                            FilterChip(
+                                selected = hijriOffset == offset,
+                                onClick = { hijriOffset = offset },
+                                label = {
+                                    Text(
+                                        when (offset) {
+                                            -1 -> "−1 day"
+                                            0 -> "Umm al-Qura"
+                                            else -> "+1 day"
+                                        },
+                                    )
+                                },
+                            )
+                        }
+                    }
+                }
+                if (useHeaderApi) {
+                    val navigation = rememberSampleMonthNavigation(calendar, anchor, locale) { visible ->
+                        anchor = visible
+                        error = null
+                    }
+                    CalendarMonthHeader(
+                        title = navigation.title,
+                        state = navigation.state,
+                        previousMonthContentDescription = "Previous month",
+                        nextMonthContentDescription = "Next month",
+                        todayLabel = sampleTodayDescription(locale),
+                    )
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(onClick = { move(-1) }) { Text("Previous") }
+                        Button(onClick = { anchor = LocalDate.now().toEpochDay(); error = null }) { Text("Today") }
+                        Button(onClick = { move(1) }) { Text("Next") }
+                    }
                 }
                 error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 CalendarSampleViewport(
-                    calendar = calendar, anchor = anchor,
+                    calendar = calendar,
+                    anchor = anchor,
                     onVisibleMonthChanged = { anchor = it; error = null },
                 ) { monthAnchor ->
-                    SampleMonth(calendar, monthAnchor, locale, state, previousDays, nextDays, fixedSixRows)
+                    SampleMonth(
+                        calendar = calendar,
+                        anchor = monthAnchor,
+                        locale = locale,
+                        state = state,
+                        previousDays = previousDays,
+                        nextDays = nextDays,
+                        fixedSixRows = fixedSixRows,
+                        hijriProvider = hijriProvider,
+                        hijriToday = hijriToday,
+                        showHeader = !useHeaderApi,
+                        showWeekNumbers = showWeekNumbers,
+                    )
                 }
                 if (showWeek) {
-                    SampleWeek(calendar, anchor, locale, state)
+                    SampleWeek(
+                        calendar = calendar,
+                        anchor = anchor,
+                        locale = locale,
+                        state = state,
+                        hijriProvider = hijriProvider,
+                        hijriToday = hijriToday,
+                        showWeekNumbers = showWeekNumbers,
+                    )
+                }
+                if (showAgenda) {
+                    SampleAgenda(
+                        calendar = calendar,
+                        anchor = anchor,
+                        locale = locale,
+                        state = state,
+                        hijriProvider = hijriProvider,
+                    )
                 }
                 Text("Selected dates / range endpoints (ISO):")
                 Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     TextButton(onClick = state::clear) { Text("Clear selection") }
+                    if (state.selection.mode == TypeSelectDay.Range) {
+                        TextButton(onClick = { state.selectRange(anchor, anchor + 4) }) {
+                            Text("Select 5-day range")
+                        }
+                    }
                     TextButton(onClick = { showDialog = true }) { Text("Open dialog") }
                 }
                 TextButton(onClick = onHeatmap) { Text("Compose heatmap demo") }
@@ -170,7 +291,18 @@ private fun CalendarSample(onHeatmap: () -> Unit) {
                         forcedMode = SampleDisplayMode.HorizontalPager,
                         viewportHeight = 340.dp,
                     ) { monthAnchor ->
-                        SampleMonth(calendar, monthAnchor, locale, state, previousDays, nextDays, fixedSixRows)
+                        SampleMonth(
+                            calendar = calendar,
+                            anchor = monthAnchor,
+                            locale = locale,
+                            state = state,
+                            previousDays = previousDays,
+                            nextDays = nextDays,
+                            fixedSixRows = fixedSixRows,
+                            hijriProvider = hijriProvider,
+                            hijriToday = hijriToday,
+                            showWeekNumbers = showWeekNumbers,
+                        )
                     }
                 },
             )
@@ -180,47 +312,123 @@ private fun CalendarSample(onHeatmap: () -> Unit) {
 
 @Composable
 private fun SampleMonth(
-    calendar: SampleCalendar, anchor: Long, locale: Locale, state: CalendarSelectionState,
-    previousDays: Boolean, nextDays: Boolean, fixedSixRows: Boolean = false,
+    calendar: SampleCalendar,
+    anchor: Long,
+    locale: Locale,
+    state: CalendarSelectionState,
+    previousDays: Boolean,
+    nextDays: Boolean,
+    fixedSixRows: Boolean,
+    hijriProvider: HijriDateProvider,
+    hijriToday: HijrahDate,
+    showHeader: Boolean = true,
+    showWeekNumbers: Boolean = false,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
     val todayDescription = sampleTodayDescription(locale)
+    val weekNumberProvider: ((Long) -> String?)? = if (showWeekNumbers) {
+        { epochDay -> sampleWeekNumber(epochDay, locale) }
+    } else {
+        null
+    }
     when (calendar) {
         SampleCalendar.Gregorian -> GregorianCalendarMonth(
             month = YearMonth.from(date), selection = state.selection,
             onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             todayDescription = todayDescription, markers = sampleMarkers(date),
+            showHeader = showHeader, weekNumber = weekNumberProvider,
         )
         SampleCalendar.Hijri -> HijriCalendarMonth(
             month = HijrahDate.from(date), selection = state.selection,
             onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
-            todayDescription = todayDescription, markers = sampleMarkers(date),
+            today = hijriToday, todayDescription = todayDescription, markers = sampleMarkers(date),
+            showHeader = showHeader, weekNumber = weekNumberProvider, dateProvider = hijriProvider,
         )
         SampleCalendar.SolarHijri -> SolarHijriCalendarMonth(
             month = JalaliCalendar(date), selection = state.selection,
             onDateClick = { state.onDayClick(solarHijriEpochDay(it)) }, locale = locale, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             todayDescription = todayDescription, markers = sampleMarkers(date),
+            showHeader = showHeader, weekNumber = weekNumberProvider,
         )
     }
 }
 
 /** Demo-only weekly view sharing the month selection and event markers. */
 @Composable
-private fun SampleWeek(calendar: SampleCalendar, anchor: Long, locale: Locale, state: CalendarSelectionState) {
+private fun SampleWeek(
+    calendar: SampleCalendar,
+    anchor: Long,
+    locale: Locale,
+    state: CalendarSelectionState,
+    hijriProvider: HijriDateProvider,
+    hijriToday: HijrahDate,
+    showWeekNumbers: Boolean,
+) {
     val date = LocalDate.ofEpochDay(anchor)
     val week: CalendarWeekData = when (calendar) {
         SampleCalendar.Gregorian -> gregorianWeekData(date, locale)
-        SampleCalendar.Hijri -> hijriWeekData(HijrahDate.from(date), locale)
+        SampleCalendar.Hijri -> hijriWeekData(
+            date = HijrahDate.from(date),
+            locale = locale,
+            today = hijriToday,
+            dateProvider = hijriProvider,
+        )
         SampleCalendar.SolarHijri -> solarHijriWeekData(JalaliCalendar(date), locale)
+    }
+    val weekNumber = if (showWeekNumbers) {
+        week.weekNumber ?: sampleWeekNumber(week.days.first().epochDay, locale)
+    } else {
+        null
     }
     CalendarWeekGrid(
         title = week.title, weekdayLabels = week.weekdayLabels, days = week.days,
         selection = state.selection, onDayClick = { state.onDayClick(it) },
-        weekNumber = week.weekNumber, todayDescription = sampleTodayDescription(locale),
+        weekNumber = weekNumber, todayDescription = sampleTodayDescription(locale),
         markers = sampleMarkers(date),
+    )
+}
+
+/** Demo-only agenda for the current month, built from the shared CalendarMonthData contract. */
+@Composable
+private fun SampleAgenda(
+    calendar: SampleCalendar,
+    anchor: Long,
+    locale: Locale,
+    state: CalendarSelectionState,
+    hijriProvider: HijriDateProvider,
+) {
+    val date = LocalDate.ofEpochDay(anchor)
+    val data = remember(calendar, anchor, locale, hijriProvider) {
+        runCatching {
+            sampleMonthData(
+                calendar = calendar,
+                anchorEpochDay = anchor,
+                locale = locale,
+                hijriDateProvider = hijriProvider,
+            )
+        }
+    }
+    Text("Agenda: ${data.getOrNull()?.title ?: "current month"}")
+    data.fold(
+        onSuccess = { monthData ->
+            CalendarAgenda(
+                days = monthData.days,
+                selection = state.selection,
+                onDayClick = { state.onDayClick(it) },
+                modifier = Modifier.fillMaxWidth().height(280.dp),
+                markers = sampleMarkers(date),
+                todayDescription = sampleTodayDescription(locale),
+            )
+        },
+        onFailure = { exception ->
+            Text(
+                exception.message ?: "Unsupported agenda month",
+                color = MaterialTheme.colorScheme.error,
+            )
+        },
     )
 }
 

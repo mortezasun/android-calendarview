@@ -1,5 +1,6 @@
 package com.develotter.calendarviewsample
 
+import com.develotter.calendarview.calendars.hijri.OffsetHijriDateProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -50,6 +51,23 @@ class CalendarSampleHeatmapTest {
                 assertEquals("$calendar enabled ${day.epochDay}", day.epochDay <= today.toEpochDay(), day.enabled)
             }
         }
+    }
+
+    @Test
+    fun hijriProviderOffsetMovesHeatmapDays() {
+        val year = sampleHeatmapCurrentYear(SampleCalendar.Hijri, today)
+        val base = sampleHeatmapYear(SampleCalendar.Hijri, year, locale, today)
+            .flatMap { month -> month.weeks.flatten().filterNotNull() }
+        val shifted = sampleHeatmapYear(
+            calendar = SampleCalendar.Hijri,
+            year = year,
+            locale = locale,
+            today = today,
+            hijriDateProvider = OffsetHijriDateProvider(offsetDays = 1),
+        ).flatMap { month -> month.weeks.flatten().filterNotNull() }
+
+        assertEquals(base.size, shifted.size)
+        assertEquals(base.first().epochDay - 1, shifted.first().epochDay)
     }
 
     @Test

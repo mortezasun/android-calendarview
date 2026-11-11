@@ -494,3 +494,37 @@ Acceptance criteria:
 KMP extraction, the Jalali replacement, the Play demo and the hosted documentation site remain
 later decisions; they are not part of the BOM release gate.
 
+---
+
+## Session 2026-11-11: sample app showcase for the v2 APIs
+
+Sample-only changes, no library API or dependency changes. The demo now exercises the recent
+additive APIs in the running app instead of documenting them only in the library:
+
+- `LauncherActivity` adds switches for agenda, week numbers, a custom `CalendarStyle`, the
+  library `CalendarMonthHeader`, a 2-14 day `CalendarRangePolicy` and Hijri method offsets.
+  The selection row can call `selectRange` directly.
+- The display-mode selector includes `CalendarMonthColumns` for adaptive month columns.
+- `sampleMonthData` exposes one `CalendarMonthData` snapshot for all three engines; the agenda
+  consumes it. `sampleWeekNumber` supplies host-formatted week numbers because the library
+  deliberately leaves that convention to the caller.
+- `rememberSampleMonthNavigation` bridges the controlled sample anchor to the engine-specific
+  saveable month states and the library month header.
+- The heatmap demo now maps through `CalendarMonthData.toHeatmap { ... }` and exposes the Hijri
+  provider offset there as well.
+- New JVM tests cover provider-backed agenda month data, host week numbers and the Hijri
+  heatmap offset.
+
+Executed on 2026-11-11 locally (Temurin 17.0.21+9, Platform `android-37.0`, Build-Tools 36.0.0):
+
+| Check | Result |
+|-------|--------|
+| `test` (all modules) | 107 tests, 0 failures, 0 errors, 0 skipped |
+| `:calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
+| `:calendarviewsample:compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL; one deprecation warning for the v1 Compose test rule |
+| `:calendarviewsample:lintDebug` | BUILD SUCCESSFUL, 0 errors |
+
+Remaining limitations:
+- No emulator or device was available. The new Compose controls were not visually exercised,
+  and the instrumentation tests were only compiled, not executed.
+

@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.develotter.calendarview.calendars.hijri.OffsetHijriDateProvider
 import com.develotter.calendarview.compose.CalendarYearHeatmap
 import com.develotter.calendarview.compose.HeatmapOrientation
 import com.develotter.calendarview.compose.HeatmapStyle
@@ -82,6 +83,8 @@ private fun HeatmapSample() {
     var calendarName by rememberSaveable { mutableStateOf(SampleCalendar.Gregorian.name) }
     val calendar = SampleCalendar.valueOf(calendarName)
     var year by rememberSaveable(calendarName) { mutableStateOf(sampleHeatmapCurrentYear(calendar)) }
+    var hijriOffset by rememberSaveable { mutableIntStateOf(0) }
+    val hijriProvider = remember(hijriOffset) { OffsetHijriDateProvider(hijriOffset) }
     var labels by rememberSaveable { mutableStateOf(true) }
     var header by rememberSaveable { mutableStateOf(true) }
     var localeTag by rememberSaveable { mutableStateOf("en") }
@@ -99,11 +102,12 @@ private fun HeatmapSample() {
     val locale = Locale.forLanguageTag(localeTag)
     val firstDay = firstDayOptions[firstDayIndex]
     val yearRange = remember(calendar) { sampleHeatmapYearRange(calendar) }
-    val months = remember(calendar, year, localeTag, firstDay, disableFuture) {
+    val months = remember(calendar, year, localeTag, firstDay, disableFuture, hijriOffset) {
         val today = LocalDate.now()
         runCatching {
             sampleHeatmapYear(
                 calendar, year, locale, today = today, firstDayOfWeek = firstDay,
+                hijriDateProvider = hijriProvider,
                 isDateEnabled = { !disableFuture || !it.isAfter(today) },
             )
         }
@@ -149,6 +153,26 @@ private fun HeatmapSample() {
                             onClick = { calendarName = item.name; selected = null },
                             label = { Text(item.name) },
                         )
+                    }
+                }
+                if (calendar == SampleCalendar.Hijri) {
+                    ChipRow {
+                        Text("Hijri method")
+                        listOf(-1, 0, 1).forEach { offset ->
+                            FilterChip(
+                                selected = hijriOffset == offset,
+                                onClick = { hijriOffset = offset; selected = null },
+                                label = {
+                                    Text(
+                                        when (offset) {
+                                            -1 -> "−1 day"
+                                            0 -> "Umm al-Qura"
+                                            else -> "+1 day"
+                                        },
+                                    )
+                                },
+                            )
+                        }
                     }
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

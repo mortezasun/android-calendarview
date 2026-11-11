@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -27,13 +28,14 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.develotter.calendarview.compose.CalendarMonthColumns
 import com.develotter.calendarview.compose.CalendarMonthList
 import com.develotter.calendarview.compose.CalendarMonthPager
 import com.develotter.calendarview.compose.CalendarScrollAxis
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 
-internal enum class SampleDisplayMode { Single, VerticalList, HorizontalList, HorizontalPager, VerticalPager }
+internal enum class SampleDisplayMode { Single, VerticalList, HorizontalList, HorizontalPager, VerticalPager, AdaptiveColumns }
 
 /**
  * Controlled visible month with an independently saved finite window center.
@@ -103,7 +105,9 @@ private fun SynchronizedMonthViewport(
     val target = months.indexOf(desired)
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = target)
     val pagerState = rememberPagerState(initialPage = target, pageCount = { months.size })
+    val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = target)
     val isList = mode == SampleDisplayMode.VerticalList || mode == SampleDisplayMode.HorizontalList
+    val isAdaptive = mode == SampleDisplayMode.AdaptiveColumns
     var ready by remember { mutableStateOf(false) }
     var appliedRequest by remember { mutableStateOf<Long?>(null) }
     var publishedMonth by remember { mutableStateOf(desired) }
@@ -115,12 +119,13 @@ private fun SynchronizedMonthViewport(
             ready = false
             when {
                 isList -> listState.scrollToItem(months.indexOf(desired))
+                isAdaptive -> gridState.scrollToItem(months.indexOf(desired))
                 mode != SampleDisplayMode.Single -> pagerState.scrollToPage(months.indexOf(desired))
             }
             publishedMonth = desired
         }
         appliedRequest = desired
-        if (mode != SampleDisplayMode.Single) {
+        if (mode != SampleDisplayMode.Single && !isAdaptive) {
             val targetIndex = months.indexOf(desired)
             snapshotFlow {
                 if (isList) listState.firstVisibleItemIndex else pagerState.settledPage
@@ -128,11 +133,19 @@ private fun SynchronizedMonthViewport(
         }
         ready = true
     }
-    LaunchedEffect(mode, listState, pagerState, months) {
+    LaunchedEffect(mode, listState, pagerState, gridState, months) {
         snapshotFlow {
-            val moving = if (isList) listState.isScrollInProgress else pagerState.isScrollInProgress
+            val moving = when {
+                isList -> listState.isScrollInProgress
+                isAdaptive -> gridState.isScrollInProgress
+                else -> pagerState.isScrollInProgress
+            }
             if (!ready || appliedRequest != currentRequest || moving || mode == SampleDisplayMode.Single) null
-            else if (isList) listState.firstVisibleItemIndex else pagerState.settledPage
+            else when {
+                isList -> listState.firstVisibleItemIndex
+                isAdaptive -> gridState.firstVisibleItemIndex
+                else -> pagerState.settledPage
+            }
         }.collect { index ->
             if (index != null && index in months.indices) {
                 val visible = months[index]
@@ -147,6 +160,7 @@ private fun SynchronizedMonthViewport(
     val active = when {
         mode == SampleDisplayMode.Single -> target
         isList -> listState.firstVisibleItemIndex
+        isAdaptive -> gridState.firstVisibleItemIndex
         else -> pagerState.settledPage
     }
     if (showWindowLabel) {
@@ -156,6 +170,12 @@ private fun SynchronizedMonthViewport(
     when (mode) {
         SampleDisplayMode.Single -> Box(viewport) {
             Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) { monthContent(desired) }
+        }
+        SampleDisplayMode.AdaptiveColumns -> CalendarMonthColumns(
+            monthCount = months.size, modifier = viewport, state = gridState,
+            minMonthWidth = 320.dp, monthKey = { months[it] },
+        ) { index ->
+            monthContent(months[index])
         }
         SampleDisplayMode.VerticalList, SampleDisplayMode.HorizontalList -> CalendarMonthList(
             monthCount = months.size, modifier = viewport, state = listState,

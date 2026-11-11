@@ -2,14 +2,23 @@ package com.develotter.calendarviewsample
 
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
 import ir.huri.jcal.JalaliCalendar
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.chrono.HijrahDate
 import java.time.temporal.ChronoField
 import java.time.temporal.ChronoUnit
+import java.time.temporal.WeekFields
+import java.util.Locale
 
 /** Calendar identifiers for this demo only, not a shared-library abstraction. */
 enum class SampleCalendar { Gregorian, Hijri, SolarHijri }
+
+/** Host-formatted week number; the library deliberately leaves the convention to the caller. */
+fun sampleWeekNumber(epochDay: Long, locale: Locale): String {
+    val week = LocalDate.ofEpochDay(epochDay).get(WeekFields.of(locale).weekOfWeekBasedYear())
+    return NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }.format(week)
+}
 
 /**
  * Returns the first absolute day of the target calendar month.

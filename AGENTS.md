@@ -72,7 +72,7 @@ These commands were executed successfully with JDK 17 and Android SDK Platform 3
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew test                                    # 104 JVM unit tests, all modules
+./gradlew test                                    # 107 JVM unit tests, all modules
 ./gradlew :library:lintDebug                      # lint for the core library
 ./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
