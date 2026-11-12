@@ -4,6 +4,14 @@ Last updated: 2026-11-11
 Version: `2.1.0` (published)
 Branch: `update`
 
+## Adaptive layout, Phase 3 (sample refactor, branch `update`)
+
+- Split `LauncherActivity.kt` without behaviour change: `CalendarSampleState.kt` (saveable UI
+  state, `rememberCalendarSampleState`), `CalendarSampleControls.kt` (configuration rows) and
+  `CalendarSampleScreen.kt` (screen plus demo month/week/agenda). The activity only hosts it.
+- Prepares the adaptive panes of Phase 4. No library or API change.
+- Not compiled locally (Gradle unavailable in this VM); verification is via CI only.
+
 ## Adaptive layout, Phase 2 (library constraint tests, branch `update`)
 
 - Added JVM tests to `CalendarMonthColumnsTest` for the 336/376 dp thresholds, the narrow-container
