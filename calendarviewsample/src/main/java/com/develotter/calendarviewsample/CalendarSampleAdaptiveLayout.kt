@@ -69,6 +69,15 @@ internal fun CalendarSampleAdaptiveLayout(
                 }
                 sampleLocalFold(windowFold, axisOrigin, if (windowFold.vertical) maxWidth else maxHeight)
             } else null
+            // Capture the bounded pane before verticalScroll gives its children infinite height.
+            val paneHeight = (
+                (if (fold != null && !fold.vertical) fold.start else maxHeight) - 32.dp
+            ).coerceAtLeast(0.dp)
+            val paneContent: @Composable () -> Unit = {
+                CompositionLocalProvider(LocalSamplePaneHeight provides paneHeight) {
+                    movableContent()
+                }
+            }
             when (sampleLayoutKind(maxWidth, fold)) {
                 SampleLayoutKind.SideBySide -> Row(
                     Modifier.fillMaxSize().padding(16.dp),
@@ -81,7 +90,7 @@ internal fun CalendarSampleAdaptiveLayout(
                     Column(
                         Modifier.weight(0.6f).fillMaxHeight().verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) { movableContent() }
+                    ) { paneContent() }
                 }
                 SampleLayoutKind.SplitByVerticalFold -> {
                     val separator = checkNotNull(fold)
@@ -99,7 +108,7 @@ internal fun CalendarSampleAdaptiveLayout(
                                 Column(
                                     Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp),
                                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                                ) { movableContent() }
+                                ) { paneContent() }
                             }
                         }
                     }
@@ -110,7 +119,7 @@ internal fun CalendarSampleAdaptiveLayout(
                         Column(
                             Modifier.height(separator.start).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) { movableContent() }
+                        ) { paneContent() }
                         Spacer(Modifier.height(separator.size))
                         Column(
                             Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
@@ -121,7 +130,7 @@ internal fun CalendarSampleAdaptiveLayout(
                 SampleLayoutKind.Stacked -> Column(
                     Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) { movableHeader(); movableContent(); movableActions() }
+                ) { movableHeader(); paneContent(); movableActions() }
             }
         }
     }

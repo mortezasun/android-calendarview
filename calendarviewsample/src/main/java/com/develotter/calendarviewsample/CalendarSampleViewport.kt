@@ -41,6 +41,7 @@ internal enum class SampleDisplayMode { Single, VerticalList, HorizontalList, Ho
  * Controlled visible month with an independently saved finite window center.
  * Settled user scrolling reports its month; external requests scroll without feedback.
  * Mode changes start at the controlled month and reset intra-month offsets.
+ * The default height follows the host pane; explicit heights remain caller-controlled.
  */
 @Composable
 internal fun CalendarSampleViewport(
@@ -50,7 +51,7 @@ internal fun CalendarSampleViewport(
     showModeSelector: Boolean = true,
     showWindowLabel: Boolean = true,
     forcedMode: SampleDisplayMode? = null,
-    viewportHeight: Dp = 480.dp,
+    viewportHeight: Dp = sampleBoundedViewportHeight(480.dp, LocalSamplePaneHeight.current),
     monthContent: @Composable (Long) -> Unit,
 ) {
     var modeName by rememberSaveable { mutableStateOf(SampleDisplayMode.Single.name) }
