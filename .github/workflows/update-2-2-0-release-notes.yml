@@ -32,6 +32,8 @@ jobs:
       - name: Update the 2.2.0 GitHub Release body
         shell: bash
         run: |
-          set -euo pipefail
-          gh release view 2.2.0 --repo "$GH_REPO" >/dev/null
-          gh release edit 2.2.0 --repo "$GH_REPO" --notes-file docs/releases/2.2.0.md
+          if gh release view 2.2.0 --repo "$GH_REPO" >/dev/null 2>&1; then
+            gh release edit 2.2.0 --repo "$GH_REPO" --notes-file docs/releases/2.2.0.md
+          else
+            echo "Release 2.2.0 not created yet; skipping notes update."
+          fi
