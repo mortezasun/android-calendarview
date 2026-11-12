@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 /**
@@ -49,6 +52,7 @@ internal fun CalendarSampleAdaptiveLayout(
     val movableContent = remember { movableContentOf { currentContent() } }
     val movableActions = remember { movableContentOf { currentActions() } }
     val fold = rememberSampleFold()
+    val contentDirection = LocalLayoutDirection.current
     BoxWithConstraints(Modifier.fillMaxSize()) {
         when (sampleLayoutKind(maxWidth, fold)) {
             SampleLayoutKind.SideBySide -> Row(
@@ -70,24 +74,30 @@ internal fun CalendarSampleAdaptiveLayout(
                 }
             }
             SampleLayoutKind.SplitByVerticalFold -> {
-                // Book posture: controls left of the hinge, calendar right of it, nothing under it.
                 val separator = checkNotNull(fold)
                 val gap = separator.size.coerceAtLeast(SampleMinFoldGap)
                 val left = separator.start.coerceIn(0.dp, (maxWidth - gap).coerceAtLeast(0.dp))
-                Row(Modifier.fillMaxSize().safeDrawingPadding()) {
-                    Column(
-                        Modifier.width(left).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        movableHeader()
-                        movableActions()
-                    }
-                    Spacer(Modifier.width(gap))
-                    Column(
-                        Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        movableContent()
+                // Fold bounds are physical left-origin coordinates, independent of text direction.
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                    Row(Modifier.fillMaxSize().safeDrawingPadding()) {
+                        CompositionLocalProvider(LocalLayoutDirection provides contentDirection) {
+                            Column(
+                                Modifier.width(left).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                movableHeader()
+                                movableActions()
+                            }
+                        }
+                        Spacer(Modifier.width(gap))
+                        CompositionLocalProvider(LocalLayoutDirection provides contentDirection) {
+                            Column(
+                                Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                movableContent()
+                            }
+                        }
                     }
                 }
             }
