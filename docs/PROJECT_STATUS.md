@@ -4,6 +4,12 @@ Last updated: 2026-11-11
 Version: `2.1.0` (published)
 Branch: `update`
 
+## Adaptive layout, Phase 2 (library constraint tests, branch `update`)
+
+- Added JVM tests to `CalendarMonthColumnsTest` for the 336/376 dp thresholds, the narrow-container
+  fallback and monotonic column counts. No public API change, so `api/*.api` is unchanged.
+- Not run locally (Gradle unavailable in this VM); verification is via CI only.
+
 ## Adaptive layout, Phase 1 (docs only, branch `update`)
 
 - Added [ADAPTIVE_LAYOUT.md](ADAPTIVE_LAYOUT.md): width formula (336/376 dp at 48 dp days),
