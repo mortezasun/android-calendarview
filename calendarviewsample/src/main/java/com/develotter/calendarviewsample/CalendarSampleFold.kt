@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -21,6 +22,12 @@ import kotlinx.coroutines.flow.emptyFlow
  * thickness of the hinge along the same axis.
  */
 internal data class SampleFold(val vertical: Boolean, val start: Dp, val size: Dp)
+
+/** Explicit null means no fold; an absent override keeps the real window observer. */
+internal data class SampleFoldOverride(val fold: SampleFold?)
+
+/** Sample-only test seam; never changes library or calendar-engine state. */
+internal val LocalSampleFoldOverride = staticCompositionLocalOf<SampleFoldOverride?> { null }
 
 internal enum class SampleLayoutKind { Stacked, SideBySide, SplitByVerticalFold, SplitByHorizontalFold }
 
@@ -39,11 +46,13 @@ internal fun sampleLayoutKind(width: Dp, fold: SampleFold?): SampleLayoutKind = 
 internal val SampleMinFoldGap: Dp = 16.dp
 
 /**
- * Observes the window layout and returns the first separating [FoldingFeature], or null on a
- * normal window. Positions are in the window's coordinate space; the sample fills the window.
+ * Observes the first separating window feature unless a sample test supplies an override.
+ * Positions are in window coordinates, not inset-content coordinates.
  */
 @Composable
 internal fun rememberSampleFold(): SampleFold? {
+    val override = LocalSampleFoldOverride.current
+    if (override != null) return override.fold
     val activity = LocalActivity.current
     val density = LocalDensity.current
     val layoutFlow: Flow<WindowLayoutInfo?> = remember(activity) {
