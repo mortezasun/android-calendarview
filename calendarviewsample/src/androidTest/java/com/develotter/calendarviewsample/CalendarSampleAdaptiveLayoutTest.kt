@@ -36,7 +36,8 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.time.LocalDate
+import com.develotter.calendarview.compose.rememberCalendarSelectionState
+import com.develotter.calendarview.enums.TypeSelectDay
 
 /** Exercises the real adaptive host with deterministic folds, not a replacement layout. */
 @RunWith(AndroidJUnit4::class)
@@ -177,14 +178,42 @@ class CalendarSampleAdaptiveLayoutTest {
                 LocalDensity provides Density(1f),
                 LocalLayoutDirection provides direction,
             ) {
-                Box(Modifier.requiredSize(width, 700.dp)) {
+                Box(Modifier.requiredSize(width, 500.dp).padding(start = 24.dp, top = 32.dp)) {
                     val fold = vertical?.let { isVertical ->
                         SampleFold(isVertical, 160.dp, 20.dp)
                     }
                     CompositionLocalProvider(
                         LocalSampleFoldOverride provides SampleFoldOverride(fold),
                     ) {
-                        CalendarSample(onHeatmap = {})
+                        val ui = rememberCalendarSampleState()
+                        val state = rememberCalendarSelectionState(ui.mode)
+                        CalendarSampleAdaptiveLayout(
+                            header = {
+                                Column {
+                                    Text("Selected:${state.selection.selectedDays.joinToString(",").ifEmpty { "none" }}")
+                                    Text("Calendar:${ui.calendar.name}")
+                                    Text("Weeks:${ui.showWeekNumbers}")
+                                    Button(onClick = {
+                                        ui.modeName = TypeSelectDay.Range.name
+                                        state.selectRange(20000L, 20004L)
+                                    }) { Text("SelectRange") }
+                                    Button(onClick = { ui.move(1) }) { Text("Next") }
+                                    Button(onClick = { ui.showWeekNumbers = !ui.showWeekNumbers }) { Text("ToggleWeeks") }
+                                    Button(onClick = { ui.selectCalendar(SampleCalendar.Hijri) }) { Text("SwitchHijri") }
+                                }
+                            },
+                            content = {
+                                CalendarSampleViewport(
+                                    calendar = ui.calendar,
+                                    anchor = ui.anchor,
+                                    onVisibleMonthChanged = { ui.showMonth(it) },
+                                    minMonthWidth = sampleTargetMonthWidth(ui.showWeekNumbers),
+                                ) { monthAnchor ->
+                                    Text("ViewportMonth:$monthAnchor")
+                                }
+                            },
+                            actions = { Text("Actions") },
+                        )
                     }
                 }
             }
@@ -199,46 +228,49 @@ class CalendarSampleAdaptiveLayoutTest {
         }
         compose.waitForIdle()
 
-        val todayIso = LocalDate.now().toString()
-        compose.onNodeWithText("Selected dates / range endpoints (ISO):").assertExists()
-        compose.onNodeWithText(todayIso).assertDoesNotExist()
+        compose.onNodeWithText("Selected:none").assertExists()
+        compose.onNodeWithText("Calendar:Gregorian").assertExists()
 
-        compose.onNodeWithText("Range").performClick()
+        compose.onNodeWithText("SelectRange").performClick()
         compose.waitForIdle()
-        compose.onNodeWithText("Select 5-day range").performClick()
-        compose.waitForIdle()
-        compose.onNodeWithText(todayIso, substring = true).assertExists()
+        compose.onNodeWithText("Selected:20000,20004").assertExists()
 
         compose.onNodeWithText("Next").performClick()
         compose.waitForIdle()
 
         compose.runOnIdle { fixture.width = 1000.dp }
         compose.waitForIdle()
-        compose.onNodeWithText(todayIso, substring = true).assertExists()
+        compose.onNodeWithText("Selected:20000,20004").assertExists()
         compose.onNodeWithText("Next").assertExists()
 
         compose.runOnIdle { fixture.vertical = true }
         compose.waitForIdle()
-        compose.onNodeWithText(todayIso, substring = true).assertExists()
+        compose.onNodeWithText("Selected:20000,20004").assertExists()
         compose.onNodeWithText("Next").assertExists()
 
         compose.runOnIdle { fixture.vertical = false }
         compose.waitForIdle()
-        compose.onNodeWithText(todayIso, substring = true).assertExists()
+        compose.onNodeWithText("Selected:20000,20004").assertExists()
         compose.onNodeWithText("Next").assertExists()
 
         compose.runOnIdle { fixture.vertical = null }
         compose.waitForIdle()
-        compose.onNodeWithText(todayIso, substring = true).assertExists()
+        compose.onNodeWithText("Selected:20000,20004").assertExists()
 
-        compose.onNodeWithText("Hijri").performClick()
+        compose.onNodeWithText("ToggleWeeks").performClick()
         compose.waitForIdle()
-        compose.onNodeWithText(todayIso, substring = true).assertExists()
+        compose.onNodeWithText("Weeks:true").assertExists()
+        compose.onNodeWithText("Selected:20000,20004").assertExists()
+
+        compose.onNodeWithText("SwitchHijri").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Calendar:Hijri").assertExists()
+        compose.onNodeWithText("Selected:20000,20004").assertExists()
 
         compose.runOnIdle { fixture.width = 360.dp }
         compose.waitForIdle()
-        compose.onNodeWithText(todayIso, substring = true).assertExists()
-        compose.onNodeWithText("Hijri").assertExists()
+        compose.onNodeWithText("Selected:20000,20004").assertExists()
+        compose.onNodeWithText("Calendar:Hijri").assertExists()
     }
 }
 
