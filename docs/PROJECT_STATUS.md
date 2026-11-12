@@ -1,7 +1,7 @@
 # Project status
 
-Last updated: 2026-11-11
-Version: `2.1.0` (published)
+Last updated: 2026-11-12
+Version: `2.2.0` (candidate verified)
 Branch: `update`
 
 ## Adaptive layout, Phase 7 (state restoration & recreation tests, branch `update`)

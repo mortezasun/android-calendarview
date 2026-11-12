@@ -14,7 +14,7 @@ plugins {
 // projects as com.github.USER.REPO:MODULE:VERSION.
 allprojects {
     group = "com.github.mortezasun.android-calendarview"
-    version = "2.1.0"
+    version = "2.2.0"
 
     // Required by Maven Central for every published artifact. Signing, credentials and
     // namespace verification remain release-operator responsibilities.

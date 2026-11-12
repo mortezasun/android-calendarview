@@ -1,5 +1,32 @@
 # Changelog
 
+## 2.2.0 - 2026-11-12
+
+Adaptive layout, multi-window and foldable release.
+
+### Added
+
+- Adaptive layout and state contract (`docs/ADAPTIVE_LAYOUT.md`) defining month width thresholds
+  (336 dp without week numbers, 376 dp with 40 dp week numbers), narrow-container fallbacks,
+  and active-month rules.
+- Width constraint and monotonicity tests in `CalendarMonthColumnsTest`.
+- Adaptive two-pane layout (`CalendarSampleAdaptiveLayout`) switching at 840 dp available width
+  (Material expanded window width), placing controls beside calendar content.
+- Foldable and hinge-aware posture support via `androidx.window:window:1.5.1` (sample-only),
+  supporting vertical book posture and horizontal tabletop posture with separation gaps.
+- Adaptive dialog viewport height calculation clamped between 240 dp and 360 dp to prevent
+  vertical overflow in landscape and compact height containers.
+- Adaptive two-pane layout for `HeatMapViewActivity`.
+- Modularized sample architecture: `CalendarSampleState`, `CalendarSampleControls`, `CalendarSampleScreen`.
+- State restoration tests (`CalendarSampleStateTest`, `CalendarSampleUiTest`) verifying state
+  survival across activity recreation and configuration changes.
+
+### Compatibility
+
+- 100% binary-compatible with `2.1.0`. All public/protected JVM APIs across `:library` and all
+  three calendar engines remain unchanged.
+- `:library` and the calendar engines remain completely dependency-free of window/fold packages.
+
 ## 2.1.0 - 2026-11-11
 
 Released. Tag `2.1.0` points to `bd046a188d9a661e657affe580c7a7fa1a3e98ba`;

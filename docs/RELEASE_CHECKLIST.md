@@ -1,10 +1,22 @@
 # Release acceptance
 
-Status: `2.1.0` is released, built successfully by JitPack and consumed from JitPack by
-an independent project. `2.0.1` remains the previous release. The 2.0.0 material at the end
-remains a historical record.
+Status: `2.2.0` candidate implemented, verified on CI and prepared for release.
+`2.1.0` remains the previous published release.
 
-## 1. Current release: 2.1.0 (2026-11-11)
+## 1. Candidate release: 2.2.0 (2026-11-12)
+
+- [x] Root version set to `2.2.0` in root `build.gradle.kts`.
+- [x] Sample `versionCode` set to `20200` and `versionName` set to `2.2.0`.
+- [x] Adaptive multi-month columns contract and constraint tests implemented.
+- [x] Two-pane adaptive layout (`CalendarSampleAdaptiveLayout`) implemented for wide screens (>= 840 dp).
+- [x] Fold and posture awareness implemented via `androidx.window:window:1.5.1`.
+- [x] Adaptive dialog viewport heights and adaptive heatmap demo implemented.
+- [x] State preservation and recreation verified with unit and UI tests.
+- [x] CI verification (`Android verification`, `Android publishing verification`, `Android instrumentation`) all passing.
+- [x] Documentation, CHANGELOG, ARCHITECTURE, README and release notes (`docs/releases/2.2.0.md`) updated.
+- [x] 100% binary compatible with `2.1.0`.
+
+## 2. Previous release: 2.1.0 (2026-11-11)
 
 - [x] Root version and sample version set to `2.1.0`.
 - [x] Release commit `bd046a188d9a661e657affe580c7a7fa1a3e98ba` is tagged `2.1.0`;
