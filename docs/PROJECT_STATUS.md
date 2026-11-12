@@ -11,10 +11,12 @@ Branch: `update`
 - `CalendarSampleFold.kt` reads the first separating `FoldingFeature`; `sampleLayoutKind` chooses
   Stacked / SideBySide / split by vertical fold (book) / split by horizontal fold (tabletop).
   A separating fold overrides the 840 dp width rule. JVM test: `SampleLayoutKindTest`.
+- Compilation fix: typed `layoutFlow` explicitly to satisfy `collectAsState` (commit `a401f82`).
+- Verified on CI: `Android verification` (run 43171433070, success), `Android publishing verification`
+  (run 43171433056, success), and `Android instrumentation` (run 43171433218, success).
 - Limitation: fold bounds are window coordinates, while the layout applies safe-drawing padding;
   offsets of a few dp near system bars are possible. Behaviour on a real foldable or foldable
-  emulator is **not verified**; CI emulators have no fold, so the new branches are untested at runtime.
-- Not compiled locally (Gradle unavailable); verification is via CI only.
+  emulator is **not verified**; CI emulators have no fold, so fold branches are untested at runtime.
 
 ## Adaptive layout, Phase 4 (adaptive sample panes, branch `update`)
 
