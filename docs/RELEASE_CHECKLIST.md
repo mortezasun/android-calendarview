@@ -1,18 +1,21 @@
 # Release acceptance
 
-Status: `2.2.0` candidate implemented, verified on CI and prepared for release.
-`2.1.0` remains the previous published release.
+Status: `2.2.0` is released and published on GitHub Releases. `2.1.0` remains the previous release.
 
-## 1. Candidate release: 2.2.0 (2026-11-12)
+## 1. Current release: 2.2.0 (2026-11-12)
 
 - [x] Root version set to `2.2.0` in root `build.gradle.kts`.
 - [x] Sample `versionCode` set to `20200` and `versionName` set to `2.2.0`.
+- [x] Release commit `f5dd967` is tagged `2.2.0`; GitHub Release `2.2.0` is published.
 - [x] Adaptive multi-month columns contract and constraint tests implemented.
 - [x] Two-pane adaptive layout (`CalendarSampleAdaptiveLayout`) implemented for wide screens (>= 840 dp).
 - [x] Fold and posture awareness implemented via `androidx.window:window:1.5.1`.
 - [x] Adaptive dialog viewport heights and adaptive heatmap demo implemented.
 - [x] State preservation and recreation verified with unit and UI tests.
-- [x] CI verification (`Android verification`, `Android publishing verification`, `Android instrumentation`) all passing.
+- [x] All required CI checks passed for the release tree:
+  - `Android verification`: Run 43176664468 (success)
+  - `Android publishing verification`: Run 43176664370 (success)
+  - `Android instrumentation`: Run 43176664365 (success)
 - [x] Documentation, CHANGELOG, ARCHITECTURE, README and release notes (`docs/releases/2.2.0.md`) updated.
 - [x] 100% binary compatible with `2.1.0`.
 

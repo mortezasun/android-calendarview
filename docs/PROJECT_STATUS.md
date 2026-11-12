@@ -1,8 +1,18 @@
 # Project status
 
 Last updated: 2026-11-12
-Version: `2.2.0` (candidate verified)
+Version: `2.2.0` (published)
 Branch: `update`
+
+## Current release status: 2.2.0 (published)
+
+- Release commit `f5dd967` is tagged `2.2.0` and the GitHub Release `2.2.0` is published.
+- All release verification jobs passed on the release tree:
+  - `Android verification`: Run 43176664468 (success across assemble, unit-tests, lint)
+  - `Android publishing verification`: Run 43176664370 (success)
+  - `Android instrumentation`: Run 43176664365 (success on API 29 across all 26 instrumented tests)
+- 100% binary compatible with `2.1.0`. All public and protected JVM APIs in `:library` and all calendar engines are identical.
+- Adaptive multi-month columns, fold postures, and two-pane adaptive sample layouts are fully implemented and verified.
 
 ## Adaptive layout, Phase 7 (state restoration & recreation tests, branch `update`)
 
