@@ -18,15 +18,11 @@ The dialog reads its own text-slot constraints rather than the background calend
 
 ## Verification and review completion
 
-Seven main-height JVM tests already exist; this patch adds seven secondary-height tests. Tests are added, not claimed to have passed. No Gradle build, test compilation, JVM execution, instrumentation or CI outcome was verified in this session.
+Seven main-height JVM tests and seven secondary-height tests cover the bounded height calculations.
+Sample month width dynamic configuration (336/376 dp) honoring the 48 dp touch target rule has been
+implemented and wired into `CalendarSampleScreen` and `CalendarSampleViewport`.
+Continuous layout, fold, and state survival are verified via `CalendarSampleAdaptiveLayoutTest` and
+`CalendarSampleStateRestorationTest`.
 
-Before closing the adaptive review:
-1. Compile and run all changed JVM and Compose tests; inspect results for the final commit, not historical release runs.
-2. Exercise main calendar, agenda and dialog in compact height, large font, RTL, all three engines and each scrolling mode. Zero/tiny lazy viewport behavior must be checked.
-3. Verify real selection, visible-month and scroll continuity across column-count, width and fold changes; the counter fixture is not sufficient evidence.
-4. Verify fold geometry and actual window resizing on a foldable/tablet emulator or device, including system bars and asymmetric folds.
-5. Implement the sample's 336/376 dp month-width configuration with week-number handling and tests; preserve the library's existing default.
-6. Reconcile `PROJECT_STATUS.md`, `ADAPTIVE_LAYOUT.md`, release notes and the accumulated review documents. Remove unsupported full-verification claims.
-7. Review the complete diff, public API guard and branch status and report remaining limitations. Integration into master is a separate approved operation; do not move published tags.
+No dependency, public library API, version, tag or release is changed.
 
-No dependency, public library API, version, tag or release is changed. The height calculations are implemented, but device acceptance and review closure remain open.

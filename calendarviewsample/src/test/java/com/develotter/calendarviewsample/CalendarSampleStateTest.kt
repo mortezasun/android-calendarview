@@ -84,4 +84,59 @@ class CalendarSampleStateTest {
         assertEquals(1, state.hijriOffset)
         assertEquals(true, state.showDialog)
     }
+
+    @Test
+    fun moveCapturesExceptionAsError() {
+        val state = CalendarSampleState(
+            calendarNameState = mutableStateOf(SampleCalendar.Gregorian.name),
+            modeNameState = mutableStateOf(TypeSelectDay.Single.name),
+            localeTagState = mutableStateOf("en"),
+            rtlState = mutableStateOf(false),
+            previousDaysState = mutableStateOf(false),
+            nextDaysState = mutableStateOf(false),
+            fixedSixRowsState = mutableStateOf(false),
+            showWeekState = mutableStateOf(false),
+            showAgendaState = mutableStateOf(false),
+            showWeekNumbersState = mutableStateOf(false),
+            customStyleState = mutableStateOf(false),
+            useHeaderApiState = mutableStateOf(false),
+            limitRangeState = mutableStateOf(false),
+            hijriOffsetState = mutableIntStateOf(0),
+            anchorState = mutableStateOf(LocalDate.MAX.toEpochDay()),
+            showDialogState = mutableStateOf(false),
+            errorState = mutableStateOf(null),
+        )
+        state.move(1)
+        org.junit.Assert.assertNotNull(state.error)
+
+        state.showMonth(LocalDate.of(2026, 1, 1).toEpochDay())
+        assertNull(state.error)
+    }
+
+    @Test
+    fun selectCalendarClearsStaleError() {
+        val state = CalendarSampleState(
+            calendarNameState = mutableStateOf(SampleCalendar.Gregorian.name),
+            modeNameState = mutableStateOf(TypeSelectDay.Single.name),
+            localeTagState = mutableStateOf("en"),
+            rtlState = mutableStateOf(false),
+            previousDaysState = mutableStateOf(false),
+            nextDaysState = mutableStateOf(false),
+            fixedSixRowsState = mutableStateOf(false),
+            showWeekState = mutableStateOf(false),
+            showAgendaState = mutableStateOf(false),
+            showWeekNumbersState = mutableStateOf(false),
+            customStyleState = mutableStateOf(false),
+            useHeaderApiState = mutableStateOf(false),
+            limitRangeState = mutableStateOf(false),
+            hijriOffsetState = mutableIntStateOf(0),
+            anchorState = mutableStateOf(LocalDate.of(2026, 1, 1).toEpochDay()),
+            showDialogState = mutableStateOf(false),
+            errorState = mutableStateOf("prior error"),
+        )
+        state.selectCalendar(SampleCalendar.SolarHijri)
+        assertEquals(SampleCalendar.SolarHijri, state.calendar)
+        assertNull(state.error)
+    }
 }
+

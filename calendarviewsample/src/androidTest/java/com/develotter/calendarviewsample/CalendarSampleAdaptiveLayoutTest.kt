@@ -164,4 +164,79 @@ class CalendarSampleAdaptiveLayoutTest {
             assertTrue(fixture.bounds.getValue("header").bottom < fixture.bounds.getValue("content").top)
         }
     }
+
+    private class CalendarHostFixture {
+        var width by mutableStateOf(360.dp)
+        var vertical by mutableStateOf<Boolean?>(null)
+        var direction by mutableStateOf(LayoutDirection.Ltr)
+
+        @Composable
+        fun Render() {
+            CompositionLocalProvider(
+                LocalDensity provides Density(1f),
+                LocalLayoutDirection provides direction,
+            ) {
+                Box(Modifier.requiredSize(width, 700.dp)) {
+                    val fold = vertical?.let { isVertical ->
+                        SampleFold(isVertical, 160.dp, 20.dp)
+                    }
+                    CompositionLocalProvider(
+                        LocalSampleFoldOverride provides SampleFoldOverride(fold),
+                    ) {
+                        CalendarSample(onHeatmap = {})
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
+    fun calendarSelectionAndMonthSurviveContinuousLayoutAndFoldTransitions() {
+        val fixture = CalendarHostFixture()
+        compose.runOnUiThread {
+            compose.activity.setContent { MaterialTheme { fixture.Render() } }
+        }
+        compose.waitForIdle()
+
+        compose.onNodeWithText("Selected dates / range endpoints (ISO):").assertExists()
+        compose.onNodeWithText("None").assertExists()
+
+        compose.onNodeWithText("Range").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Select 5-day range").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("None").assertDoesNotExist()
+
+        compose.onNodeWithText("Next").performClick()
+        compose.waitForIdle()
+
+        compose.runOnIdle { fixture.width = 1000.dp }
+        compose.waitForIdle()
+        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText("Next").assertExists()
+
+        compose.runOnIdle { fixture.vertical = true }
+        compose.waitForIdle()
+        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText("Next").assertExists()
+
+        compose.runOnIdle { fixture.vertical = false }
+        compose.waitForIdle()
+        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText("Next").assertExists()
+
+        compose.runOnIdle { fixture.vertical = null }
+        compose.waitForIdle()
+        compose.onNodeWithText("None").assertDoesNotExist()
+
+        compose.onNodeWithText("Hijri").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("None").assertDoesNotExist()
+
+        compose.runOnIdle { fixture.width = 360.dp }
+        compose.waitForIdle()
+        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText("Hijri").assertExists()
+    }
 }
+

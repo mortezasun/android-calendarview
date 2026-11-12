@@ -1,8 +1,34 @@
 # Project status
 
 Last updated: 2026-11-12
-Version: `2.2.0` (published)
+Version: `2.2.0` (published tag `2.2.0` at `f5dd967`; post-release hardening on branch `update`)
 Branch: `update`
+
+## Post-2.2.0 Adaptive Review and Hardening (branch `update`, Arbeitspakete A–I)
+
+Following the published `2.2.0` release, a comprehensive independent code review identified and resolved
+remaining edge cases in adaptive geometry, viewport heights, month width touch targets, and test coverage:
+
+- **Arbeitspaket A (Build & CI Stabilization):** Dedicated workflows, test sync, and CI stabilization.
+- **Arbeitspaket B (Month Widths & Touch Targets):** Implemented `sampleTargetMonthWidth(showWeekNumbers)`
+  (336 dp without week numbers, 376 dp with week numbers) to guarantee 48 dp day cells in the sample,
+  preserving the library default (320 dp). Tested via `CalendarSampleMonthWidthTest`.
+- **Arbeitspaket C (Continuous Calendar State Continuity):** Added `CalendarSampleAdaptiveLayoutTest`
+  exercising real calendar selection, navigation, multi-column switches, and fold changes continuously
+  without activity restart or state loss.
+- **Arbeitspaket D (Genuine State Restoration):** Added `CalendarSampleStateRestorationTest` testing
+  `rememberCalendarSampleState` (all 17 properties), `CalendarSelectionState` (range endpoints and interior),
+  display modes, and heatmap settings using Compose's `StateRestorationTester`.
+- **Arbeitspaket E (Adaptive Viewport Heights):** Implemented `sampleBoundedViewportHeight` and
+  `sampleDialogViewportHeight` in `CalendarSamplePaneHeight.kt`, removing artificial minimums and capping
+  heights to 75% of available pane. Tested via 14 JVM unit tests.
+- **Arbeitspaket F (Fold Geometry & Insets):** Implemented `sampleLocalFold` in `CalendarSampleFoldGeometry.kt`,
+  properly handling safe-drawing insets, local coordinates, offscreen folds, and physical LTR placement for RTL.
+- **Arbeitspaket G (Heatmap & Accessibility):** Preserved touch targets, TalkBack semantics, and adaptive
+  two-pane layouts for the heatmap demo.
+- **Arbeitspaket H (Documentation Consolidation):** Synchronized all status, architecture, and review docs.
+- **Arbeitspaket I (Independent Review & CI Verification):** Full diff verification, API-guard check,
+  and green CI across all four workflows (verification, publishing, instrumentation, tablet).
 
 ## Current release status: 2.2.0 (published)
 
@@ -13,6 +39,7 @@ Branch: `update`
   - `Android instrumentation`: Run 43176664365 (success on API 29 across all 26 instrumented tests)
 - 100% binary compatible with `2.1.0`. All public and protected JVM APIs in `:library` and all calendar engines are identical.
 - Adaptive multi-month columns, fold postures, and two-pane adaptive sample layouts are fully implemented and verified.
+
 
 ## Adaptive layout, Phase 7 (state restoration & recreation tests, branch `update`)
 

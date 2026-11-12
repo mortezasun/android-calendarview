@@ -52,6 +52,7 @@ internal fun CalendarSampleViewport(
     showWindowLabel: Boolean = true,
     forcedMode: SampleDisplayMode? = null,
     viewportHeight: Dp = sampleBoundedViewportHeight(480.dp, LocalSamplePaneHeight.current),
+    minMonthWidth: Dp = sampleTargetMonthWidth(showWeekNumbers = false),
     monthContent: @Composable (Long) -> Unit,
 ) {
     var modeName by rememberSaveable { mutableStateOf(SampleDisplayMode.Single.name) }
@@ -86,6 +87,7 @@ internal fun CalendarSampleViewport(
                     onVisibleMonthChanged = onVisibleMonthChanged,
                     showWindowLabel = showWindowLabel,
                     viewportHeight = viewportHeight,
+                    minMonthWidth = minMonthWidth,
                     monthContent = monthContent,
                 )
             }
@@ -101,6 +103,7 @@ private fun SynchronizedMonthViewport(
     onVisibleMonthChanged: (Long) -> Unit,
     showWindowLabel: Boolean,
     viewportHeight: Dp,
+    minMonthWidth: Dp,
     monthContent: @Composable (Long) -> Unit,
 ) {
     val target = months.indexOf(desired)
@@ -174,14 +177,14 @@ private fun SynchronizedMonthViewport(
         }
         SampleDisplayMode.AdaptiveColumns -> CalendarMonthColumns(
             monthCount = months.size, modifier = viewport, state = gridState,
-            minMonthWidth = 320.dp, monthKey = { months[it] },
+            minMonthWidth = minMonthWidth, monthKey = { months[it] },
         ) { index ->
             monthContent(months[index])
         }
         SampleDisplayMode.VerticalList, SampleDisplayMode.HorizontalList -> CalendarMonthList(
             monthCount = months.size, modifier = viewport, state = listState,
             axis = if (mode == SampleDisplayMode.VerticalList) CalendarScrollAxis.Vertical else CalendarScrollAxis.Horizontal,
-            monthKey = { months[it] }, horizontalMonthWidth = 320.dp,
+            monthKey = { months[it] }, horizontalMonthWidth = minMonthWidth,
         ) { index ->
             if (mode == SampleDisplayMode.HorizontalList) {
                 Column(Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) { monthContent(months[index]) }

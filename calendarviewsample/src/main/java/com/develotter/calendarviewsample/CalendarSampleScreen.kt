@@ -111,6 +111,7 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                         calendar = calendar,
                         anchor = ui.anchor,
                         onVisibleMonthChanged = { ui.showMonth(it) },
+                        minMonthWidth = sampleTargetMonthWidth(ui.showWeekNumbers),
                     ) { monthAnchor ->
                         SampleMonth(
                             calendar = calendar,
@@ -179,6 +180,7 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                             showWindowLabel = false,
                             forcedMode = SampleDisplayMode.HorizontalPager,
                             viewportHeight = dialogHeight,
+                            minMonthWidth = sampleTargetMonthWidth(ui.showWeekNumbers),
                         ) { monthAnchor ->
                             SampleMonth(
                                 calendar = calendar,

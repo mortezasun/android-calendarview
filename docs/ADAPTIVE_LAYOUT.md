@@ -44,6 +44,7 @@ content (the grid itself adds none between day cells).
   **not** a 48 dp-width touch-target guarantee.
 - The default is not changed silently because it alters visible behaviour of existing callers.
   Hosts that want 48 dp-wide days pass `minMonthWidth = 336.dp` (or `376.dp` with week numbers).
+  The sample app implements this policy explicitly via `sampleTargetMonthWidth(showWeekNumbers)`.
   Any future opt-in preset must be an additive defaulted parameter placed before the trailing
   content lambda.
 

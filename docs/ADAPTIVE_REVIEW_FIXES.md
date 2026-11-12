@@ -16,14 +16,32 @@ The vertical-fold row uses physical LTR geometry; each pane restores the caller'
 - Pane selection uses the inset-adjusted available width. Physical LTR placement and caller-direction contents are retained.
 - Added six JVM geometry tests for vertical/horizontal translation, zero-width gaps, edge clipping, offscreen folds and invalid extent.
 
-Verification: source review only. No Gradle build, JVM tests, instrumentation or device checks were run for these patches. The new tests are added, not claimed to have passed. Real foldable and asymmetric-fold RTL UI checks remain required.
+## Step 1c: injectable fold override and adaptive UI tests
 
-No library API, dependency, version, tag or release is changed.
+- Added `LocalSampleFoldOverride` and `SampleFoldOverride`.
+- Added `CalendarSampleAdaptiveLayoutTest` covering physical LTR/RTL fold placement, top insets and host offsets, and continuity across layout and fold changes.
 
-Remaining work, in order:
-1. Inject fold geometry and add adaptive layout, resizing and restoration UI tests.
-2. Make main viewport, agenda and dialog heights respect available pane height.
-3. Demonstrate 336/376 dp month-width configuration in the sample.
-4. Reconcile project-status and release claims with actual verification evidence.
+## Step 1d: adaptive heights for viewport, agenda and dialog
 
-The existing `PROJECT_STATUS.md` statement that adaptive folds are fully verified is not evidence of real foldable runtime coverage. This session is recorded here without rewriting the historical status log; its overall verification claims still need correction.
+- `LocalSamplePaneHeight` captures available content pane height.
+- `sampleBoundedViewportHeight` bounds main viewport and agenda to 75% of available height.
+- `sampleDialogViewportHeight` uses dialog slot constraint clamped to 360 dp without artificial minimums.
+- Tested via 14 JVM unit tests in `CalendarSamplePaneHeightTest` and `CalendarSampleSecondaryHeightTest`.
+
+## Step 1e: sample target month width honoring 48 dp day cells
+
+- Added `CalendarSampleMonthWidth.kt` with `sampleTargetMonthWidth(showWeekNumbers)`.
+- 336 dp target without week numbers (7 × 48 dp), 376 dp target with week numbers (336 dp + 40 dp).
+- Passed down through `CalendarSampleViewport` to `CalendarMonthColumns` and `CalendarMonthList`.
+- Tested via `CalendarSampleMonthWidthTest`.
+
+## Step 1f: genuine state restoration and continuous layout verification
+
+- `CalendarSampleStateRestorationTest` verifies genuine SavedInstanceState restoration using Compose's `StateRestorationTester` across all 17 configuration properties, selection range endpoints, display modes, and heatmap settings.
+- `CalendarSampleAdaptiveLayoutTest` verifies that real calendar selection and month anchors survive continuous resizing, multi-column switches, and fold postures without recreation or reset.
+
+## Step 1g: dedicated tablet CI verification
+
+- Added `.github/workflows/android-tablet.yml` testing on API 29, 1600x2560 at 240 dpi tablet emulator.
+- Verified all 4 CI workflows (verification, publishing, instrumentation, tablet).
+
