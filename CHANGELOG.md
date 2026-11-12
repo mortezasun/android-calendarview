@@ -1,5 +1,24 @@
 # Changelog
 
+## 2.2.1 - 2026-11-12
+
+Adaptive layout hardening, minimum touch targets, fold geometry, state restoration suite and tablet CI.
+
+### Added and Improved
+
+- Month width enforcement (`CalendarSampleMonthWidth.kt`) guaranteeing full 48 dp day cell touch targets (336 dp without week numbers, 376 dp with 40 dp week numbers), verified in `CalendarSampleMonthWidthTest`.
+- Adaptive viewport, agenda, and dialog heights (`CalendarSamplePaneHeights.kt`) clamped to prevent clipping in landscape or compact heights, verified in `CalendarSamplePaneHeightTest` and `CalendarSampleSecondaryHeightTest`.
+- RTL and insets-aware fold geometry handling (`CalendarSampleFoldGeometry.kt`), verified in `CalendarSampleFoldGeometryTest`.
+- Continuous layout and fold transition tests (`CalendarSampleAdaptiveLayoutTest`) validating state continuity across compact, wide, vertical fold, horizontal fold, no fold, week toggle, and calendar engine switches.
+- Genuine `SavedInstanceState` restoration tests (`CalendarSampleStateRestorationTest.kt`) using Compose's `StateRestorationTester`, asserting survival of all 17 sample properties and selection range endpoints and interior.
+- Automated Android Tablet CI workflow (`android-tablet.yml`) verifying all instrumentation tests on a 1600x2560 240 dpi API 29 tablet emulator.
+- Consolidated adaptive documentation (`docs/ADAPTIVE_LAYOUT.md`, `docs/ADAPTIVE_HEIGHTS.md`, `docs/ADAPTIVE_REVIEW_FIXES.md`, `docs/ADAPTIVE_TABLET_CI.md`).
+
+### Compatibility
+
+- 100% binary-compatible with `2.2.0`, `2.1.0` and `2.0.1`. All public/protected JVM APIs across `:library` and all three calendar engines remain unchanged.
+- `:library` and the calendar engines remain completely dependency-free of window/fold packages.
+
 ## 2.2.0 - 2026-11-12
 
 Adaptive layout, multi-window and foldable release.

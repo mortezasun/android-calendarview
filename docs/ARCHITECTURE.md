@@ -1,8 +1,8 @@
-# Architecture (v2.2.0)
+# Architecture (v2.2.1)
 
 ## Overview
 
-`android-calendarview` is a **native Jetpack Compose calendar library** with decoupled calendar engines and an interactive demo app. Version `2.2.0` is the current release; version 2.0.0 eliminated all legacy XML layouts, ViewBinding, custom view measurement, and reflection.
+`android-calendarview` is a **native Jetpack Compose calendar library** with decoupled calendar engines and an interactive demo app. Version `2.2.1` is the current release; version 2.0.0 eliminated all legacy XML layouts, ViewBinding, custom view measurement, and reflection.
 
 The architecture follows standard Compose state and rendering patterns:
 - **Stateless rendering:** `CalendarMonthGrid` and `CalendarDayCell` render month layouts declaratively.

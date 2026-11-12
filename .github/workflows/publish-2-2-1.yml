@@ -1,0 +1,73 @@
+name: Publish approved 2.2.1 release
+
+on:
+  push:
+    branches: [update]
+
+concurrency:
+  group: publish-approved-2-2-1
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  checks: read
+  actions: read
+
+jobs:
+  release:
+    if: >-
+      github.repository == 'mortezasun/android-calendarview' &&
+      contains(github.event.head_commit.message, 'release: 2.2.1')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: mortezasun/android-calendarview
+      REQUIRED_CHECKS: '["assemble","unit-tests","lint","publishing","Core and sample instrumentation","Core and sample tablet instrumentation"]'
+    steps:
+      - name: Check out release automation
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Refuse to overwrite an existing release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh api "repos/$GH_REPO/git/ref/tags/2.2.1" >/dev/null 2>&1; then
+            echo "Tag 2.2.1 already exists; refusing to move it." >&2
+            exit 1
+          fi
+
+      - name: Verify release commit has the same tree as its parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          current_tree=$(gh api "repos/$GH_REPO/git/commits/$GITHUB_SHA" --jq '.tree.sha')
+          parent_sha=$(gh api "repos/$GH_REPO/git/commits/$GITHUB_SHA" --jq '.parents[0].sha')
+          parent_tree=$(gh api "repos/$GH_REPO/git/commits/$parent_sha" --jq '.tree.sha')
+          if [ "$current_tree" != "$parent_tree" ]; then
+            echo "Release commit tree differs from its parent; refusing to release." >&2
+            exit 1
+          fi
+          echo "PARENT_SHA=$parent_sha" >> "$GITHUB_ENV"
+
+      - name: Wait for instrumentation runs on the parent commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          source scripts/wait-for-required-checks.sh
+          wait_for_checks "$PARENT_SHA" '["Core and sample instrumentation","Core and sample tablet instrumentation"]'
+
+      - name: Wait for all checks on the release commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          source scripts/wait-for-required-checks.sh
+          wait_for_checks "$GITHUB_SHA" "$REQUIRED_CHECKS"
+
+      - name: Create approved tag and public release
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create 2.2.1 --repo "$GH_REPO" --target "$GITHUB_SHA" --title "2.2.1 - Adaptive Compose calendar hardening release" --notes-file docs/releases/2.2.1.md --latest

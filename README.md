@@ -13,7 +13,7 @@
 
 A native Jetpack Compose calendar library for Android. It ships one shared, calendar-independent core (month grid, selection engine, containers, heatmaps) plus pluggable calendar engines for **Gregorian**, **Islamic Hijri** and **Solar Hijri (Jalali / Persian)** — with full RTL support.
 
-**Current release:** [`2.2.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.2.0) — adaptive layout, multi-window and fold-aware support. See the [2.2.0 release notes](docs/releases/2.2.0.md).
+**Current release:** [`2.2.1`](https://github.com/mortezasun/android-calendarview/releases/tag/2.2.1) — adaptive layout, multi-window and fold-aware support. See the [2.2.1 release notes](docs/releases/2.2.1.md).
 
 ---
 
@@ -94,22 +94,22 @@ Add the engines you need to your module's `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core only (needed if you build your own calendar on top of CalendarMonthGrid)
-    implementation("com.github.mortezasun.android-calendarview:library:2.2.0")
+    implementation("com.github.mortezasun.android-calendarview:library:2.2.1")
 
     // Calendar engines (each one already includes :library)
-    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.2.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.2.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.2.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.2.1")
+    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.2.1")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.2.1")
 }
 ```
 
-### Bill of Materials (2.2.0)
+### Bill of Materials (2.2.1)
 
-The BOM is published with `2.2.0` and constrains the core and all three engines:
+The BOM is published with `2.2.1` and constrains the core and all three engines:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.2.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.2.1"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
     implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri")
@@ -118,20 +118,20 @@ dependencies {
 
 The BOM is part of the same publication set and is included by `jitpack.yml` and the
 publishing workflow. A JitPack-only consumer resolved all four constrained modules at
-`2.2.0` without `mavenLocal()`. The POM contains the metadata Maven Central requires,
+`2.2.1` without `mavenLocal()`. The POM contains the metadata Maven Central requires,
 but signing, namespace verification and upload are not configured; JitPack remains the
 only configured remote repository.
 
 If you only need one engine, keep its explicit version and omit the BOM.
 
-### Upgrading from 2.1.0
+### Upgrading from 2.2.0 or 2.1.0
 
-The 2.2.0 release is binary-compatible with 2.1.0. If your build pinned module versions
+The 2.2.1 release is binary-compatible with 2.2.0 and 2.1.0. If your build pinned module versions
 directly, move them to the BOM and bump the platform:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.2.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.2.1"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
 }
@@ -539,7 +539,7 @@ Requirements: JDK 17, Android SDK Platform 37, Build-Tools 36.0.0.
 Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 27.
 
 ```bash
-git clone --branch 2.2.0 https://github.com/mortezasun/android-calendarview.git
+git clone --branch 2.2.1 https://github.com/mortezasun/android-calendarview.git
 cd android-calendarview
 ./gradlew :calendarviewsample:assembleDebug   # build the demo app
 ./gradlew test                                # JVM unit tests (all modules)
@@ -568,7 +568,7 @@ CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Compose architecture, rendering and state model |
 | [V2_MIGRATION_MAPPING.md](docs/V2_MIGRATION_MAPPING.md) | 1.x → 2.0.0 migration matrix |
 | [PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | Verified status, test coverage, release notes |
-| [releases/2.2.0.md](docs/releases/2.2.0.md) | Current release notes and verification evidence |
+| [releases/2.2.1.md](docs/releases/2.2.1.md) | Current release notes and verification evidence |
 | [ADAPTIVE_LAYOUT.md](docs/ADAPTIVE_LAYOUT.md) | Adaptive layout, multi-window and state contract |
 | [ADJACENT_MONTH_DAYS.md](docs/ADJACENT_MONTH_DAYS.md) | Previous/next-month day behavior |
 | [COMPOSE_MONTH_CONTAINERS.md](docs/COMPOSE_MONTH_CONTAINERS.md) | List and pager containers |
