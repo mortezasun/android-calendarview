@@ -28,7 +28,11 @@ remaining edge cases in adaptive geometry, viewport heights, month width touch t
   two-pane layouts for the heatmap demo.
 - **Arbeitspaket H (Documentation Consolidation):** Synchronized all status, architecture, and review docs.
 - **Arbeitspaket I (Independent Review & CI Verification):** Full diff verification, API-guard check,
-  and green CI across all four workflows (verification, publishing, instrumentation, tablet).
+  and green CI across all four workflows on commit `90ad35b`:
+  - `Android verification`: Run 43223950693 (success across assemble, unit-tests, lint)
+  - `Android publishing verification`: Run 43223950670 (success)
+  - `Android instrumentation`: Run 43223950664 (success on API 29 across all 34 instrumented tests)
+  - `Android tablet verification`: Run 43223950572 (success on 1600x2560 240 dpi tablet across all 34 instrumented tests)
 
 ## Current release status: 2.2.0 (published)
 
