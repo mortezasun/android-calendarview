@@ -186,17 +186,14 @@ class CalendarSampleAdaptiveLayoutTest {
                         LocalSampleFoldOverride provides SampleFoldOverride(fold),
                     ) {
                         val ui = rememberCalendarSampleState()
-                        val state = rememberCalendarSelectionState(ui.mode)
+                        val state = rememberCalendarSelectionState(TypeSelectDay.Range)
                         CalendarSampleAdaptiveLayout(
                             header = {
                                 Column {
                                     Text("Selected:${state.selection.selectedDays.joinToString(",").ifEmpty { "none" }}")
                                     Text("Calendar:${ui.calendar.name}")
                                     Text("Weeks:${ui.showWeekNumbers}")
-                                    Button(onClick = {
-                                        ui.modeName = TypeSelectDay.Range.name
-                                        state.selectRange(20000L, 20004L)
-                                    }) { Text("SelectRange") }
+                                    Button(onClick = { state.selectRange(20000L, 20004L) }) { Text("SelectRange") }
                                     Button(onClick = { ui.move(1) }) { Text("Next") }
                                     Button(onClick = { ui.showWeekNumbers = !ui.showWeekNumbers }) { Text("ToggleWeeks") }
                                     Button(onClick = { ui.selectCalendar(SampleCalendar.Hijri) }) { Text("SwitchHijri") }
