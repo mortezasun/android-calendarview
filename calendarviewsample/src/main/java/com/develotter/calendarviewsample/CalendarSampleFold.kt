@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
 import androidx.window.layout.WindowLayoutInfo
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 
 /**
@@ -45,10 +46,10 @@ internal val SampleMinFoldGap: Dp = 16.dp
 internal fun rememberSampleFold(): SampleFold? {
     val activity = LocalActivity.current
     val density = LocalDensity.current
-    val layoutInfo by remember(activity) {
-        activity?.let { WindowInfoTracker.getOrCreate(it).windowLayoutInfo(it) }
-            ?: emptyFlow<WindowLayoutInfo>()
-    }.collectAsState<WindowLayoutInfo?>(initial = null)
+    val layoutFlow: Flow<WindowLayoutInfo?> = remember(activity) {
+        activity?.let { WindowInfoTracker.getOrCreate(it).windowLayoutInfo(it) } ?: emptyFlow()
+    }
+    val layoutInfo by layoutFlow.collectAsState(initial = null)
     val feature = layoutInfo?.displayFeatures
         ?.filterIsInstance<FoldingFeature>()
         ?.firstOrNull { it.isSeparating }
