@@ -1,12 +1,12 @@
 # Release acceptance
 
-Status: `2.2.1` is prepared on branch `update`. `2.2.0` remains the previous published release.
+Status: `2.2.1` is released and published on GitHub Releases. `2.2.0` remains the previous published release.
 
 ## 1. Current release: 2.2.1 (2026-11-12)
 
 - [x] Root version set to `2.2.1` in root `build.gradle.kts`.
 - [x] Sample `versionCode` set to `20201` and `versionName` set to `2.2.1`.
-- [ ] Release commit tagged `2.2.1` and GitHub Release `2.2.1` published via `publish-2-2-1.yml`.
+- [x] Release commit `dd20e49` is tagged `2.2.1`; GitHub Release `2.2.1` is published via `publish-2-2-1.yml` (run 43268408129).
 - [x] Minimum month width touch target enforcement (336 dp without week numbers, 376 dp with 40 dp week numbers) implemented and tested.
 - [x] Adaptive pane and secondary viewport height bounds implemented and tested.
 - [x] RTL and insets-aware fold geometry handling implemented and tested.
@@ -14,10 +14,10 @@ Status: `2.2.1` is prepared on branch `update`. `2.2.0` remains the previous pub
 - [x] Genuine `SavedInstanceState` restoration suite (`StateRestorationTester`) passing.
 - [x] Tablet CI emulator workflow (`android-tablet.yml`, 1600x2560 240 dpi) operational and passing.
 - [x] All required CI checks passed for the release tree:
-  - `Android verification`: Run 43225113422 (success)
-  - `Android publishing verification`: Run 43225113483 (success)
-  - `Android instrumentation`: Run 43225113341 (success)
-  - `Android tablet verification`: Run 43225113380 (success)
+  - `Android verification`: Run 43268408115 (success)
+  - `Android publishing verification`: Run 43268408103 (success)
+  - `Android instrumentation`: Run 43268408390 (success)
+  - `Android tablet verification`: Run 43268408198 (success)
 - [x] Documentation, CHANGELOG, ARCHITECTURE, README and release notes (`docs/releases/2.2.1.md`) updated.
 - [x] 100% binary compatible with `2.2.0`, `2.1.0` and `2.0.1`.
 

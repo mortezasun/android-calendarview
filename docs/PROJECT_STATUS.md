@@ -1,7 +1,7 @@
 # Project status
 
 Last updated: 2026-11-12
-Version: `2.2.1` (prepared on branch `update`; prior published release `2.2.0` at `f5dd967`)
+Version: `2.2.1` (published tag `2.2.1` at `dd20e49`)
 Branch: `update`
 
 ## Post-2.2.0 Adaptive Review and Hardening (branch `update`, Arbeitspakete A–I)
@@ -34,15 +34,15 @@ remaining edge cases in adaptive geometry, viewport heights, month width touch t
   - `Android instrumentation`: Run 43223950664 (success on API 29 across all 34 instrumented tests)
   - `Android tablet verification`: Run 43223950572 (success on 1600x2560 240 dpi tablet across all 34 instrumented tests)
 
-## Current release status: 2.2.1 (prepared)
+## Current release status: 2.2.1 (published)
 
-- Release preparation committed on branch `update`.
+- Release commit `dd20e49` is tagged `2.2.1` and the GitHub Release `2.2.1` is published via `publish-2-2-1.yml` (run 43268408129).
 - Includes full Arbeitspakete A–I adaptive hardening suite, 48 dp touch target enforcement, fold geometry, adaptive pane heights, continuous transition tests, genuine state restoration tests, and tablet CI.
-- All four CI workflows verified on commit `90ad35b` / `cf7b2dc`:
-  - `Android verification`: Run 43225113422 (success across assemble, unit-tests, lint)
-  - `Android publishing verification`: Run 43225113483 (success)
-  - `Android instrumentation`: Run 43225113341 (success on API 29 across all 34 instrumented tests)
-  - `Android tablet verification`: Run 43225113380 (success on 1600x2560 240 dpi tablet across all 34 instrumented tests)
+- All four CI workflows verified on release tree `dd20e49`:
+  - `Android verification`: Run 43268408115 (success across assemble, unit-tests, lint)
+  - `Android publishing verification`: Run 43268408103 (success)
+  - `Android instrumentation`: Run 43268408390 (success on API 29 across all 34 instrumented tests)
+  - `Android tablet verification`: Run 43268408198 (success on 1600x2560 240 dpi tablet across all 34 instrumented tests)
 - 100% binary compatible with `2.2.0`, `2.1.0` and `2.0.1`.
 
 ## Previous release status: 2.2.0 (published)
