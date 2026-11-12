@@ -4,6 +4,20 @@ Last updated: 2026-11-11
 Version: `2.1.0` (published)
 Branch: `update`
 
+## Adaptive layout, Phase 7 (state restoration & recreation tests, branch `update`)
+
+- Added `CalendarSampleStateTest.kt` covering anchor updates, month moves, engine switches and
+  display settings preservation.
+- Added `calendarEngineAndDisplayOptionsSurviveActivityRecreation` to `CalendarSampleUiTest.kt`,
+  verifying that engine switch and state survive activity recreation.
+
+## Adaptive layout, Phase 6 (adaptive dialogs & heatmap demo, branch `update`)
+
+- `HeatMapViewActivity.kt`: wrapped `HeatmapSample` in `CalendarSampleAdaptiveLayout`, providing
+  two-pane layout on wide screens (>= 840 dp) and separating folds (book/tabletop posture).
+- `CalendarSampleScreen.kt`: dialog month viewport height is now adaptive using `BoxWithConstraints`
+  clamped between 240 dp and 360 dp to prevent clipping in landscape/compact height.
+
 ## Adaptive layout, Phase 5 (fold-aware sample, branch `update`)
 
 - Added `androidx.window:window:1.5.1` (`libs.androidx.window`) to `:calendarviewsample` only,

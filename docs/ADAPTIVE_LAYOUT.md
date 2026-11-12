@@ -96,13 +96,14 @@ covered by this contract.
 
 ## Phases
 
-0. Done so far: 1 contract, 2 constraint tests, 3 sample split, 4 two-pane sample at 840 dp
-   (`CalendarSampleAdaptiveLayout.kt`, `BoxWithConstraints`), 5 fold-aware sample
-   (`androidx.window` 1.5.1, sample only, approved).
-
-1. Contract (this file). 2. Library constraint tests/API if needed (update `api/*.api`).
-3. Split sample state/controls. 4. Adaptive panes. 5. Fold-aware layout (needs dependency
-approval). 6. Dialogs, agenda, heatmap. 7. State restoration tests.
+All planned phases 1 through 7 are implemented:
+1. Contract (`docs/ADAPTIVE_LAYOUT.md`).
+2. Library constraint tests (`CalendarMonthColumnsTest.kt`).
+3. Split sample state/controls (`CalendarSampleState.kt`, `CalendarSampleControls.kt`, `CalendarSampleScreen.kt`).
+4. Adaptive panes (`CalendarSampleAdaptiveLayout.kt` at 840 dp).
+5. Fold-aware layout (`androidx.window:window:1.5.1`, `CalendarSampleFold.kt`, book/tabletop postures).
+6. Adaptive dialogs & heatmap demo (`CalendarSampleScreen.kt`, `HeatMapViewActivity.kt`).
+7. State restoration & recreation tests (`CalendarSampleStateTest.kt`, `CalendarSampleUiTest.kt`).
 
 ## Open decisions
 

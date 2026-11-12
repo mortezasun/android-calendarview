@@ -267,4 +267,16 @@ class CalendarSampleUiTest {
         showViewport()
         assertDisplayedInMainViewport(compose.onNodeWithText(title))
     }
+
+    @Test
+    fun calendarEngineAndDisplayOptionsSurviveActivityRecreation() {
+        click("SolarHijri")
+        compose.waitForIdle()
+        compose.onNodeWithText("SolarHijri").assertExists()
+        compose.activityRule.scenario.recreate()
+        compose.waitForIdle()
+        compose.onNodeWithText("SolarHijri").assertExists()
+        click("Gregorian")
+        compose.waitForIdle()
+    }
 }

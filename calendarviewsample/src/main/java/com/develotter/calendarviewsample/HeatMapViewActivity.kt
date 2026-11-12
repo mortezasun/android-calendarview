@@ -6,14 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -135,147 +131,151 @@ private fun HeatmapSample() {
 
     CompositionLocalProvider(LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr) {
         Surface(Modifier.fillMaxSize()) {
-            Column(
-                Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text("${calendar.name} heatmap: $year", style = MaterialTheme.typography.headlineSmall)
-                val orientation = HeatmapOrientation.valueOf(orientationName)
-                Text(
-                    if (orientation == HeatmapOrientation.WeeksAsColumns) {
-                        "Synthetic demo data. Swipe each month horizontally to see all weeks."
-                    } else {
-                        "Synthetic demo data. Each row is one week."
-                    },
-                )
-                ChipRow {
-                    SampleCalendar.entries.forEach { item ->
-                        FilterChip(
-                            selected = calendar == item,
-                            onClick = { calendarName = item.name; selected = null },
-                            label = { Text(item.name) },
-                        )
-                    }
-                }
-                if (calendar == SampleCalendar.Hijri) {
+            CalendarSampleAdaptiveLayout(
+                header = {
+                    Text("${calendar.name} heatmap: $year", style = MaterialTheme.typography.headlineSmall)
+                    val orientation = HeatmapOrientation.valueOf(orientationName)
+                    Text(
+                        if (orientation == HeatmapOrientation.WeeksAsColumns) {
+                            "Synthetic demo data. Swipe each month horizontally to see all weeks."
+                        } else {
+                            "Synthetic demo data. Each row is one week."
+                        },
+                    )
                     ChipRow {
-                        Text("Hijri method")
-                        listOf(-1, 0, 1).forEach { offset ->
+                        SampleCalendar.entries.forEach { item ->
                             FilterChip(
-                                selected = hijriOffset == offset,
-                                onClick = { hijriOffset = offset; selected = null },
-                                label = {
-                                    Text(
-                                        when (offset) {
-                                            -1 -> "−1 day"
-                                            0 -> "Umm al-Qura"
-                                            else -> "+1 day"
-                                        },
-                                    )
-                                },
+                                selected = calendar == item,
+                                onClick = { calendarName = item.name; selected = null },
+                                label = { Text(item.name) },
                             )
                         }
                     }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Button(
-                        enabled = year > yearRange.first,
-                        onClick = { year--; selected = null },
-                    ) { Text("Previous") }
-                    Button(
-                        enabled = year < yearRange.last,
-                        onClick = { year++; selected = null },
-                    ) { Text("Next") }
-                }
-                ChipRow {
-                    TypeSelectDay.entries.forEach { item ->
-                        FilterChip(selected = mode == item, onClick = { modeName = item.name }, label = { Text(item.name) })
+                    if (calendar == SampleCalendar.Hijri) {
+                        ChipRow {
+                            Text("Hijri method")
+                            listOf(-1, 0, 1).forEach { offset ->
+                                FilterChip(
+                                    selected = hijriOffset == offset,
+                                    onClick = { hijriOffset = offset; selected = null },
+                                    label = {
+                                        Text(
+                                            when (offset) {
+                                                -1 -> "−1 day"
+                                                0 -> "Umm al-Qura"
+                                                else -> "+1 day"
+                                            },
+                                        )
+                                    },
+                                )
+                            }
+                        }
                     }
-                }
-                ChipRow {
-                    listOf("en", "de", "fa", "ar").forEach { tag ->
-                        FilterChip(selected = localeTag == tag, onClick = { localeTag = tag }, label = { Text(tag) })
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            enabled = year > yearRange.first,
+                            onClick = { year--; selected = null },
+                        ) { Text("Previous") }
+                        Button(
+                            enabled = year < yearRange.last,
+                            onClick = { year++; selected = null },
+                        ) { Text("Next") }
                     }
-                    Text("RTL")
-                    Switch(checked = rtl, onCheckedChange = { rtl = it })
-                }
-                ChipRow {
-                    Text("First day")
-                    firstDayOptions.forEachIndexed { index, day ->
-                        FilterChip(
-                            selected = firstDayIndex == index,
-                            onClick = { firstDayIndex = index },
-                            label = { Text(day?.getDisplayName(TextStyle.SHORT, Locale.ENGLISH) ?: "Default") },
-                        )
+                    ChipRow {
+                        TypeSelectDay.entries.forEach { item ->
+                            FilterChip(selected = mode == item, onClick = { modeName = item.name }, label = { Text(item.name) })
+                        }
                     }
-                }
-                ChipRow {
-                    HeatmapOrientation.entries.forEach { item ->
-                        FilterChip(
-                            selected = orientationName == item.name,
-                            onClick = { orientationName = item.name },
-                            label = { Text(if (item == HeatmapOrientation.WeeksAsColumns) "Weeks as columns" else "Weeks as rows") },
-                        )
+                    ChipRow {
+                        listOf("en", "de", "fa", "ar").forEach { tag ->
+                            FilterChip(selected = localeTag == tag, onClick = { localeTag = tag }, label = { Text(tag) })
+                        }
+                        Text("RTL")
+                        Switch(checked = rtl, onCheckedChange = { rtl = it })
                     }
-                }
-                ChipRow {
-                    Text("Colors")
-                    SampleHeatmapPalette.entries.forEach { item ->
-                        FilterChip(selected = paletteName == item.name, onClick = { paletteName = item.name }, label = { Text(item.name) })
+                    ChipRow {
+                        Text("First day")
+                        firstDayOptions.forEachIndexed { index, day ->
+                            FilterChip(
+                                selected = firstDayIndex == index,
+                                onClick = { firstDayIndex = index },
+                                label = { Text(day?.getDisplayName(TextStyle.SHORT, Locale.ENGLISH) ?: "Default") },
+                            )
+                        }
                     }
-                }
-                ChipRow {
-                    Text("Cells")
-                    SampleHeatmapCells.entries.forEach { item ->
-                        FilterChip(selected = cellsName == item.name, onClick = { cellsName = item.name }, label = { Text(item.name) })
+                    ChipRow {
+                        HeatmapOrientation.entries.forEach { item ->
+                            FilterChip(
+                                selected = orientationName == item.name,
+                                onClick = { orientationName = item.name },
+                                label = { Text(if (item == HeatmapOrientation.WeeksAsColumns) "Weeks as columns" else "Weeks as rows") },
+                            )
+                        }
                     }
-                }
-                ChipRow {
-                    Text("Today border")
-                    SampleTodayColor.entries.forEach { item ->
-                        FilterChip(selected = todayColorName == item.name, onClick = { todayColorName = item.name }, label = { Text(item.name) })
+                    ChipRow {
+                        Text("Colors")
+                        SampleHeatmapPalette.entries.forEach { item ->
+                            FilterChip(selected = paletteName == item.name, onClick = { paletteName = item.name }, label = { Text(item.name) })
+                        }
                     }
-                }
-                ChipRow {
-                    Text("Header")
-                    Switch(checked = header, onCheckedChange = { header = it })
-                    Text("Weekday labels")
-                    Switch(checked = labels, onCheckedChange = { labels = it })
-                    Text("Disable future days")
-                    Switch(checked = disableFuture, onCheckedChange = { disableFuture = it })
-                }
-                months.fold(
-                    onSuccess = { monthData ->
-                        CalendarYearHeatmap(
-                            months = monthData,
-                            onDayClick = { day ->
-                                if (mode == TypeSelectDay.None) selected = day.epochDay else state.onDayClick(day.epochDay)
-                            },
-                            locale = locale,
-                            showWeekdayLabels = labels,
-                            showHeader = header,
-                            orientation = orientation,
-                            style = style,
-                            selection = if (mode == TypeSelectDay.None) null else state.selection,
-                            todayBorderColor = todayBorderColor,
-                            header = { Text(it, style = MaterialTheme.typography.titleMedium) },
-                            weekdayContent = { Text(it, style = MaterialTheme.typography.labelSmall) },
-                            colorForIntensity = colorForIntensity,
-                        )
-                    },
-                    onFailure = { error ->
-                        Text(
-                            error.message ?: "Unsupported calendar year",
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    },
-                )
-                if (mode != TypeSelectDay.None) {
-                    Text("Selected dates / range endpoints (ISO):")
-                    Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
-                    TextButton(onClick = state::clear) { Text("Clear selection") }
-                }
-            }
+                    ChipRow {
+                        Text("Cells")
+                        SampleHeatmapCells.entries.forEach { item ->
+                            FilterChip(selected = cellsName == item.name, onClick = { cellsName = item.name }, label = { Text(item.name) })
+                        }
+                    }
+                    ChipRow {
+                        Text("Today border")
+                        SampleTodayColor.entries.forEach { item ->
+                            FilterChip(selected = todayColorName == item.name, onClick = { todayColorName = item.name }, label = { Text(item.name) })
+                        }
+                    }
+                    ChipRow {
+                        Text("Header")
+                        Switch(checked = header, onCheckedChange = { header = it })
+                        Text("Weekday labels")
+                        Switch(checked = labels, onCheckedChange = { labels = it })
+                        Text("Disable future days")
+                        Switch(checked = disableFuture, onCheckedChange = { disableFuture = it })
+                    }
+                },
+                content = {
+                    val orientation = HeatmapOrientation.valueOf(orientationName)
+                    months.fold(
+                        onSuccess = { monthData ->
+                            CalendarYearHeatmap(
+                                months = monthData,
+                                onDayClick = { day ->
+                                    if (mode == TypeSelectDay.None) selected = day.epochDay else state.onDayClick(day.epochDay)
+                                },
+                                locale = locale,
+                                showWeekdayLabels = labels,
+                                showHeader = header,
+                                orientation = orientation,
+                                style = style,
+                                selection = if (mode == TypeSelectDay.None) null else state.selection,
+                                todayBorderColor = todayBorderColor,
+                                header = { Text(it, style = MaterialTheme.typography.titleMedium) },
+                                weekdayContent = { Text(it, style = MaterialTheme.typography.labelSmall) },
+                                colorForIntensity = colorForIntensity,
+                            )
+                        },
+                        onFailure = { error ->
+                            Text(
+                                error.message ?: "Unsupported calendar year",
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        },
+                    )
+                },
+                actions = {
+                    if (mode != TypeSelectDay.None) {
+                        Text("Selected dates / range endpoints (ISO):")
+                        Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
+                        TextButton(onClick = state::clear) { Text("Clear selection") }
+                    }
+                },
+            )
         }
     }
     selected?.let { epochDay ->

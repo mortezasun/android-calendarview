@@ -1,6 +1,7 @@
 package com.develotter.calendarviewsample
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -168,27 +169,34 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                 confirmButton = { TextButton(onClick = { ui.showDialog = false }) { Text("Close") } },
                 title = { Text("${calendar.name} calendar") },
                 text = {
-                    CalendarSampleViewport(
-                        calendar = calendar,
-                        anchor = ui.anchor,
-                        onVisibleMonthChanged = { ui.showMonth(it) },
-                        showModeSelector = false,
-                        showWindowLabel = false,
-                        forcedMode = SampleDisplayMode.HorizontalPager,
-                        viewportHeight = 340.dp,
-                    ) { monthAnchor ->
-                        SampleMonth(
+                    BoxWithConstraints(Modifier.fillMaxWidth()) {
+                        val dialogHeight = if (maxHeight.value.isFinite() && maxHeight > 0.dp) {
+                            maxHeight.coerceAtMost(360.dp).coerceAtLeast(240.dp)
+                        } else {
+                            340.dp
+                        }
+                        CalendarSampleViewport(
                             calendar = calendar,
-                            anchor = monthAnchor,
-                            locale = locale,
-                            state = state,
-                            previousDays = ui.previousDays,
-                            nextDays = ui.nextDays,
-                            fixedSixRows = ui.fixedSixRows,
-                            hijriProvider = hijriProvider,
-                            hijriToday = hijriToday,
-                            showWeekNumbers = ui.showWeekNumbers,
-                        )
+                            anchor = ui.anchor,
+                            onVisibleMonthChanged = { ui.showMonth(it) },
+                            showModeSelector = false,
+                            showWindowLabel = false,
+                            forcedMode = SampleDisplayMode.HorizontalPager,
+                            viewportHeight = dialogHeight,
+                        ) { monthAnchor ->
+                            SampleMonth(
+                                calendar = calendar,
+                                anchor = monthAnchor,
+                                locale = locale,
+                                state = state,
+                                previousDays = ui.previousDays,
+                                nextDays = ui.nextDays,
+                                fixedSixRows = ui.fixedSixRows,
+                                hijriProvider = hijriProvider,
+                                hijriToday = hijriToday,
+                                showWeekNumbers = ui.showWeekNumbers,
+                            )
+                        }
                     }
                 },
             )
