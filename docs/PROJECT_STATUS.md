@@ -4,6 +4,16 @@ Last updated: 2026-11-11
 Version: `2.1.0` (published)
 Branch: `update`
 
+## Adaptive layout, Phase 1 (docs only, branch `update`)
+
+- Added [ADAPTIVE_LAYOUT.md](ADAPTIVE_LAYOUT.md): width formula (336/376 dp at 48 dp days),
+  narrow-container fallback, active-month definition, 1↔N column anchor rule, state to preserve.
+- Finding: the `CalendarMonthColumns` default `minMonthWidth = 320.dp` yields about 45.7 dp
+  (no week numbers) or 40 dp (with week numbers) per day; only the height is enforced at 48 dp.
+  Default intentionally unchanged.
+- No code, API, dependency or build changes; nothing was built or tested locally.
+- Open: phases 2–7, window-size/fold dependency approval, optional `maxColumns`/48 dp preset.
+
 ## Current release status: 2.1.0 (published)
 
 - Release commit `bd046a188d9a661e657affe580c7a7fa1a3e98ba` is tagged `2.1.0` and the
