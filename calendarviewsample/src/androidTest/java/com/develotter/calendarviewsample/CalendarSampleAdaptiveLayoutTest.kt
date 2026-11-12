@@ -36,6 +36,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.LocalDate
 
 /** Exercises the real adaptive host with deterministic folds, not a replacement layout. */
 @RunWith(AndroidJUnit4::class)
@@ -198,44 +199,45 @@ class CalendarSampleAdaptiveLayoutTest {
         }
         compose.waitForIdle()
 
+        val todayIso = LocalDate.now().toString()
         compose.onNodeWithText("Selected dates / range endpoints (ISO):").assertExists()
-        compose.onNodeWithText("None").assertExists()
+        compose.onNodeWithText(todayIso).assertDoesNotExist()
 
         compose.onNodeWithText("Range").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Select 5-day range").performClick()
         compose.waitForIdle()
-        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText(todayIso, substring = true).assertExists()
 
         compose.onNodeWithText("Next").performClick()
         compose.waitForIdle()
 
         compose.runOnIdle { fixture.width = 1000.dp }
         compose.waitForIdle()
-        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText(todayIso, substring = true).assertExists()
         compose.onNodeWithText("Next").assertExists()
 
         compose.runOnIdle { fixture.vertical = true }
         compose.waitForIdle()
-        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText(todayIso, substring = true).assertExists()
         compose.onNodeWithText("Next").assertExists()
 
         compose.runOnIdle { fixture.vertical = false }
         compose.waitForIdle()
-        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText(todayIso, substring = true).assertExists()
         compose.onNodeWithText("Next").assertExists()
 
         compose.runOnIdle { fixture.vertical = null }
         compose.waitForIdle()
-        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText(todayIso, substring = true).assertExists()
 
         compose.onNodeWithText("Hijri").performClick()
         compose.waitForIdle()
-        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText(todayIso, substring = true).assertExists()
 
         compose.runOnIdle { fixture.width = 360.dp }
         compose.waitForIdle()
-        compose.onNodeWithText("None").assertDoesNotExist()
+        compose.onNodeWithText(todayIso, substring = true).assertExists()
         compose.onNodeWithText("Hijri").assertExists()
     }
 }
