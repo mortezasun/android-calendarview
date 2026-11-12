@@ -4,6 +4,16 @@ Last updated: 2026-11-11
 Version: `2.1.0` (published)
 Branch: `update`
 
+## Adaptive layout, Phase 4 (adaptive sample panes, branch `update`)
+
+- Added `CalendarSampleAdaptiveLayout.kt`: below 840 dp available width the sample keeps the single
+  scrolling column; from 840 dp it shows a controls pane (title, options, selection actions) beside
+  a calendar pane. The decision uses `BoxWithConstraints`, so no new dependency was needed.
+- Slots use `movableContentOf`, so display mode, scroll and viewport state should survive a layout
+  switch. This is unverified at runtime; Phase 7 must test it.
+- Not changed: viewport fixed heights (Phase 6), fold/posture handling (Phase 5, needs approval).
+- Not compiled locally (Gradle unavailable); verification is via CI only.
+
 ## Adaptive layout, Phase 3 (sample refactor, branch `update`)
 
 - Split `LauncherActivity.kt` without behaviour change: `CalendarSampleState.kt` (saveable UI

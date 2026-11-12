@@ -1,15 +1,11 @@
 package com.develotter.calendarviewsample
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -82,86 +78,89 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
         LocalCalendarStyle provides calendarStyle,
     ) {
         Surface(Modifier.fillMaxSize()) {
-            Column(
-                Modifier.safeDrawingPadding().verticalScroll(rememberScrollState()).padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text("Compose Calendar Demo", style = MaterialTheme.typography.headlineSmall)
-                CalendarSampleControls(ui)
-                if (ui.useHeaderApi) {
-                    val navigation = rememberSampleMonthNavigation(
-                        calendar = calendar,
-                        anchor = ui.anchor,
-                        locale = locale,
-                        hijriDateProvider = hijriProvider,
-                    ) { visible -> ui.showMonth(visible) }
-                    CalendarMonthHeader(
-                        title = navigation.title,
-                        state = navigation.state,
-                        previousMonthContentDescription = "Previous month",
-                        nextMonthContentDescription = "Next month",
-                        todayLabel = sampleTodayDescription(locale),
-                    )
-                } else {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Button(onClick = { ui.move(-1) }) { Text("Previous") }
-                        Button(onClick = { ui.goToToday() }) { Text("Today") }
-                        Button(onClick = { ui.move(1) }) { Text("Next") }
-                    }
-                }
-                ui.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                CalendarSampleViewport(
-                    calendar = calendar,
-                    anchor = ui.anchor,
-                    onVisibleMonthChanged = { ui.showMonth(it) },
-                ) { monthAnchor ->
-                    SampleMonth(
-                        calendar = calendar,
-                        anchor = monthAnchor,
-                        locale = locale,
-                        state = state,
-                        previousDays = ui.previousDays,
-                        nextDays = ui.nextDays,
-                        fixedSixRows = ui.fixedSixRows,
-                        hijriProvider = hijriProvider,
-                        hijriToday = hijriToday,
-                        showHeader = !ui.useHeaderApi,
-                        showWeekNumbers = ui.showWeekNumbers,
-                    )
-                }
-                if (ui.showWeek) {
-                    SampleWeek(
-                        calendar = calendar,
-                        anchor = ui.anchor,
-                        locale = locale,
-                        state = state,
-                        hijriProvider = hijriProvider,
-                        hijriToday = hijriToday,
-                        showWeekNumbers = ui.showWeekNumbers,
-                    )
-                }
-                if (ui.showAgenda) {
-                    SampleAgenda(
-                        calendar = calendar,
-                        anchor = ui.anchor,
-                        locale = locale,
-                        state = state,
-                        hijriProvider = hijriProvider,
-                    )
-                }
-                Text("Selected dates / range endpoints (ISO):")
-                Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = state::clear) { Text("Clear selection") }
-                    if (state.selection.mode == TypeSelectDay.Range) {
-                        TextButton(onClick = { state.selectRange(ui.anchor, ui.anchor + 4) }) {
-                            Text("Select 5-day range")
+            CalendarSampleAdaptiveLayout(
+                header = {
+                    Text("Compose Calendar Demo", style = MaterialTheme.typography.headlineSmall)
+                    CalendarSampleControls(ui)
+                },
+                content = {
+                    if (ui.useHeaderApi) {
+                        val navigation = rememberSampleMonthNavigation(
+                            calendar = calendar,
+                            anchor = ui.anchor,
+                            locale = locale,
+                            hijriDateProvider = hijriProvider,
+                        ) { visible -> ui.showMonth(visible) }
+                        CalendarMonthHeader(
+                            title = navigation.title,
+                            state = navigation.state,
+                            previousMonthContentDescription = "Previous month",
+                            nextMonthContentDescription = "Next month",
+                            todayLabel = sampleTodayDescription(locale),
+                        )
+                    } else {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Button(onClick = { ui.move(-1) }) { Text("Previous") }
+                            Button(onClick = { ui.goToToday() }) { Text("Today") }
+                            Button(onClick = { ui.move(1) }) { Text("Next") }
                         }
                     }
-                    TextButton(onClick = { ui.showDialog = true }) { Text("Open dialog") }
-                }
-                TextButton(onClick = onHeatmap) { Text("Compose heatmap demo") }
-            }
+                    ui.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                    CalendarSampleViewport(
+                        calendar = calendar,
+                        anchor = ui.anchor,
+                        onVisibleMonthChanged = { ui.showMonth(it) },
+                    ) { monthAnchor ->
+                        SampleMonth(
+                            calendar = calendar,
+                            anchor = monthAnchor,
+                            locale = locale,
+                            state = state,
+                            previousDays = ui.previousDays,
+                            nextDays = ui.nextDays,
+                            fixedSixRows = ui.fixedSixRows,
+                            hijriProvider = hijriProvider,
+                            hijriToday = hijriToday,
+                            showHeader = !ui.useHeaderApi,
+                            showWeekNumbers = ui.showWeekNumbers,
+                        )
+                    }
+                    if (ui.showWeek) {
+                        SampleWeek(
+                            calendar = calendar,
+                            anchor = ui.anchor,
+                            locale = locale,
+                            state = state,
+                            hijriProvider = hijriProvider,
+                            hijriToday = hijriToday,
+                            showWeekNumbers = ui.showWeekNumbers,
+                        )
+                    }
+                    if (ui.showAgenda) {
+                        SampleAgenda(
+                            calendar = calendar,
+                            anchor = ui.anchor,
+                            locale = locale,
+                            state = state,
+                            hijriProvider = hijriProvider,
+                        )
+                    }
+                },
+                actions = {
+                    Text("Selected dates / range endpoints (ISO):")
+                    Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextButton(onClick = state::clear) { Text("Clear selection") }
+                        if (state.selection.mode == TypeSelectDay.Range) {
+                            TextButton(onClick = { state.selectRange(ui.anchor, ui.anchor + 4) }) {
+                                Text("Select 5-day range")
+                            }
+                        }
+                        TextButton(onClick = { ui.showDialog = true }) { Text("Open dialog") }
+                    }
+                    TextButton(onClick = onHeatmap) { Text("Compose heatmap demo") }
+                },
+            )
         }
         if (ui.showDialog) {
             AlertDialog(

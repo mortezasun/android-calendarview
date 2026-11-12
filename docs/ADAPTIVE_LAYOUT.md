@@ -96,6 +96,9 @@ covered by this contract.
 
 ## Phases
 
+0. Done so far: 1 contract, 2 constraint tests, 3 sample split, 4 two-pane sample at 840 dp
+   (`CalendarSampleAdaptiveLayout.kt`, `BoxWithConstraints`, no dependency).
+
 1. Contract (this file). 2. Library constraint tests/API if needed (update `api/*.api`).
 3. Split sample state/controls. 4. Adaptive panes. 5. Fold-aware layout (needs dependency
 approval). 6. Dialogs, agenda, heatmap. 7. State restoration tests.
