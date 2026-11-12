@@ -41,6 +41,7 @@ kotlin {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
+    implementation(libs.androidx.window)
     implementation(project(":library"))
     implementation(project(":calendar-gregorian"))
     implementation(project(":calendar-solarHijri"))

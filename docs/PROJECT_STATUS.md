@@ -4,6 +4,18 @@ Last updated: 2026-11-11
 Version: `2.1.0` (published)
 Branch: `update`
 
+## Adaptive layout, Phase 5 (fold-aware sample, branch `update`)
+
+- Added `androidx.window:window:1.5.1` (`libs.androidx.window`) to `:calendarviewsample` only,
+  approved by the maintainer for this phase. `:library` and the engines stay dependency-free.
+- `CalendarSampleFold.kt` reads the first separating `FoldingFeature`; `sampleLayoutKind` chooses
+  Stacked / SideBySide / split by vertical fold (book) / split by horizontal fold (tabletop).
+  A separating fold overrides the 840 dp width rule. JVM test: `SampleLayoutKindTest`.
+- Limitation: fold bounds are window coordinates, while the layout applies safe-drawing padding;
+  offsets of a few dp near system bars are possible. Behaviour on a real foldable or foldable
+  emulator is **not verified**; CI emulators have no fold, so the new branches are untested at runtime.
+- Not compiled locally (Gradle unavailable); verification is via CI only.
+
 ## Adaptive layout, Phase 4 (adaptive sample panes, branch `update`)
 
 - Added `CalendarSampleAdaptiveLayout.kt`: below 840 dp available width the sample keeps the single
