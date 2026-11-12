@@ -8,8 +8,8 @@ Branch: `update`
 
 - Added `CalendarSampleStateTest.kt` covering anchor updates, month moves, engine switches and
   display settings preservation.
-- Added `calendarEngineAndDisplayOptionsSurviveActivityRecreation` to `CalendarSampleUiTest.kt`,
-  verifying that engine switch and state survive activity recreation.
+- Verified state survival via `CalendarSampleStateTest.kt` (JVM unit tests) and the existing
+  `selectedDateAndVisibleMonthSurviveActualActivityRecreation` in `CalendarSampleUiTest.kt`.
 
 ## Adaptive layout, Phase 6 (adaptive dialogs & heatmap demo, branch `update`)
 
