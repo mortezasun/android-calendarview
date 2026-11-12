@@ -17,3 +17,9 @@ internal fun sampleBoundedViewportHeight(preferred: Dp, available: Dp): Dp {
     require(!available.value.isNaN() && available >= 0.dp) { "available must be non-negative" }
     return if (available == Dp.Infinity) preferred else minOf(preferred, available * 0.75f)
 }
+
+/** Uses the dialog text slot's own bound; never raises a small bound to an artificial minimum. */
+internal fun sampleDialogViewportHeight(available: Dp): Dp {
+    require(!available.value.isNaN() && available >= 0.dp) { "available must be non-negative" }
+    return if (available == Dp.Infinity) 340.dp else minOf(360.dp, available)
+}

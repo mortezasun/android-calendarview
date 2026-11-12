@@ -170,11 +170,7 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                 title = { Text("${calendar.name} calendar") },
                 text = {
                     BoxWithConstraints(Modifier.fillMaxWidth()) {
-                        val dialogHeight = if (maxHeight.value.isFinite() && maxHeight > 0.dp) {
-                            maxHeight.coerceAtMost(360.dp).coerceAtLeast(240.dp)
-                        } else {
-                            340.dp
-                        }
+                        val dialogHeight = sampleDialogViewportHeight(maxHeight)
                         CalendarSampleViewport(
                             calendar = calendar,
                             anchor = ui.anchor,
@@ -313,7 +309,9 @@ private fun SampleAgenda(
                 days = monthData.days,
                 selection = state.selection,
                 onDayClick = { state.onDayClick(it) },
-                modifier = Modifier.fillMaxWidth().height(280.dp),
+                modifier = Modifier.fillMaxWidth().height(
+                    sampleBoundedViewportHeight(280.dp, LocalSamplePaneHeight.current),
+                ),
                 markers = sampleMarkers(date),
                 todayDescription = sampleTodayDescription(locale),
             )
