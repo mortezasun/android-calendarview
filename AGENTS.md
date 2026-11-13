@@ -3,6 +3,18 @@
 Binding working rules for coding agents in this repository. Read this file and the linked
 documents before changing any code.
 
+## Planned work: 2.4.0 Chinese calendar
+
+Before implementing the Chinese calendar, read [RELEASE_PLAN_2.4.0.md](RELEASE_PLAN_2.4.0.md),
+[ADR 0005](docs/decisions/0005-independent-native-chinese-calendar.md),
+[the specification](docs/CHINESE_CALENDAR_SPEC.md),
+[quality and security gates](docs/CHINESE_CALENDAR_QUALITY.md), and
+[the release plan](docs/releases/2.4.0.md). These describe planned work, not implemented features.
+The engine must be self-written pure Kotlin and usable without Compose, Android or other
+calendar engines; the separate Compose facade may reuse `:library`. Do not copy/port external
+calendar code, add an ICU runtime wrapper, or claim unverified multiplatform support.
+Do not bump versions, create a release tag or publish 2.4.0 as part of planning.
+
 ## Read first
 
 1. [README.md](README.md) - public usage and build entry point.
