@@ -90,21 +90,30 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 ### P6 - Release Candidate und 2.4.0
 
 - [x] Erst nach gruenen Produktgates Versionen synchron auf 2.4.0 vorbereiten; Sample versionCode 20400 nur nach Monotoniepruefung, versionName 2.4.0. (20300 -> 20400.)
-- [ ] RC-Nachweise fuer einen exakten Commit sammeln; alle Veroeffentlichungs- und Consumer-Pruefungen aus dem Releaseplan ausfuehren. (Evidenzbaum `1ab841e70b6fb7ab35b16e970715b500b91f95a2` auf `origin/update`; isolierte Publikation, zwei Consumer und alle vier Remote-Workflows bestanden. Remote-JitPack weiterhin offen.)
+- [ ] RC-Nachweise fuer einen exakten Commit sammeln; alle Veroeffentlichungs- und Consumer-Pruefungen aus dem Releaseplan ausfuehren. (Evidenzbaum `1ab841e70b6fb7ab35b16e970715b500b91f95a2` und Review-Fixstand `e80c00f` auf `origin/update`; isolierte Publikation, zwei Consumer und alle vier Remote-Workflows bestanden. Remote-JitPack und die unabhaengige JitPack-Consumer-Pruefung weiterhin offen.)
 - [ ] Separate ausdrueckliche Freigabe fuer Merge, Tag und GitHub Release einholen. Kein Tag 2.4.0 mit offenen Pflichtgates.
 - [ ] Nach Tagging tatsaechliche Remote-Artefakte/Varianten und unabhaengige Consumer verifizieren. Erst dann erfolgreiche Distribution behaupten.
 
 ### Review-Nachbesserungen 2026-11-13 (Basis `6970b92`)
 
-- [x] P1 Heute-Navigation: `canGoToday`/`goToToday` respektieren `minMonth..maxMonth`; Tests vor, innerhalb und nach den Grenzen.
-- [x] P1 Referenzabweichungen: drei Konflikte astronomisch und mit unabhaengiger NASA/GSFC-Zeit belegt; Generator prueft fehlende Dateien, Jahres-/Schaltmonatsstatus und vollstaendige Abdeckung und beendet den Verify-Modus bei Fehlern mit Status 1; Python-Regressionstests ergaenzt.
-- [x] P2 Overlay-Navigation: `chineseGregorianGrid` nutzt gregorianische Monatsanker, Header und Pager-/Listenidentitaeten; der chinesische Modus behaelt die Schaltmonatsnavigation. Header- und Pager-Pfad als Compose-Regressionstest ergaenzt (Kompilierung, nicht auf Geraet ausgefuehrt).
-- [x] P2 Agenda: `chineseStyle` ist `remember`-Key; Wechsel aller vier Stile ohne Datumswechsel getestet.
-- [x] P2 Today-Callback: `rememberUpdatedState` versorgt Zustand und Saver mit dem aktuellen Callback; Callbackwechsel und echte `StateRestorationTester`-Wiederherstellung getestet. Nichtbinaere Schaltflags werden beim Decode abgelehnt.
-- [x] P2 Kalenderwechsel: Anker ausserhalb des Engine-Bereichs wird an beiden Grenzen auf den naechsten unterstuetzten Tag begrenzt, mit Fehlermeldung; die gemeinsame Auswahl bleibt unveraendert. Tests fuer beide Grenzen und den Fallback ergaenzt.
-- [x] Release-Dokumentation: Widerspruch zwischen fehlendem Remote-Run und den vier erfolgreichen Runs auf `1ab841e` korrigiert; Fixstand ist nicht als remote geprueft markiert.
+| Finding | Fix (Datei) | Regressionstest | Ausgefuehrte Pruefung |
+|---|---|---|---|
+| P1 Heute-Navigation | `calendar-chinese-compose/.../ChineseMonthState.kt`: `canGoToday` und `goToToday` pruefen beide `minMonth..maxMonth`; ausserhalb der Bounds bleibt der Monat unveraendert. | `ChineseComposeDataTest.monthStateTodayNavigationHonoursConfiguredBounds`; bestehender Leap-/Bounds-Test korrigiert. | `:calendar-chinese-compose:testDebugUnitTest` und `:calendarviewsample:testDebugUnitTest` gruen. |
+| P1 Referenzabweichungen | `tools/chinese-calendar/generate.py`: Referenzdateien, Jahres-/Schaltstatus, vollstaendige Abdeckung und `--verify-reference`; `reference-conflicts.json` mit JDE/TT, Delta-T, UTC, UTC+8 und NASA/GSFC-Zeit; `manifest.json` neu erzeugt. Keine Tabellenkorrektur. | `tools/chinese-calendar/test_generate.py` (fehlende Dateien/Starts, Jahres-/Leap-Mismatch, Konfliktaudit, Verify-Fehlerstatus); `ChineseCalendarEngineTest.documentedHkoConflictsRemainOnTheUtcPlus8CivilDate`. | `test_generate.py`: 4 Tests, 0 Fehler. Generator `--verify-reference`: 2.458 exakt + 3 auditiert = 2.461, 0 fehlende Referenzen, `complete=True`, Exit 0. Manifest-Output/-Coverage stimmt mit dem gepushten Manifest. |
+| P2 Overlay-Navigation | `CalendarSampleMonthNavigation.kt`, `CalendarSampleViewport.kt`, `CalendarSampleScreen.kt`, `CalendarSampleNavigation.kt`: gregorianische Monatsanker, Header und Pager-/Listenidentitaeten fuer `chineseGregorianGrid`. | `CalendarSampleNavigationTest.chineseOverlayUsesGregorianMonthStepsAndIdentities`; `ChineseComposeRegressionTest.gregorianOverlayHeaderAndPagerStepGregorianMonths`. | Sample-JVM-Tests gruen; `compileDebugAndroidTestKotlin` gruen; Remote-Instrumentation der Core-/Sample-Suite auf API 29 success. Keine separate chinesische Geraetematrix. |
+| P2 Agenda | `CalendarSampleScreen.kt`: `chineseStyle` ist `remember`-Key. | `CalendarSampleMonthDataTest.chineseAgendaLabelsFollowTheSelectedStyleWithoutChangingTheDate`; `ChineseComposeRegressionTest.agendaRebuildsLabelsWhenTheStyleChangesWithoutADateChange`. | Sample-JVM-Tests und AndroidTest-Kompilierung gruen; Remote-Suite success. |
+| P2 Today-Callback | `ChineseMonthState.kt`: `rememberUpdatedState` fuer Zustand und Saver; `ChineseMonthSnapshot.decode` lehnt Flags ausserhalb `0/1` ab. | `ChineseComposeDataTest.monthStateRejectsNonBinaryLeapFlagsWhenRestoring`; `ChineseComposeRegressionTest.chineseMonthStateSurvivesRestorationAndUsesTheLatestTodayCallback`. | Compose-JVM-Tests gruen; AndroidTest-Kompilierung gruen; Remote-Suite success. |
+| P2 Kalenderwechsel | `CalendarSampleState.kt`, `CalendarSampleMonthNavigation.kt`: Anchor-Fallback an beiden Grenzen mit Meldung; Auswahl unveraendert; Header clamp't ungueltige Anchors. | `CalendarSampleStateTest.switchingToChineseClampsUnsupportedAnchorsAtBothEnds`; `ChineseComposeRegressionTest.unsupportedAnchorFallbackKeepsTheSharedSelection`. | Sample-JVM-Tests gruen; AndroidTest-Kompilierung gruen; Remote-Suite success. |
+
+- [x] Release-Dokumentation: Der fruehere Widerspruch zwischen fehlendem Remote-Run und erfolgreichen Runs ist entfernt; die genannten Runs `1ab841e` und `e80c00f` gehoeren zu tatsaechlich gepushten Commits. Der Doku-Abschluss `2491c09` ist ebenfalls auf `update`; die vier zugehoerigen Remote-Workflows waren success (verification `43414411458`, publishing `43414411492`, instrumentation `43414411441`, tablet `43414411446`).
 - [x] Remote-CI fuer den Fix-Commit `e80c00f` auf `update`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286` - alle success.
-- [ ] JitPack, echte Geraete-/Fold-/TalkBack-Matrix, Benchmarks und Advisory-Scan bleiben offen.
+
+#### Weiterhin offene Gates
+
+- [ ] JitPack-Build `2.4.0` und JitPack-Only-Consumer ohne `mavenLocal`/`includeBuild`; die JitPack-2.3.0-Pruefung bleibt ebenfalls offen.
+- [ ] Chinesische Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix und Benchmarks. Die Remote-Instrumentation auf API 29 ist kein Ersatz fuer reale Geraete/Folds.
+- [ ] Advisory-/CVE-Scan fuer die aufgeloesten direkten und transitiven Abhaengigkeiten.
+- [ ] Merge, Tag `2.4.0` und GitHub Release nur nach separater ausdruecklicher Freigabe; bis dahin kein Tag und keine Publikation.
 
 ## Arbeitsregel fuer die Implementierung
 

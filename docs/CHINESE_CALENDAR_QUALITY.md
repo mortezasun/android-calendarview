@@ -20,7 +20,7 @@ Schwachstellenfreiheit noch einen aktuellen CVE-Scan.
 
 - [ ] None/Single/Multiple/Range, deaktivierte Tage und Marker; Epoch-Day-Identitaet beim Wechsel zwischen allen Kalendern erhalten.
 - [x] Navigation normaler Monat -> Schaltmonat -> Folgemonat, Jahreswechsel, Grenzen und Heute ausserhalb des Bereichs. (JVM-Bounds-Tests und Compose-Regressionstest fuer Callback/Grenzen ergaenzt; Geraete-Ausfuehrung offen.)
-- [x] Saver-Roundtrip und echte StateRestorationTester-/Activity-Recreation-Tests einschliesslich Schaltflag und alter gespeicherter Sample-Zustaende. Neue Enum-Eintraege duerfen alte ordinalbasierte Saves nicht umdeuten. (`ChineseMonthSnapshot`-Decode-Tests und `StateRestorationTester`-Test fuer den Schaltmonat ergaenzt; der Test ist kompiliert, nicht auf einem Geraet ausgefuehrt.)
+- [x] Saver-Roundtrip und echte StateRestorationTester-/Activity-Recreation-Tests einschliesslich Schaltflag und alter gespeicherter Sample-Zustaende. Neue Enum-Eintraege duerfen alte ordinalbasierte Saves nicht umdeuten. (`ChineseMonthSnapshot`-Decode-Tests und `StateRestorationTester`-Test fuer den Schaltmonat ergaenzt; lokal kompiliert, Remote-Instrumentation der Sample-Suite auf API 29 erfolgreich, aber keine separate chinesische Geraetematrix.)
 - [ ] Monat, Woche, Agenda, Pager/Liste und Jahresheatmap mit 12 und 13 Monaten.
 - [ ] Telefon/Tablet, schmale Breite, Landscape, Mehrspalten, Split-Screen, simulierte Folds und kontinuierliche Layoutwechsel. Reale Foldable-Tests separat ausweisen.
 - [ ] LTR/RTL, chinesische/englische Beschriftung, grosse Schrift, TalkBack, deaktivierte Semantik und sichtbare Schaltmonatkennzeichnung.
