@@ -1,8 +1,60 @@
 # Project status
 
-Last updated: 2026-11-12
-Version: `2.2.1` (published tag `2.2.1` at `dd20e49`)
+Last updated: 2026-11-13
+Version: `2.4.0` development tree (latest published release: `2.3.0`)
 Branch: `update`
+
+## Current development: 2.4.0 Chinese calendar (unreleased, 2026-11-13)
+
+Status: implemented and locally verified on branch `update`; **not committed at the time of these
+checks, not tagged, not merged and not published**. No claim is made for remote CI, JitPack,
+emulator/instrumentation or other devices.
+
+- Added `:calendar-chinese-native`, a Kotlin Multiplatform engine with `jvm()` and `linuxX64()`
+  targets: immutable `ChineseMonth`/`ChineseDate`, `ChineseCalendarEngine`, `ChineseFormat`,
+  `ChineseTextStyle`, explicit `ChineseDateOutOfRangeException`, and a versioned month table for
+  Chinese years `1901..2099` (Gregorian `1901-02-19..2100-02-08`, 72,674 days, 2,461 months,
+  73 leap years).
+- Data provenance: `tools/chinese-calendar/generate.py` derives month starts at development time
+  from VSOP87D Earth series, Meeus chapters 25/49 and Espenak–Meeus ΔT. HKO tables were used only
+  as a development-time comparison (2,458/2,461 month starts equal; the three 1–5-minute-after-
+  midnight cases 1914-11-18, 1916-02-04 and 1920-11-11 are recorded in
+  `tools/chinese-calendar/manifest.json`). No HKO data, ICU, lunar-java or other calendar code is
+  embedded or redistributed.
+- Added `:calendar-chinese-compose`: `ChineseCalendarMonth`, `GregorianChineseCalendarMonth`,
+  `chineseMonthData`, `ChineseWeekData`, `ChineseMonthState`/`rememberChineseMonthState` with
+  leap-month identity in title, keys, saver and heatmap titles, plus `chineseYearHeatmap` /
+  `chineseMonthHeatmap`. Adjacent cells outside the engine range are blank and disabled.
+- Integrated `SampleCalendar.Chinese` into the sample with a separate month view, Gregorian grid
+  with Chinese secondary labels, style chips, leap-month details, week/agenda views, heatmaps,
+  navigation bounds and saved-state fields. The enum entry is appended last and the sample saves
+  the calendar by name, so existing saved states are not reinterpreted.
+- Wired `settings.gradle.kts`, root version `2.4.0`, sample `versionCode 20400`/`versionName
+  "2.4.0"`, BOM (seven constraints), `jitpack.yml`, `scripts/api-check.sh` (six AARs plus the KMP
+  JVM jar), `android-verification.yml` (new native-engine job) and `android-publishing.yml`.
+
+### Verification (local, JDK 21.0, Android SDK Platform 37.0, Build-Tools 37.0.0)
+
+| Check | Result |
+|---|---|
+| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 198 tests (185 Android JVM + 13 KMP JVM), 0 failed, 0 skipped |
+| `./gradlew :calendar-chinese-native:linuxX64Test` | BUILD SUCCESSFUL; 13 tests, 0 failed, 0 skipped |
+| `./gradlew :calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
+| `./gradlew ... lintDebug` for core, all five calendar modules and sample | BUILD SUCCESSFUL |
+| `./gradlew :calendarviewsample:compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL (compile only; not executed) |
+| `bash scripts/api-check.sh` | passed; existing five dumps `0` diff, two new dumps added |
+| isolated `publishToMavenLocal` to `/tmp/m2test` | engine root/jvm/linuxx64, compose and BOM published; POMs inspected: engine only `kotlin-stdlib`, compose `library` + engine + material3 runtime, BOM lists seven modules |
+| standalone JVM consumer (`javac` + engine jar) | 2024-02-10 → epoch 19763, round-trip OK, 2023 has 13 months and leap month `2023-2L`; jar contains no AndroidX/Compose/Android classes |
+| independent Android consumer (separate `/tmp` project, BOM + file Maven repo, `assembleDebug`) | BUILD SUCCESSFUL; APK produced, not installed or run |
+
+### Open items
+
+- Commit and push on `update`; the evidence tree is the commit recorded in the final handoff.
+- Remote GitHub Actions for the new workflow job and `2.4.0` have not run.
+- Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
+- Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
+  checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).
+- No merge, tag, GitHub Release or publication was performed and none is authorized by this status.
 
 ## Current release status: 2.3.0 (published, branch `update`, 2026-11-12)
 

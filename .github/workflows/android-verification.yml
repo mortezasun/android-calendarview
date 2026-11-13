@@ -24,11 +24,13 @@ jobs:
       matrix:
         include:
           - check: assemble
-            tasks: ':calendarviewsample:assembleDebug :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease :calendar-solarHijri-native:assembleRelease :calendar-bom:generatePomFileForCalendarBomPublication'
+            tasks: ':calendarviewsample:assembleDebug :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease :calendar-solarHijri-native:assembleRelease :calendar-chinese-compose:assembleRelease :calendar-chinese-native:jvmJar :calendar-bom:generatePomFileForCalendarBomPublication'
           - check: unit-tests
-            tasks: 'test'
+            tasks: 'test :calendar-chinese-native:jvmTest'
+          - check: native-engine
+            tasks: ':calendar-chinese-native:linuxX64Test'
           - check: lint
-            tasks: ':library:lintDebug :calendar-gregorian:lintDebug :calendar-hijri:lintDebug :calendar-solarHijri:lintDebug :calendar-solarHijri-native:lintDebug :calendarviewsample:lintDebug'
+            tasks: ':library:lintDebug :calendar-gregorian:lintDebug :calendar-hijri:lintDebug :calendar-solarHijri:lintDebug :calendar-solarHijri-native:lintDebug :calendar-chinese-compose:lintDebug :calendarviewsample:lintDebug'
     steps:
       - name: Check out source
         uses: actions/checkout@v7

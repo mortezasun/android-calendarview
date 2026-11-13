@@ -14,7 +14,7 @@ plugins {
 // projects as com.github.USER.REPO:MODULE:VERSION.
 allprojects {
     group = "com.github.mortezasun.android-calendarview"
-    version = "2.3.0"
+    version = "2.4.0"
 
     // Required by Maven Central for every published artifact. Signing, credentials and
     // namespace verification remain release-operator responsibilities.
@@ -23,7 +23,7 @@ allprojects {
             publications.withType<MavenPublication>().configureEach {
                 pom {
                     name.set(project.name)
-                    description.set("Android Compose calendar library module ${project.name}.")
+                    description.set("Calendar library module ${project.name} for android-calendarview.")
                     url.set("https://github.com/mortezasun/android-calendarview")
                     licenses {
                         license {

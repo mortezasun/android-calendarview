@@ -1,8 +1,21 @@
 # Release acceptance
 
-Status: `2.3.0` is released and published on GitHub Releases. `2.2.1` remains the previous published release and published on GitHub Releases. `2.2.0` remains the previous published release.
+Status: `2.4.0` is a locally verified release candidate, not tagged or published. `2.3.0` is the latest published release. `2.2.1` remains the previous published release and published on GitHub Releases. `2.2.0` remains the previous published release.
 
-## 0. Current release: 2.3.0 (2026-11-12)
+## 0. Current release candidate: 2.4.0 (unreleased, 2026-11-13)
+
+- [x] `:calendar-chinese-native` and `:calendar-chinese-compose` implemented, integrated and documented.
+- [x] Root version `2.4.0`; sample `versionCode 20400` (monotonic after `20300`) and `versionName "2.4.0"`.
+- [x] BOM, `jitpack.yml`, API guard, verification/publishing workflows and sample updated for seven artifacts.
+- [x] `api/calendar-chinese-native.api` and `api/calendar-chinese-compose.api` generated; existing five dumps unchanged (`0` diff).
+- [x] Local JVM/Native tests, sample build, lint, release AARs, isolated publishing, POM checks, standalone JVM consumer and independent Android BOM consumer passed.
+- [ ] Commit/push the exact evidence tree on `update` and record its hash.
+- [ ] Remote CI (verification, publishing verification, instrumentation, tablet) green for that commit.
+- [ ] Remote JitPack `2.4.0` build and JitPack-only consumer without `mavenLocal`/`includeBuild`.
+- [ ] Instrumentation and device/fold/TalkBack/benchmark checks listed as open in `CHINESE_CALENDAR_QUALITY.md`.
+- [ ] Separate explicit approval for merge, tag `2.4.0` and GitHub Release.
+
+## 1. Previous release: 2.3.0 (2026-11-12)
 
 - [x] Root version set to `2.3.0` in root `build.gradle.kts`, sample `versionCode` `20300` / `versionName` `"2.3.0"`.
 - [x] New `:calendar-solarHijri-native` module implemented (`SolarHijriEngine`, `SolarHijriDate`, `SolarHijriLocale`, Compose parity, boundary guards, `Clock` injection).

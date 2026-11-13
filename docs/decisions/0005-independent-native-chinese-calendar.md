@@ -1,6 +1,6 @@
 # ADR 0005: selbstgeschriebener chinesischer Kalender
 
-Datum: 2026-11-13. Status: Zielentscheidung fuer die Planung; Umsetzung offen.
+Datum: 2026-11-13. Status: umgesetzt auf Branch `update` (2.4.0-Releasekandidat); Tag/Release offen.
 
 ## Kontext
 
@@ -12,7 +12,8 @@ Zwei getrennte Artefakte: `:calendar-chinese-native` fuer Berechnung und immutab
 
 Keine Uebernahme oder Portierung von lunar-java, ICU, Internet-Snippets oder fremden Kalenderalgorithmen-Implementierungen. Kalenderdaten sind getrennt vom eigenen Code zu behandeln: Herkunft, Nutzungsrechte und Erzeugungsverfahren muessen nachgewiesen sein. Selbstgeschriebener Code bedeutet nicht selbst beobachtete astronomische Daten.
 
-Die erste Engine benutzt eigene ganzzahlige Umrechnungslogik mit versionierten, kompakten Monatsdaten. Das ist eine native Offline-Implementierung, aber keine astronomische Echtzeitberechnung. Unterstuetzter Bereich und Datensatzversion sind Teil des Vertrags. Keine extrapolierten Ergebnisse ausserhalb des Bereichs.
+Die erste Engine benutzt eigene ganzzahlige Umrechnungslogik mit versionierten, kompakten Monatsdaten
+(Chinese years `1901..2099`, generated at development time from VSOP87D/Meeus; no HKO or ICU data embedded). Das ist eine native Offline-Implementierung, aber keine astronomische Echtzeitberechnung. Unterstuetzter Bereich und Datensatzversion sind Teil des Vertrags. Keine extrapolierten Ergebnisse ausserhalb des Bereichs.
 
 Bestehende Compose-APIs bleiben unveraendert. KMP-/Kotlin-Native-Unterstuetzung der Engine wird durch echte Builds und Tests belegt. Die Android-Compose-Fassade wird nicht als iOS-faehig bezeichnet, solange ihr gemeinsamer Kern nicht nachweislich multiplatform ist.
 

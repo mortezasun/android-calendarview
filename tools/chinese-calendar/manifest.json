@@ -1,0 +1,70 @@
+{
+  "datasetVersion": "2026.11-astronomical-v1",
+  "generator": "tools/chinese-calendar/generate.py",
+  "generatorVersion": 1,
+  "output": {
+    "kotlinFile": "ChineseCalendarData.kt",
+    "leapYears": 73,
+    "months": 2461,
+    "sha256": "2636c5231f72e3eb85ea29b42f09c92ccb90ac594badb403875dcbefeccec384",
+    "years": 199
+  },
+  "range": {
+    "firstYear": 1901,
+    "lastYear": 2099
+  },
+  "sources": {
+    "algorithms": [
+      "VSOP87D Earth series (Bretagnon & Francou 1988), truncated below 1e-7 rad.",
+      "Meeus, Astronomical Algorithms, 2nd ed., chapter 25 (apparent solar longitude), chapter 49 (new moon).",
+      "Espenak & Meeus Delta T polynomial expressions."
+    ],
+    "reference": {
+      "mismatches": [
+        {
+          "date": "1914-11-18",
+          "hko": null,
+          "nearestHko": [
+            {
+              "date": "1914-11-17",
+              "month": 10
+            }
+          ],
+          "ours": 10
+        },
+        {
+          "date": "1916-02-04",
+          "hko": null,
+          "nearestHko": [
+            {
+              "date": "1916-02-03",
+              "month": 1
+            }
+          ],
+          "ours": 1
+        },
+        {
+          "date": "1920-11-11",
+          "hko": null,
+          "nearestHko": [
+            {
+              "date": "1920-11-10",
+              "month": 10
+            }
+          ],
+          "ours": 10
+        }
+      ],
+      "monthsCompared": 2461,
+      "name": "Hong Kong Observatory Gregorian-Lunar conversion tables",
+      "terms": "https://www.hko.gov.hk/en/readme/readme.htm",
+      "url": "https://www.hko.gov.hk/en/gts/time/conversion.htm",
+      "usage": "Development-time comparison only; no HKO content is embedded."
+    },
+    "vsop87d": {
+      "sha256": "8b160c859136d467f2be7fc29efa8a9652e95516dfbde00e4c739d7ddc90ca91",
+      "url": "https://ftp.imcce.fr/pub/ephem/planets/vsop87/VSOP87D.ear",
+      "usage": "Development-time astronomy only; the file is not redistributed."
+    }
+  }
+}

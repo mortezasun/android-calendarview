@@ -13,7 +13,7 @@
 
 A native Jetpack Compose calendar library for Android. It ships one shared, calendar-independent core (month grid, selection engine, containers, heatmaps) plus pluggable calendar engines for **Gregorian**, **Islamic Hijri** and **Solar Hijri (Jalali / Persian)** — with full RTL support.
 
-**Current release:** [`2.3.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.3.0) — adds the dependency-free `:calendar-solarHijri-native` module (Borkowski engine, immutable `SolarHijriDate`, injectable `Clock`). See the [2.3.0 release notes](docs/releases/2.3.0.md).
+**Latest published release:** [`2.3.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.3.0). **Development version:** `2.4.0` on branch `update` adds the self-written Chinese lunisolar engine and Compose facade; it is prepared and verified locally but **not tagged, merged or published** yet. See the [2.4.0 plan](RELEASE_PLAN_2.4.0.md) and [release notes](docs/releases/2.4.0.md).
 
 ---
 
@@ -43,11 +43,11 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 ## ✨ Features
 
 - **100% Jetpack Compose** – no XML layouts, ViewBinding or reflection.
-- **Multiple calendar systems** – Gregorian (`java.time`), Hijri (`java.time.chrono.HijrahDate`, Umm al-Qura by default) and Solar Hijri (`ir.huri.jcal.JalaliCalendar`). Hijri month and week data accept a `HijriDateProvider` for local method adjustments.
+- **Multiple calendar systems** – Gregorian (`java.time`), Hijri (`java.time.chrono.HijrahDate`, Umm al-Qura by default), Solar Hijri (`ir.huri.jcal.JalaliCalendar`) and Chinese lunisolar (own dependency-free Kotlin engine with leap months, Chinese years 1901–2099). Hijri month and week data accept a `HijriDateProvider` for local method adjustments.
 - **One selection engine for all calendars** – `None`, `Single`, `Multiple` and `Range`, keyed by absolute epoch days and saved across process death via `rememberSaveable`.
 - **Configurable month grid** – dynamic rows or fixed 6 rows (42 cells), independently toggleable previous/next-month days, header/weekday visibility, disabled dates and a customizable *today* border.
 - **Scrolling containers** – `CalendarMonthList` (`LazyColumn`/`LazyRow`) and `CalendarMonthPager` (`HorizontalPager`/`VerticalPager`).
-- **Month navigation** – `CalendarMonthHeader` plus saveable engine month states (`rememberGregorianMonthState`, `rememberHijriMonthState`, `rememberSolarHijriMonthState`, `rememberSolarHijriNativeMonthState`) with inclusive bounds and a today action.
+- **Month navigation** – `CalendarMonthHeader` plus saveable engine month states (`rememberGregorianMonthState`, `rememberHijriMonthState`, `rememberSolarHijriMonthState`, `rememberSolarHijriNativeMonthState`, `rememberChineseMonthState`) with inclusive bounds and a today action.
 - **Shared month data** – every engine month snapshot implements `CalendarMonthData`; `toHeatmap()` turns any month into the calendar-agnostic year-heatmap format.
 - **Week and agenda** – `CalendarWeekGrid` renders a seven-day week from engine `*WeekData`; `CalendarAgenda` renders a bounded vertical day list with the same selection and marker semantics.
 - **Markers and week numbers** – caller-owned epoch-day markers render as accessible event dots; an optional caller-formatted week-number column is available on month and week grids.
@@ -68,10 +68,12 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 | `:calendar-hijri` | `…calendars.hijri` | `HijriCalendarMonth`, backed by `HijrahDate`. |
 | `:calendar-solarHijri` | `…calendars.solarHijri` | `SolarHijriCalendarMonth`, backed by `ir.huri:jalalicalendar` (exposed as `api`). |
 | `:calendar-solarHijri-native` | `…calendars.solarHijriNative` | `SolarHijriNativeCalendarMonth`, dependency-free Borkowski engine (`-61..3177` AP), immutable `SolarHijriDate`, injectable `Clock`. |
-| `:calendar-bom` | – | Version constraints for the five published library artifacts. No runtime code. |
+| `:calendar-chinese-native` | `…calendars.chineseNative` | Self-written Kotlin Multiplatform lunisolar engine: immutable `ChineseMonth`/`ChineseDate`, leap months, `ChineseCalendarEngine`, formatting. JVM and `linuxX64` targets; no Android, Compose or third-party calendar dependency. |
+| `:calendar-chinese-compose` | `…calendars.chineseCompose` | `ChineseCalendarMonth`, Gregorian grid with Chinese labels, week data, saveable `ChineseMonthState`, year/month heatmaps. Depends only on the Chinese engine and `:library`. |
+| `:calendar-bom` | – | Version constraints for the seven published library artifacts. No runtime code. |
 | `:calendarviewsample` | `com.develotter.calendarviewsample` | Interactive demo app (month views, containers, agenda, adaptive columns, markers, week numbers, styles, range policy, month header and Hijri method offset, heatmaps). |
 
-Every calendar module depends on `:library` via `api`, so adding an engine is enough to get the core. `:calendar-bom` aligns the published versions but is not a runtime dependency.
+Every Compose calendar module depends on `:library` via `api`, so adding an engine is enough to get the core. The Chinese engine is usable on its own without `:library`, Compose or Android. `:calendar-bom` aligns the published versions but is not a runtime dependency.
 
 ---
 
@@ -95,46 +97,56 @@ Add the engines you need to your module's `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core only (needed if you build your own calendar on top of CalendarMonthGrid)
-    implementation("com.github.mortezasun.android-calendarview:library:2.3.0")
+    implementation("com.github.mortezasun.android-calendarview:library:2.4.0")
 
     // Calendar engines (each one already includes :library)
-    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.3.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.3.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.3.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.4.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.4.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.4.0")
     // Or dependency-free native Solar Hijri engine (immutable SolarHijriDate, no jalalicalendar):
-    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri-native:2.3.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri-native:2.4.0")
+
+    // Chinese lunisolar engine (usable without Compose/Android) and optional Compose facade:
+    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-native:2.4.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-compose:2.4.0")
 }
 ```
 
-### Bill of Materials (2.3.0)
+### Bill of Materials (2.4.0)
 
-The BOM is published with `2.3.0` and constrains the core and all four engines:
+The BOM is prepared with `2.4.0` and constrains the core and all six engines:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.3.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.4.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
     implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri")
     implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri-native")
+    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-native")
+    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-compose")
 }
 ```
 
 The BOM is part of the same publication set and is included by `jitpack.yml` and the
-publishing workflow. The four-module BOM was consumer-verified on JitPack for `2.1.0`/`2.2.1`; `2.3.0` adds `:calendar-solarHijri-native` to the BOM and awaits remote JitPack build confirmation. The POM contains the metadata Maven Central requires,
+publishing workflow. `2.4.0` is not published yet: local isolated-Maven publication and POM
+checks passed, but a JitPack tag build and consumer smoke test are still open. The four-module
+BOM was consumer-verified on JitPack for `2.1.0`/`2.2.1`; the `2.3.0` and `2.4.0` additions have
+no confirmed remote JitPack build yet. The POM contains the metadata Maven Central requires,
 but signing, namespace verification and upload are not configured; JitPack remains the
 only configured remote repository.
 
 If you only need one engine, keep its explicit version and omit the BOM.
 
-### Upgrading from 2.2.1, 2.2.0 or 2.1.0
+### Upgrading from 2.3.0 or older
 
-The 2.3.0 release is 100% binary-compatible with 2.2.1, 2.2.0 and 2.1.0 (and `:calendar-solarHijri` remains unchanged). If your build pinned module versions
-directly, move them to the BOM and bump the platform:
+The `2.4.0` change is additive: the checked-in public API dumps of all existing modules are
+unchanged (`0` diff against `2.3.0`), and no existing engine depends on the new modules. If your
+build pinned module versions directly, move them to the BOM and bump the platform:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.3.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.4.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
 }
@@ -226,7 +238,7 @@ For new projects that do not need `ir.huri.jcal.JalaliCalendar`, prefer `:calend
 ```kotlin
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeCalendarMonth
-import com.develotter.calendarview.selection.rememberCalendarSelectionState
+import com.develotter.calendarview.compose.rememberCalendarSelectionState
 
 @Composable
 fun SolarHijriNativeScreen() {
@@ -238,6 +250,55 @@ fun SolarHijriNativeScreen() {
     )
 }
 ```
+
+### Chinese (native lunisolar)
+
+`:calendar-chinese-native` computes offline from a versioned month table generated by
+`tools/chinese-calendar/generate.py` (VSOP87D + Meeus solar/lunar algorithms). No HKO table or
+other calendar engine is embedded. Supported Chinese years are `1901..2099`
+(Gregorian `1901-02-19..2100-02-08`); leap months are explicit and never encoded as month 13.
+
+```kotlin
+import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
+import com.develotter.calendarview.calendars.chineseNative.ChineseDate
+import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
+
+// Pure Kotlin/JVM: no Compose, Android or other calendar module needed.
+val newYear = ChineseDate.of(2024, monthNumber = 1, dayOfMonth = 1)
+val epochDay = newYear.toEpochDay()
+val sameDay = ChineseDate.fromEpochDay(epochDay)
+
+val leapSecondMonth = ChineseCalendarEngine.leapMonth(2023) // ChineseMonth(2023, 2, leap = true)
+val months = ChineseCalendarEngine.monthsInYear(2023)       // 13 entries, leap month after month 2
+```
+
+Compose facade:
+
+```kotlin
+import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
+import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
+import com.develotter.calendarview.calendars.chineseCompose.ChineseCalendarMonth
+import com.develotter.calendarview.calendars.chineseCompose.rememberChineseMonthState
+import com.develotter.calendarview.compose.rememberCalendarSelectionState
+
+@Composable
+fun ChineseScreen() {
+    val selection = rememberCalendarSelectionState()
+    val monthState = rememberChineseMonthState(
+        initialMonth = ChineseMonth.fromEpochDay(java.time.LocalDate.now().toEpochDay()),
+    )
+
+    ChineseCalendarMonth(
+        month = monthState.month,
+        selection = selection.selection,
+        onDateClick = { epochDay -> selection.onDayClick(epochDay) },
+        style = ChineseTextStyle.SimplifiedChinese,
+    )
+}
+```
+
+Use `GregorianChineseCalendarMonth` for a Gregorian grid with Chinese month/day labels, and
+`chineseYearHeatmap` / `chineseMonthHeatmap` for 12- or 13-month year blocks.
 
 Legacy `:calendar-solarHijri` (`JalaliCalendar`):
 
@@ -257,7 +318,7 @@ fun SolarHijriScreen() {
 ```
 
 > [!TIP]
-> All engines share the same epoch-day timeline, so a single `CalendarSelectionState` can be shown in Gregorian, Hijri and Jalali views at the same time.
+> All engines share the same epoch-day timeline, so a single `CalendarSelectionState` can be shown in Gregorian, Hijri, Jalali and Chinese views at the same time.
 
 ---
 
@@ -288,7 +349,7 @@ state.clear()
 
 ## 🧭 Month navigation
 
-Engine month states own the visible month, the inclusive bounds and month arithmetic; the shared header only renders and dispatches. All four engine states are saveable and expose `month`, `title(locale)`, `canGoPrevious`, `canGoNext`, `canGoToday`, `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`.
+Engine month states own the visible month, the inclusive bounds and month arithmetic; the shared header only renders and dispatches. All five engine states are saveable and expose `month`, `title(locale)`, `canGoPrevious`, `canGoNext`, `canGoToday`, `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`.
 
 ```kotlin
 val monthState = rememberGregorianMonthState(
@@ -399,7 +460,7 @@ CalendarMonthColumns(
 
 ## 🎨 Customization
 
-All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHijriCalendarMonth`, `SolarHijriNativeCalendarMonth`) share these optional parameters:
+All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHijriCalendarMonth`, `SolarHijriNativeCalendarMonth`, `ChineseCalendarMonth`) share the common optional parameters below; the Chinese facade uses `style`/`locale` and `todayEpochDay`:
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -500,7 +561,7 @@ CalendarYearHeatmap(
 
 ### Any calendar (Hijri, Jalali, …)
 
-The calendar-agnostic overload takes pre-built `HeatmapMonthData` blocks, so `:library` stays free of engine dependencies. Build them from the engine's month data (`gregorianMonthData`, `hijriMonthData`, `solarHijriNativeMonthData`, `solarHijriMonthData`) with `toHeatmap()`; `isToday` and `enabled` come straight from the engine's `CalendarDayCell`:
+The calendar-agnostic overload takes pre-built `HeatmapMonthData` blocks, so `:library` stays free of engine dependencies. Build them from the engine's month data (`gregorianMonthData`, `hijriMonthData`, `solarHijriNativeMonthData`, `solarHijriMonthData`, or the ready-made `chineseYearHeatmap` / `chineseMonthHeatmap` blocks) with `toHeatmap()`; `isToday` and `enabled` come straight from the engine's `CalendarDayCell`:
 
 ```kotlin
 val months = (1..12).map { month ->
@@ -559,27 +620,31 @@ Version 2.0.0 removes all View-based components (`MultiMonthView`, `MonthView`, 
 
 ## 🔨 Building from source
 
-Requirements: JDK 17, Android SDK Platform 37, Build-Tools 36.0.0.
+Requirements: JDK 17+, Android SDK Platform 37, Build-Tools 36.0.0 or 37.0.0, and a
+Kotlin/Native-capable host for `linuxX64Test`.
 Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 27.
 
 ```bash
-git clone --branch 2.3.0 https://github.com/mortezasun/android-calendarview.git
+git clone --branch update https://github.com/mortezasun/android-calendarview.git
 cd android-calendarview
 ./gradlew :calendarviewsample:assembleDebug   # build the demo app
-./gradlew test                                # JVM unit tests (all modules)
+./gradlew test :calendar-chinese-native:jvmTest # JVM unit tests (all modules + KMP JVM target)
+./gradlew :calendar-chinese-native:linuxX64Test # same engine fixtures on Kotlin/Native
 ./gradlew lintDebug                           # Android Lint
 ./gradlew connectedDebugAndroidTest           # instrumentation tests (device/emulator)
 
 # Public JVM API guard (after the release AARs are built)
 ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
   :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease \
-  :calendar-solarHijri-native:assembleRelease
+  :calendar-solarHijri-native:assembleRelease :calendar-chinese-compose:assembleRelease \
+  :calendar-chinese-native:jvmJar
 bash scripts/api-check.sh
 
 # Publish all artifacts, including the BOM, into the local Maven repository
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
   :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal \
-  :calendar-solarHijri-native:publishToMavenLocal \
+  :calendar-solarHijri-native:publishToMavenLocal :calendar-chinese-native:publishToMavenLocal \
+  :calendar-chinese-compose:publishToMavenLocal \
   :calendar-bom:publishToMavenLocal
 ```
 
@@ -594,7 +659,10 @@ CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Compose architecture, rendering and state model |
 | [V2_MIGRATION_MAPPING.md](docs/V2_MIGRATION_MAPPING.md) | 1.x → 2.0.0 migration matrix |
 | [PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | Verified status, test coverage, release notes |
-| [releases/2.3.0.md](docs/releases/2.3.0.md) | Current release notes and verification evidence |
+| [releases/2.4.0.md](docs/releases/2.4.0.md) | 2.4.0 development notes, verification evidence and open gates |
+| [CHINESE_CALENDAR_SPEC.md](docs/CHINESE_CALENDAR_SPEC.md) | Chinese engine API, data contract and range |
+| [CHINESE_CALENDAR_QUALITY.md](docs/CHINESE_CALENDAR_QUALITY.md) | Test matrix and executed results |
+| [releases/2.3.0.md](docs/releases/2.3.0.md) | Last published release notes |
 | [ADAPTIVE_LAYOUT.md](docs/ADAPTIVE_LAYOUT.md) | Adaptive layout, multi-window and state contract |
 | [ADJACENT_MONTH_DAYS.md](docs/ADJACENT_MONTH_DAYS.md) | Previous/next-month day behavior |
 | [COMPOSE_MONTH_CONTAINERS.md](docs/COMPOSE_MONTH_CONTAINERS.md) | List and pager containers |

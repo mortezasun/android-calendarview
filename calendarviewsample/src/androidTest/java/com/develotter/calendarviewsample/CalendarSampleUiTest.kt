@@ -27,6 +27,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthData
 import com.develotter.calendarview.calendars.hijri.compose.hijriMonthData
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthData
+import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
+import com.develotter.calendarview.calendars.chineseCompose.chineseMonthData
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
 import ir.huri.jcal.JalaliCalendar
@@ -253,6 +255,7 @@ class CalendarSampleUiTest {
                     SampleCalendar.Hijri -> hijriMonthData(HijrahDate.from(today), locale).title
                     SampleCalendar.SolarHijri -> solarHijriMonthData(JalaliCalendar(today), locale).title
                     SampleCalendar.SolarHijriNative -> solarHijriNativeMonthData(SolarHijriDate.fromLocalDate(today), locale).title
+                    SampleCalendar.Chinese -> chineseMonthData(ChineseMonth.fromEpochDay(today.toEpochDay()), locale = locale).title
                 }
                 compose.onNodeWithText(title).assertExists()
             }

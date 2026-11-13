@@ -8,7 +8,7 @@
 | Add a configuration switch | The public composable in `library/.../compose/CalendarMonthGrid.kt` or `CalendarHeatmap.kt` (defaulted parameter, forwarded to the renderer) |
 | Add a view mode (list/pager direction) | `library/.../compose/CalendarMonthContainers.kt` (`CalendarMonthList`, `CalendarMonthPager`, `CalendarScrollAxis`) |
 | Change month grid geometry | `library/.../compose/CalendarMonthGrid.kt` and `CalendarMonthCells.kt` (`buildCalendarMonthCells`, `fixedSixRows`) |
-| Add a calendar system | New Gradle module with a `*MonthData` builder and a `*CalendarMonth` composable, modeled on `:calendar-gregorian` |
+| Add a calendar system | New Gradle module with a `*MonthData` builder and a `*CalendarMonth` composable, modeled on `:calendar-gregorian`; for a bounded engine use `:calendar-chinese-native` + `:calendar-chinese-compose` as the KMP/engine-facade example |
 | Change day formatting | The engine's `*MonthData.kt` / `*DayCell` code in its own module; the grid only renders `CalendarDayCell` |
 | Change the Hijri method | `calendar-hijri/.../HijriDateProvider.kt`; pass the provider through `hijriMonthData`, `hijriWeekData`, `HijriCalendarMonth` and the provider-aware `HijriMonthState`/`rememberHijriMonthState` |
 | Change heatmap rendering | `library/.../compose/CalendarHeatmap.kt` (`HeatmapBlock`, `HeatmapCell`) |
@@ -30,7 +30,9 @@ or from the sample. Calendar-specific code stays in its module.
 ### New calendar engine
 
 1. Create a module like `:calendar-gregorian` (same `build.gradle.kts` shape, dependency on
-   `:library`).
+   `:library`). If the engine must work without Android/Compose, split it: a pure Kotlin
+   Multiplatform module plus a Compose facade, as `:calendar-chinese-native` and
+   `:calendar-chinese-compose` do.
 2. Implement the month data builder (`*MonthData.kt`), mirroring `gregorianMonthData`:
    - localized month caption and weekday labels,
    - `firstDayOffset` relative to the configured `firstDayOfWeek`,
@@ -100,7 +102,9 @@ The library is deliberately small:
    ```bash
    ./gradlew :calendarviewsample:assembleDebug
    ```
-4. Run `./gradlew test` (JVM tests for selection, month cells, heatmap data and every engine).
+4. Run `./gradlew test :calendar-chinese-native:jvmTest` (JVM tests for selection, month cells,
+   heatmap data and every engine). For the engine, also run
+   `./gradlew :calendar-chinese-native:linuxX64Test`; common tests execute on both targets.
    The Compose UI and sample acceptance tests live in `src/androidTest` and need an emulator or
    device; `./gradlew :library:compileDebugAndroidTestKotlin` only proves they compile.
 5. Run `./gradlew :library:lintDebug` when the change is non-trivial.
@@ -118,7 +122,9 @@ declaration, assemble the release AARs and run:
 
 ```bash
 ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
-  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease
+  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease \
+  :calendar-solarHijri-native:assembleRelease :calendar-chinese-compose:assembleRelease \
+  :calendar-chinese-native:jvmJar
 bash scripts/api-check.sh          # fails on an unexpected API diff
 bash scripts/api-check.sh --update # regenerates api/*.api after an intentional change
 ```
@@ -131,9 +137,12 @@ values, annotations or source compatibility. Review `git diff api/` together wit
 
 - The published version lives once in the root `build.gradle.kts` (`allprojects` group and version)
   and is shared by every module. The artifact id is the module name: `library`,
-  `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native`.
-- The five library modules apply `maven-publish` and publish their `release` variant with a sources
-  jar under `com.github.mortezasun.android-calendarview`. `:calendarviewsample` is not published.
+  `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native`,
+  `calendar-chinese-native`, `calendar-chinese-compose`.
+- Five Android library modules publish their `release` variant with a sources jar;
+  `:calendar-chinese-native` publishes Kotlin Multiplatform metadata plus `-jvm` and `-linuxx64`
+  variants and their sources. All share `com.github.mortezasun.android-calendarview`.
+  `:calendarviewsample` is not published.
 - `:calendar-bom` is a `java-platform` publication whose constraints use the same root version.
   Publish it together with the modules and update `jitpack.yml`/CI if the module set changes.
 - The shared POM block in the root build supplies name, description, URL, Apache-2.0 license,
@@ -161,7 +170,8 @@ move the click handling onto the small visual box.
 
 ### Bounded calendar engines and adjacent-day guards
 
-When a calendar engine supports a finite year range (such as `SolarHijriEngine`'s `-61..3177` AP),
+When a calendar engine supports a finite year range (such as `SolarHijriEngine`'s `-61..3177` AP
+or `ChineseCalendarEngine`'s Chinese years `1901..2099`),
 the month state must clamp navigation (`canGoPrevious`/`canGoNext`) to the engine bounds even when
 caller bounds are `null`, and `adjacentDayProvider` / week builders must return a blank, disabled
 `CalendarDayCell` for out-of-range epoch days instead of throwing.

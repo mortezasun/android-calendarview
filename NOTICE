@@ -30,3 +30,15 @@ Kazimierz M. Borkowski. jalaali-js is distributed under the MIT License:
     LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
     OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
     SOFTWARE.
+
+Calendar data provenance
+------------------------
+
+The module :calendar-chinese-native uses a month table generated at development time by
+tools/chinese-calendar/generate.py from published astronomical algorithms: VSOP87D Earth
+series (Bretagnon & Francou 1988), Meeus, Astronomical Algorithms, 2nd ed., chapters 25 and 49,
+and the Espenak & Meeus Delta T expressions. The VSOP87D input file is not redistributed and no
+Hong Kong Observatory conversion table, ICU data or third-party calendar code is embedded.
+Reference comparisons and the three documented near-midnight deviations are recorded in
+tools/chinese-calendar/manifest.json. The generator and its output are covered by the project's
+Apache-2.0 license; the cited algorithms and reference data remain subject to their own terms.

@@ -2,11 +2,13 @@
 
 Workflow: .github/workflows/android-verification.yml
 Branch: update
-Status: active; the 2.1.0 release-tree verification jobs passed on 2026-11-11.
+Status: active; the `2.4.0` workflow changes have not run on GitHub yet, so this document describes
+the configured jobs, not a passed remote run. The last inspected remote runs were the `2.3.0`
+release-tree jobs on 2026-11-12.
 
 ## Triggers and cost
 
-Pushes to update, pull requests targeting update and manual workflow_dispatch start three
+Pushes to update, pull requests targeting update and manual workflow_dispatch start four
 independent GitHub-hosted Ubuntu jobs. Each has a 30-minute timeout. New runs on the same
 ref cancel older runs. Jobs can consume Actions minutes and store artifacts for seven days,
 subject to repository/account policy. No publishing, release signing, deployment, write token
@@ -15,11 +17,14 @@ pull_request_target execution. GitHub repository Actions settings may still requ
 
 ## Jobs
 
-- assemble: builds the sample and its library dependencies.
-- unit-tests: runs Gradle test across the project; generated template tests may also run.
-- lint: runs debug lint for core, all three calendar modules and sample.
+- assemble: builds the sample, all release AARs, the Chinese engine JVM jar and the BOM POM.
+- unit-tests: runs Gradle `test` across the project plus `:calendar-chinese-native:jvmTest`.
+- native-engine: runs `:calendar-chinese-native:linuxX64Test` on the same commonTest fixtures.
+- lint: runs debug lint for core, all calendar modules, the Chinese Compose facade and sample.
 
 The matrix uses fail-fast: false, so failure of one job does not cancel the other checks.
+The native-engine job downloads the Kotlin/Native toolchain on first use and can take longer than
+the JVM jobs; the 30-minute job timeout still applies.
 No continue-on-error, test exclusion or lint suppression is introduced. These are debug
 checks, not proof that release variants or published consumer artifacts work.
 

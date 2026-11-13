@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.enums.TypeSelectDay
 import java.time.LocalDate
 import java.util.Locale
@@ -37,6 +38,9 @@ internal class CalendarSampleState(
     private val anchorState: MutableState<Long>,
     private val showDialogState: MutableState<Boolean>,
     private val errorState: MutableState<String?>,
+    private val chineseStyleNameState: MutableState<String> = mutableStateOf(ChineseTextStyle.English.name),
+    private val showChineseDetailsState: MutableState<Boolean> = mutableStateOf(false),
+    private val chineseGregorianGridState: MutableState<Boolean> = mutableStateOf(false),
 ) {
     var calendarName: String by calendarNameState
     var modeName: String by modeNameState
@@ -55,10 +59,14 @@ internal class CalendarSampleState(
     var anchor: Long by anchorState
     var showDialog: Boolean by showDialogState
     var error: String? by errorState
+    var chineseStyleName: String by chineseStyleNameState
+    var showChineseDetails: Boolean by showChineseDetailsState
+    var chineseGregorianGrid: Boolean by chineseGregorianGridState
 
     val calendar: SampleCalendar get() = SampleCalendar.valueOf(calendarName)
     val mode: TypeSelectDay get() = TypeSelectDay.valueOf(modeName)
     val locale: Locale get() = Locale.forLanguageTag(localeTag)
+    val chineseStyle: ChineseTextStyle get() = ChineseTextStyle.valueOf(chineseStyleName)
 
     /** Switches the calendar engine and clears a stale navigation error. */
     fun selectCalendar(item: SampleCalendar) {
@@ -104,9 +112,12 @@ internal fun rememberCalendarSampleState(): CalendarSampleState {
     val anchor = rememberSaveable { mutableStateOf(LocalDate.now().toEpochDay()) }
     val showDialog = rememberSaveable { mutableStateOf(false) }
     val error = rememberSaveable { mutableStateOf<String?>(null) }
+    val chineseStyleName = rememberSaveable { mutableStateOf(ChineseTextStyle.English.name) }
+    val showChineseDetails = rememberSaveable { mutableStateOf(false) }
+    val chineseGregorianGrid = rememberSaveable { mutableStateOf(false) }
     return CalendarSampleState(
         calendarName, modeName, localeTag, rtl, previousDays, nextDays, fixedSixRows, showWeek,
         showAgenda, showWeekNumbers, customStyle, useHeaderApi, limitRange, hijriOffset, anchor,
-        showDialog, error,
+        showDialog, error, chineseStyleName, showChineseDetails, chineseGregorianGrid,
     )
 }

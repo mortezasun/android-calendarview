@@ -44,7 +44,7 @@ jobs:
           set -euo pipefail
           mkdir -p .ci-diagnostics
           git rev-parse HEAD | tee .ci-diagnostics/publishing-sha.txt
-          bash ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal :calendar-solarHijri-native:publishToMavenLocal :calendar-bom:publishToMavenLocal \
+          bash ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal :calendar-solarHijri-native:publishToMavenLocal :calendar-chinese-native:publishToMavenLocal :calendar-chinese-compose:publishToMavenLocal :calendar-bom:publishToMavenLocal \
             -Dmaven.repo.local="$RUNNER_TEMP/calendar-maven" \
             --no-daemon --stacktrace --console=plain 2>&1 | tee .ci-diagnostics/publishing.txt
 
@@ -54,7 +54,7 @@ jobs:
           set -euo pipefail
           base="$RUNNER_TEMP/calendar-maven/com/github/mortezasun/android-calendarview"
           mkdir -p .ci-diagnostics/publications
-          for module in library calendar-gregorian calendar-hijri calendar-solarHijri calendar-solarHijri-native; do
+          for module in library calendar-gregorian calendar-hijri calendar-solarHijri calendar-solarHijri-native calendar-chinese-compose; do
             directory="$base/$module"
             for suffix in .aar .pom .module -sources.jar; do
               file=$(find "$directory" -type f -name "${module}-*${suffix}" -size +0c -print -quit)
@@ -71,6 +71,38 @@ jobs:
             echo "calendar-solarHijri-native POM must not depend on jalalicalendar" >&2
             exit 1
           fi
+          engine_base="$base/calendar-chinese-native"
+          for suffix in .pom .module -sources.jar; do
+            file=$(find "$engine_base" -maxdepth 1 -type f -name "calendar-chinese-native-*${suffix}" -size +0c -print -quit)
+            if [ -z "$file" ]; then
+              echo "Missing nonempty publication: calendar-chinese-native $suffix" >&2
+              exit 1
+            fi
+            echo "Verified $file"
+          done
+          engine_jar=$(find "$engine_base" -type f -name 'calendar-chinese-native-*.jar' ! -name '*-sources.jar' -size +0c -print -quit)
+          if [ -z "$engine_jar" ]; then
+            echo "Missing calendar-chinese-native metadata jar" >&2
+            exit 1
+          fi
+          engine_pom=$(find "$engine_base" -maxdepth 1 -type f -name 'calendar-chinese-native-*.pom' -print -quit)
+          if grep -qE 'calendar-(gregorian|hijri|solarHijri)|androidx|compose' "$engine_pom"; then
+            echo "calendar-chinese-native POM must stay free of other engines, AndroidX and Compose" >&2
+            exit 1
+          fi
+          for variant in calendar-chinese-native-jvm calendar-chinese-native-linuxx64; do
+            variant_base="$base/$variant"
+            for suffix in .pom .module -sources.jar; do
+              file=$(find "$variant_base" -maxdepth 1 -type f -name "$variant-*${suffix}" -size +0c -print -quit)
+              if [ -z "$file" ]; then
+                echo "Missing nonempty publication: $variant $suffix" >&2
+                exit 1
+              fi
+              echo "Verified $file"
+            done
+            cp -R "$variant_base" .ci-diagnostics/publications/
+          done
+          cp -R "$engine_base" .ci-diagnostics/publications/
           bom_base="$base/calendar-bom"
           for suffix in .pom .module; do
             file=$(find "$bom_base" -type f -name "calendar-bom-*${suffix}" -size +0c -print -quit)

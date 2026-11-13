@@ -1,5 +1,6 @@
 package com.develotter.calendarviewsample
 
+import com.develotter.calendarview.calendars.chineseNative.ChineseDate
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import ir.huri.jcal.JalaliCalendar
@@ -36,6 +37,17 @@ class CalendarSampleNavigationTest {
         assertEquals(solarHijriEpochDay(JalaliCalendar(1398, 12, 1)), moveSampleMonth(SampleCalendar.SolarHijri, anchor, -13))
         assertEquals(solarHijriEpochDay(JalaliCalendar(1401, 2, 1)), moveSampleMonth(SampleCalendar.SolarHijri, anchor, 13))
         assertEquals(solarHijriEpochDay(JalaliCalendar(1400, 1, 1)), moveSampleMonth(SampleCalendar.SolarHijri, anchor, 0))
+    }
+
+    @Test
+    fun chineseTraversesTheLeapMonthAndNormalizesToDayOne() {
+        val anchor = ChineseDate(2023, 2, true, 18).toEpochDay()
+        assertEquals(ChineseDate(2023, 3, false, 1).toEpochDay(), moveSampleMonth(SampleCalendar.Chinese, anchor, 1))
+        assertEquals(ChineseDate(2023, 2, false, 1).toEpochDay(), moveSampleMonth(SampleCalendar.Chinese, anchor, -1))
+        assertEquals(ChineseDate(2023, 2, true, 1).toEpochDay(), moveSampleMonth(SampleCalendar.Chinese, anchor, 0))
+        val newYear = ChineseDate(2024, 1, false, 20).toEpochDay()
+        assertEquals(ChineseDate(2024, 2, false, 1).toEpochDay(), moveSampleMonth(SampleCalendar.Chinese, newYear, 1))
+        assertEquals(ChineseDate(2023, 12, false, 1).toEpochDay(), moveSampleMonth(SampleCalendar.Chinese, newYear, -1))
     }
 
     @Test

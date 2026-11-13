@@ -5,6 +5,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
+import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
+import com.develotter.calendarview.calendars.chineseCompose.rememberChineseMonthState
 import com.develotter.calendarview.calendars.gregorian.compose.rememberGregorianMonthState
 import com.develotter.calendarview.calendars.hijri.HijriDateProvider
 import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
@@ -37,6 +40,7 @@ internal fun rememberSampleMonthNavigation(
     anchor: Long,
     locale: Locale,
     hijriDateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+    chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
     onMonthChanged: (Long) -> Unit,
 ): SampleMonthNavigation {
     val date = LocalDate.ofEpochDay(anchor)
@@ -89,6 +93,19 @@ internal fun rememberSampleMonthNavigation(
                 }
             }
             SampleMonthNavigation(title = state.title(locale), state = state)
+        }
+        SampleCalendar.Chinese -> {
+            val initialMonth = remember { ChineseMonth.fromEpochDay(anchor) }
+            val state = rememberChineseMonthState(initialMonth)
+            LaunchedEffect(state.month) {
+                val epochDay = state.month.startEpochDay()
+                if (epochDay != anchor) onChanged(epochDay)
+            }
+            LaunchedEffect(anchor) {
+                val target = ChineseMonth.fromEpochDay(anchor)
+                if (state.month != target) state.goTo(target)
+            }
+            SampleMonthNavigation(title = state.title(chineseStyle), state = state)
         }
         SampleCalendar.SolarHijriNative -> {
             val initialMonth = remember { SolarHijriDate.fromLocalDate(date) }

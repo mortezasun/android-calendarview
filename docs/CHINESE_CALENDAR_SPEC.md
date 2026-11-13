@@ -1,6 +1,6 @@
 # Chinesischer Kalender: API- und Datenvertrag fuer 2.4.0
 
-Status: Entwurf zur Implementierung; keine der genannten APIs existiert durch dieses Dokument.
+Status: implementiert auf Branch `update` (2.4.0-Releasekandidat); API-Dumps unter `api/`.
 
 ## Kalenderkonvention
 
@@ -8,14 +8,16 @@ Moderner chinesischer Lunisolarkalender mit dokumentierter ziviler UTC+08:00-Ref
 
 `year` bezeichnet das gregorianische Jahr, in dem das betreffende chinesische Neujahr beginnt. Nicht ungeprueft mit ICU YEAR oder EXTENDED_YEAR gleichsetzen. `monthNumber` liegt in 1..12; Schaltmonate werden durch ein eigenes Flag unterschieden, niemals als Monat 13 kodiert.
 
-## Vorgeschlagene Engine-API
+## Implementierte Engine-API
 
 Paket: `com.develotter.calendarview.calendars.chineseNative`.
 
-- `ChineseMonth`: year, monthNumber, isLeapMonth.
-- `ChineseDate`: ChineseMonth und dayOfMonth.
-- Validierende Factorys bzw. Konstruktoren; keine oeffentlichen Pfade zu ungueltigen Werten. Bei Kotlin-data-classes insbesondere copy()-Umgehungen verhindern oder gleichwertig validieren.
-- `ChineseCalendarEngine`: minEpochDay/maxEpochDay, fromEpochDay, toEpochDay, monthsInYear, lengthOfMonth, nextMonth und previousMonth.
+- `ChineseMonth`: `year`, `monthNumber`, `isLeapMonth`; privater Konstruktor, Factory `of`, `fromEpochDay`.
+- `ChineseDate`: `year`, `monthNumber`, `isLeapMonth`, `dayOfMonth`; Factory `of`, `fromEpochDay`.
+- Beide sind keine data classes; Validierung im Konstruktor, manuelles `equals`/`hashCode`, kein `copy()`-Pfad.
+- `ChineseCalendarEngine`: `MIN_YEAR`/`MAX_YEAR`, `MIN_EPOCH_DAY`/`MAX_EPOCH_DAY`, `isSupported`, `fromEpochDay`, `toEpochDay`, `monthsInYear`, `monthOf`, `lengthOfMonth`, `lengthOfYear`, `monthStartEpochDay`, `firstMonthOfYear`, `lastMonthOfYear`, `nextMonth`, `previousMonth`, `leapMonth`, `hasLeapMonth`.
+- `ChineseDateOutOfRangeException : IllegalArgumentException` fuer nicht unterstuetzte Werte; ungueltige Monate/Tage werfen `IllegalArgumentException`.
+- `ChineseFormat`/`ChineseTextStyle`: English, SimplifiedChinese, TraditionalChinese, Numeric.
 - Tagesarithmetik ueber Epoch Days mit gepruefter Addition; Monatsarithmetik ueber die tatsaechliche Reihenfolge der 12/13 Monate. Bei gleichem Tag in kuerzerem Zielmonat wird auf dessen letzten Tag geklemmt; ein nicht vorhandener Schaltmonat wird niemals erfunden.
 - Monate des Jahres werden chronologisch geliefert, z.B. regulaerer Monat N, Schaltmonat N, regulaerer Monat N+1. Keine fixe Liste mit genau zwoelf Eintraegen.
 - Datumsvergleich erfolgt chronologisch; gleiche Monatsnummer mit anderem Schaltflag ist nicht derselbe Monat.
@@ -24,17 +26,30 @@ Invalides Datum: IllegalArgumentException oder dokumentierter spezialisierter Un
 
 ## Daten und Grenzen
 
-Ziel-Referenzfenster: gregorianisch 1901-2100. Das HKO stellt Umrechnungstabellen fuer diese Jahre bereit. Exakte nutzbare Grenzen und vollstaendige Randmonate erst nach Datenpruefung festschreiben; fehlende Tage nicht extrapolieren. Teilweise sichtbare Randmonate muessen klar als solche behandelt werden.
+Implementierter Bereich: chinesische Jahre `1901..2099`, also Gregorian `1901-02-19` bis
+`2100-02-08` (72.674 Tage, 2.461 Monate, 73 Schaltjahre). Die Tabelle enthaelt vollstaendige
+chinesische Jahre; ausserhalb liegende Tage werden abgelehnt, nicht extrapoliert. Teilweise
+sichtbare Randmonate werden in der Compose-Fassade als leere, deaktivierte Zellen behandelt.
+Der Generator verglich 2.461 Monatsstarts mit HKO-Referenzen (2.458 gleich); die drei
+Minutenfaelle sind unten und im Manifest dokumentiert. Es wird keine HKO-Tabelle ausgeliefert.
 
 Eigener Datensatz: Monatsbeginn als Epoch Day, Monatsnummer, Schaltflag und Laenge, bzw. aequivalente selbst definierte Kompaktkodierung. Invarianten beim Generieren pruefen: streng steigende Starts, lueckenlose Tage, gueltige Laengen, gueltige Monatsfolge und konsistente Jahresstarts. Praefixindizes fuer begrenzte Suche; keine mutable globale Kalenderinstanz.
 
 Pflichtmanifest: Quelle und Abrufdatum, Nutzungsbedingungen/Attribution, Quellen-Hash, Generatorversion, Datensatzversion und -Hash, exakter Bereich, Referenzkonvention, Konfliktliste und Reviewer. Generator und gepruefte Eingabe muessen reproduzierbar sein; Laufzeit und normale Consumer-Builds brauchen keinen Referenzserver.
 
-HKO-Zukunftsdaten koennen bei Ereignissen nahe Mitternacht um einen Tag abweichen. Fuer 2057, 2089 und 2097 sind entsprechende Neumondfaelle dokumentiert. Datensatzversion fixieren, Grenzen der Zusage offenlegen und Aenderungen in spaeteren Releases nachvollziehbar dokumentieren. Ungeklaerte Abweichungen nicht durch willkuerliche Sonderfaelle kaschieren.
+Ereignisse nahe lokaler Mitternacht koennen je nach Referenz um einen Tag abweichen. Der
+Generator dokumentiert drei solche Faelle: 1914-11-18, 1916-02-04 und 1920-11-11 (Neumond
+1-5 Minuten nach Mitternacht; HKO nennt den Vortag). Datensatzversion
+`2026.11-astronomical-v1`, Ausgabe-SHA256 und VSOP87D-Eingabe-SHA256 stehen im Manifest.
+Aenderungen muessen in spaeteren Releases nachvollziehbar versioniert werden; keine
+willkuerlichen Sonderfaelle.
 
 ## Compose-Vertrag
 
-Paket: `com.develotter.calendarview.calendars.chineseCompose`. Geplante Namen: ChineseCalendarMonth, ChineseMonthData, ChineseWeekData, ChineseMonthState und rememberChineseMonthState. Benennung vor API-Freeze mit existierenden Konventionen abgleichen.
+Paket: `com.develotter.calendarview.calendars.chineseCompose`. Implementiert:
+`ChineseCalendarMonth`, `GregorianChineseCalendarMonth`, `ChineseMonthData`, `ChineseWeekData`
+mit `chineseWeekData`, `ChineseMonthState` mit `rememberChineseMonthState`, `ChineseMonthSnapshot`,
+`chineseMonthData`, `chineseMonthOfOrNull`, `chineseYearHeatmap` und `chineseMonthHeatmap`.
 
 - CalendarMonthData/CalendarWeekData und den vorhandenen Renderer verwenden.
 - Auswahl, Marker und Click-Mapping bleiben Epoch-Day-basiert.

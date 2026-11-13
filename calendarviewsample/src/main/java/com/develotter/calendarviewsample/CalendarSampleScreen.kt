@@ -20,6 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.develotter.calendarview.calendars.chineseNative.ChineseDate
+import com.develotter.calendarview.calendars.chineseNative.ChineseFormat
+import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
+import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
+import com.develotter.calendarview.calendars.chineseCompose.ChineseCalendarMonth
+import com.develotter.calendarview.calendars.chineseCompose.GregorianChineseCalendarMonth
+import com.develotter.calendarview.calendars.chineseCompose.chineseWeekData
 import com.develotter.calendarview.calendars.gregorian.compose.GregorianCalendarMonth
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianWeekData
 import com.develotter.calendarview.calendars.hijri.HijriDateProvider
@@ -43,6 +50,7 @@ import com.develotter.calendarview.compose.LocalCalendarStyle
 import com.develotter.calendarview.compose.rememberCalendarSelectionState
 import com.develotter.calendarview.enums.TypeSelectDay
 import com.develotter.calendarview.selection.CalendarRangePolicy
+import com.develotter.calendarview.selection.CalendarSelection
 import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
 import java.time.YearMonth
@@ -94,6 +102,7 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                             anchor = ui.anchor,
                             locale = locale,
                             hijriDateProvider = hijriProvider,
+                            chineseStyle = ui.chineseStyle,
                         ) { visible -> ui.showMonth(visible) }
                         CalendarMonthHeader(
                             title = navigation.title,
@@ -128,6 +137,8 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                             hijriToday = hijriToday,
                             showHeader = !ui.useHeaderApi,
                             showWeekNumbers = ui.showWeekNumbers,
+                            chineseStyle = ui.chineseStyle,
+                            chineseGregorianGrid = ui.chineseGregorianGrid,
                         )
                     }
                     if (ui.showWeek) {
@@ -139,6 +150,7 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                             hijriProvider = hijriProvider,
                             hijriToday = hijriToday,
                             showWeekNumbers = ui.showWeekNumbers,
+                            chineseStyle = ui.chineseStyle,
                         )
                     }
                     if (ui.showAgenda) {
@@ -148,6 +160,14 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                             locale = locale,
                             state = state,
                             hijriProvider = hijriProvider,
+                            chineseStyle = ui.chineseStyle,
+                        )
+                    }
+                    if (ui.showChineseDetails && calendar == SampleCalendar.Chinese) {
+                        ChineseDetails(
+                            anchor = ui.anchor,
+                            selection = state.selection,
+                            style = ui.chineseStyle,
                         )
                     }
                 },
@@ -196,6 +216,8 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                                 hijriProvider = hijriProvider,
                                 hijriToday = hijriToday,
                                 showWeekNumbers = ui.showWeekNumbers,
+                                chineseStyle = ui.chineseStyle,
+                                chineseGregorianGrid = ui.chineseGregorianGrid,
                             )
                         }
                     }
@@ -218,6 +240,8 @@ private fun SampleMonth(
     hijriToday: HijrahDate,
     showHeader: Boolean = true,
     showWeekNumbers: Boolean = false,
+    chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
+    chineseGregorianGrid: Boolean = false,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
     val todayDescription = sampleTodayDescription(locale)
@@ -257,6 +281,23 @@ private fun SampleMonth(
             todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider,
         )
+        SampleCalendar.Chinese -> if (chineseGregorianGrid) {
+            GregorianChineseCalendarMonth(
+                month = YearMonth.from(date), selection = state.selection,
+                onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+                style = chineseStyle, showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
+                fixedSixRows = fixedSixRows, todayDescription = todayDescription, markers = sampleMarkers(date),
+                showHeader = showHeader,
+            )
+        } else {
+            ChineseCalendarMonth(
+                month = ChineseMonth.fromEpochDay(anchor), selection = state.selection,
+                onDateClick = state::onDayClick, locale = locale, modifier = Modifier.fillMaxWidth(),
+                style = chineseStyle, showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
+                fixedSixRows = fixedSixRows, todayDescription = todayDescription, markers = sampleMarkers(date),
+                showHeader = showHeader, weekNumber = weekNumberProvider,
+            )
+        }
     }
 }
 
@@ -270,9 +311,10 @@ private fun SampleWeek(
     hijriProvider: HijriDateProvider,
     hijriToday: HijrahDate,
     showWeekNumbers: Boolean,
+    chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
-    val week: CalendarWeekData = when (calendar) {
+    val week: CalendarWeekData? = runCatching { when (calendar) {
         SampleCalendar.Gregorian -> gregorianWeekData(date, locale)
         SampleCalendar.Hijri -> hijriWeekData(
             date = hijriProvider.dateForEpochDay(anchor),
@@ -282,6 +324,16 @@ private fun SampleWeek(
         )
         SampleCalendar.SolarHijri -> solarHijriWeekData(JalaliCalendar(date), locale)
         SampleCalendar.SolarHijriNative -> solarHijriNativeWeekData(SolarHijriDate.fromLocalDate(date), locale)
+        SampleCalendar.Chinese -> chineseWeekData(
+            epochDay = anchor,
+            style = chineseStyle,
+            locale = locale,
+            todayEpochDay = LocalDate.now().toEpochDay(),
+        )
+    } }.getOrNull()
+    if (week == null) {
+        Text("Week outside supported range", color = MaterialTheme.colorScheme.error)
+        return
     }
     val weekNumber = if (showWeekNumbers) {
         week.weekNumber ?: sampleWeekNumber(week.days.first().epochDay, locale)
@@ -304,6 +356,7 @@ private fun SampleAgenda(
     locale: Locale,
     state: CalendarSelectionState,
     hijriProvider: HijriDateProvider,
+    chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
     val data = remember(calendar, anchor, locale, hijriProvider) {
@@ -313,6 +366,7 @@ private fun SampleAgenda(
                 anchorEpochDay = anchor,
                 locale = locale,
                 hijriDateProvider = hijriProvider,
+                chineseStyle = chineseStyle,
             )
         }
     }
@@ -358,4 +412,32 @@ private fun sampleTodayDescription(locale: Locale): String = when (locale.langua
     "fa" -> "امروز"
     "ar" -> "اليوم"
     else -> "Today"
+}
+
+/**
+ * Demo detail panel for the selected day (or the visible month anchor): shared epoch identity,
+ * Gregorian date, formatted Chinese date and explicit leap-month status.
+ */
+@Composable
+private fun ChineseDetails(
+    anchor: Long,
+    selection: CalendarSelection,
+    style: ChineseTextStyle,
+) {
+    val epochDay = selection.selectedDays.firstOrNull() ?: anchor
+    val gregorian = LocalDate.ofEpochDay(epochDay)
+    Text("Details", style = MaterialTheme.typography.titleSmall)
+    Text("Epoch day: $epochDay")
+    Text("Gregorian: $gregorian")
+    val date = runCatching { ChineseDate.fromEpochDay(epochDay) }.getOrNull()
+    if (date == null) {
+        Text(
+            "Chinese: outside supported range",
+            color = MaterialTheme.colorScheme.error,
+        )
+    } else {
+        Text("Chinese: ${ChineseFormat.dateLabel(date, style)}")
+        Text("Chinese year: ${date.year}, month ${date.monthNumber}, day ${date.dayOfMonth}")
+        Text("Leap month: ${if (date.isLeapMonth) "yes (month ${date.monthNumber})" else "no"}")
+    }
 }

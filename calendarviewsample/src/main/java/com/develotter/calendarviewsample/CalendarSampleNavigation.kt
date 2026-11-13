@@ -1,5 +1,6 @@
 package com.develotter.calendarviewsample
 
+import com.develotter.calendarview.calendars.chineseNative.ChineseDate
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import ir.huri.jcal.JalaliCalendar
@@ -13,7 +14,7 @@ import java.time.temporal.WeekFields
 import java.util.Locale
 
 /** Calendar identifiers for this demo only, not a shared-library abstraction. */
-enum class SampleCalendar { Gregorian, Hijri, SolarHijri, SolarHijriNative }
+enum class SampleCalendar { Gregorian, Hijri, SolarHijri, SolarHijriNative, Chinese }
 
 /** Host-formatted week number; the library deliberately leaves the convention to the caller. */
 fun sampleWeekNumber(epochDay: Long, locale: Locale): String {
@@ -41,6 +42,10 @@ fun moveSampleMonth(calendar: SampleCalendar, anchorEpochDay: Long, offset: Int)
             solarHijriEpochDay(JalaliCalendar(year, month, 1))
         }
         SampleCalendar.SolarHijriNative -> SolarHijriDate.fromLocalDate(date)
+            .withDayOfMonth(1)
+            .plusMonths(offset.toLong())
+            .toEpochDay()
+        SampleCalendar.Chinese -> ChineseDate.fromEpochDay(anchorEpochDay)
             .withDayOfMonth(1)
             .plusMonths(offset.toLong())
             .toEpochDay()

@@ -3,17 +3,20 @@
 Binding working rules for coding agents in this repository. Read this file and the linked
 documents before changing any code.
 
-## Planned work: 2.4.0 Chinese calendar
+## Current work: 2.4.0 Chinese calendar (implemented, release candidate)
 
-Before implementing the Chinese calendar, read [RELEASE_PLAN_2.4.0.md](RELEASE_PLAN_2.4.0.md),
+The 2.4.0 Chinese calendar is implemented on branch `update` as a local release candidate, not
+tagged, merged or published. Read [RELEASE_PLAN_2.4.0.md](RELEASE_PLAN_2.4.0.md),
 [ADR 0005](docs/decisions/0005-independent-native-chinese-calendar.md),
 [the specification](docs/CHINESE_CALENDAR_SPEC.md),
 [quality and security gates](docs/CHINESE_CALENDAR_QUALITY.md), and
-[the release plan](docs/releases/2.4.0.md). These describe planned work, not implemented features.
-The engine must be self-written pure Kotlin and usable without Compose, Android or other
+[the release notes](docs/releases/2.4.0.md). Open gates are listed there; do not report them as
+done.
+
+The engine must stay self-written pure Kotlin and usable without Compose, Android or other
 calendar engines; the separate Compose facade may reuse `:library`. Do not copy/port external
-calendar code, add an ICU runtime wrapper, or claim unverified multiplatform support.
-Do not bump versions, create a release tag or publish 2.4.0 as part of planning.
+calendar code or data tables, add an ICU runtime wrapper, or claim unverified platform support.
+Do not bump versions, create a release tag, merge or publish 2.4.0 without separate approval.
 
 ## Read first
 
@@ -30,9 +33,10 @@ is not part of your task and never reset, stash or overwrite it without explicit
 - Multi-module Android **library** project, not an app-first project.
 - `:library` contains the Compose core: month grid, selection engine, scrolling containers and
   heatmaps.
-- `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri`, `:calendar-solarHijri-native` are calendar engines that depend
-  on `:library`. `:calendar-bom` is a `java-platform` publication that constrains their versions;
-  `:calendarviewsample` is the demo app and depends on all modules.
+- `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` and the KMP engine
+  `:calendar-chinese-native` together with its Compose facade `:calendar-chinese-compose` are the
+  calendar modules. `:calendar-solarHijri-native` is the other dependency-free engine.
+  `:calendar-bom` constrains all published modules; `:calendarviewsample` depends on all modules.
 - Public API lives in `com.develotter.calendarview.*`; calendar-specific types live in
   `com.develotter.calendarview.calendars.*`.
 - Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk` 37,
@@ -79,21 +83,23 @@ is not part of your task and never reset, stash or overwrite it without explicit
 
 ## Verified commands
 
-These commands were executed successfully with JDK 17 and Android SDK Platform 37
-(package `platforms;android-37.0`); the API guard was verified on 2026-11-11:
+These commands were executed successfully with JDK 21.0 and Android SDK Platform 37
+(package `platforms;android-37.0`); the 2.4.0 API guard and tests were verified on 2026-11-13:
 
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew test                                    # 176 JVM unit tests, all modules
+./gradlew test :calendar-chinese-native:jvmTest    # 198 JVM tests (185 Android + 13 KMP)
+./gradlew :calendar-chinese-native:linuxX64Test    # 13 Kotlin/Native tests
 ./gradlew :library:lintDebug                      # lint for the core library
 ./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
   :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal \
-  :calendar-solarHijri-native:publishToMavenLocal \
+  :calendar-solarHijri-native:publishToMavenLocal :calendar-chinese-native:publishToMavenLocal \
+  :calendar-chinese-compose:publishToMavenLocal \
   :calendar-bom:publishToMavenLocal  # into ~/.m2
 
-# After the four release AARs are built:
+# After the release AARs and the engine JVM jar are built:
 bash scripts/api-check.sh          # public JVM API diff against api/*.api
 bash scripts/api-check.sh --update # intentional API change: regenerate the dumps
 ```

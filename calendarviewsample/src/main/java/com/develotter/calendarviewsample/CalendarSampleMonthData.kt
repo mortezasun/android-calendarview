@@ -1,5 +1,8 @@
 package com.develotter.calendarviewsample
 
+import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
+import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
+import com.develotter.calendarview.calendars.chineseCompose.chineseMonthData
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthData
 import com.develotter.calendarview.calendars.hijri.HijriDateProvider
 import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
@@ -24,6 +27,7 @@ fun sampleMonthData(
     locale: Locale,
     today: LocalDate = LocalDate.now(),
     hijriDateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+    chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
 ): CalendarMonthData {
     val date = LocalDate.ofEpochDay(anchorEpochDay)
     return when (calendar) {
@@ -43,6 +47,12 @@ fun sampleMonthData(
             month = SolarHijriDate.fromLocalDate(date),
             locale = locale,
             today = SolarHijriDate.fromLocalDate(today),
+        )
+        SampleCalendar.Chinese -> chineseMonthData(
+            month = ChineseMonth.fromEpochDay(anchorEpochDay),
+            style = chineseStyle,
+            locale = locale,
+            todayEpochDay = today.toEpochDay(),
         )
     }
 }

@@ -1,7 +1,8 @@
 # Setup
 
-Verified on 2026-11-11 against release `2.1.0` (commit `bd046a188d9a661e657affe580c7a7fa1a3e98ba`)
-and its post-release documentation commit.
+Verified on 2026-11-13 against the `2.4.0` development tree on branch `update` (JDK 21.0,
+Android SDK Platform 37.0, Build-Tools 37.0.0). The GitHub workflows still configure JDK 17;
+their `2.4.0` runs are not part of this local evidence.
 
 ## Required tools
 
@@ -11,7 +12,7 @@ and its post-release documentation commit.
 | Gradle | 9.8.2 | Provided by the wrapper; do not install a separate Gradle. |
 | Android Gradle Plugin | 9.5.1 | Resolved from `google()` via `gradle/libs.versions.toml`. |
 | Android SDK Platform | API 37 | SDK Manager package `platforms;android-37.0`. Required by `compileSdk = 37`. |
-| Android SDK Build-Tools | 36.0.0 | Default/minimum for AGP 9.5. |
+| Android SDK Build-Tools | 36.0.0 | Default/minimum for AGP 9.5; 37.0.0 was also used successfully for the local 2.4.0 verification. |
 | Android SDK Platform-Tools | current | Only needed to install/run the APK on a device. |
 
 `targetSdk` is 37 and `minSdk` is 27. Java/Kotlin target is JVM 17. Kotlin compilation goes through
@@ -70,7 +71,10 @@ Building only the core library:
 
 `src/test` holds the JVM tests: selection engine and saved-state snapshots, month-cell building,
 heatmap data and style validation, the sample helpers, the Hijri date-provider mapping and one
-month-data suite per calendar engine. `src/androidTest` holds the Compose UI tests (`CalendarSelectionComposeTest`,
+month-data suite per calendar engine. The Chinese engine additionally has `commonTest` fixtures
+executed by both `:calendar-chinese-native:jvmTest` and `:calendar-chinese-native:linuxX64Test`.
+The local 2.4.0 run executed 185 Android JVM tests plus 13 engine tests on each target, all
+passing (0 failed, 0 skipped). `src/androidTest` holds the Compose UI tests (`CalendarSelectionComposeTest`,
 `CalendarHeatmapComposeTest`, `CalendarMonthHeaderComposeTest`,
 `CalendarProductViewsComposeTest`, plus the sample acceptance tests). Only the `ExampleUnitTest` /
 `ExampleInstrumentedTest` files are leftover templates. Instrumented tests require an emulator or
@@ -101,7 +105,9 @@ The release AARs have a checked-in public JVM API dump in `api/`. After assembli
 
 ```bash
 ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
-  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease :calendar-solarHijri-native:assembleRelease
+  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease \
+  :calendar-solarHijri-native:assembleRelease :calendar-chinese-compose:assembleRelease \
+  :calendar-chinese-native:jvmJar
 bash scripts/api-check.sh
 ```
 
@@ -111,10 +117,13 @@ JVM signatures only, not Kotlin default values, annotations or source compatibil
 
 ## Publishing
 
-The four library modules apply `maven-publish` and publish their `release` variant with a sources
-jar as `com.github.mortezasun.android-calendarview:<module>:<version>`. The group and version are
+Five Android library modules apply `maven-publish` and publish their `release` variant with a
+sources jar as `com.github.mortezasun.android-calendarview:<module>:<version>`.
+`:calendar-chinese-native` publishes Kotlin Multiplatform metadata plus `jvm` and `linuxx64`
+variants under the same group; its artifacts are a metadata jar, per-target jars/module metadata
+and sources, not an AAR. The group and version are
 defined once in the root `build.gradle.kts`; the artifact id is the module name.
-`:calendar-bom` publishes a `java-platform` POM with constraints for all four modules.
+`:calendar-bom` publishes a `java-platform` POM with constraints for all seven modules.
 `calendarviewsample` is not published. `jitpack.yml` pins JDK 17 for the JitPack build and
 publishes the BOM together with the modules.
 
@@ -125,13 +134,18 @@ publishes the BOM together with the modules.
   :calendar-hijri:publishToMavenLocal \
   :calendar-solarHijri:publishToMavenLocal \
   :calendar-solarHijri-native:publishToMavenLocal \
+  :calendar-chinese-native:publishToMavenLocal \
+  :calendar-chinese-compose:publishToMavenLocal \
   :calendar-bom:publishToMavenLocal
 ```
 
 Artifacts land in `~/.m2/repository/com/github/mortezasun/android-calendarview/`. Check the
-generated POMs: each `calendar-*` module must depend on `...:library` in compile scope,
-`calendar-solarHijri` must additionally carry `ir.huri:jalalicalendar` (while `calendar-solarHijri-native` must not), and the BOM must list all
-four modules in `dependencyManagement` with the root version. The shared POM fields (name,
+generated POMs: each Compose `calendar-*` module must depend on `...:library` in compile scope
+(and `calendar-chinese-compose` additionally on `calendar-chinese-native`),
+`calendar-solarHijri` must additionally carry `ir.huri:jalalicalendar` (while
+`calendar-solarHijri-native` and `calendar-chinese-native` must not), and the BOM must list all
+seven modules in `dependencyManagement` with the root version. The Chinese engine POM must not
+reference AndroidX, Compose, Java date libraries or another calendar module. The shared POM fields (name,
 description, URL, license, developer, SCM) come from the root build. Maven Central signing and
 upload are not configured. JitPack built release `2.1.0` and a JitPack-only consumer resolved the
 BOM plus all four modules on 2026-11-11; see [PROJECT_STATUS.md](PROJECT_STATUS.md) and
@@ -147,4 +161,7 @@ BOM plus all four modules on 2026-11-11; see [PROJECT_STATUS.md](PROJECT_STATUS.
    Run `chmod +x gradlew` (do not commit the mode change unless the task asks for it).
 3. **Missing SDK location.** Without `ANDROID_HOME` or `local.properties`, Gradle stops during
    configuration with "SDK location not found".
-4. **No JDK installed.** AGP 9.5 requires JDK 17; a newer JDK may work but was not verified here.
+4. **No JDK installed.** AGP 9.5 requires JDK 17; JDK 21.0 was used for the local 2.4.0 verification.
+5. **Kotlin/Native toolchain download.** `:calendar-chinese-native:linuxX64Test` downloads the
+   Kotlin/Native compiler and dependencies on first use. This needs network access and disk space;
+   an offline run fails before the tests start.

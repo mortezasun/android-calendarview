@@ -1,5 +1,8 @@
 package com.develotter.calendarviewsample
 
+import com.develotter.calendarview.calendars.chineseNative.ChineseDate
+import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
+import com.develotter.calendarview.calendars.chineseCompose.chineseYearHeatmap
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthData
 import com.develotter.calendarview.calendars.hijri.HijriDateProvider
 import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
@@ -62,6 +65,15 @@ fun sampleHeatmapYear(
         )
         data.toHeatmap { sampleHeatmapIntensity(it) }
     }
+    SampleCalendar.Chinese -> chineseYearHeatmap(
+        year = year,
+        style = ChineseTextStyle.English,
+        locale = locale,
+        firstDayOfWeek = firstDayOfWeek ?: WeekFields.of(locale).firstDayOfWeek,
+        todayEpochDay = today.toEpochDay(),
+        isDateEnabled = { isDateEnabled(LocalDate.ofEpochDay(it)) },
+        intensity = { sampleHeatmapIntensity(it) },
+    )
     SampleCalendar.SolarHijriNative -> (1..12).map { month ->
         val data = solarHijriNativeMonthData(
             SolarHijriDate(year, month, 1), locale,
@@ -83,6 +95,7 @@ fun sampleHeatmapCurrentYear(
     SampleCalendar.Hijri -> hijriDateProvider.dateForEpochDay(today.toEpochDay()).get(ChronoField.YEAR)
     SampleCalendar.SolarHijri -> JalaliCalendar(today).year
     SampleCalendar.SolarHijriNative -> SolarHijriDate.fromLocalDate(today).year
+    SampleCalendar.Chinese -> ChineseDate.fromEpochDay(today.toEpochDay()).year
 }
 
 /** Bounded demo ranges that the platform chronologies and JalaliCalendar support. */
@@ -91,6 +104,7 @@ fun sampleHeatmapYearRange(calendar: SampleCalendar): IntRange = when (calendar)
     SampleCalendar.Hijri -> 1300..1600
     SampleCalendar.SolarHijri -> 1200..1600
     SampleCalendar.SolarHijriNative -> 1200..1600
+    SampleCalendar.Chinese -> 1901..2099
 }
 
 /** Deterministic synthetic values in 0..0.9, matching the previous demo's rhythm. */

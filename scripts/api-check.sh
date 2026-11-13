@@ -35,29 +35,42 @@ if [[ ! -x "$JAVAP" || ! -x "$JAR" ]]; then
     exit 1
 fi
 
-MODULES=(library calendar-gregorian calendar-hijri calendar-solarHijri calendar-solarHijri-native)
+MODULES=(library calendar-gregorian calendar-hijri calendar-solarHijri calendar-solarHijri-native calendar-chinese-compose)
+# The Kotlin Multiplatform engine publishes a JVM jar instead of an Android AAR.
+ENGINE_MODULE=calendar-chinese-native
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 CLASS_JARS=()
 CLASSPATH=""
+declare -A JARS
 for module in "${MODULES[@]}"; do
     aar="$module/build/outputs/aar/${module}-release.aar"
     if [[ ! -f "$aar" ]]; then
         echo "Missing $aar." >&2
-        echo "Run: ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease :calendar-solarHijri-native:assembleRelease" >&2
+        echo "Run: ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease :calendar-solarHijri-native:assembleRelease :calendar-chinese-compose:assembleRelease" >&2
         exit 1
     fi
     classes_jar="$TMP/${module}.jar"
     unzip -p "$aar" classes.jar > "$classes_jar"
+    JARS[$module]="$classes_jar"
     CLASS_JARS+=("$classes_jar")
     CLASSPATH="${CLASSPATH:+$CLASSPATH:}$classes_jar"
 done
 
+engine_jar="$(find "$ENGINE_MODULE/build/libs" -maxdepth 1 -type f -name '*-jvm-*.jar' ! -name '*-sources.jar' | head -n 1)"
+if [[ -z "$engine_jar" ]]; then
+    echo "Missing $ENGINE_MODULE JVM jar." >&2
+    echo "Run: ./gradlew :calendar-chinese-native:jvmJar" >&2
+    exit 1
+fi
+JARS[$ENGINE_MODULE]="$engine_jar"
+CLASSPATH="${CLASSPATH:+$CLASSPATH:}$engine_jar"
+
 mkdir -p "$TMP/api"
 
-for module in "${MODULES[@]}"; do
-    classes_jar="$TMP/${module}.jar"
+for module in "${MODULES[@]}" "$ENGINE_MODULE"; do
+    classes_jar="${JARS[$module]}"
     dump="$TMP/api/${module}.api"
     {
         echo "# Public JVM API of com.github.mortezasun.android-calendarview:${module}"
@@ -80,6 +93,7 @@ for module in "${MODULES[@]}"; do
         grep -E '^(public |  |\})' <<<"$output" \
             | grep -vE '\$stable|DefaultConstructorMarker|\$default|access\$|synthetic' \
             | grep -vE 'solarHijriMonthTitle|hijriDayCellForEpoch|solarHijriNativeDayCellForEpoch' \
+            | grep -v '\$com_github_mortezasun_' \
             | sed -E 's/([A-Za-z0-9_]+)-[A-Za-z0-9_]+\(/\1(/' \
             >> "$dump"
         printf '\n' >> "$dump"
@@ -94,6 +108,7 @@ for module in "${MODULES[@]}"; do
             | grep -v 'ComposableSingletons' \
             | grep -v 'WhenMappings' \
             | grep -vE '\.R(\$.*)?$' \
+            | grep -vE 'ChineseCalendar(Data|Table)' \
             | grep -vE '\.BuildConfig$' \
             | sort
     )
@@ -111,7 +126,7 @@ if [[ "$UPDATE" -eq 1 ]]; then
 fi
 
 FAILED=0
-for module in "${MODULES[@]}"; do
+for module in "${MODULES[@]}" "$ENGINE_MODULE"; do
     if [[ ! -f "api/${module}.api" ]]; then
         echo "Missing api/${module}.api. Run scripts/api-check.sh --update." >&2
         FAILED=1
