@@ -3,7 +3,10 @@
 Stand: 2026-11-13. Zielbranch: `update`. Status: Umsetzung und Review-Nachbesserungen
 lokal verifiziert; Remote-CI fuer den Evidenzbaum `1ab841e` und den Fixstand `e80c00f` gruen.
 Die Nachbesserungen auf Basis `6fac725` sind als `5cf640d` lokal verifiziert; der gepushte Baum
-`952bbb6` ist mit allen vier Remote-Workflows gruen. JitPack, Geraetegates, Tag und Release offen.
+`952bbb6` ist mit allen vier Remote-Workflows gruen. Die Review-Findings gegen `54bf23d` sind im
+Arbeitsbaum lokal behoben, publiziert und mit isolierten Consumern geprueft; der Nachbesserungs-
+block wird separat auf `update` committet, die Remote-CI ist danach zu pruefen. JitPack,
+Geraetegates, Tag und Release bleiben offen.
 Gepruefte Branchbasis: `a9642f13d596fd35137945bc234dbf2827e6e398`. Letzter per GitHub API
 bestaetigter Release: `2.3.0`, Tag-Commit `8b7bea42e888785752fff199b2d53c04ab9888e4`,
 veroeffentlicht am 2026-11-13. Abweichende historische Datumsangaben nicht ungeprueft
@@ -122,6 +125,21 @@ Diese Nachbesserungen sind lokal getestet. Remote-CI fuer `952bbb6` (enthaelt `5
 verification `43439808516`, publishing `43439808420`, instrumentation `43439808384`, tablet
 `43439808435` - alle success. Geraete-, Fold-, TalkBack-, Benchmark-, Advisory- und
 JitPack-Gates bleiben offen.
+
+### Review-Nachbesserungen 2026-11-13 (Basis `54bf23d`)
+
+| Finding | Fix (Datei) | Regressionstest | Ausgefuehrte Pruefung |
+|---|---|---|---|
+| P1 Viewport-Recovery | `calendarviewsample/.../CalendarSampleViewport.kt`: ein `LaunchedEffect` setzt bei gueltigem `desired` und fehlgeschlagenem Fenster das Center auf `desired`; ungueltiges `desired` bleibt im Fehlerzweig. | `ChineseComposeRegressionTest.invalidCenterRecoversWhenAValidAnchorArrivesWithoutCompositionRestart` (ungueltiger Center, dann gueltiger Anchor ohne Neustart) und `switchingFromGregorianOverlayToChineseMonthsRebuildsTheWindow`. | `compileDebugKotlin`, `compileDebugAndroidTestKotlin` und `testDebugUnitTest` gruen; UI-Tests lokal nicht ausfuehrbar (kein Emulator), Remote-Instrumentation nach Push offen. |
+| P2 README/Consumer | `README.md`: `ChineseDate.of(2024, monthNumber = 1, isLeapMonth = false, dayOfMonth = 1)`. Neuer isolierter JVM-Consumer unter `tools/consumer-check/jvm-consumer` kompiliert und fuehrt genau dieses Beispiel aus. | JVM-Consumer `Main.kt` mit Asserts fuer Epoch 19763, Roundtrip, 13 Monate und `2023-2L`. | `:jvm-consumer:run` mit `/tmp/m2-review-final` als einziger Kalender-Repository-Quelle: `JVM consumer OK`, Exit 0. |
+| P2 Publishing-CI | `scripts/verify-publication.sh`: exakte AAR-/JAR-/Klib-/POM-/Module-/Sources-Pfade, ZIP-/Klassen-/Klib-Inhalte, alle `files`-/`available-at`-Referenzen der `.module`-Dateien sowie POM-/BOM-Abhaengigkeiten. Fehlende Target-Binaries und gebrochene Metadatenreferenzen schlagen fehl. Workflow ruft den Check und zwei isolierte Consumer auf. | Negativtests: geloeschte JVM-JAR und manipulierte Klib-Referenz fuehren jeweils zu Exit 1. Positivtest: vollstaendige lokale Publikation Exit 0. | `scripts/verify-publication.sh /tmp/m2-review-final 2.4.0` passed; Android-Consumer `:android-consumer:compileDebugKotlin` und JVM-Consumer `:jvm-consumer:run` aus `tools/consumer-check` erfolgreich. |
+| P2 API-Guard | `scripts/api-check.sh`: Version aus `build.gradle.kts`, exakter Pfad `calendar-chinese-native-jvm-${VERSION}.jar`, genau ein nicht-Sources-JVM-Jar; abweichende/stale Jars sind ein Fehler. | Manueller Negativtest mit zusaetzlichem `-jvm-2.3.0.jar`: Exit 1 mit Liste der gefundenen Jars; danach entfernt. | `bash scripts/api-check.sh` nach Entfernen des stale Jars: `Public API matches the checked-in dumps`, Exit 0. |
+| Zusatzfund Publikationsmetadaten | `calendar-chinese-native/build.gradle.kts`: Root-Metadata-JAR, Root-Sources-JAR und linuxX64-Klib werden auf die in Gradle Module Metadata referenzierten Dateinamen normalisiert. Vorher referenzierten die `.module`-Dateien `calendar-chinese-native-metadata-*.jar`/`-kotlin-*-sources.jar` und `...linuxX64Main-*.klib`, die im Repository nicht unter diesen Namen lagen. | `scripts/verify-publication.sh` prueft jede Metadatenreferenz; der Android-/JVM-Consumer loest die Varianten aus dem publizierten Repo auf. | Isolierte Publikation und beide Consumer erfolgreich; der Check schlaegt bei manipulierter Referenz fehl. |
+
+Lokale Regression: `test :calendar-chinese-native:jvmTest :calendar-chinese-native:linuxX64Test`
+und `:calendarviewsample:assembleDebug` BUILD SUCCESSFUL; 193 Android-JVM- + 14 KMP-JVM-Tests
+sowie 14 linuxX64-Tests ohne Fehler. Die beiden neuen Compose-Tests sind kompiliert, aber ohne
+lokalen Emulator nicht ausgefuehrt. Remote-CI fuer diesen Commit ist nach dem Push zu pruefen.
 
 #### Weiterhin offene Gates
 

@@ -53,66 +53,25 @@ jobs:
         run: |
           set -euo pipefail
           base="$RUNNER_TEMP/calendar-maven/com/github/mortezasun/android-calendarview"
-          mkdir -p .ci-diagnostics/publications
-          for module in library calendar-gregorian calendar-hijri calendar-solarHijri calendar-solarHijri-native calendar-chinese-compose; do
-            directory="$base/$module"
-            for suffix in .aar .pom .module -sources.jar; do
-              file=$(find "$directory" -type f -name "${module}-*${suffix}" -size +0c -print -quit)
-              if [ -z "$file" ]; then
-                echo "Missing nonempty publication: $module $suffix" >&2
-                exit 1
-              fi
-              echo "Verified $file"
-            done
-            cp -R "$directory" .ci-diagnostics/publications/
-          done
-          native_pom=$(find "$base/calendar-solarHijri-native" -type f -name 'calendar-solarHijri-native-*.pom' -print -quit)
+          bash scripts/verify-publication.sh "$RUNNER_TEMP/calendar-maven" 2.4.0 \
+            2>&1 | tee .ci-diagnostics/publication-verification.txt
+          native_pom="$base/calendar-solarHijri-native/2.4.0/calendar-solarHijri-native-2.4.0.pom"
           if grep -q 'jalalicalendar' "$native_pom"; then
             echo "calendar-solarHijri-native POM must not depend on jalalicalendar" >&2
             exit 1
           fi
-          engine_base="$base/calendar-chinese-native"
-          for suffix in .pom .module -sources.jar; do
-            file=$(find "$engine_base" -type f -name "calendar-chinese-native-*${suffix}" -size +0c -print -quit)
-            if [ -z "$file" ]; then
-              echo "Missing nonempty publication: calendar-chinese-native $suffix" >&2
-              exit 1
-            fi
-            echo "Verified $file"
-          done
-          engine_jar=$(find "$engine_base" -type f -name 'calendar-chinese-native-*.jar' ! -name '*-sources.jar' -size +0c -print -quit)
-          if [ -z "$engine_jar" ]; then
-            echo "Missing calendar-chinese-native metadata jar" >&2
-            exit 1
-          fi
-          engine_pom=$(find "$engine_base" -type f -name 'calendar-chinese-native-*.pom' -print -quit)
-          if grep -qE 'calendar-(gregorian|hijri|solarHijri)|androidx|compose' "$engine_pom"; then
-            echo "calendar-chinese-native POM must stay free of other engines, AndroidX and Compose" >&2
-            exit 1
-          fi
-          for variant in calendar-chinese-native-jvm calendar-chinese-native-linuxx64; do
-            variant_base="$base/$variant"
-            for suffix in .pom .module -sources.jar; do
-              file=$(find "$variant_base" -type f -name "$variant-*${suffix}" -size +0c -print -quit)
-              if [ -z "$file" ]; then
-                echo "Missing nonempty publication: $variant $suffix" >&2
-                exit 1
-              fi
-              echo "Verified $file"
-            done
-            cp -R "$variant_base" .ci-diagnostics/publications/
-          done
-          cp -R "$engine_base" .ci-diagnostics/publications/
-          bom_base="$base/calendar-bom"
-          for suffix in .pom .module; do
-            file=$(find "$bom_base" -type f -name "calendar-bom-*${suffix}" -size +0c -print -quit)
-            if [ -z "$file" ]; then
-              echo "Missing nonempty BOM publication: calendar-bom $suffix" >&2
-              exit 1
-            fi
-            echo "Verified $file"
-          done
-          cp -R "$bom_base" .ci-diagnostics/publications/
+          mkdir -p .ci-diagnostics/publications
+          cp -R "$base" .ci-diagnostics/publications/
+
+      - name: Build isolated published-artifact consumers
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash ./gradlew -p tools/consumer-check \
+            :jvm-consumer:run :android-consumer:compileDebugKotlin \
+            -PconsumerRepo="$RUNNER_TEMP/calendar-maven" \
+            --no-daemon --stacktrace --console=plain \
+            2>&1 | tee .ci-diagnostics/consumer-check.txt
 
       - name: Upload publishing diagnostics and artifacts
         if: always()

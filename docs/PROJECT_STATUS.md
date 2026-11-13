@@ -42,6 +42,17 @@ other devices.
   today-callback test exchanges two distinct callback instances after restoration. Sample JVM
   tests and the Python audit pass; the new Compose boundary/callback tests compile but were not
   run locally on a device.
+- Review fixes against `54bf23d`: `CalendarSampleViewport` rebuilds a failed window when a valid
+  requested month arrives (invalid center -> valid anchor and Gregorian overlay -> Chinese mode
+  are covered by new compiled Compose regression tests); the README `ChineseDate.of` example now
+  passes `isLeapMonth = false` and is executed by a standalone JVM consumer; the publishing
+  workflow checks exact target binaries and every Gradle Module Metadata reference and builds an
+  isolated JVM + Android consumer; the API guard requires the exact versioned engine JAR and
+  rejects ambiguous/stale JVM jars. A real publication defect was also fixed: Kotlin 2.4 wrote
+  the metadata/sources/native files under different names than the `.module` files referenced,
+  so the engine build now normalizes those names. Local consumers resolve the BOM, JVM jar and
+  native klib from the isolated repository. This block is committed separately on `update`; its
+  remote CI run is still to be checked.
 - Added `:calendar-chinese-compose`: `ChineseCalendarMonth`, `GregorianChineseCalendarMonth`,
   `chineseMonthData`, `ChineseWeekData`, `ChineseMonthState`/`rememberChineseMonthState` with
   leap-month identity in title, keys, saver and heatmap titles, plus `chineseYearHeatmap` /
@@ -66,7 +77,11 @@ other devices.
 | `python3 -m unittest tools/chinese-calendar/test_generate.py` | 6 tests, 0 failed; missing reference files/starts, year/leap checks, documented-conflict audit, instant/timezone/tolerance rejection and the corrected NASA-1914 value |
 | `bash scripts/api-check.sh` | passed; existing five dumps `0` diff, two new dumps added |
 | isolated `publishToMavenLocal` to `/tmp/m2test` | engine root/jvm/linuxx64, compose and BOM published; POMs inspected: engine only `kotlin-stdlib`, compose `library` + engine + material3 runtime, BOM lists seven modules |
+| isolated publication verification on `/tmp/m2-review-final` | `scripts/verify-publication.sh` passed: exact AAR/JAR/KLIB/POM/MODULE/sources files, archive contents, all `.module` `files`/`available-at` references, engine POM isolation and BOM constraints |
 | standalone JVM consumer (`javac` + engine jar) | 2024-02-10 → epoch 19763, round-trip OK, 2023 has 13 months and leap month `2023-2L`; jar contains no AndroidX/Compose/Android classes |
+| tracked isolated JVM consumer (`tools/consumer-check`) | `:jvm-consumer:run` against `/tmp/m2-review-final`: `JVM consumer OK`, Exit 0; resolves BOM + engine from the publication only |
+| tracked isolated Android consumer (`tools/consumer-check`) | `:android-consumer:compileDebugKotlin` against `/tmp/m2-review-final`: BUILD SUCCESSFUL; compiles the public Compose facade, not installed/run |
+| negative publication/API checks | missing target JVM jar and broken native `.module` reference each fail the verifier; a second stale `-jvm-2.3.0.jar` fails `scripts/api-check.sh` |
 | independent Android consumer (separate `/tmp` project, BOM + file Maven repo, `assembleDebug`) | BUILD SUCCESSFUL; APK produced, not installed or run |
 
 ### Open items
@@ -91,6 +106,7 @@ other devices.
   - `Android instrumentation`: Run 43439808384 (success)
   - `Android tablet verification`: Run 43439808435 (success)
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
+- Remote CI for the pushed review-fix commit against `54bf23d` is still to be verified; local publication, both isolated consumers, the API guard and the native/JVM regression are green.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).
 - No merge, tag, GitHub Release or publication was performed and none is authorized by this status.

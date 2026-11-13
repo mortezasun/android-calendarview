@@ -58,12 +58,34 @@ for module in "${MODULES[@]}"; do
     CLASSPATH="${CLASSPATH:+$CLASSPATH:}$classes_jar"
 done
 
-engine_jar="$(find "$ENGINE_MODULE/build/libs" -maxdepth 1 -type f -name '*-jvm-*.jar' ! -name '*-sources.jar' | head -n 1)"
-if [[ -z "$engine_jar" ]]; then
-    echo "Missing $ENGINE_MODULE JVM jar." >&2
+VERSION="$(sed -nE 's/^[[:space:]]*version = "([^"]+)"$/\1/p' build.gradle.kts | head -n 1)"
+if [[ -z "$VERSION" ]]; then
+    echo "Could not read the published version from build.gradle.kts." >&2
+    exit 1
+fi
+ENGINE_LIBS="$ENGINE_MODULE/build/libs"
+EXPECTED_ENGINE_JAR="$ENGINE_LIBS/${ENGINE_MODULE}-jvm-${VERSION}.jar"
+shopt -s nullglob
+ENGINE_JARS=()
+for candidate in "$ENGINE_LIBS/${ENGINE_MODULE}-jvm-"*.jar; do
+    if [[ "$candidate" == *-sources.jar ]]; then
+        continue
+    fi
+    ENGINE_JARS+=("$candidate")
+done
+shopt -u nullglob
+if [[ ! -f "$EXPECTED_ENGINE_JAR" ]]; then
+    echo "Missing exact $ENGINE_MODULE JVM jar: $EXPECTED_ENGINE_JAR" >&2
     echo "Run: ./gradlew :calendar-chinese-native:jvmJar" >&2
     exit 1
 fi
+if [[ "${#ENGINE_JARS[@]}" -ne 1 || "${ENGINE_JARS[0]}" != "$EXPECTED_ENGINE_JAR" ]]; then
+    echo "Ambiguous $ENGINE_MODULE JVM jars; expected exactly $EXPECTED_ENGINE_JAR." >&2
+    printf 'Found: %s\n' "${ENGINE_JARS[@]}" >&2
+    echo "Remove stale jars from $ENGINE_LIBS (for example with ./gradlew :calendar-chinese-native:clean)." >&2
+    exit 1
+fi
+engine_jar="$EXPECTED_ENGINE_JAR"
 JARS[$ENGINE_MODULE]="$engine_jar"
 CLASSPATH="${CLASSPATH:+$CLASSPATH:}$engine_jar"
 

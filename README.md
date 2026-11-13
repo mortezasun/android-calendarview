@@ -264,7 +264,7 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseDate
 import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 
 // Pure Kotlin/JVM: no Compose, Android or other calendar module needed.
-val newYear = ChineseDate.of(2024, monthNumber = 1, dayOfMonth = 1)
+val newYear = ChineseDate.of(2024, monthNumber = 1, isLeapMonth = false, dayOfMonth = 1)
 val epochDay = newYear.toEpochDay()
 val sameDay = ChineseDate.fromEpochDay(epochDay)
 

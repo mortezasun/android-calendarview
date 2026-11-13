@@ -9,6 +9,8 @@
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
+/tools/consumer-check/.gradle/
+/tools/consumer-check/**/build/
 /captures
 .externalNativeBuild
 .cxx

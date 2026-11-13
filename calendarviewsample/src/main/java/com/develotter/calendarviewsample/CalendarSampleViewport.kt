@@ -63,6 +63,12 @@ internal fun CalendarSampleViewport(
     val window = remember(monthCalendar, center) { runCatching { sampleMonthWindow(monthCalendar, center) } }
     val desired = request.getOrNull()
     val months = window.getOrNull()
+    // A saved/carried center can be invalid while the requested anchor is valid (for example
+    // after restoring state or changing the visible month range). The error branch below cannot
+    // recover on its own because the window is never built for an invalid center.
+    LaunchedEffect(monthCalendar, desired, window.isFailure) {
+        if (desired != null && window.isFailure && center != desired) center = desired
+    }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (showModeSelector) {
             Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {

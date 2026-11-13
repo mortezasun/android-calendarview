@@ -81,6 +81,66 @@ class ChineseComposeRegressionTest {
     }
 
     @Test
+    fun invalidCenterRecoversWhenAValidAnchorArrivesWithoutCompositionRestart() {
+        val invalid = ChineseCalendarEngine.MIN_EPOCH_DAY - 1
+        val valid = ChineseCalendarEngine.MIN_EPOCH_DAY
+        val anchor = mutableStateOf(invalid)
+        val validMonth = moveSampleMonth(SampleCalendar.Chinese, valid, 0)
+        compose.setContent {
+            MaterialTheme {
+                Column {
+                    Button(onClick = { anchor.value = valid }) { Text("valid") }
+                    CalendarSampleViewport(
+                        calendar = SampleCalendar.Chinese,
+                        anchor = anchor.value,
+                        forcedMode = SampleDisplayMode.Single,
+                        viewportHeight = androidx.compose.ui.unit.Dp(200f),
+                    ) { monthAnchor ->
+                        Text("month:$monthAnchor")
+                    }
+                }
+            }
+        }
+
+        // The initial center is invalid, so the window must fail before the valid anchor arrives.
+        compose.onNodeWithText("month:$validMonth").assertDoesNotExist()
+        compose.onNodeWithText("valid").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("month:$validMonth").assertIsDisplayed()
+        compose.onNodeWithText("Updating month window").assertDoesNotExist()
+    }
+
+    @Test
+    fun switchingFromGregorianOverlayToChineseMonthsRebuildsTheWindow() {
+        val anchor = LocalDate.of(2023, 2, 15).toEpochDay()
+        val overlay = mutableStateOf(true)
+        val gregorianMonth = moveSampleMonth(SampleCalendar.Gregorian, anchor, 0)
+        val chineseMonth = moveSampleMonth(SampleCalendar.Chinese, anchor, 0)
+        compose.setContent {
+            MaterialTheme {
+                Column {
+                    Button(onClick = { overlay.value = false }) { Text("chinese") }
+                    CalendarSampleViewport(
+                        calendar = SampleCalendar.Chinese,
+                        anchor = anchor,
+                        monthCalendar = sampleMonthNavigationCalendar(SampleCalendar.Chinese, overlay.value),
+                        forcedMode = SampleDisplayMode.HorizontalPager,
+                        viewportHeight = androidx.compose.ui.unit.Dp(200f),
+                    ) { monthAnchor ->
+                        Text("month:$monthAnchor")
+                    }
+                }
+            }
+        }
+
+        compose.onNodeWithText("month:$gregorianMonth").assertIsDisplayed()
+        compose.onNodeWithText("chinese").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("month:$chineseMonth").assertIsDisplayed()
+        compose.onNodeWithText("Updating month window").assertDoesNotExist()
+    }
+
+    @Test
     fun chineseBoundaryWindowRendersAndNavigatesInSingleMode() {
         val anchor = mutableStateOf(ChineseCalendarEngine.MIN_EPOCH_DAY)
         val minimum = moveSampleMonth(SampleCalendar.Chinese, ChineseCalendarEngine.MIN_EPOCH_DAY, 0)

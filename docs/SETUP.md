@@ -139,8 +139,19 @@ publishes the BOM together with the modules.
   :calendar-bom:publishToMavenLocal
 ```
 
-Artifacts land in `~/.m2/repository/com/github/mortezasun/android-calendarview/`. Check the
-generated POMs: each Compose `calendar-*` module must depend on `...:library` in compile scope
+Artifacts land in `~/.m2/repository/com/github/mortezasun/android-calendarview/`. Verify the
+exact versioned files, archive contents and every Gradle Module Metadata reference, then build
+the isolated JVM and Android consumers (pass the same Maven repository used above):
+
+```bash
+bash scripts/verify-publication.sh /tmp/m2-review 2.4.0
+./gradlew -p tools/consumer-check :jvm-consumer:run :android-consumer:compileDebugKotlin \
+  -PconsumerRepo=/tmp/m2-review
+```
+
+The consumer build is standalone: it has no `project(...)` or `includeBuild(...)` reference and
+does not default to `mavenLocal()`. Check the generated POMs: each Compose `calendar-*` module
+must depend on `...:library` in compile scope
 (and `calendar-chinese-compose` additionally on `calendar-chinese-native`),
 `calendar-solarHijri` must additionally carry `ir.huri:jalalicalendar` (while
 `calendar-solarHijri-native` and `calendar-chinese-native` must not), and the BOM must list all
