@@ -7,7 +7,7 @@ Schwachstellenfreiheit noch einen aktuellen CVE-Scan.
 ## Funktionale Pflichtmatrix
 
 - [x] Jeden unterstuetzten Epoch Day nach chinesisch und zurueck konvertieren; jeden gueltigen chinesischen Tag umgekehrt pruefen. (72.674 Tage, `wholeRangeRoundTrips`.)
-- [x] Zusaetzlich unabhaengige Referenzdaten vergleichen. Roundtrips allein beweisen keine richtige Kalenderzuordnung. (Generator: 2.458 exakt + 3 auditierte Abweichungen = 2.461 HKO-Monatsstarts, 0 fehlende Referenzen; die Abweichungen sind mit strukturierter NASA/GSFC-Neumondzeit und 60-s-Toleranz belegt; `--verify-reference` verlangt vollstaendige Datei-/Startabdeckung, Jahres-/Schaltmonatsstatus, identische UTC-/UTC+8-Instants und explizite Zeitzonen. Die Ursache der abweichenden HKO-UT-Zeile bleibt ungeklaert.)
+- [x] Zusaetzlich unabhaengige Referenzdaten vergleichen. Roundtrips allein beweisen keine richtige Kalenderzuordnung. (Generator: 2.458 exakt + 3 auditierte Abweichungen = 2.461 HKO-Monatsstarts, 0 fehlende Referenzen; die Abweichungen sind mit strukturierter NASA/GSFC-Neumondzeit und 60-s-Toleranz belegt; `--verify-reference` verlangt vollstaendige Datei-/Startabdeckung, Jahres-/Schaltmonatsstatus, identische UTC-/UTC+8-Instants und explizite Zeitzonen. Die HKO-Zeilen sind mit Pekinger Ortszeit vor 1929 vereinbar; die Library bleibt bewusst bei UTC+8 und behandelt sie als dokumentierte historische Referenzunterschiede.)
 - [x] Alle Jahres-/Monatswechsel, 29-/30-Tage-Monate, alle Schaltmonate und insbesondere 2033/2034 gegen Referenz pruefen. (2.461 Monate lueckenlos; Leap-Fixtures inkl. 2033/2034.)
 - [x] Randjahre, Randmonate, Nebenmonatszellen, min/max +/- 1 und ungueltige Schaltmonate pruefen.
 - [x] Gregorianische Jahrhundertgrenzen einschliesslich 1900/2000/2100 soweit unterstuetzt bzw. als ablehnender Grenztest abdecken. (Range endet 2100-02-08; 1900/2100 ausserhalb werden abgelehnt.)
@@ -61,7 +61,7 @@ Vor Freigabe Benchmarks fuer Konvertierung, Monatsaufbau, 13-Monats-Heatmap und 
 | Compose-Daten/State | 10 Tests: Monat/Woche/State/Saver/Heatmap/Overlay, inkl. 12/13 Monate, Bounds und Decode-Validierung |
 | Sample | `assembleDebug`, 60 Unit-Tests und `compileDebugAndroidTestKotlin` erfolgreich; neue Single-/Pager-Boundary-Tests nur kompiliert |
 | API/Consumer | bestehende Dumps `0` Diff; Engine-JVM-Consumer; Android-BOM-Consumer `assembleDebug` |
-| Python-Referenzpruefung | 6 Tests: fehlende Dateien/Starts, Jahres-/Schaltmonatsstatus, dokumentierter Konflikt, Verify-Fehlerstatus, Instant-Gleichheit/Zeitzonen/Toleranz und NASA-1914-Wert |
+| Python-Referenzpruefung | 7 Tests: fehlende Dateien/Starts, Jahres-/Schaltmonatsstatus, dokumentierter Konflikt, Verify-Fehlerstatus, Instant-Gleichheit/Zeitzonen/Toleranz, NASA-1914-Wert und SHA-256 der Kotlin-Daten gegen das Manifest |
 | Remote-CI | Evidenzbaum `1ab841e`: verification `43401491446`, publishing `43401491433`, instrumentation `43401491452`, tablet `43401491675`; Fixstand `e80c00f`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286`; Nachbesserungsbaum `952bbb6` (enthaelt `5cf640d`): verification `43439808516`, publishing `43439808420`, instrumentation `43439808384`, tablet `43439808435` - alle success. |
 | Offen | chinesische UI-Interaktion auf realen Geraeten/Folds, TalkBack/Grossschrift/RTL, Touch-Target-Messung, Benchmarks, Advisory-/CVE-Scan, JitPack |
 

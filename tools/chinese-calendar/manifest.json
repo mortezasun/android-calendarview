@@ -40,7 +40,7 @@
       "documentedConflicts": [
         {
           "chineseYear": 1914,
-          "classification": "HKO lists 1914-11-17 while the documented UTC+8 rule places the new moon 1m43s after local midnight on 1914-11-18, so this dataset keeps 1914-11-18. Why HKO's 1914 row uses the previous UT date is unresolved; the available sources do not establish an intentional historical UT-date convention.",
+          "classification": "HKO lists 1914-11-17, consistent with pre-1929 Beijing local mean time (UT+7:45:40), while the new moon is 1m43s after UTC+8 midnight on 1914-11-18. This dataset deliberately applies the modern UTC+8 convention across its full range and keeps 1914-11-18; the HKO row is a documented historical-reference difference, not an open data question.",
           "deltaTSeconds": 16.92,
           "generatedDate": "1914-11-18",
           "hkoDate": "1914-11-17",
@@ -59,7 +59,7 @@
         },
         {
           "chineseYear": 1916,
-          "classification": "HKO lists 1916-02-03 while the documented UTC+8 rule places the new moon 5m16s after local midnight on 1916-02-04, so this dataset keeps 1916-02-04. Why HKO's 1916 row uses the previous UT date is unresolved; the available sources do not establish an intentional historical UT-date convention.",
+          "classification": "HKO lists 1916-02-03, consistent with pre-1929 Beijing local mean time (UT+7:45:40), while the new moon is 5m16s after UTC+8 midnight on 1916-02-04. This dataset deliberately applies the modern UTC+8 convention across its full range and keeps 1916-02-04; the HKO row is a documented historical-reference difference, not an open data question.",
           "deltaTSeconds": 18.34,
           "generatedDate": "1916-02-04",
           "hkoDate": "1916-02-03",
@@ -78,7 +78,7 @@
         },
         {
           "chineseYear": 1920,
-          "classification": "HKO lists 1920-11-10 while the documented UTC+8 rule places the new moon 4m50s after local midnight on 1920-11-11, so this dataset keeps 1920-11-11. Why HKO's 1920 row uses the previous UT date is unresolved; the available sources do not establish an intentional historical UT-date convention.",
+          "classification": "HKO lists 1920-11-10, consistent with pre-1929 Beijing local mean time (UT+7:45:40), while the new moon is 4m50s after UTC+8 midnight on 1920-11-11. This dataset deliberately applies the modern UTC+8 convention across its full range and keeps 1920-11-11; the HKO row is a documented historical-reference difference, not an open data question.",
           "deltaTSeconds": 21.86,
           "generatedDate": "1920-11-11",
           "hkoDate": "1920-11-10",

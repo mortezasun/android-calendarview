@@ -26,9 +26,11 @@ other devices.
   NASA/GSFC new-moon times (1914-11-17 16:02 UT, 1916-02-03 16:05 UT, 1920-11-10 16:05 UT) with a
   documented 60-second tolerance. `--verify-reference` checks complete file/start coverage, year
   and leap status, identical UTC/UTC+8 instants, explicit time zones and the independent time
-  within tolerance. HKO lists the previous UT date; why its historical row differs is unresolved
-  and is not presented as an established convention. The table keeps the documented UTC+8 date.
-  No HKO data, ICU, lunar-java or other calendar code is embedded or redistributed.
+  within tolerance. HKO lists the previous UT date, consistent with pre-1929 Beijing local mean
+  time (UT+7:45:40). The dataset deliberately keeps the modern UTC+8 convention across its full
+  range; these are documented historical-reference differences, not an open data question. A
+  blanket local-time switch would also move other starts (the audit includes 1906-04-24), so it is
+  not adopted. No HKO data, ICU, lunar-java or other calendar code is embedded or redistributed.
 - Review fixes (base `6970b92`): today navigation honours configured month bounds; the reference
   comparison rejects missing files/starts and checks year/leap status; the Gregorian Chinese
   overlay uses Gregorian header/pager identities; agenda keys include the text style; the today
@@ -38,7 +40,8 @@ other devices.
 - Further review fixes (base `6fac725`): the sample month window is truncated at finite engine
   bounds so both boundary months render in Single and Pager modes; the conflict audit requires
   both recorded instants to agree and compares the structured NASA time within its documented
-  tolerance; the 1914 NASA value is corrected and the HKO explanation is marked unresolved; the
+  tolerance; the 1914 NASA value is corrected and the HKO rows are recorded as a deliberate UTC+8
+  product convention; the
   today-callback test exchanges two distinct callback instances after restoration. Sample JVM
   tests and the Python audit pass; the new Compose boundary/callback tests compile but were not
   run locally on a device.
@@ -84,7 +87,7 @@ other devices.
 | `./gradlew :calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
 | `./gradlew ... lintDebug` for core, all five calendar modules and sample | BUILD SUCCESSFUL |
 | `./gradlew :calendarviewsample:compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL (compile only; not executed) |
-| `python3 -m unittest tools/chinese-calendar/test_generate.py` | 6 tests, 0 failed; missing reference files/starts, year/leap checks, documented-conflict audit, instant/timezone/tolerance rejection and the corrected NASA-1914 value |
+| `python3 -m unittest tools/chinese-calendar/test_generate.py` | 7 tests, 0 failed; missing reference files/starts, year/leap checks, documented-conflict audit, instant/timezone/tolerance rejection, the corrected NASA-1914 value and the Kotlin-data SHA-256 against the manifest |
 | `bash scripts/api-check.sh` | passed; existing five dumps `0` diff, two new dumps added |
 | isolated `publishToMavenLocal` to `/tmp/m2test` | engine root/jvm/linuxx64, compose and BOM published; POMs inspected: engine only `kotlin-stdlib`, compose `library` + engine + material3 runtime, BOM lists seven modules |
 | isolated publication verification on `/tmp/m2-review-final` | `scripts/verify-publication.sh` passed: exact AAR/JAR/KLIB/POM/MODULE/sources files, archive contents, all `.module` `files`/`available-at` references, engine POM isolation and BOM constraints |

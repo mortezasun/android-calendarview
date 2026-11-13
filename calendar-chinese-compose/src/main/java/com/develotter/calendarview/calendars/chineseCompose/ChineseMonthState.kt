@@ -99,6 +99,19 @@ internal object ChineseMonthSnapshot {
 }
 
 /**
+ * Resolves the default visible month inside the engine's supported epoch-day range.
+ * A host clock outside the published data set must not crash composition; the nearest
+ * supported month is shown instead.
+ */
+internal fun defaultChineseMonth(todayEpochDay: Long): ChineseMonth =
+    ChineseMonth.fromEpochDay(
+        todayEpochDay.coerceIn(
+            ChineseCalendarEngine.MIN_EPOCH_DAY,
+            ChineseCalendarEngine.MAX_EPOCH_DAY,
+        ),
+    )
+
+/**
  * Remembers a saveable [ChineseMonthState]. Initial month and bounds are initializers, not
  * controlled inputs: changing them during composition resets the state. Restoration validates
  * the saved month against the current data set and bounds and falls back to the initializer when
@@ -106,7 +119,7 @@ internal object ChineseMonthSnapshot {
  */
 @Composable
 fun rememberChineseMonthState(
-    initialMonth: ChineseMonth = ChineseMonth.fromEpochDay(LocalDate.now().toEpochDay()),
+    initialMonth: ChineseMonth = defaultChineseMonth(LocalDate.now().toEpochDay()),
     minMonth: ChineseMonth = ChineseCalendarEngine.firstMonthOfYear(ChineseCalendarEngine.MIN_YEAR),
     maxMonth: ChineseMonth = ChineseCalendarEngine.lastMonthOfYear(ChineseCalendarEngine.MAX_YEAR),
     today: () -> Long = { LocalDate.now().toEpochDay() },

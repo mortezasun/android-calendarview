@@ -170,6 +170,20 @@ class ChineseComposeDataTest {
     }
 
     @Test
+    fun defaultMonthIsClampedToTheSupportedDataSet() {
+        assertEquals(
+            ChineseCalendarEngine.firstMonthOfYear(ChineseCalendarEngine.MIN_YEAR),
+            defaultChineseMonth(Long.MIN_VALUE),
+        )
+        assertEquals(
+            ChineseCalendarEngine.lastMonthOfYear(ChineseCalendarEngine.MAX_YEAR),
+            defaultChineseMonth(Long.MAX_VALUE),
+        )
+        val epochDay = LocalDate.of(2024, 2, 10).toEpochDay()
+        assertEquals(ChineseMonth.fromEpochDay(epochDay), defaultChineseMonth(epochDay))
+    }
+
+    @Test
     fun monthStateRejectsNonBinaryLeapFlagsWhenRestoring() {
         assertEquals(ChineseMonth.of(2024, 2), ChineseMonthSnapshot.decode(listOf(2024, 2, 0)))
         assertEquals(ChineseMonth.of(2033, 11, true), ChineseMonthSnapshot.decode(listOf(2033, 11, 1)))

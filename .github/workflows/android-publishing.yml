@@ -53,9 +53,14 @@ jobs:
         run: |
           set -euo pipefail
           base="$RUNNER_TEMP/calendar-maven/com/github/mortezasun/android-calendarview"
-          bash scripts/verify-publication.sh "$RUNNER_TEMP/calendar-maven" 2.4.0 \
+          VERSION="$(sed -nE 's/^[[:space:]]*version = "([^"]+)"$/\1/p' build.gradle.kts | head -n 1)"
+          if [[ -z "$VERSION" ]]; then
+            echo "Could not read the publication version from build.gradle.kts" >&2
+            exit 1
+          fi
+          bash scripts/verify-publication.sh "$RUNNER_TEMP/calendar-maven" "$VERSION" \
             2>&1 | tee .ci-diagnostics/publication-verification.txt
-          native_pom="$base/calendar-solarHijri-native/2.4.0/calendar-solarHijri-native-2.4.0.pom"
+          native_pom="$base/calendar-solarHijri-native/$VERSION/calendar-solarHijri-native-$VERSION.pom"
           if grep -q 'jalalicalendar' "$native_pom"; then
             echo "calendar-solarHijri-native POM must not depend on jalalicalendar" >&2
             exit 1

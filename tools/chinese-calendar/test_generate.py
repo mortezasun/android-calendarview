@@ -3,6 +3,7 @@
 
 import copy
 import datetime
+import hashlib
 import importlib.util
 import json
 import os
@@ -157,12 +158,37 @@ class HkoComparisonTest(unittest.TestCase):
             "tolerance 5.0s" in error for error in check(too_tight)
         ))
 
-    def test_1914_reference_uses_the_actual_nasa_minute_and_marks_hko_reason_unresolved(self):
+    def test_1914_reference_uses_the_actual_nasa_minute_and_records_hko_difference(self):
         with open(os.path.join(HERE, "reference-conflicts.json"), encoding="utf-8") as handle:
-            conflict = json.load(handle)["conflicts"][0]
+            conflicts = json.load(handle)["conflicts"]
+        conflict = conflicts[0]
         self.assertEqual("1914-11-17T16:02:00Z", conflict["independentReference"]["newMoonUtc"])
         self.assertEqual(60, conflict["independentReference"]["toleranceSeconds"])
-        self.assertIn("unresolved", conflict["classification"])
+        for item in conflicts:
+            self.assertIn("Beijing local mean time", item["classification"])
+            self.assertIn("deliberately applies the modern UTC+8", item["classification"])
+            self.assertIn("not an open data question", item["classification"])
+
+    def test_checked_in_kotlin_source_matches_manifest_sha256(self):
+        root = os.path.dirname(os.path.dirname(HERE))
+        with open(os.path.join(root, "tools", "chinese-calendar", "manifest.json"), encoding="utf-8") as handle:
+            manifest = json.load(handle)
+        source_path = os.path.join(
+            root,
+            "calendar-chinese-native",
+            "src",
+            "commonMain",
+            "kotlin",
+            "com",
+            "develotter",
+            "calendarview",
+            "calendars",
+            "chineseNative",
+            "ChineseCalendarData.kt",
+        )
+        with open(source_path, "rb") as handle:
+            digest = hashlib.sha256(handle.read()).hexdigest()
+        self.assertEqual(manifest["output"]["sha256"], digest)
 
     def test_unallowed_field_mismatch_fails_verification(self):
         start = datetime.date(2024, 2, 10)

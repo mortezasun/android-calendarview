@@ -47,10 +47,13 @@ und dokumentierte Toleranz von 60 s) und die Einordnung: der Neumond liegt 1m43s
 16:05 UT und fuer 1920-11-10 16:05 UT. `--verify-reference` prueft, dass `newMoonUtc` und
 `newMoonUtcPlus8` denselben Zeitpunkt bezeichnen, beide explizite Offsets tragen und die
 NASA-Zeit innerhalb der dokumentierten Toleranz zum neu berechneten UTC-Wert liegt. Die HKO-Zeile
-traegt jeweils den vorherigen UT-Kalendertag; ob dies eine absichtliche historische HKO-UT-
-Konvention oder eine andere Regel ist, ist mit den verfuegbaren Quellen nicht belegt und bleibt
-ausdruecklich ungeklaert. Die Tabelle bleibt auf dem dokumentierten UTC+8-Datum; es gibt keine
-undokumentierte Tabellenkorrektur. `--verify-reference` prueft alle erwarteten Dateien und
+traegt jeweils den vorherigen UT-Kalendertag; das ist mit Pekinger Ortszeit (UT+7:45:40) vor 1929
+vereinbar. Die Library trifft eine bewusste Produktentscheidung: Sie wendet ueber den gesamten
+Bereich die moderne UTC+8-Konvention an und uebernimmt keine historische Ortszeitregel. Eine
+pauschale Umstellung auf Ortszeit wuerde nach dem durchgefuehrten Audit auch weitere Monatsstarts
+verschieben (z. B. 1906-04-24); sie ist daher nicht Teil dieser Entscheidung. Die drei HKO-Zeilen
+sind dokumentierte historische Referenzunterschiede, keine offene Datenfrage. Die Tabelle bleibt
+auf dem dokumentierten UTC+8-Datum; es gibt keine undokumentierte Tabellenkorrektur. `--verify-reference` prueft alle erwarteten Dateien und
 Monatsstarts sowie Jahr und Schaltstatus und beendet sich bei Abweichungen mit Status 1.
 Datensatzversion `2026.11-astronomical-v1`, Ausgabe-SHA256 und VSOP87D-Eingabe-SHA256 stehen im
 Manifest. Aenderungen muessen in spaeteren Releases nachvollziehbar versioniert werden; keine
