@@ -1,16 +1,20 @@
 # Release acceptance
 
-Status: `2.3.0` is prepared on `update` (not yet released). `2.2.1` is the current published release and published on GitHub Releases. `2.2.0` remains the previous published release.
+Status: `2.3.0` is released and published on GitHub Releases. `2.2.1` remains the previous published release and published on GitHub Releases. `2.2.0` remains the previous published release.
 
-## 0. Upcoming release: 2.3.0 (in preparation on `update`)
+## 0. Current release: 2.3.0 (2026-11-12)
 
 - [x] Root version set to `2.3.0` in root `build.gradle.kts`, sample `versionCode` `20300` / `versionName` `"2.3.0"`.
 - [x] New `:calendar-solarHijri-native` module implemented (`SolarHijriEngine`, `SolarHijriDate`, `SolarHijriLocale`, Compose parity, boundary guards, `Clock` injection).
 - [x] `:calendar-solarHijri-native` added to `settings.gradle.kts`, `calendar-bom`, `jitpack.yml`, `scripts/api-check.sh`, CI workflows, and `calendarviewsample`.
 - [x] `api/calendar-solarHijri-native.api` generated; existing `api/*.api` dumps unchanged (`0` diff).
-- [ ] All required CI checks passing on `update` (`assemble`, `unit-tests`, `lint`, `publishing`, `Core and sample instrumentation`, `Core and sample tablet instrumentation`).
-- [ ] Empty release commit `release: 2.3.0` pushed to `update` and published via `publish-2-3-0.yml`.
-- [ ] JitPack `2.3.0` build verified (all 5 modules + BOM) and consumer smoke test passed without `ir.huri:jalalicalendar`.
+- [x] All required CI checks passed for the release tree (`8b7bea42e888785752fff199b2d53c04ab9888e4`):
+  - `Android verification`: Run 43375002038 (success)
+  - `Android publishing verification`: Run 43375002125 (success)
+  - `Android instrumentation`: Run 43375002077 (success)
+  - `Android tablet verification`: Run 43375002074 (success)
+- [x] Release commit `8b7bea4` (`release: 2.3.0`) is tagged `2.3.0`; GitHub Release `2.3.0` is published via `publish-2-3-0.yml` (Run 43375002033).
+- [ ] JitPack `2.3.0` build verified (all 5 modules + BOM) and consumer smoke test passed without `ir.huri:jalalicalendar` (initial JitPack probe returned HTTP 500; verify on `jitpack.io/#mortezasun/android-calendarview/2.3.0`).
 
 ## 1. Current release: 2.2.1 (2026-11-12)
 

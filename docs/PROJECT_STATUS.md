@@ -4,7 +4,7 @@ Last updated: 2026-11-12
 Version: `2.2.1` (published tag `2.2.1` at `dd20e49`)
 Branch: `update`
 
-## Upcoming release 2.3.0: `:calendar-solarHijri-native` (branch `update`, 2026-11-12)
+## Current release status: 2.3.0 (published, branch `update`, 2026-11-12)
 
 - Added dependency-free `:calendar-solarHijri-native` module (`com.develotter.calendarview.calendars.solarHijriNative`) per [ADR 0004](decisions/0004-native-solar-hijri-module.md), keeping `:calendar-solarHijri` and `api/calendar-solarHijri.api` completely unchanged.
 - Implemented `SolarHijriEngine` (Borkowski 1996 break-table port from `jalaali-js`, MIT, attributed in `NOTICE`, years `-61..3177` AP), immutable `SolarHijriDate`, `SolarHijriLocale` (`fa`, `fa-AF`/`prs`, `en`), and Compose parity (`SolarHijriNativeCalendarMonth`, `SolarHijriNativeMonthData`, `SolarHijriNativeWeekData`, `SolarHijriNativeMonthState` / `rememberSolarHijriNativeMonthState` with injectable `Clock` and boundary guards).
@@ -15,7 +15,13 @@ Branch: `update`
   - Release AARs for all 5 library modules + `bash scripts/api-check.sh`: passed (`api/calendar-solarHijri-native.api` added; existing 4 `.api` dumps have 0 diff).
   - `publishToMavenLocal` to `/tmp/m2`: verified `calendar-solarHijri-native-2.3.0.pom` has no `jalalicalendar` dependency and `calendar-bom-2.3.0.pom` constrains all 5 library modules.
   - `python3 -m unittest discover -s scripts -p 'test_*.py'`: 8 tests passed.
-- Not run locally: instrumented/tablet emulator suites (require KVM/emulator in CI) and remote JitPack/consumer verification (pending push/release approval).
+- Published `2.3.0` on GitHub Releases (`https://github.com/mortezasun/android-calendarview/releases/tag/2.3.0`) from commit `8b7bea42e888785752fff199b2d53c04ab9888e4` via `publish-2-3-0.yml` (Run `43375002033`).
+- Verified remote CI runs on `8b7bea4`:
+  - `Android verification`: Run `43375002038` (success)
+  - `Android publishing verification`: Run `43375002125` (success)
+  - `Android instrumentation`: Run `43375002077` (success)
+  - `Android tablet verification`: Run `43375002074` (success)
+- Pending external check: remote JitPack `2.3.0` build & consumer smoke test (initial probe to `jitpack.io` returned HTTP 500).
 
 ## Post-2.2.0 Adaptive Review and Hardening (branch `update`, Arbeitspakete A–I)
 
