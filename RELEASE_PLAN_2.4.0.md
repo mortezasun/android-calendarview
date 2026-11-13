@@ -5,8 +5,10 @@ lokal verifiziert; Remote-CI fuer den Evidenzbaum `1ab841e` und den Fixstand `e8
 Die Nachbesserungen auf Basis `6fac725` sind als `5cf640d` lokal verifiziert; der gepushte Baum
 `952bbb6` ist mit allen vier Remote-Workflows gruen. Die Review-Findings gegen `54bf23d` sind im
 Arbeitsbaum lokal behoben, publiziert und mit isolierten Consumern geprueft. Der Nachbesserungs-
-block ist als `09e3a73` auf `update`; alle vier Remote-Workflows sind success. JitPack,
-Geraetegates, Tag und Release bleiben offen.
+block ist als `09e3a73` auf `update`; alle vier Remote-Workflows sind success. Die
+Publishing-URL-Nachbesserung auf Basis `acf3bfc` ist lokal verifiziert; der Folgeblock wird auf
+`update` committet, die Remote-CI ist separat zu pruefen. JitPack, Geraetegates, Tag und Release
+bleiben offen.
 Gepruefte Branchbasis: `a9642f13d596fd35137945bc234dbf2827e6e398`. Letzter per GitHub API
 bestaetigter Release: `2.3.0`, Tag-Commit `8b7bea42e888785752fff199b2d53c04ab9888e4`,
 veroeffentlicht am 2026-11-13. Abweichende historische Datumsangaben nicht ungeprueft
@@ -132,7 +134,7 @@ JitPack-Gates bleiben offen.
 |---|---|---|---|
 | P1 Viewport-Recovery | `calendarviewsample/.../CalendarSampleViewport.kt`: ein `LaunchedEffect` setzt bei gueltigem `desired` und fehlgeschlagenem Fenster das Center auf `desired`; ungueltiges `desired` bleibt im Fehlerzweig. | `ChineseComposeRegressionTest.invalidCenterRecoversWhenAValidAnchorArrivesWithoutCompositionRestart` (ungueltiger Center, dann gueltiger Anchor ohne Neustart) und `switchingFromGregorianOverlayToChineseMonthsRebuildsTheWindow`. | `compileDebugKotlin`, `compileDebugAndroidTestKotlin` und `testDebugUnitTest` gruen; UI-Tests lokal nicht ausfuehrbar (kein Emulator), Remote-Instrumentation nach Push offen. |
 | P2 README/Consumer | `README.md`: `ChineseDate.of(2024, monthNumber = 1, isLeapMonth = false, dayOfMonth = 1)`. Neuer isolierter JVM-Consumer unter `tools/consumer-check/jvm-consumer` kompiliert und fuehrt genau dieses Beispiel aus. | JVM-Consumer `Main.kt` mit Asserts fuer Epoch 19763, Roundtrip, 13 Monate und `2023-2L`. | `:jvm-consumer:run` mit `/tmp/m2-review-final` als einziger Kalender-Repository-Quelle: `JVM consumer OK`, Exit 0. |
-| P2 Publishing-CI | `scripts/verify-publication.sh`: exakte AAR-/JAR-/Klib-/POM-/Module-/Sources-Pfade, ZIP-/Klassen-/Klib-Inhalte, alle `files`-/`available-at`-Referenzen der `.module`-Dateien sowie POM-/BOM-Abhaengigkeiten. Fehlende Target-Binaries und gebrochene Metadatenreferenzen schlagen fehl. Workflow ruft den Check und zwei isolierte Consumer auf. | Negativtests: geloeschte JVM-JAR und manipulierte Klib-Referenz fuehren jeweils zu Exit 1. Positivtest: vollstaendige lokale Publikation Exit 0. | `scripts/verify-publication.sh /tmp/m2-review-final 2.4.0` passed; Android-Consumer `:android-consumer:compileDebugKotlin` und JVM-Consumer `:jvm-consumer:run` aus `tools/consumer-check` erfolgreich. |
+| P2 Publishing-CI | `scripts/verify-publication.sh`: exakte AAR-/JAR-/Klib-/POM-/Module-/Sources-Pfade, ZIP-/Klassen-/Klib-Inhalte, alle `files`-/`available-at`-Referenzen der `.module`-Dateien sowie POM-/BOM-Abhaengigkeiten. Fehlende Target-Binaries und gebrochene Metadatenreferenzen schlagen fehl. Workflow ruft den Check und zwei isolierte Consumer auf. Die spaetere URL-Nachbesserung auf Basis `acf3bfc` loest `files[].url` gegen die `.module`-Datei auf und prueft `name` separat. | Negativtests: geloeschte JVM-JAR, manipulierte Klib-Referenz, fehlende `url` und kaputte `url` bei vorhandener `name`-Datei fuehren jeweils zu Exit 1. Positivtest: vollstaendige lokale Publikation Exit 0. | `scripts/verify-publication.sh /tmp/m2-review-final 2.4.0` passed; Android-Consumer `:android-consumer:compileDebugKotlin` und JVM-Consumer `:jvm-consumer:run` aus `tools/consumer-check` erfolgreich. |
 | P2 API-Guard | `scripts/api-check.sh`: Version aus `build.gradle.kts`, exakter Pfad `calendar-chinese-native-jvm-${VERSION}.jar`, genau ein nicht-Sources-JVM-Jar; abweichende/stale Jars sind ein Fehler. | Manueller Negativtest mit zusaetzlichem `-jvm-2.3.0.jar`: Exit 1 mit Liste der gefundenen Jars; danach entfernt. | `bash scripts/api-check.sh` nach Entfernen des stale Jars: `Public API matches the checked-in dumps`, Exit 0. |
 | Zusatzfund Publikationsmetadaten | `calendar-chinese-native/build.gradle.kts`: Root-Metadata-JAR, Root-Sources-JAR und linuxX64-Klib werden auf die in Gradle Module Metadata referenzierten Dateinamen normalisiert. Vorher referenzierten die `.module`-Dateien `calendar-chinese-native-metadata-*.jar`/`-kotlin-*-sources.jar` und `...linuxX64Main-*.klib`, die im Repository nicht unter diesen Namen lagen. | `scripts/verify-publication.sh` prueft jede Metadatenreferenz; der Android-/JVM-Consumer loest die Varianten aus dem publizierten Repo auf. | Isolierte Publikation und beide Consumer erfolgreich; der Check schlaegt bei manipulierter Referenz fehl. |
 
@@ -141,6 +143,14 @@ und `:calendarviewsample:assembleDebug` BUILD SUCCESSFUL; 193 Android-JVM- + 14 
 sowie 14 linuxX64-Tests ohne Fehler. Die beiden neuen Compose-Tests sind kompiliert, aber ohne
 lokalen Emulator nicht ausgefuehrt. Remote-CI fuer `09e3a73`: verification `43447073439`,
 publishing `43447073475`, instrumentation `43447073390`, tablet `43447073539` - alle success.
+
+### Review-Nachbesserung 2026-11-13 (Basis `acf3bfc`)
+
+| Finding | Fix (Datei) | Regressionstest | Ausgefuehrte Pruefung |
+|---|---|---|---|
+| P1 Publishing-Pruefluecke | `scripts/publication_metadata.py` (importierbarer Check) und `scripts/verify-publication.sh`: `files[].url` ist Pflicht, wird per `urlsplit` validiert und relativ gegen die `.module`-Datei aufgeloest; das Ziel muss existieren und nicht leer sein. `files[].name` wird nur separat auf Vorhandensein geprueft und nie als Pfad verwendet. `available-at.url` nutzt denselben Check. Nicht-lokale URLs werden als nicht pruefbar abgelehnt. | `scripts/test_publication_metadata.py`: gueltige relative URL bei abweichendem `name`, fehlende URL, kaputte URL bei vorhandener `name`-Datei und fehlender Name. Zusaetzlich Integrationstests gegen eine kopierte vollstaendige Publikation mit entfernter bzw. gebrochener URL. | `python3 -m unittest discover -s scripts -p 'test_*.py'`: 12 Tests gruen; Verifier gegen `/tmp/m2-review-final`: Exit 0; beide manipulierten Module: Exit 1 mit `missing url` bzw. `missing/empty`. |
+
+Plattformabdeckung dieses Nachweises: Der JVM-Consumer loest die Root-Modul-Metadaten und die JVM-Variante auf und fuehrt `ChineseDate.of` aus. Der Android-Consumer kompiliert die Compose-Fassade und ihre veroeffentlichten AAR-Abhaengigkeiten. Die linuxX64-Klib wird auf Datei-/Archiv- und Metadatenebene geprueft, aber in diesem Lauf **nicht von einem Kotlin/Native-Consumer konsumiert**. Die Pruefung ist kein JitPack- oder Remote-Consumer-Nachweis.
 
 #### Weiterhin offene Gates
 

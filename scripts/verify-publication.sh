@@ -69,14 +69,15 @@ for suffix in .pom .module; do
     require_file "$BOM_BASE/calendar-bom-${VERSION}${suffix}"
 done
 
-# Gradle Module Metadata is the consumer-facing contract. Every file it names must exist
-# under the same coordinates, otherwise a platform variant is silently unresolvable.
-python3 - "$BASE" "$VERSION" <<'PY'
-import json
+# Gradle Module Metadata is the consumer-facing contract. Every artifact URL must resolve
+# to a non-empty file; the display name is validated separately and is never used as a path.
+PYTHONPATH="$ROOT/scripts${PYTHONPATH:+:$PYTHONPATH}" python3 - "$BASE" "$VERSION" <<'PY'
 import pathlib
 import sys
 import xml.etree.ElementTree as ET
 import zipfile
+
+from publication_metadata import check_module
 
 base = pathlib.Path(sys.argv[1])
 version = sys.argv[2]
@@ -103,40 +104,15 @@ def check_zip(path, required_prefixes, label):
             fail(f"{label} has no archive entry {prefix!r}: {path}")
 
 
-def check_module(path):
-    if not path.is_file() or path.stat().st_size == 0:
-        fail(f"missing module metadata: {path}")
-        return
-    try:
-        metadata = json.loads(path.read_text())
-    except json.JSONDecodeError as error:
-        fail(f"invalid module metadata {path}: {error}")
-        return
-    for variant in metadata.get("variants", []):
-        for artifact in variant.get("files", []):
-            name = artifact.get("name")
-            if not name:
-                fail(f"{path}: variant {variant.get('name')} has a file without a name")
-                continue
-            referenced = path.parent / name
-            if not referenced.is_file() or referenced.stat().st_size == 0:
-                fail(
-                    f"{path}: variant {variant.get('name')} references missing/empty "
-                    f"{referenced}"
-                )
-        available_at = variant.get("available-at")
-        if available_at and available_at.get("url"):
-            referenced = (path.parent / available_at["url"]).resolve()
-            if not referenced.is_file() or referenced.stat().st_size == 0:
-                fail(f"{path}: available-at target is missing/empty: {referenced}")
-
-
 engine_dir = base / "calendar-chinese-native" / version
 jvm_dir = base / "calendar-chinese-native-jvm" / version
 native_dir = base / "calendar-chinese-native-linuxx64" / version
-check_module(engine_dir / f"calendar-chinese-native-{version}.module")
-check_module(jvm_dir / f"calendar-chinese-native-jvm-{version}.module")
-check_module(native_dir / f"calendar-chinese-native-linuxx64-{version}.module")
+for module_file in (
+    engine_dir / f"calendar-chinese-native-{version}.module",
+    jvm_dir / f"calendar-chinese-native-jvm-{version}.module",
+    native_dir / f"calendar-chinese-native-linuxx64-{version}.module",
+):
+    failures.extend(check_module(module_file))
 
 check_zip(
     engine_dir / f"calendar-chinese-native-{version}.jar",

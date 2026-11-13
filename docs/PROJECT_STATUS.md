@@ -54,6 +54,13 @@ other devices.
   native klib from the isolated repository. This block is `09e3a73` on `update`; all four remote
   workflows passed (verification `43447073439`, publishing `43447073475`, instrumentation
   `43447073390`, tablet `43447073539`). A docs-only follow-up records these results.
+- Publishing URL fix (base `acf3bfcb484886a73c4a03474971d0b289219023`): the verifier now requires
+  `files[].url`, validates it and resolves relative URLs against the `.module` file; the target must
+  exist and be non-empty. `files[].name` is checked separately and is never used as the download
+  path. `available-at.url` uses the same validation. A copied complete publication with a missing
+  URL or a broken URL (while the `name` file still exists) now fails the verifier; 12 script unit
+  tests pass. The JVM and Android consumers were re-run after the change; the linuxX64 klib is
+  file/metadata-checked but was not consumed by a Kotlin/Native consumer.
 - Added `:calendar-chinese-compose`: `ChineseCalendarMonth`, `GregorianChineseCalendarMonth`,
   `chineseMonthData`, `ChineseWeekData`, `ChineseMonthState`/`rememberChineseMonthState` with
   leap-month identity in title, keys, saver and heatmap titles, plus `chineseYearHeatmap` /
@@ -82,7 +89,8 @@ other devices.
 | standalone JVM consumer (`javac` + engine jar) | 2024-02-10 → epoch 19763, round-trip OK, 2023 has 13 months and leap month `2023-2L`; jar contains no AndroidX/Compose/Android classes |
 | tracked isolated JVM consumer (`tools/consumer-check`) | `:jvm-consumer:run` against `/tmp/m2-review-final`: `JVM consumer OK`, Exit 0; resolves BOM + engine from the publication only |
 | tracked isolated Android consumer (`tools/consumer-check`) | `:android-consumer:compileDebugKotlin` against `/tmp/m2-review-final`: BUILD SUCCESSFUL; compiles the public Compose facade, not installed/run |
-| negative publication/API checks | missing target JVM jar and broken native `.module` reference each fail the verifier; a second stale `-jvm-2.3.0.jar` fails `scripts/api-check.sh` |
+| negative publication/API checks | missing target JVM jar, broken native `.module` reference, missing `files[].url` and broken `files[].url` (with the `name` file still present) each fail the verifier; a second stale `-jvm-2.3.0.jar` fails `scripts/api-check.sh` |
+| `python3 -m unittest discover -s scripts -p 'test_*.py'` | 12 tests, 0 failed; 4 new tests cover URL resolution and missing-name handling |
 | independent Android consumer (separate `/tmp` project, BOM + file Maven repo, `assembleDebug`) | BUILD SUCCESSFUL; APK produced, not installed or run |
 
 ### Open items
@@ -108,6 +116,7 @@ other devices.
   - `Android tablet verification`: Run 43439808435 (success)
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
 - Remote CI for the review-fix commit `09e3a73` against `54bf23d` is success: verification `43447073439`, publishing `43447073475`, instrumentation `43447073390`, tablet `43447073539`. The documentation follow-up is a separate commit; local publication, both isolated consumers, the API guard and the native/JVM regression are green.
+- Remote CI for the URL-based publication follow-up on base `acf3bfc` is still to be verified after this block is pushed. The verifier, 12 script tests and both isolated consumers are locally green; the linuxX64 variant remains file-checked only.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).
 - No merge, tag, GitHub Release or publication was performed and none is authorized by this status.

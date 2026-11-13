@@ -60,17 +60,22 @@ trigger for this branch-only setup.
 Workflow: .github/workflows/android-publishing.yml. It publishes every Android AAR, the KMP
 engine root/JVM/linuxX64 publications and the BOM to `$RUNNER_TEMP/calendar-maven`, then runs
 `scripts/verify-publication.sh`. That script checks exact versioned paths (not `find`-selected
-files), archive contents, every file and `available-at` target referenced by Gradle Module
-Metadata, engine POM isolation and BOM constraints. It fails on a missing target binary or a
-broken metadata reference.
+files), archive contents, engine POM isolation and BOM constraints. For every Gradle Module
+Metadata `files[]` entry it requires a nonempty `url`, resolves the URL against the `.module`
+file and checks the target; the display `name` is validated separately and never used as the
+path. `available-at.url` is resolved the same way. It fails on a missing target binary or a
+missing/broken metadata URL.
 
 The same job then builds `tools/consumer-check`, a standalone Gradle build that has no
 `project(...)` or `includeBuild(...)` link to this repository. Its JVM module runs the public
 `ChineseDate.of` example against the published engine/BOM, and its Android module compiles the
-public Compose facade against the published AARs. The consumer receives the isolated repository
-through `-PconsumerRepo=...`; it does not use `mavenLocal()` by default. This is local-candidate
-verification, not a JitPack consumer test. The exact-binary and consumer checks were validated
-locally on 2026-11-13 and passed remotely in run `43447073475` for commit `09e3a73`.
+public Compose facade against the published AARs. The JVM consumer resolves the engine's root
+metadata and `jvm` variant; the Android consumer resolves the Compose AARs. The `linuxX64` klib
+is checked at file/archive/metadata level but is not consumed by a Kotlin/Native consumer here.
+The consumer receives the isolated repository through `-PconsumerRepo=...`; it does not use
+`mavenLocal()` by default. This is local-candidate verification, not a JitPack consumer test. The
+exact-binary and consumer checks were validated locally on 2026-11-13 and passed remotely in run
+`43447073475` for commit `09e3a73`.
 
 ## Remaining priority-0 checks
 
