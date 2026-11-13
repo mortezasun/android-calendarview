@@ -65,6 +65,7 @@ Vor Freigabe Benchmarks fuer Konvertierung, Monatsaufbau, 13-Monats-Heatmap und 
 | Benchmark | JVM-Baseline auf Freebuff-VM, JDK 21.0.13, 8 vCPU: Konvertierung 58,77 ns/Op, Monatsaufbau 16.074,47 ns/Monat, 13-Monats-Heatmap 355.526 ns/Jahr, Navigation 53,79 ns/Schritt; Allokationen 56,01 B / 15.630,53 B / 248.328 B / 48,01 B pro Operation. Fokustest gruen; physische Geraeteabnahme offen. |
 | Advisory | 101 Laufzeitkoordinaten, OSV `querybatch`: 0 Treffer. 334 Laufzeit-/Buildscript-Koordinaten: Treffer nur im AGP-9.5.1-Buildscript (Guava, commons-lang3, jose4j, Bouncy Castle, JDOM2); nicht in AAR/JAR. Maintainer-Akzeptanz/AGP-Upgrade offen. |
 | Emulator | API-29-x86_64-Image und Emulator installiert; Boot scheitert an `ProbeKVM: This user doesn't have permissions to use KVM (/dev/kvm)`, Benutzer nicht in Gruppe `kvm`. Keine lokale Geraeteausfuehrung. |
+| Gate-Evidenz-Remote-CI | `4ce4d3f`: verification `43479911419`, publishing `43479911387`, instrumentation `43479911196`, tablet `43479911275` - alle success. |
 | Offen | chinesische UI-Interaktion auf realen Geraeten/Folds, TalkBack/Grossschrift/RTL, Touch-Target-Messung, physische Benchmark-Abnahme, finale Budgetfreigabe, Buildscript-Advisory-Akzeptanz, Tag/JitPack-2.4.0 |
 
 ## Benchmark-Budgets (provisorisch, 2026-11-13)

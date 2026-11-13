@@ -104,7 +104,7 @@ committed as `5cf640d` and locally tested; remote CI for the pushed tree `952bbb
 - Benchmark-Baseline (Freebuff-VM, JDK 21.0.13, 8 vCPU): Konvertierung 58,77 ns/Op; Monatsaufbau 16.074,47 ns/Monat; 13-Monats-Heatmap 355.526 ns/Jahr; Navigation 53,79 ns/Schritt. Allokationen 56,01 B / 15.630,53 B / 248.328 B / 48,01 B pro Operation. Fokustest gruen; physische Zielhardware und finale Budgets offen.
 - Advisory-Scan: 101 Laufzeitkoordinaten ohne OSV-Treffer; 334 Laufzeit-/Buildscript-Koordinaten mit Treffern ausschliesslich im AGP-9.5.1-Buildscript (Guava, commons-lang3, jose4j, Bouncy Castle, JDOM2). Diese Pakete sind nicht in den ausgelieferten AAR/JARs; Maintainer-Akzeptanz oder AGP-Upgrade bleibt offen.
 - Lokaler API-29-Emulator installiert, Boot scheitert an fehlender KVM-Gruppenberechtigung (`/dev/kvm`); die Remote-API-29-Suite ist gruen, aber keine chinesische Geraete-/Fold-/TalkBack-Matrix.
-- `./gradlew test :calendar-chinese-native:linuxX64Test`, der Benchmark-Fokustest, `scripts/api-check.sh` und die Python-Suites waren erfolgreich. Kein Merge, Tag oder Release wurde erstellt.
+- `./gradlew test :calendar-chinese-native:linuxX64Test`, der Benchmark-Fokustest, `scripts/api-check.sh` und die Python-Suites waren erfolgreich. Der Gate-Evidenzcommit `4ce4d3f` ist auf `origin/update`; Remote-CI: verification `43479911419`, publishing `43479911387`, instrumentation `43479911196`, tablet `43479911275` - alle success. Kein Merge, Tag oder Release wurde erstellt.
 
 ### Open items
 

@@ -284,8 +284,10 @@ Schaltmonatkennzeichnung und Touch-Target-Messung. Die konkrete Checkliste steht
 
 `./gradlew test :calendar-chinese-native:linuxX64Test` war erfolgreich; der fokussierte
 Benchmark-Test ebenfalls. `bash scripts/api-check.sh` meldet `Public API matches the checked-in
-dumps.`; die Python-Suites liefen mit 7 + 12 Tests ohne Fehler. Kein Merge, Tag oder Release
-wurde erstellt.
+dumps.`; die Python-Suites liefen mit 7 + 12 Tests ohne Fehler. Der Evidenzcommit `4ce4d3f`
+(Code und Gate-Dokumentation) ist auf `origin/update`; alle vier Remote-Workflows sind success:
+verification `43479911419`, publishing `43479911387`, instrumentation `43479911196`, tablet
+`43479911275`. Kein Merge, Tag oder Release wurde erstellt.
 
 ## Arbeitsregel fuer die Implementierung
 
