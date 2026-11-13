@@ -89,7 +89,7 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 ### P6 - Release Candidate und 2.4.0
 
 - [x] Erst nach gruenen Produktgates Versionen synchron auf 2.4.0 vorbereiten; Sample versionCode 20400 nur nach Monotoniepruefung, versionName 2.4.0. (20300 -> 20400.)
-- [ ] RC-Nachweise fuer einen exakten Commit sammeln; alle Veroeffentlichungs- und Consumer-Pruefungen aus dem Releaseplan ausfuehren. (Evidenzbaum `d5416403d2f9a77a60b30eb2bf93f6302959059b`; isolierte Publikation und zwei Consumer bestanden. Push und Remote-Pruefungen offen.)
+- [ ] RC-Nachweise fuer einen exakten Commit sammeln; alle Veroeffentlichungs- und Consumer-Pruefungen aus dem Releaseplan ausfuehren. (Evidenzbaum `d5416403d2f9a77a60b30eb2bf93f6302959059b` auf `origin/update`; isolierte Publikation und zwei Consumer bestanden. Remote-Pruefungen offen.)
 - [ ] Separate ausdrueckliche Freigabe fuer Merge, Tag und GitHub Release einholen. Kein Tag 2.4.0 mit offenen Pflichtgates.
 - [ ] Nach Tagging tatsaechliche Remote-Artefakte/Varianten und unabhaengige Consumer verifizieren. Erst dann erfolgreiche Distribution behaupten.
 

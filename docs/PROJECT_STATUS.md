@@ -49,8 +49,8 @@ emulator/instrumentation or other devices.
 
 ### Open items
 
-- Evidence tree committed as `d5416403d2f9a77a60b30eb2bf93f6302959059b`; push on `update` follows in the documentation-only follow-up commit.
-- Remote GitHub Actions for the new workflow job and `2.4.0` have not run (push pending).
+- Evidence tree committed as `d5416403d2f9a77a60b30eb2bf93f6302959059b` and pushed to `origin/update`; documentation follow-up `0db4e1061b7b4fe6e322c0dd098e07fca73dc38e`.
+- Remote GitHub Actions for the new workflow job and `2.4.0` have not been inspected after the push.
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).
