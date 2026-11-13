@@ -1,8 +1,10 @@
 package com.develotter.calendarviewsample
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +21,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.calendars.chineseNative.ChineseDate
@@ -103,12 +107,21 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                             "Compose Calendar Demo",
                             style = MaterialTheme.typography.headlineSmall,
                             modifier = Modifier.weight(1f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
-                        Button(
-                            onClick = ui::showChineseDemo,
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                        Box(
+                            Modifier
+                                .clip(MaterialTheme.shapes.small)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .clickable(onClick = ui::showChineseDemo)
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
                         ) {
-                            Text("Chinese demo")
+                            Text(
+                                "CN 2.4.0",
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                style = MaterialTheme.typography.labelMedium,
+                            )
                         }
                     }
                     CalendarSampleControls(ui)
