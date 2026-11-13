@@ -1,7 +1,7 @@
 # Chinese calendar: API and data contract for 2.4.0
 
 Status: implemented on branch `update` (2.4.0 release candidate); public API dumps are under
-`api/`. Current verified remote HEAD is `dc3abe22f1d67ad2dd78fe43b99515f49ee97f27`.
+`api/`. Verified release source HEAD is `4dc484ae8cff91bad0869cd8d24e0b71144ff8e9`.
 
 ## Calendar convention
 

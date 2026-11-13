@@ -8,9 +8,9 @@ fixed locally, published and checked with isolated consumers. The follow-up bloc
 `09e3a73` on `update`; all four remote workflows succeeded. The publishing URL follow-up based
 on `acf3bfc` is locally verified. The next block is `9fd3b50` on `update`; all four remote
 workflows succeeded. The follow-up based on `9fd3b50` is pushed as `a138306` and green in all
-four remote workflows. The current remote HEAD is
-`dc3abe22f1d67ad2dd78fe43b99515f49ee97f27`; verification `43520705754`, publishing
-`43520705242`, instrumentation `43520705461` and tablet `43520705438` all succeeded. JitPack is
+four remote workflows. The verified release source HEAD is
+`4dc484ae8cff91bad0869cd8d24e0b71144ff8e9`; verification `43528254651`, publishing
+`43528254527`, instrumentation `43528254722` and tablet `43528254471` all succeeded. JitPack is
 verified for `2.3.0` and commit `7a51e24`; the 2.4.0 tag/BOM consumer remains blocked without a
 tag. Benchmarks and the advisory scan were executed. A software-emulated API 29 phone smoke test
 reached the sample's leap-month details; the real-device/fold/TalkBack/large-font/RTL matrix, plus
@@ -170,8 +170,8 @@ open points remain explicitly open.
   `e80c00f` and follow-up tree `952bbb6` on `origin/update`; isolated publication, two consumers
   and all four remote workflows passed. JitPack commit build `7a51e24` and direct engine
   consumer passed; the 2.4.0 tag/BOM consumer is blocked without a tag, see gate addendum.
-  Current HEAD `dc3abe2` is green in all four workflows: verification `43520705754`, publishing
-  `43520705242`, instrumentation `43520705461`, tablet `43520705438`.)
+  Verified release source HEAD `4dc484a` is green in all four workflows: verification `43528254651`, publishing
+  `43528254527`, instrumentation `43528254722`, tablet `43528254471`.)
 - [ ] Obtain separate explicit approval for merge, tag and GitHub Release. No 2.4.0 tag with open
   mandatory gates.
 - [ ] After tagging, verify actual remote artifacts/variants and independent consumers. Only then
@@ -360,7 +360,7 @@ There is no physical device and KVM is unavailable:
 A software-accelerated API 29 x86_64 AVD (`codebuff_api29`, 1080x1920, 420 dpi) was nevertheless
 booted with `-accel off -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect`. It reached
 `dev.bootcomplete=1` and exposed `emulator-5554`; the debug sample installed, `LauncherActivity`
-started, and the main screen rendered. Tapping `Chinese 2.4.0 demo: leap month` showed
+started, and the main screen rendered. Tapping the compact `CN 2.4.0` entry showed
 `2023 Leap 2nd Month`; after scrolling, `Details` showed epoch day 19445, Gregorian `2023-03-29`
 and `Chinese: 2023 Leap 2nd Month, day 8`. No app `FATAL EXCEPTION` appeared. Under software CPU
 emulation System UI and Google Play services raised ANRs, and `am start -W` timed out at 21.9 s
@@ -393,9 +393,9 @@ marker and touch-target measurement. The concrete checklist is in
 as well. `bash scripts/api-check.sh` reports `Public API matches the checked-in dumps.`; the Python
 suites ran 7 + 12 tests without failures. Evidence commit `4ce4d3f` (code and gate documentation)
 is on `origin/update`; all four remote workflows succeeded: verification `43479911419`, publishing
-`43479911387`, instrumentation `43479911196`, tablet `43479911275`. Current HEAD `dc3abe2` is
-green: verification `43520705754`, publishing `43520705242`, instrumentation `43520705461`,
-tablet `43520705438`. No merge, tag or release was created.
+`43479911387`, instrumentation `43479911196`, tablet `43479911275`. Verified release source HEAD `4dc484a` is
+green: verification `43528254651`, publishing `43528254527`, instrumentation `43528254722`,
+tablet `43528254471`. No merge, tag or release was created.
 
 ## Implementation work rule
 
