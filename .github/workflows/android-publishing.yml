@@ -73,7 +73,7 @@ jobs:
           fi
           engine_base="$base/calendar-chinese-native"
           for suffix in .pom .module -sources.jar; do
-            file=$(find "$engine_base" -maxdepth 1 -type f -name "calendar-chinese-native-*${suffix}" -size +0c -print -quit)
+            file=$(find "$engine_base" -type f -name "calendar-chinese-native-*${suffix}" -size +0c -print -quit)
             if [ -z "$file" ]; then
               echo "Missing nonempty publication: calendar-chinese-native $suffix" >&2
               exit 1
@@ -85,7 +85,7 @@ jobs:
             echo "Missing calendar-chinese-native metadata jar" >&2
             exit 1
           fi
-          engine_pom=$(find "$engine_base" -maxdepth 1 -type f -name 'calendar-chinese-native-*.pom' -print -quit)
+          engine_pom=$(find "$engine_base" -type f -name 'calendar-chinese-native-*.pom' -print -quit)
           if grep -qE 'calendar-(gregorian|hijri|solarHijri)|androidx|compose' "$engine_pom"; then
             echo "calendar-chinese-native POM must stay free of other engines, AndroidX and Compose" >&2
             exit 1
@@ -93,7 +93,7 @@ jobs:
           for variant in calendar-chinese-native-jvm calendar-chinese-native-linuxx64; do
             variant_base="$base/$variant"
             for suffix in .pom .module -sources.jar; do
-              file=$(find "$variant_base" -maxdepth 1 -type f -name "$variant-*${suffix}" -size +0c -print -quit)
+              file=$(find "$variant_base" -type f -name "$variant-*${suffix}" -size +0c -print -quit)
               if [ -z "$file" ]; then
                 echo "Missing nonempty publication: $variant $suffix" >&2
                 exit 1
