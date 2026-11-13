@@ -6,8 +6,8 @@ Branch: `update`
 
 ## Current development: 2.4.0 Chinese calendar (unreleased, 2026-11-13)
 
-Status: implemented and locally verified on branch `update`; **not committed at the time of these
-checks, not tagged, not merged and not published**. No claim is made for remote CI, JitPack,
+Status: implemented, committed and locally verified on branch `update` at `d5416403d2f9a77a60b30eb2bf93f6302959059b`;
+**not tagged, merged or published**. No claim is made for remote CI, JitPack,
 emulator/instrumentation or other devices.
 
 - Added `:calendar-chinese-native`, a Kotlin Multiplatform engine with `jvm()` and `linuxX64()`
@@ -49,8 +49,8 @@ emulator/instrumentation or other devices.
 
 ### Open items
 
-- Commit and push on `update`; the evidence tree is the commit recorded in the final handoff.
-- Remote GitHub Actions for the new workflow job and `2.4.0` have not run.
+- Evidence tree committed as `d5416403d2f9a77a60b30eb2bf93f6302959059b`; push on `update` follows in the documentation-only follow-up commit.
+- Remote GitHub Actions for the new workflow job and `2.4.0` have not run (push pending).
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).

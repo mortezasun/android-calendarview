@@ -1,6 +1,6 @@
 # 2.4.0: Testplan, Anfaelligkeiten und Sicherheitsgates
 
-Status: Kernmatrix am 2026-11-13 lokal ausgefuehrt (JDK 21, JVM + linuxX64). Geraete-, UI-,
+Status: Kernmatrix am 2026-11-13 lokal auf `d5416403d2f9a77a60b30eb2bf93f6302959059b` ausgefuehrt (JDK 21, JVM + linuxX64). Geraete-, UI-,
 Benchmark- und Advisory-Pruefungen sind offen. Dieser Plan behauptet weder Schwachstellenfreiheit
 noch einen aktuellen CVE-Scan.
 
