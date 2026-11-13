@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -15,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeRight
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.develotter.calendarview.calendars.chineseCompose.rememberChineseMonthState
 import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
@@ -24,11 +26,16 @@ import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.compose.CalendarMonthHeader
 import com.develotter.calendarview.compose.rememberCalendarSelectionState
 import com.develotter.calendarview.enums.TypeSelectDay
+import org.junit.Assert.assertNotSame
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
 import java.util.Locale
+
+private class FixedToday(private val epochDay: Long) : () -> Long {
+    override fun invoke(): Long = epochDay
+}
 
 /** Targeted regression tests for the reviewed Chinese Compose and sample integration paths. */
 @RunWith(AndroidJUnit4::class)
@@ -37,8 +44,11 @@ class ChineseComposeRegressionTest {
     val compose = createComposeRule()
 
     @Test
-    fun chineseMonthStateSurvivesRestorationAndUsesTheLatestTodayCallback() {
-        val today = mutableStateOf(ChineseMonth.of(2023, 3).startEpochDay())
+    fun chineseMonthStateSurvivesRestorationAndUsesAReplacedTodayCallback() {
+        val firstToday = FixedToday(ChineseMonth.of(2023, 3).startEpochDay())
+        val secondToday = FixedToday(ChineseMonth.of(2023, 4).startEpochDay())
+        assertNotSame(firstToday, secondToday)
+        val today = mutableStateOf<() -> Long>(firstToday)
         val restoration = StateRestorationTester(compose)
         restoration.setContent {
             MaterialTheme {
@@ -47,14 +57,12 @@ class ChineseComposeRegressionTest {
                         initialMonth = ChineseMonth.of(2023, 2),
                         minMonth = ChineseMonth.of(2023, 1),
                         maxMonth = ChineseMonth.of(2023, 3),
-                        today = { today.value },
+                        today = today.value,
                     )
                     Text("month:${state.title()}")
                     Text("canToday:${state.canGoToday}")
                     Button(onClick = state::next) { Text("next") }
-                    Button(onClick = { today.value = ChineseMonth.of(2023, 4).startEpochDay() }) {
-                        Text("laterToday")
-                    }
+                    Button(onClick = { today.value = secondToday }) { Text("replaceToday") }
                 }
             }
         }
@@ -66,10 +74,90 @@ class ChineseComposeRegressionTest {
         restoration.emulateSavedInstanceStateRestore()
         compose.onNodeWithText("month:2023 Leap 2nd Month").assertExists()
 
-        compose.onNodeWithText("laterToday").performClick()
+        compose.onNodeWithText("replaceToday").performClick()
         compose.onNodeWithText("canToday:false").assertExists()
-        // The callback update must not reset the visible navigation state.
+        // Replacing the callback instance must not reset the visible navigation state.
         compose.onNodeWithText("month:2023 Leap 2nd Month").assertExists()
+    }
+
+    @Test
+    fun chineseBoundaryWindowRendersAndNavigatesInSingleMode() {
+        val anchor = mutableStateOf(ChineseCalendarEngine.MIN_EPOCH_DAY)
+        val minimum = moveSampleMonth(SampleCalendar.Chinese, ChineseCalendarEngine.MIN_EPOCH_DAY, 0)
+        val maximum = moveSampleMonth(SampleCalendar.Chinese, ChineseCalendarEngine.MAX_EPOCH_DAY, 0)
+        compose.setContent {
+            MaterialTheme {
+                Column {
+                    val navigation = rememberSampleMonthNavigation(
+                        calendar = SampleCalendar.Chinese,
+                        anchor = anchor.value,
+                        locale = Locale.ENGLISH,
+                    ) { anchor.value = it }
+                    CalendarMonthHeader(
+                        title = navigation.title,
+                        state = navigation.state,
+                        previousMonthContentDescription = "Previous month",
+                        nextMonthContentDescription = "Next month",
+                    )
+                    Button(onClick = { anchor.value = ChineseCalendarEngine.MAX_EPOCH_DAY }) { Text("upper") }
+                    CalendarSampleViewport(
+                        calendar = SampleCalendar.Chinese,
+                        anchor = anchor.value,
+                        forcedMode = SampleDisplayMode.Single,
+                        viewportHeight = androidx.compose.ui.unit.Dp(200f),
+                    ) { monthAnchor ->
+                        Text("month:$monthAnchor")
+                    }
+                }
+            }
+        }
+
+        compose.onNodeWithText("month:$minimum").assertIsDisplayed()
+        compose.onNodeWithText("Window month 1 / 13").assertExists()
+        compose.onNodeWithText("Updating month window").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Next month").performClick()
+        compose.onNodeWithText("month:${moveSampleMonth(SampleCalendar.Chinese, minimum, 1)}").assertIsDisplayed()
+
+        compose.onNodeWithText("upper").performClick()
+        compose.onNodeWithText("month:$maximum").assertIsDisplayed()
+        compose.onNodeWithText("Window month 13 / 13").assertExists()
+        compose.onNodeWithText("Updating month window").assertDoesNotExist()
+        compose.onNodeWithContentDescription("Previous month").performClick()
+        compose.onNodeWithText("month:${moveSampleMonth(SampleCalendar.Chinese, maximum, -1)}").assertIsDisplayed()
+    }
+
+    @Test
+    fun chineseBoundaryWindowRendersAndNavigatesInPager() {
+        val anchor = mutableStateOf(ChineseCalendarEngine.MIN_EPOCH_DAY)
+        val minimum = moveSampleMonth(SampleCalendar.Chinese, ChineseCalendarEngine.MIN_EPOCH_DAY, 0)
+        val maximum = moveSampleMonth(SampleCalendar.Chinese, ChineseCalendarEngine.MAX_EPOCH_DAY, 0)
+        compose.setContent {
+            MaterialTheme {
+                Column {
+                    Button(onClick = { anchor.value = ChineseCalendarEngine.MAX_EPOCH_DAY }) { Text("upper") }
+                    CalendarSampleViewport(
+                        calendar = SampleCalendar.Chinese,
+                        anchor = anchor.value,
+                        forcedMode = SampleDisplayMode.HorizontalPager,
+                        onVisibleMonthChanged = { anchor.value = it },
+                        viewportHeight = androidx.compose.ui.unit.Dp(200f),
+                    ) { monthAnchor ->
+                        Text("month:$monthAnchor")
+                    }
+                }
+            }
+        }
+
+        compose.onNodeWithText("month:$minimum").assertIsDisplayed()
+        compose.onNodeWithText("month:$minimum").performTouchInput { swipeLeft() }
+        compose.waitForIdle()
+        compose.onNodeWithText("month:${moveSampleMonth(SampleCalendar.Chinese, minimum, 1)}").assertIsDisplayed()
+
+        compose.onNodeWithText("upper").performClick()
+        compose.onNodeWithText("month:$maximum").assertIsDisplayed()
+        compose.onNodeWithText("month:$maximum").performTouchInput { swipeRight() }
+        compose.waitForIdle()
+        compose.onNodeWithText("month:${moveSampleMonth(SampleCalendar.Chinese, maximum, -1)}").assertIsDisplayed()
     }
 
     @Test

@@ -11,9 +11,13 @@
       "deltaTSeconds": 16.92,
       "newMoonUtc": "1914-11-17T16:01:42.986Z",
       "newMoonUtcPlus8": "1914-11-18T00:01:42.986+08:00",
-      "independentReference": "NASA/GSFC phases table: 1914 Nov 17 16:01 UT",
-      "independentReferenceUrl": "https://eclipse.gsfc.nasa.gov/phase/phases1901.html",
-      "classification": "The HKO table labels the UT calendar date (1914-11-17); the documented UTC+8 rule puts the new moon 1m43s after local midnight on 1914-11-18, so this dataset keeps 1914-11-18."
+      "independentReference": {
+        "name": "NASA/GSFC phases table",
+        "url": "https://eclipse.gsfc.nasa.gov/phase/phases1901.html",
+        "newMoonUtc": "1914-11-17T16:02:00Z",
+        "toleranceSeconds": 60
+      },
+      "classification": "HKO lists 1914-11-17 while the documented UTC+8 rule places the new moon 1m43s after local midnight on 1914-11-18, so this dataset keeps 1914-11-18. Why HKO's 1914 row uses the previous UT date is unresolved; the available sources do not establish an intentional historical UT-date convention."
     },
     {
       "generatedDate": "1916-02-04",
@@ -25,9 +29,13 @@
       "deltaTSeconds": 18.34,
       "newMoonUtc": "1916-02-03T16:05:16.197Z",
       "newMoonUtcPlus8": "1916-02-04T00:05:16.197+08:00",
-      "independentReference": "NASA/GSFC phases table: 1916 Feb 3 16:05 UT",
-      "independentReferenceUrl": "https://eclipse.gsfc.nasa.gov/phase/phases1901.html",
-      "classification": "The HKO table labels the UT calendar date (1916-02-03); the documented UTC+8 rule puts the new moon 5m16s after local midnight on 1916-02-04, so this dataset keeps 1916-02-04."
+      "independentReference": {
+        "name": "NASA/GSFC phases table",
+        "url": "https://eclipse.gsfc.nasa.gov/phase/phases1901.html",
+        "newMoonUtc": "1916-02-03T16:05:00Z",
+        "toleranceSeconds": 60
+      },
+      "classification": "HKO lists 1916-02-03 while the documented UTC+8 rule places the new moon 5m16s after local midnight on 1916-02-04, so this dataset keeps 1916-02-04. Why HKO's 1916 row uses the previous UT date is unresolved; the available sources do not establish an intentional historical UT-date convention."
     },
     {
       "generatedDate": "1920-11-11",
@@ -39,9 +47,13 @@
       "deltaTSeconds": 21.86,
       "newMoonUtc": "1920-11-10T16:04:49.587Z",
       "newMoonUtcPlus8": "1920-11-11T00:04:49.587+08:00",
-      "independentReference": "NASA/GSFC phases table: 1920 Nov 10 16:05 UT",
-      "independentReferenceUrl": "https://eclipse.gsfc.nasa.gov/phase/phases1901.html",
-      "classification": "The HKO table labels the UT calendar date (1920-11-10); the documented UTC+8 rule puts the new moon 4m50s after local midnight on 1920-11-11, so this dataset keeps 1920-11-11."
+      "independentReference": {
+        "name": "NASA/GSFC phases table",
+        "url": "https://eclipse.gsfc.nasa.gov/phase/phases1901.html",
+        "newMoonUtc": "1920-11-10T16:05:00Z",
+        "toleranceSeconds": 60
+      },
+      "classification": "HKO lists 1920-11-10 while the documented UTC+8 rule places the new moon 4m50s after local midnight on 1920-11-11, so this dataset keeps 1920-11-11. Why HKO's 1920 row uses the previous UT date is unresolved; the available sources do not establish an intentional historical UT-date convention."
     }
   ]
 }

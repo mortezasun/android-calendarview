@@ -393,18 +393,52 @@ def new_moon_for_epoch_day(epoch_day):
     raise AssertionError("no new moon found for epoch day %d" % epoch_day)
 
 
+def parse_conflict_instant(value, field, offset, errors):
+    """Parse an ISO-8601 conflict instant, requiring an explicit offset."""
+    if not isinstance(value, str):
+        errors.append("%s must be an ISO-8601 string" % field)
+        return None
+    normalized = value[:-1] + "+00:00" if value.endswith("Z") else value
+    try:
+        parsed = datetime.datetime.fromisoformat(normalized)
+    except ValueError as error:
+        errors.append("%s is not a valid ISO instant: %s" % (field, error))
+        return None
+    if parsed.tzinfo is None or parsed.utcoffset() is None:
+        errors.append("%s must include an explicit timezone offset" % field)
+        return None
+    if parsed.utcoffset() != offset:
+        errors.append("%s must carry an explicit %s offset" % (field, offset))
+        return None
+    return parsed
+
+
 def verify_conflict_astronomy(conflict, epoch_day, number, chinese_year, leap):
     """Recompute the documented time-scale chain; never trust recorded numbers alone."""
     errors = []
     required = (
         "newMoonJde", "deltaTSeconds", "newMoonUtc", "newMoonUtcPlus8",
-        "independentReference", "independentReferenceUrl", "classification",
+        "independentReference", "classification",
     )
     for key in required:
         if key not in conflict or conflict[key] in (None, ""):
             errors.append("missing %s" % key)
+    reference = conflict.get("independentReference")
+    if not isinstance(reference, dict):
+        errors.append("independentReference must be an object with name, url, newMoonUtc and toleranceSeconds")
+        return errors
+    for key in ("name", "url", "newMoonUtc", "toleranceSeconds"):
+        if key not in reference or reference[key] in (None, ""):
+            errors.append("missing independentReference.%s" % key)
     if errors:
         return errors
+    try:
+        tolerance_seconds = float(reference["toleranceSeconds"])
+    except (TypeError, ValueError):
+        return errors + ["independentReference.toleranceSeconds must be numeric"]
+    if not math.isfinite(tolerance_seconds) or tolerance_seconds < 0:
+        return errors + ["independentReference.toleranceSeconds must be finite and non-negative"]
+
     k, jde = new_moon_for_epoch_day(epoch_day)
     delta_t = delta_t_days(2000 + k / 12.3685)
     utc = jde - delta_t
@@ -413,17 +447,34 @@ def verify_conflict_astronomy(conflict, epoch_day, number, chinese_year, leap):
         errors.append("newMoonJde %.6f differs from recomputed %.6f" % (conflict["newMoonJde"], jde))
     if abs(delta_t * 86400.0 - float(conflict["deltaTSeconds"])) > 0.02:
         errors.append("deltaTSeconds differs from recomputed %.2f" % (delta_t * 86400.0))
-    try:
-        recorded_utc = datetime.datetime.fromisoformat(conflict["newMoonUtc"].replace("Z", "+00:00"))
-        recorded_local = datetime.datetime.fromisoformat(conflict["newMoonUtcPlus8"])
-    except ValueError as error:
-        return errors + ["invalid ISO instant: %s" % error]
-    if abs(recorded_utc.timestamp() - (utc - EPOCH_JD) * 86400.0) > 1.0:
+
+    recorded_utc = parse_conflict_instant(
+        conflict["newMoonUtc"], "newMoonUtc", datetime.timedelta(0), errors,
+    )
+    recorded_local = parse_conflict_instant(
+        conflict["newMoonUtcPlus8"], "newMoonUtcPlus8", datetime.timedelta(hours=8), errors,
+    )
+    independent_utc = parse_conflict_instant(
+        reference["newMoonUtc"], "independentReference.newMoonUtc",
+        datetime.timedelta(0), errors,
+    )
+    if recorded_utc is None or recorded_local is None or independent_utc is None:
+        return errors
+    if recorded_utc != recorded_local:
+        errors.append("newMoonUtc and newMoonUtcPlus8 must denote the same instant")
+    expected_utc = datetime.datetime.fromtimestamp(
+        (utc - EPOCH_JD) * 86400.0, tz=datetime.timezone.utc,
+    )
+    if abs((recorded_utc - expected_utc).total_seconds()) > 1.0:
         errors.append("newMoonUtc differs from recomputed UTC")
-    if recorded_local.utcoffset() != datetime.timedelta(hours=8):
-        errors.append("newMoonUtcPlus8 must carry a +08:00 offset")
     if recorded_local.date() != civil_date(epoch_day):
         errors.append("UTC+8 date differs from generated month start")
+    difference = abs((independent_utc - expected_utc).total_seconds())
+    if difference > tolerance_seconds:
+        errors.append(
+            "independentReference.newMoonUtc differs from recomputed UTC by %.1fs "
+            "(tolerance %.1fs)" % (difference, tolerance_seconds)
+        )
     if conflict.get("chineseYear") != chinese_year or conflict.get("monthNumber") != number:
         errors.append("conflict year/month metadata differs from generated month")
     if conflict.get("isLeapMonth") != leap:

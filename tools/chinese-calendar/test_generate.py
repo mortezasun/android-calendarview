@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Regression tests for the development-time HKO comparison, run without VSOP87D."""
 
+import copy
 import datetime
 import importlib.util
 import json
@@ -109,6 +110,59 @@ class HkoComparisonTest(unittest.TestCase):
                 for mismatch in report["mismatches"]
             ))
             self.assertTrue(GENERATE.verify_reference(report))
+
+    def test_conflict_instants_must_agree_and_use_structured_reference_tolerance(self):
+        with open(os.path.join(HERE, "reference-conflicts.json"), encoding="utf-8") as handle:
+            conflict = json.load(handle)["conflicts"][0]
+        start = datetime.date.fromisoformat(conflict["generatedDate"])
+
+        def check(value):
+            return GENERATE.verify_conflict_astronomy(
+                value,
+                epoch_day(start),
+                value["monthNumber"],
+                value["chineseYear"],
+                value["isLeapMonth"],
+            )
+
+        self.assertEqual([], check(conflict))
+
+        different_instant = copy.deepcopy(conflict)
+        different_instant["newMoonUtcPlus8"] = "1914-11-18T00:01:43.986+08:00"
+        self.assertTrue(any(
+            "same instant" in error for error in check(different_instant)
+        ))
+
+        missing_local_zone = copy.deepcopy(conflict)
+        missing_local_zone["newMoonUtcPlus8"] = "1914-11-18T00:01:42.986"
+        self.assertTrue(any(
+            "timezone offset" in error for error in check(missing_local_zone)
+        ))
+
+        missing_utc_zone = copy.deepcopy(conflict)
+        missing_utc_zone["newMoonUtc"] = "1914-11-17T16:01:42.986"
+        self.assertTrue(any(
+            "timezone offset" in error for error in check(missing_utc_zone)
+        ))
+
+        outside_tolerance = copy.deepcopy(conflict)
+        outside_tolerance["independentReference"]["newMoonUtc"] = "1914-11-17T16:04:00Z"
+        self.assertTrue(any(
+            "tolerance 60.0s" in error for error in check(outside_tolerance)
+        ))
+
+        too_tight = copy.deepcopy(conflict)
+        too_tight["independentReference"]["toleranceSeconds"] = 5
+        self.assertTrue(any(
+            "tolerance 5.0s" in error for error in check(too_tight)
+        ))
+
+    def test_1914_reference_uses_the_actual_nasa_minute_and_marks_hko_reason_unresolved(self):
+        with open(os.path.join(HERE, "reference-conflicts.json"), encoding="utf-8") as handle:
+            conflict = json.load(handle)["conflicts"][0]
+        self.assertEqual("1914-11-17T16:02:00Z", conflict["independentReference"]["newMoonUtc"])
+        self.assertEqual(60, conflict["independentReference"]["toleranceSeconds"])
+        self.assertIn("unresolved", conflict["classification"])
 
     def test_unallowed_field_mismatch_fails_verification(self):
         start = datetime.date(2024, 2, 10)
