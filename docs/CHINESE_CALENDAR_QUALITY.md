@@ -1,31 +1,31 @@
 # 2.4.0: Testplan, Anfaelligkeiten und Sicherheitsgates
 
-Status: Kernmatrix am 2026-11-13 lokal (JDK 21, JVM + linuxX64) und in Remote-CI auf `1ab841e70b6fb7ab35b16e970715b500b91f95a2` sowie auf dem Review-Fixstand `e80c00f` ausgefuehrt.
+Status: Kernmatrix am 2026-11-13 lokal (JDK 21, JVM + linuxX64) und in Remote-CI auf `1ab841e70b6fb7ab35b16e970715b500b91f95a2` sowie auf dem Review-Fixstand `e80c00f` ausgefuehrt. Die Nachbesserungen auf `6fac725` (`5cf640d`) sind lokal geprueft; Remote-CI fuer diesen Commit ist noch nicht bestaetigt.
 Geraete-, UI-, Benchmark- und Advisory-Pruefungen sind offen. Dieser Plan behauptet weder
 Schwachstellenfreiheit noch einen aktuellen CVE-Scan.
 
 ## Funktionale Pflichtmatrix
 
 - [x] Jeden unterstuetzten Epoch Day nach chinesisch und zurueck konvertieren; jeden gueltigen chinesischen Tag umgekehrt pruefen. (72.674 Tage, `wholeRangeRoundTrips`.)
-- [x] Zusaetzlich unabhaengige Referenzdaten vergleichen. Roundtrips allein beweisen keine richtige Kalenderzuordnung. (Generator: 2.458 exakt + 3 auditierte Abweichungen = 2.461 HKO-Monatsstarts, 0 fehlende Referenzen; die Abweichungen sind mit NASA/GSFC-Neumondzeit belegt; `--verify-reference` verlangt vollstaendige Datei-/Startabdeckung und Jahres-/Schaltmonatsstatus.)
+- [x] Zusaetzlich unabhaengige Referenzdaten vergleichen. Roundtrips allein beweisen keine richtige Kalenderzuordnung. (Generator: 2.458 exakt + 3 auditierte Abweichungen = 2.461 HKO-Monatsstarts, 0 fehlende Referenzen; die Abweichungen sind mit strukturierter NASA/GSFC-Neumondzeit und 60-s-Toleranz belegt; `--verify-reference` verlangt vollstaendige Datei-/Startabdeckung, Jahres-/Schaltmonatsstatus, identische UTC-/UTC+8-Instants und explizite Zeitzonen. Die Ursache der abweichenden HKO-UT-Zeile bleibt ungeklaert.)
 - [x] Alle Jahres-/Monatswechsel, 29-/30-Tage-Monate, alle Schaltmonate und insbesondere 2033/2034 gegen Referenz pruefen. (2.461 Monate lueckenlos; Leap-Fixtures inkl. 2033/2034.)
 - [x] Randjahre, Randmonate, Nebenmonatszellen, min/max +/- 1 und ungueltige Schaltmonate pruefen.
 - [x] Gregorianische Jahrhundertgrenzen einschliesslich 1900/2000/2100 soweit unterstuetzt bzw. als ablehnender Grenztest abdecken. (Range endet 2100-02-08; 1900/2100 ausserhalb werden abgelehnt.)
 - [x] Grosse positive/negative Operanden, Int-/Long-Grenzen, Overflow und ungueltige Tageszahlen pruefen.
 - [x] UTC, UTC+08, Europe/Berlin mit Sommerzeit und weitere Geraetezonen liefern fuer denselben Epoch Day dasselbe Engine-Ergebnis. Keine Millisekunden/86400000-Tagesrechnung. (Engine nutzt ausschliesslich Epoch Days und enthaelt keine java.time-/Zeitzonen-Nutzung; Jar-Scan.)
 - [x] Monatsarithmetik mit Schaltmonaten und Tag-Clamping, naechster/vorheriger Monat sowie Anfang/Ende testen.
-- [x] Identische Fixtures auf JVM und einem ausgefuehrten Kotlin/Native-Target. Fuer beworbenes iOS: Simulator-Runtime und unabhaengiger Consumer auf macOS. Nur Kompilieren ist kein Runtime-Test. (JVM 13 + linuxX64 13; iOS nicht beworben.)
+- [x] Identische Fixtures auf JVM und einem ausgefuehrten Kotlin/Native-Target. Fuer beworbenes iOS: Simulator-Runtime und unabhaengiger Consumer auf macOS. Nur Kompilieren ist kein Runtime-Test. (JVM 14 + linuxX64 14; iOS nicht beworben.)
 
 ## Compose- und Regressionsmatrix
 
 - [ ] None/Single/Multiple/Range, deaktivierte Tage und Marker; Epoch-Day-Identitaet beim Wechsel zwischen allen Kalendern erhalten.
-- [x] Navigation normaler Monat -> Schaltmonat -> Folgemonat, Jahreswechsel, Grenzen und Heute ausserhalb des Bereichs. (JVM-Bounds-Tests und Compose-Regressionstest fuer Callback/Grenzen ergaenzt; Geraete-Ausfuehrung offen.)
-- [x] Saver-Roundtrip und echte StateRestorationTester-/Activity-Recreation-Tests einschliesslich Schaltflag und alter gespeicherter Sample-Zustaende. Neue Enum-Eintraege duerfen alte ordinalbasierte Saves nicht umdeuten. (`ChineseMonthSnapshot`-Decode-Tests und `StateRestorationTester`-Test fuer den Schaltmonat ergaenzt; lokal kompiliert, Remote-Instrumentation der Sample-Suite auf API 29 erfolgreich, aber keine separate chinesische Geraetematrix.)
+- [x] Navigation normaler Monat -> Schaltmonat -> Folgemonat, Jahreswechsel, Grenzen und Heute ausserhalb des Bereichs. (JVM-Bounds-Tests, Boundary-Window-Tests fuer beide Engine-Grenzen sowie Compose-Single-/Pager-Regressionstests ergaenzt; Geraete-Ausfuehrung offen.)
+- [x] Saver-Roundtrip und echte StateRestorationTester-/Activity-Recreation-Tests einschliesslich Schaltflag und alter gespeicherter Sample-Zustaende. Neue Enum-Eintraege duerfen alte ordinalbasierte Saves nicht umdeuten. (`ChineseMonthSnapshot`-Decode-Tests und `StateRestorationTester`-Test fuer den Schaltmonat mit Austausch zweier Callback-Instanzen ergaenzt; lokal kompiliert, Remote-Instrumentation der Sample-Suite auf API 29 erfolgreich, aber keine separate chinesische Geraetematrix.)
 - [ ] Monat, Woche, Agenda, Pager/Liste und Jahresheatmap mit 12 und 13 Monaten.
 - [ ] Telefon/Tablet, schmale Breite, Landscape, Mehrspalten, Split-Screen, simulierte Folds und kontinuierliche Layoutwechsel. Reale Foldable-Tests separat ausweisen.
 - [ ] LTR/RTL, chinesische/englische Beschriftung, grosse Schrift, TalkBack, deaktivierte Semantik und sichtbare Schaltmonatkennzeichnung.
 - [ ] Bestehende Touch-Target-Regeln und bekannte schmale-Viewport-Einschraenkungen erhalten; keine pauschale 48-dp-Garantie ohne Messung.
-- [x] Regression aller vorhandenen Module: Tests, Lint, Sample,   API-Guard und eigenstaendige Consumer. (205 JVM + 14 Native, Lint, Sample-APK, API-Guard, JVM- und Android-Consumer.)
+- [x] Regression aller vorhandenen Module: Tests, Lint, Sample,   API-Guard und eigenstaendige Consumer. (207 JVM + 14 Native, Lint, Sample-APK, API-Guard, JVM- und Android-Consumer.)
 
 ## Risikoregister
 
@@ -56,13 +56,13 @@ Vor Freigabe Benchmarks fuer Konvertierung, Monatsaufbau, 13-Monats-Heatmap und 
 
 | Punkt | Ergebnis |
 |---|---|
-| JVM | `test :calendar-chinese-native:jvmTest`: 205 JVM-Tests, 0 Fehler, 0 Skip |
+| JVM | `test :calendar-chinese-native:jvmTest`: 207 JVM-Tests (193 Android JVM + 14 KMP JVM), 0 Fehler, 0 Skip |
 | Kotlin/Native | `:calendar-chinese-native:linuxX64Test`: 14 Tests, 0 Fehler, 0 Skip |
 | Compose-Daten/State | 10 Tests: Monat/Woche/State/Saver/Heatmap/Overlay, inkl. 12/13 Monate, Bounds und Decode-Validierung |
-| Sample | `assembleDebug`, Unit-Tests und `compileDebugAndroidTestKotlin` erfolgreich |
+| Sample | `assembleDebug`, 60 Unit-Tests und `compileDebugAndroidTestKotlin` erfolgreich; neue Single-/Pager-Boundary-Tests nur kompiliert |
 | API/Consumer | bestehende Dumps `0` Diff; Engine-JVM-Consumer; Android-BOM-Consumer `assembleDebug` |
-| Python-Referenzpruefung | 4 Tests: fehlende Dateien/Starts, Jahres-/Schaltmonatsstatus, dokumentierter Konflikt, Verify-Fehlerstatus |
-| Remote-CI | Evidenzbaum `1ab841e`: verification `43401491446`, publishing `43401491433`, instrumentation `43401491452`, tablet `43401491675`; Fixstand `e80c00f`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286` - alle success |
+| Python-Referenzpruefung | 6 Tests: fehlende Dateien/Starts, Jahres-/Schaltmonatsstatus, dokumentierter Konflikt, Verify-Fehlerstatus, Instant-Gleichheit/Zeitzonen/Toleranz und NASA-1914-Wert |
+| Remote-CI | Evidenzbaum `1ab841e`: verification `43401491446`, publishing `43401491433`, instrumentation `43401491452`, tablet `43401491675`; Fixstand `e80c00f`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286` - alle success. Fuer `5cf640d` noch offen. |
 | Offen | chinesische UI-Interaktion auf realen Geraeten/Folds, TalkBack/Grossschrift/RTL, Touch-Target-Messung, Benchmarks, Advisory-/CVE-Scan, JitPack |
 
 ## Nachweisformat

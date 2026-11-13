@@ -8,8 +8,10 @@ Branch: `update`
 
 Status: implemented, committed, locally verified and remotely CI-green on branch `update` at `1ab841e70b6fb7ab35b16e970715b500b91f95a2`. The review fixes on top of
 `6970b924c855bb02792dee2bf818f63fe1b66500` are locally tested and CI-green at
-`e80c00fd1748a2d0e0c35db10abe8053d1176b66`. **Not tagged, merged or published.** No claim is made
-for JitPack, emulator/instrumentation device coverage or other devices.
+`e80c00fd1748a2d0e0c35db10abe8053d1176b66`. The further review fixes on base `6fac725` are
+committed as `5cf640d` and locally tested; Remote-CI for that commit is pending. **Not tagged,
+merged or published.** No claim is made for JitPack, emulator/instrumentation device coverage or
+other devices.
 
 - Added `:calendar-chinese-native`, a Kotlin Multiplatform engine with `jvm()` and `linuxX64()`
   targets: immutable `ChineseMonth`/`ChineseDate`, `ChineseCalendarEngine`, `ChineseFormat`,
@@ -20,17 +22,26 @@ for JitPack, emulator/instrumentation device coverage or other devices.
   from VSOP87D Earth series, Meeus chapters 25/49 and Espenak–Meeus ΔT. HKO tables were used only
   as a development-time comparison: 2,458/2,461 month starts match exactly. The three cases
   1914-11-18, 1916-02-04 and 1920-11-11 are audited in
-  `tools/chinese-calendar/reference-conflicts.json` with JDE/TT, ΔT, UTC, UTC+8 and independent
-  NASA/GSFC new-moon times; HKO labels the UT date (previous day), so the table keeps the
-  documented UTC+8 date. `--verify-reference` checks complete file/start coverage, year and leap
-  status and exits non-zero on undocumented deviations. No HKO data, ICU, lunar-java or other
-  calendar code is embedded or redistributed.
+  `tools/chinese-calendar/reference-conflicts.json` with JDE/TT, ΔT, UTC, UTC+8 and structured
+  NASA/GSFC new-moon times (1914-11-17 16:02 UT, 1916-02-03 16:05 UT, 1920-11-10 16:05 UT) with a
+  documented 60-second tolerance. `--verify-reference` checks complete file/start coverage, year
+  and leap status, identical UTC/UTC+8 instants, explicit time zones and the independent time
+  within tolerance. HKO lists the previous UT date; why its historical row differs is unresolved
+  and is not presented as an established convention. The table keeps the documented UTC+8 date.
+  No HKO data, ICU, lunar-java or other calendar code is embedded or redistributed.
 - Review fixes (base `6970b92`): today navigation honours configured month bounds; the reference
   comparison rejects missing files/starts and checks year/leap status; the Gregorian Chinese
   overlay uses Gregorian header/pager identities; agenda keys include the text style; the today
   callback is kept current without resetting navigation; snapshot decoding rejects non-binary
   leap flags; switching to Chinese clamps an unsupported anchor with a visible message while the
   shared selection stays unchanged. Targeted JVM and compiled Compose regression tests were added.
+- Further review fixes (base `6fac725`): the sample month window is truncated at finite engine
+  bounds so both boundary months render in Single and Pager modes; the conflict audit requires
+  both recorded instants to agree and compares the structured NASA time within its documented
+  tolerance; the 1914 NASA value is corrected and the HKO explanation is marked unresolved; the
+  today-callback test exchanges two distinct callback instances after restoration. Sample JVM
+  tests and the Python audit pass; the new Compose boundary/callback tests compile but were not
+  run locally on a device.
 - Added `:calendar-chinese-compose`: `ChineseCalendarMonth`, `GregorianChineseCalendarMonth`,
   `chineseMonthData`, `ChineseWeekData`, `ChineseMonthState`/`rememberChineseMonthState` with
   leap-month identity in title, keys, saver and heatmap titles, plus `chineseYearHeatmap` /
@@ -47,12 +58,12 @@ for JitPack, emulator/instrumentation device coverage or other devices.
 
 | Check | Result |
 |---|---|
-| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 205 JVM tests (191 Android JVM + 14 KMP JVM), 0 failed, 0 skipped |
+| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 207 JVM tests (193 Android JVM + 14 KMP JVM), 0 failed, 0 skipped |
 | `./gradlew :calendar-chinese-native:linuxX64Test` | BUILD SUCCESSFUL; 14 tests, 0 failed, 0 skipped |
 | `./gradlew :calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
 | `./gradlew ... lintDebug` for core, all five calendar modules and sample | BUILD SUCCESSFUL |
 | `./gradlew :calendarviewsample:compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL (compile only; not executed) |
-| `python3 -m unittest tools/chinese-calendar/test_generate.py` | 4 tests, 0 failed; missing reference files/starts, year/leap checks and documented-conflict audit |
+| `python3 -m unittest tools/chinese-calendar/test_generate.py` | 6 tests, 0 failed; missing reference files/starts, year/leap checks, documented-conflict audit, instant/timezone/tolerance rejection and the corrected NASA-1914 value |
 | `bash scripts/api-check.sh` | passed; existing five dumps `0` diff, two new dumps added |
 | isolated `publishToMavenLocal` to `/tmp/m2test` | engine root/jvm/linuxx64, compose and BOM published; POMs inspected: engine only `kotlin-stdlib`, compose `library` + engine + material3 runtime, BOM lists seven modules |
 | standalone JVM consumer (`javac` + engine jar) | 2024-02-10 → epoch 19763, round-trip OK, 2023 has 13 months and leap month `2023-2L`; jar contains no AndroidX/Compose/Android classes |
@@ -74,6 +85,7 @@ for JitPack, emulator/instrumentation device coverage or other devices.
   the Chinese reference-comparison Python step. These runs execute the existing
   instrumentation/tablet suites; they are not a Chinese-specific device, fold, TalkBack or
   benchmark matrix.
+- Remote-CI for `5cf640d` is pending; the last confirmed green review-fix commit is `e80c00f`.
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).

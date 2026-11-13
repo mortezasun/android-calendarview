@@ -41,9 +41,15 @@ Pflichtmanifest: Quelle und Abrufdatum, Nutzungsbedingungen/Attribution, Quellen
 Ereignisse nahe lokaler Mitternacht koennen je nach Referenz um einen Tag abweichen. Der
 Generator dokumentiert drei solche Faelle: 1914-11-18, 1916-02-04 und 1920-11-11. Fuer jeden
 Fall nennt `tools/chinese-calendar/reference-conflicts.json` JDE (TT), Delta-T, UTC-Instant,
-UTC+8-Tagesdatum, die unabhaengige NASA/GSFC-Neumondzeit und die Einordnung: der Neumond liegt
-1m43s, 5m16s bzw. 4m50s nach UTC+8-Mitternacht, waehrend die HKO-Zeile den UT-Kalendertag
-(Vortag) traegt. Die Tabelle bleibt auf dem dokumentierten UTC+8-Datum; es gibt keine
+UTC+8-Tagesdatum, eine strukturierte unabhaengige NASA/GSFC-Referenz (UTC-Zeit, Quelle, URL
+und dokumentierte Toleranz von 60 s) und die Einordnung: der Neumond liegt 1m43s, 5m16s bzw.
+4m50s nach UTC+8-Mitternacht. Die NASA-Tabelle nennt fuer 1914-11-17 16:02 UT, fuer 1916-02-03
+16:05 UT und fuer 1920-11-10 16:05 UT. `--verify-reference` prueft, dass `newMoonUtc` und
+`newMoonUtcPlus8` denselben Zeitpunkt bezeichnen, beide explizite Offsets tragen und die
+NASA-Zeit innerhalb der dokumentierten Toleranz zum neu berechneten UTC-Wert liegt. Die HKO-Zeile
+traegt jeweils den vorherigen UT-Kalendertag; ob dies eine absichtliche historische HKO-UT-
+Konvention oder eine andere Regel ist, ist mit den verfuegbaren Quellen nicht belegt und bleibt
+ausdruecklich ungeklaert. Die Tabelle bleibt auf dem dokumentierten UTC+8-Datum; es gibt keine
 undokumentierte Tabellenkorrektur. `--verify-reference` prueft alle erwarteten Dateien und
 Monatsstarts sowie Jahr und Schaltstatus und beendet sich bei Abweichungen mit Status 1.
 Datensatzversion `2026.11-astronomical-v1`, Ausgabe-SHA256 und VSOP87D-Eingabe-SHA256 stehen im
