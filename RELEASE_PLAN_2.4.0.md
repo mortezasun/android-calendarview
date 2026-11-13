@@ -1,8 +1,8 @@
 # Releaseplan 2.4.0: eigener chinesischer Kalender
 
 Stand: 2026-11-13. Zielbranch: `update`. Status: Umsetzung und Review-Nachbesserungen
-lokal verifiziert; Remote-CI fuer den Evidenzbaum `1ab841e` gruen. Fix-Commit, Remote-CI fuer
-diesen Fixstand, JitPack, Geraetegates, Tag und Release offen.
+lokal verifiziert; Remote-CI fuer den Evidenzbaum `1ab841e` und den Fixstand `e80c00f` gruen.
+JitPack, Geraetegates, Tag und Release offen.
 Gepruefte Branchbasis: `a9642f13d596fd35137945bc234dbf2827e6e398`. Letzter per GitHub API
 bestaetigter Release: `2.3.0`, Tag-Commit `8b7bea42e888785752fff199b2d53c04ab9888e4`,
 veroeffentlicht am 2026-11-13. Abweichende historische Datumsangaben nicht ungeprueft
@@ -103,7 +103,8 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 - [x] P2 Today-Callback: `rememberUpdatedState` versorgt Zustand und Saver mit dem aktuellen Callback; Callbackwechsel und echte `StateRestorationTester`-Wiederherstellung getestet. Nichtbinaere Schaltflags werden beim Decode abgelehnt.
 - [x] P2 Kalenderwechsel: Anker ausserhalb des Engine-Bereichs wird an beiden Grenzen auf den naechsten unterstuetzten Tag begrenzt, mit Fehlermeldung; die gemeinsame Auswahl bleibt unveraendert. Tests fuer beide Grenzen und den Fallback ergaenzt.
 - [x] Release-Dokumentation: Widerspruch zwischen fehlendem Remote-Run und den vier erfolgreichen Runs auf `1ab841e` korrigiert; Fixstand ist nicht als remote geprueft markiert.
-- [ ] Remote-CI fuer den Fix-Commit auf `update`, JitPack, echte Geraete-/Fold-/TalkBack-Matrix, Benchmarks und Advisory-Scan bleiben offen.
+- [x] Remote-CI fuer den Fix-Commit `e80c00f` auf `update`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286` - alle success.
+- [ ] JitPack, echte Geraete-/Fold-/TalkBack-Matrix, Benchmarks und Advisory-Scan bleiben offen.
 
 ## Arbeitsregel fuer die Implementierung
 

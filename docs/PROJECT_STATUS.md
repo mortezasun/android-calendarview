@@ -7,9 +7,9 @@ Branch: `update`
 ## Current development: 2.4.0 Chinese calendar (unreleased, 2026-11-13)
 
 Status: implemented, committed, locally verified and remotely CI-green on branch `update` at `1ab841e70b6fb7ab35b16e970715b500b91f95a2`. The review fixes on top of
-`6970b924c855bb02792dee2bf818f63fe1b66500` are locally tested; their own remote-CI evidence is
-still pending. **Not tagged, merged or published.** No claim is made for JitPack,
-emulator/instrumentation or other devices.
+`6970b924c855bb02792dee2bf818f63fe1b66500` are locally tested and CI-green at
+`e80c00fd1748a2d0e0c35db10abe8053d1176b66`. **Not tagged, merged or published.** No claim is made
+for JitPack, emulator/instrumentation device coverage or other devices.
 
 - Added `:calendar-chinese-native`, a Kotlin Multiplatform engine with `jvm()` and `linuxX64()`
   targets: immutable `ChineseMonth`/`ChineseDate`, `ChineseCalendarEngine`, `ChineseFormat`,
@@ -65,10 +65,15 @@ emulator/instrumentation or other devices.
   - `Android publishing verification`: Run 43401491433 (success)
   - `Android instrumentation`: Run 43401491452 (success)
   - `Android tablet verification`: Run 43401491675 (success).
-- Remote GitHub Actions are green for `1ab841e70b6fb7ab35b16e970715b500b91f95a2`, including the new `native-engine` job. This run
-  executes the existing instrumentation/tablet suites; it is not a Chinese-specific device,
-  fold, TalkBack or benchmark matrix. The review-fix commit on `update` still needs its own
-  remote-CI run.
+- Review-fix commit `e80c00fd1748a2d0e0c35db10abe8053d1176b66` pushed to `origin/update`; all four workflows passed:
+  - `Android verification`: Run 43412948314 (success)
+  - `Android publishing verification`: Run 43412948284 (success)
+  - `Android instrumentation`: Run 43412948316 (success)
+  - `Android tablet verification`: Run 43412948286 (success).
+- Remote GitHub Actions are green for `1ab841e70b6fb7ab35b16e970715b500b91f95a2` and `e80c00f`, including the new `native-engine` job and
+  the Chinese reference-comparison Python step. These runs execute the existing
+  instrumentation/tablet suites; they are not a Chinese-specific device, fold, TalkBack or
+  benchmark matrix.
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).

@@ -1,9 +1,8 @@
 # 2.4.0: Testplan, Anfaelligkeiten und Sicherheitsgates
 
-Status: Kernmatrix am 2026-11-13 lokal (JDK 21, JVM + linuxX64) und in Remote-CI auf `1ab841e70b6fb7ab35b16e970715b500b91f95a2` ausgefuehrt; Review-Nachbesserungen
-auf `6970b92` sind lokal getestet, aber noch nicht remote. Geraete-, UI-, Benchmark- und
-Advisory-Pruefungen sind offen. Dieser Plan behauptet weder Schwachstellenfreiheit noch einen
-aktuellen CVE-Scan.
+Status: Kernmatrix am 2026-11-13 lokal (JDK 21, JVM + linuxX64) und in Remote-CI auf `1ab841e70b6fb7ab35b16e970715b500b91f95a2` sowie auf dem Review-Fixstand `e80c00f` ausgefuehrt.
+Geraete-, UI-, Benchmark- und Advisory-Pruefungen sind offen. Dieser Plan behauptet weder
+Schwachstellenfreiheit noch einen aktuellen CVE-Scan.
 
 ## Funktionale Pflichtmatrix
 
@@ -63,7 +62,7 @@ Vor Freigabe Benchmarks fuer Konvertierung, Monatsaufbau, 13-Monats-Heatmap und 
 | Sample | `assembleDebug`, Unit-Tests und `compileDebugAndroidTestKotlin` erfolgreich |
 | API/Consumer | bestehende Dumps `0` Diff; Engine-JVM-Consumer; Android-BOM-Consumer `assembleDebug` |
 | Python-Referenzpruefung | 4 Tests: fehlende Dateien/Starts, Jahres-/Schaltmonatsstatus, dokumentierter Konflikt, Verify-Fehlerstatus |
-| Remote-CI | verification `43401491446`, publishing `43401491433`, instrumentation `43401491452`, tablet `43401491675`: alle success (Evidenzbaum `1ab841e`; Fixstand noch nicht remote) |
+| Remote-CI | Evidenzbaum `1ab841e`: verification `43401491446`, publishing `43401491433`, instrumentation `43401491452`, tablet `43401491675`; Fixstand `e80c00f`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286` - alle success |
 | Offen | chinesische UI-Interaktion auf realen Geraeten/Folds, TalkBack/Grossschrift/RTL, Touch-Target-Messung, Benchmarks, Advisory-/CVE-Scan, JitPack |
 
 ## Nachweisformat
