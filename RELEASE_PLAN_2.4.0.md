@@ -7,8 +7,9 @@ Die Nachbesserungen auf Basis `6fac725` sind als `5cf640d` lokal verifiziert; de
 Arbeitsbaum lokal behoben, publiziert und mit isolierten Consumern geprueft. Der Nachbesserungs-
 block ist als `09e3a73` auf `update`; alle vier Remote-Workflows sind success. Die
 Publishing-URL-Nachbesserung auf Basis `acf3bfc` ist lokal verifiziert. Der Folgeblock ist als
-`9fd3b50` auf `update`; alle vier Remote-Workflows sind success. JitPack, Geraetegates, Tag und
-Release bleiben offen.
+`9fd3b50` auf `update`; alle vier Remote-Workflows sind success. Die Nachbesserung auf Basis
+`9fd3b50` ist als `a138306` gepusht und mit allen vier Remote-Workflows gruen. JitPack,
+Geraetegates, Tag und Release bleiben offen.
 Gepruefte Branchbasis: `a9642f13d596fd35137945bc234dbf2827e6e398`. Letzter per GitHub API
 bestaetigter Release: `2.3.0`, Tag-Commit `8b7bea42e888785752fff199b2d53c04ab9888e4`,
 veroeffentlicht am 2026-11-13. Abweichende historische Datumsangaben nicht ungeprueft
@@ -153,6 +154,17 @@ publishing `43447073475`, instrumentation `43447073390`, tablet `43447073539` - 
 Plattformabdeckung dieses Nachweises: Der JVM-Consumer loest die Root-Modul-Metadaten und die JVM-Variante auf und fuehrt `ChineseDate.of` aus. Der Android-Consumer kompiliert die Compose-Fassade und ihre veroeffentlichten AAR-Abhaengigkeiten. Die linuxX64-Klib wird auf Datei-/Archiv- und Metadatenebene geprueft, aber in diesem Lauf **nicht von einem Kotlin/Native-Consumer konsumiert**. Die Pruefung ist kein JitPack- oder Remote-Consumer-Nachweis.
 
 Remote-CI fuer `9fd3b50`: verification `43459739249`, publishing `43459739473`, instrumentation `43459739435`, tablet `43459739230` - alle success.
+
+### Nachbesserung 2026-11-13 (Basis `9fd3b50`)
+
+| Punkt | Umsetzung | Nachweis |
+|---|---|---|
+| HKO-Datenkonvention | Bewusste UT+8-Produktentscheidung: Die drei HKO-Zeilen sind mit Pekinger Ortszeit vor 1929 vereinbar, eine pauschale LMT-Umstellung verschiebt aber auch 1906-04-24. `unresolved` ist entfernt; Daten und Ausgabe-Hash bleiben unveraendert. | Generator `--verify-reference`: 2.458 exakt + 3 dokumentiert = 2.461, `complete=True`; `ChineseCalendarData.kt` byte-identisch; Manifest-Hash `2636c523...`; Audit der LMT-Variante lokal ausgefuehrt. |
+| Default-Monat | `defaultChineseMonth` klemmt den Standard-`initialMonth` auf `MIN_EPOCH_DAY..MAX_EPOCH_DAY`; bei einem Host-Datum ausserhalb des Datenbereichs wird der naechste unterstuetzte Monat angezeigt. | `ChineseComposeDataTest.defaultMonthIsClampedToTheSupportedDataSet` mit `Long.MIN_VALUE`, `Long.MAX_VALUE` und einem Datum im Bereich; Fokustest gruen, XML `failures="0"`. |
+| Workflow-Version | `.github/workflows/android-publishing.yml` liest die Version aus `build.gradle.kts`, prueft sie auf leer und verwendet sie fuer Verifier und Native-POM; keine hartkodierte `2.4.0`. | YAML-Parse OK; lokale Versionsermittlung `2.4.0`; `grep` findet keine hartkodierte Version. |
+| Daten-Hash-Test | `test_checked_in_kotlin_source_matches_manifest_sha256` vergleicht den SHA-256 von `ChineseCalendarData.kt` mit `manifest.json`. | `python3 -m unittest discover -s tools/chinese-calendar -p 'test_*.py'`: 7 Tests, 0 Fehler. |
+
+Commits: `95c1cc3` (vier Nachbesserungen) und `a138306` (interner Helper aus dem JVM-API-Dump gefiltert). Der erste Verification-Run fuer `95c1cc3` schlug am API-Guard fehl, weil der interne Top-Level-Helper als JVM-Methode sichtbar war; der API-Dump blieb unveraendert. Remote-CI fuer `a138306`: verification `43472900415`, publishing `43472900052`, instrumentation `43472901643`, tablet `43472900502` - alle success.
 
 #### Weiterhin offene Gates
 
