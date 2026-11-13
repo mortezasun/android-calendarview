@@ -9,7 +9,7 @@ Status: `2.4.0` is a locally verified release candidate, not tagged or published
 - [x] BOM, `jitpack.yml`, API guard, verification/publishing workflows and sample updated for seven artifacts.
 - [x] `api/calendar-chinese-native.api` and `api/calendar-chinese-compose.api` generated; existing five dumps unchanged (`0` diff).
 - [x] Local JVM/Native tests, sample build, lint, release AARs, isolated publishing, POM checks, standalone JVM consumer and independent Android BOM consumer passed.
-- [x] Evidence tree `d5416403d2f9a77a60b30eb2bf93f6302959059b` and documentation follow-up pushed to `origin/update`.
+- [x] Evidence tree `1ab841e70b6fb7ab35b16e970715b500b91f95a2` (including the KMP publishing lookup fix) pushed to `origin/update`; local and remote checks passed.
 - [x] Remote CI green for `1ab841e70b6fb7ab35b16e970715b500b91f95a2`:
   - `Android verification`: Run 43401491446 (success)
   - `Android publishing verification`: Run 43401491433 (success)

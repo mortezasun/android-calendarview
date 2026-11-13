@@ -6,7 +6,7 @@ Branch: `update`
 
 ## Current development: 2.4.0 Chinese calendar (unreleased, 2026-11-13)
 
-Status: implemented, committed and locally verified on branch `update` at `d5416403d2f9a77a60b30eb2bf93f6302959059b`;
+Status: implemented, committed, locally verified and remotely CI-green on branch `update` at `1ab841e70b6fb7ab35b16e970715b500b91f95a2`;
 **not tagged, merged or published**. No claim is made for remote CI, JitPack,
 emulator/instrumentation or other devices.
 

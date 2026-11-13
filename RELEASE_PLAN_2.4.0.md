@@ -76,12 +76,12 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 
 - [x] Chinesischen Kalender als eigene Auswahl integrieren. Chinesischen Monat und gregorianisches Gitter mit chinesischer Zusatzbeschriftung anbieten.
 - [x] Steuerung gruppieren: Kalender, Datum/Navigation, Auswahl, Darstellung, Grenzen und Details. Details zeigen Epoch Day, gregorianisches Datum, chinesisches Datum und Schaltmonatstatus.
-- [ ] Telefon, Tablet, Mehrspalten, Split-Screen und Fold-Transitions mit vorhandener adaptiver Architektur testen. (Kein Emulator/Geraet ausgefuehrt; nur `compileDebugAndroidTestKotlin`.)
-- [ ] Auswahl und sichtbaren Monat bei Rotation, Zustandswiederherstellung und Kalenderwechsel erhalten. Ein begrenzter Anzeigemonat darf nicht stillschweigend die globale Auswahl veraendern. (Saver-/Navigationslogik per Unit-Test und bestehender Restoration-Suite abgedeckt, echte Activity-Recreation fuer Chinese nicht ausgefuehrt.)
+- [ ] Telefon, Tablet, Mehrspalten, Split-Screen und Fold-Transitions mit vorhandener adaptiver Architektur testen. (Lokaler Emulator fehlt; Remote-Instrumentation und -Tablet sind fuer die bestehende Suite gruen, eine chinesische Geraete-/Fold-Matrix wurde nicht separat ausgefuehrt.)
+- [ ] Auswahl und sichtbaren Monat bei Rotation, Zustandswiederherstellung und Kalenderwechsel erhalten. Ein begrenzter Anzeigemonat darf nicht stillschweigend die globale Auswahl veraendern. (Saver-/Navigationslogik per Unit-Test und bestehender Restoration-Suite abgedeckt; echte Activity-Recreation mit Chinese nicht separat ausgefuehrt.)
 
 ### P5 - Haertung und Dokumentationssynchronisation
 
-- [ ] Gesamte Matrix in CHINESE_CALENDAR_QUALITY ausfuehren und Findings schliessen. (Funktionale Kernmatrix und Regression ausgefuehrt; Instrumentation, Geraete-/Fold-/TalkBack-Matrix, Benchmarks und Advisory-Scan offen.)
+- [ ] Gesamte Matrix in CHINESE_CALENDAR_QUALITY ausfuehren und Findings schliessen. (Funktionale Kernmatrix, Regression und Remote-Suite ausgefuehrt; chinesische Geraete-/Fold-/TalkBack-Matrix, Benchmarks und Advisory-Scan offen.)
 - [x] README, ARCHITECTURE, DEVELOPMENT, SETUP, CI, PROJECT_STATUS, RELEASE_CHECKLIST, CHANGELOG und AGENTS auf tatsaechlich implementierten Stand bringen. Bestehende historische Nachweise erhalten.
 - [x] Fehlenden API-Dump und Consumer-Beispiele ergaenzen; Lizenz-/NOTICE- und Publikationsmetadaten pruefen.
 - [x] Bestehende API-Dumps gegen 2.3.0 vergleichen; neue Module duerfen keine versteckten Breaking Changes verursachen. (Fuenf bestehende Dumps `0` Diff; zwei neue Dumps.)
