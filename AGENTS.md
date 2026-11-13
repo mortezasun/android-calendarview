@@ -73,7 +73,7 @@ These commands were executed successfully with JDK 17 and Android SDK Platform 3
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew test                                    # 113 JVM unit tests, all modules
+./gradlew test                                    # 176 JVM unit tests, all modules
 ./gradlew :library:lintDebug                      # lint for the core library
 ./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
@@ -104,7 +104,7 @@ for smaller changes. Report any command that could not be run and why.
 - No secrets, API keys or machine-specific paths in tracked files. `local.properties` stays
   untracked.
 - Git: commit only on request and only the files belonging to the task. Never force-push, never
-  merge into `master`/`main`, never rewrite published history.
+  merge into `master`/`main` without explicit user approval, never rewrite published history.
 
 ## When something is unclear
 

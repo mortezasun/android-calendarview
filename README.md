@@ -13,7 +13,7 @@
 
 A native Jetpack Compose calendar library for Android. It ships one shared, calendar-independent core (month grid, selection engine, containers, heatmaps) plus pluggable calendar engines for **Gregorian**, **Islamic Hijri** and **Solar Hijri (Jalali / Persian)** — with full RTL support.
 
-**Current release:** [`2.2.1`](https://github.com/mortezasun/android-calendarview/releases/tag/2.2.1) — adaptive layout, multi-window and fold-aware support. See the [2.2.1 release notes](docs/releases/2.2.1.md).
+**Current release:** [`2.3.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.3.0) — adds the dependency-free `:calendar-solarHijri-native` module (Borkowski engine, immutable `SolarHijriDate`, injectable `Clock`). See the [2.3.0 release notes](docs/releases/2.3.0.md).
 
 ---
 
@@ -47,7 +47,7 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 - **One selection engine for all calendars** – `None`, `Single`, `Multiple` and `Range`, keyed by absolute epoch days and saved across process death via `rememberSaveable`.
 - **Configurable month grid** – dynamic rows or fixed 6 rows (42 cells), independently toggleable previous/next-month days, header/weekday visibility, disabled dates and a customizable *today* border.
 - **Scrolling containers** – `CalendarMonthList` (`LazyColumn`/`LazyRow`) and `CalendarMonthPager` (`HorizontalPager`/`VerticalPager`).
-- **Month navigation** – `CalendarMonthHeader` plus saveable engine month states (`rememberGregorianMonthState`, `rememberHijriMonthState`, `rememberSolarHijriMonthState`) with inclusive bounds and a today action.
+- **Month navigation** – `CalendarMonthHeader` plus saveable engine month states (`rememberGregorianMonthState`, `rememberHijriMonthState`, `rememberSolarHijriMonthState`, `rememberSolarHijriNativeMonthState`) with inclusive bounds and a today action.
 - **Shared month data** – every engine month snapshot implements `CalendarMonthData`; `toHeatmap()` turns any month into the calendar-agnostic year-heatmap format.
 - **Week and agenda** – `CalendarWeekGrid` renders a seven-day week from engine `*WeekData`; `CalendarAgenda` renders a bounded vertical day list with the same selection and marker semantics.
 - **Markers and week numbers** – caller-owned epoch-day markers render as accessible event dots; an optional caller-formatted week-number column is available on month and week grids.
@@ -121,16 +121,15 @@ dependencies {
 ```
 
 The BOM is part of the same publication set and is included by `jitpack.yml` and the
-publishing workflow. A JitPack-only consumer resolved all four constrained modules at
-`2.2.1` without `mavenLocal()`. The POM contains the metadata Maven Central requires,
+publishing workflow. The four-module BOM was consumer-verified on JitPack for `2.1.0`/`2.2.1`; `2.3.0` adds `:calendar-solarHijri-native` to the BOM and awaits remote JitPack build confirmation. The POM contains the metadata Maven Central requires,
 but signing, namespace verification and upload are not configured; JitPack remains the
 only configured remote repository.
 
 If you only need one engine, keep its explicit version and omit the BOM.
 
-### Upgrading from 2.2.0 or 2.1.0
+### Upgrading from 2.2.1, 2.2.0 or 2.1.0
 
-The 2.2.1 release is binary-compatible with 2.2.0 and 2.1.0. If your build pinned module versions
+The 2.3.0 release is 100% binary-compatible with 2.2.1, 2.2.0 and 2.1.0 (and `:calendar-solarHijri` remains unchanged). If your build pinned module versions
 directly, move them to the BOM and bump the platform:
 
 ```kotlin
@@ -227,12 +226,17 @@ For new projects that do not need `ir.huri.jcal.JalaliCalendar`, prefer `:calend
 ```kotlin
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeCalendarMonth
+import com.develotter.calendarview.selection.rememberCalendarSelectionState
 
-SolarHijriNativeCalendarMonth(
-    month = SolarHijriDate.now(),
-    selection = selection,
-    onDateClick = { date -> /* SolarHijriDate(year, month, day) */ },
-)
+@Composable
+fun SolarHijriNativeScreen() {
+    val state = rememberCalendarSelectionState()
+    SolarHijriNativeCalendarMonth(
+        month = SolarHijriDate.now(),
+        selection = state.selection,
+        onDateClick = { date -> state.onDayClick(date.toEpochDay()) },
+    )
+}
 ```
 
 Legacy `:calendar-solarHijri` (`JalaliCalendar`):
@@ -284,7 +288,7 @@ state.clear()
 
 ## 🧭 Month navigation
 
-Engine month states own the visible month, the inclusive bounds and month arithmetic; the shared header only renders and dispatches. All three states are saveable and expose `month`, `title(locale)`, `canGoPrevious`, `canGoNext`, `canGoToday`, `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`.
+Engine month states own the visible month, the inclusive bounds and month arithmetic; the shared header only renders and dispatches. All four engine states are saveable and expose `month`, `title(locale)`, `canGoPrevious`, `canGoNext`, `canGoToday`, `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`.
 
 ```kotlin
 val monthState = rememberGregorianMonthState(
@@ -329,7 +333,7 @@ CalendarWeekGrid(
 )
 ```
 
-Use `hijriWeekData(HijrahDate.now())` or `solarHijriWeekData(JalaliCalendar())` for the other engines. `CalendarAgenda` is a bounded, vertically scrolling day list; it shares markers, selection, today styling and accessibility descriptions with the grids:
+Use `hijriWeekData(HijrahDate.now())`, `solarHijriNativeWeekData(SolarHijriDate.now())`, or `solarHijriWeekData(JalaliCalendar())` for the other engines. `CalendarAgenda` is a bounded, vertically scrolling day list; it shares markers, selection, today styling and accessibility descriptions with the grids:
 
 ```kotlin
 CalendarAgenda(
@@ -395,7 +399,7 @@ CalendarMonthColumns(
 
 ## 🎨 Customization
 
-All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHijriCalendarMonth`) share these optional parameters:
+All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHijriCalendarMonth`, `SolarHijriNativeCalendarMonth`) share these optional parameters:
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -496,7 +500,7 @@ CalendarYearHeatmap(
 
 ### Any calendar (Hijri, Jalali, …)
 
-The calendar-agnostic overload takes pre-built `HeatmapMonthData` blocks, so `:library` stays free of engine dependencies. Build them from the engine's month data (`gregorianMonthData`, `hijriMonthData`, `solarHijriMonthData`) with `toHeatmap()`; `isToday` and `enabled` come straight from the engine's `CalendarDayCell`:
+The calendar-agnostic overload takes pre-built `HeatmapMonthData` blocks, so `:library` stays free of engine dependencies. Build them from the engine's month data (`gregorianMonthData`, `hijriMonthData`, `solarHijriNativeMonthData`, `solarHijriMonthData`) with `toHeatmap()`; `isToday` and `enabled` come straight from the engine's `CalendarDayCell`:
 
 ```kotlin
 val months = (1..12).map { month ->
@@ -559,7 +563,7 @@ Requirements: JDK 17, Android SDK Platform 37, Build-Tools 36.0.0.
 Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 27.
 
 ```bash
-git clone --branch 2.2.1 https://github.com/mortezasun/android-calendarview.git
+git clone --branch 2.3.0 https://github.com/mortezasun/android-calendarview.git
 cd android-calendarview
 ./gradlew :calendarviewsample:assembleDebug   # build the demo app
 ./gradlew test                                # JVM unit tests (all modules)
@@ -590,7 +594,7 @@ CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Compose architecture, rendering and state model |
 | [V2_MIGRATION_MAPPING.md](docs/V2_MIGRATION_MAPPING.md) | 1.x → 2.0.0 migration matrix |
 | [PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | Verified status, test coverage, release notes |
-| [releases/2.2.1.md](docs/releases/2.2.1.md) | Current release notes and verification evidence |
+| [releases/2.3.0.md](docs/releases/2.3.0.md) | Current release notes and verification evidence |
 | [ADAPTIVE_LAYOUT.md](docs/ADAPTIVE_LAYOUT.md) | Adaptive layout, multi-window and state contract |
 | [ADJACENT_MONTH_DAYS.md](docs/ADJACENT_MONTH_DAYS.md) | Previous/next-month day behavior |
 | [COMPOSE_MONTH_CONTAINERS.md](docs/COMPOSE_MONTH_CONTAINERS.md) | List and pager containers |
