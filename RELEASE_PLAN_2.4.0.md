@@ -4,8 +4,8 @@ Stand: 2026-11-13. Zielbranch: `update`. Status: Umsetzung und Review-Nachbesser
 lokal verifiziert; Remote-CI fuer den Evidenzbaum `1ab841e` und den Fixstand `e80c00f` gruen.
 Die Nachbesserungen auf Basis `6fac725` sind als `5cf640d` lokal verifiziert; der gepushte Baum
 `952bbb6` ist mit allen vier Remote-Workflows gruen. Die Review-Findings gegen `54bf23d` sind im
-Arbeitsbaum lokal behoben, publiziert und mit isolierten Consumern geprueft; der Nachbesserungs-
-block wird separat auf `update` committet, die Remote-CI ist danach zu pruefen. JitPack,
+Arbeitsbaum lokal behoben, publiziert und mit isolierten Consumern geprueft. Der Nachbesserungs-
+block ist als `09e3a73` auf `update`; alle vier Remote-Workflows sind success. JitPack,
 Geraetegates, Tag und Release bleiben offen.
 Gepruefte Branchbasis: `a9642f13d596fd35137945bc234dbf2827e6e398`. Letzter per GitHub API
 bestaetigter Release: `2.3.0`, Tag-Commit `8b7bea42e888785752fff199b2d53c04ab9888e4`,
@@ -139,7 +139,8 @@ JitPack-Gates bleiben offen.
 Lokale Regression: `test :calendar-chinese-native:jvmTest :calendar-chinese-native:linuxX64Test`
 und `:calendarviewsample:assembleDebug` BUILD SUCCESSFUL; 193 Android-JVM- + 14 KMP-JVM-Tests
 sowie 14 linuxX64-Tests ohne Fehler. Die beiden neuen Compose-Tests sind kompiliert, aber ohne
-lokalen Emulator nicht ausgefuehrt. Remote-CI fuer diesen Commit ist nach dem Push zu pruefen.
+lokalen Emulator nicht ausgefuehrt. Remote-CI fuer `09e3a73`: verification `43447073439`,
+publishing `43447073475`, instrumentation `43447073390`, tablet `43447073539` - alle success.
 
 #### Weiterhin offene Gates
 

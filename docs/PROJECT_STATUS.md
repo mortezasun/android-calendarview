@@ -51,8 +51,9 @@ other devices.
   rejects ambiguous/stale JVM jars. A real publication defect was also fixed: Kotlin 2.4 wrote
   the metadata/sources/native files under different names than the `.module` files referenced,
   so the engine build now normalizes those names. Local consumers resolve the BOM, JVM jar and
-  native klib from the isolated repository. This block is committed separately on `update`; its
-  remote CI run is still to be checked.
+  native klib from the isolated repository. This block is `09e3a73` on `update`; all four remote
+  workflows passed (verification `43447073439`, publishing `43447073475`, instrumentation
+  `43447073390`, tablet `43447073539`). A docs-only follow-up records these results.
 - Added `:calendar-chinese-compose`: `ChineseCalendarMonth`, `GregorianChineseCalendarMonth`,
   `chineseMonthData`, `ChineseWeekData`, `ChineseMonthState`/`rememberChineseMonthState` with
   leap-month identity in title, keys, saver and heatmap titles, plus `chineseYearHeatmap` /
@@ -106,7 +107,7 @@ other devices.
   - `Android instrumentation`: Run 43439808384 (success)
   - `Android tablet verification`: Run 43439808435 (success)
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
-- Remote CI for the pushed review-fix commit against `54bf23d` is still to be verified; local publication, both isolated consumers, the API guard and the native/JVM regression are green.
+- Remote CI for the review-fix commit `09e3a73` against `54bf23d` is success: verification `43447073439`, publishing `43447073475`, instrumentation `43447073390`, tablet `43447073539`. The documentation follow-up is a separate commit; local publication, both isolated consumers, the API guard and the native/JVM regression are green.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).
 - No merge, tag, GitHub Release or publication was performed and none is authorized by this status.

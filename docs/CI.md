@@ -70,7 +70,7 @@ The same job then builds `tools/consumer-check`, a standalone Gradle build that 
 public Compose facade against the published AARs. The consumer receives the isolated repository
 through `-PconsumerRepo=...`; it does not use `mavenLocal()` by default. This is local-candidate
 verification, not a JitPack consumer test. The exact-binary and consumer checks were validated
-locally on 2026-11-13; a remote run for the current commit still has to be recorded.
+locally on 2026-11-13 and passed remotely in run `43447073475` for commit `09e3a73`.
 
 ## Remaining priority-0 checks
 
