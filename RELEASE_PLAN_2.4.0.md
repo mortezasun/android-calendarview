@@ -128,7 +128,6 @@ JitPack-Gates bleiben offen.
 - [ ] JitPack-Build `2.4.0` und JitPack-Only-Consumer ohne `mavenLocal`/`includeBuild`; die JitPack-2.3.0-Pruefung bleibt ebenfalls offen.
 - [ ] Chinesische Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix und Benchmarks. Die Remote-Instrumentation auf API 29 ist kein Ersatz fuer reale Geraete/Folds.
 - [ ] Advisory-/CVE-Scan fuer die aufgeloesten direkten und transitiven Abhaengigkeiten.
-- [x] Remote-CI fuer den Nachbesserungsbaum `952bbb6` (enthaelt `5cf640d`) auf `update`: verification `43439808516`, publishing `43439808420`, instrumentation `43439808384`, tablet `43439808435` - alle success.
 - [ ] Merge, Tag `2.4.0` und GitHub Release nur nach separater ausdruecklicher Freigabe; bis dahin kein Tag und keine Publikation.
 
 ## Arbeitsregel fuer die Implementierung
