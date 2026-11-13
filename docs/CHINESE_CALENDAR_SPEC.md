@@ -30,8 +30,9 @@ Implementierter Bereich: chinesische Jahre `1901..2099`, also Gregorian `1901-02
 `2100-02-08` (72.674 Tage, 2.461 Monate, 73 Schaltjahre). Die Tabelle enthaelt vollstaendige
 chinesische Jahre; ausserhalb liegende Tage werden abgelehnt, nicht extrapoliert. Teilweise
 sichtbare Randmonate werden in der Compose-Fassade als leere, deaktivierte Zellen behandelt.
-Der Generator verglich 2.461 Monatsstarts mit HKO-Referenzen (2.458 exakt gleich); die drei
-Abweichungen sind unten und im Manifest dokumentiert. Es wird keine HKO-Tabelle ausgeliefert.
+Der Generator verglich **2.461 Monatsstarts** mit HKO-Referenzen: **2.458 exakt + 3 auditierte
+Abweichungen = 2.461, 0 fehlende Referenzen/Dateien**. Die drei Abweichungen sind unten und im
+Manifest dokumentiert. Es wird keine HKO-Tabelle ausgeliefert.
 
 Eigener Datensatz: Monatsbeginn als Epoch Day, Monatsnummer, Schaltflag und Laenge, bzw. aequivalente selbst definierte Kompaktkodierung. Invarianten beim Generieren pruefen: streng steigende Starts, lueckenlose Tage, gueltige Laengen, gueltige Monatsfolge und konsistente Jahresstarts. Praefixindizes fuer begrenzte Suche; keine mutable globale Kalenderinstanz.
 

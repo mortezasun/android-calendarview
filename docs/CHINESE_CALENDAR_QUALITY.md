@@ -7,7 +7,7 @@ Schwachstellenfreiheit noch einen aktuellen CVE-Scan.
 ## Funktionale Pflichtmatrix
 
 - [x] Jeden unterstuetzten Epoch Day nach chinesisch und zurueck konvertieren; jeden gueltigen chinesischen Tag umgekehrt pruefen. (72.674 Tage, `wholeRangeRoundTrips`.)
-- [x] Zusaetzlich unabhaengige Referenzdaten vergleichen. Roundtrips allein beweisen keine richtige Kalenderzuordnung. (Generator: 2.458/2.461 HKO-Monatsstarts exakt, drei auditierte Abweichungen mit NASA/GSFC-Neumondzeit; `--verify-reference` verlangt vollstaendige Datei-/Startabdeckung und Jahres-/Schaltmonatsstatus.)
+- [x] Zusaetzlich unabhaengige Referenzdaten vergleichen. Roundtrips allein beweisen keine richtige Kalenderzuordnung. (Generator: 2.458 exakt + 3 auditierte Abweichungen = 2.461 HKO-Monatsstarts, 0 fehlende Referenzen; die Abweichungen sind mit NASA/GSFC-Neumondzeit belegt; `--verify-reference` verlangt vollstaendige Datei-/Startabdeckung und Jahres-/Schaltmonatsstatus.)
 - [x] Alle Jahres-/Monatswechsel, 29-/30-Tage-Monate, alle Schaltmonate und insbesondere 2033/2034 gegen Referenz pruefen. (2.461 Monate lueckenlos; Leap-Fixtures inkl. 2033/2034.)
 - [x] Randjahre, Randmonate, Nebenmonatszellen, min/max +/- 1 und ungueltige Schaltmonate pruefen.
 - [x] Gregorianische Jahrhundertgrenzen einschliesslich 1900/2000/2100 soweit unterstuetzt bzw. als ablehnender Grenztest abdecken. (Range endet 2100-02-08; 1900/2100 ausserhalb werden abgelehnt.)
