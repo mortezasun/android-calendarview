@@ -9,8 +9,8 @@ Branch: `update`
 Status: implemented, committed, locally verified and remotely CI-green on branch `update` at `1ab841e70b6fb7ab35b16e970715b500b91f95a2`. The review fixes on top of
 `6970b924c855bb02792dee2bf818f63fe1b66500` are locally tested and CI-green at
 `e80c00fd1748a2d0e0c35db10abe8053d1176b66`. The further review fixes on base `6fac725` are
-committed as `5cf640d` and locally tested; Remote-CI for that commit is pending. **Not tagged,
-merged or published.** No claim is made for JitPack, emulator/instrumentation device coverage or
+committed as `5cf640d` and locally tested; remote CI for the pushed tree `952bbb6` (containing
+`5cf640d`) passed all four workflows. **Not tagged, merged or published.** No claim is made for JitPack, emulator/instrumentation device coverage or
 other devices.
 
 - Added `:calendar-chinese-native`, a Kotlin Multiplatform engine with `jvm()` and `linuxX64()`
@@ -85,7 +85,11 @@ other devices.
   the Chinese reference-comparison Python step. These runs execute the existing
   instrumentation/tablet suites; they are not a Chinese-specific device, fold, TalkBack or
   benchmark matrix.
-- Remote-CI for `5cf640d` is pending; the last confirmed green review-fix commit is `e80c00f`.
+- Remote-CI for the pushed tree `952bbb6` (containing `5cf640d`) passed all four workflows:
+  - `Android verification`: Run 43439808516 (success)
+  - `Android publishing verification`: Run 43439808420 (success)
+  - `Android instrumentation`: Run 43439808384 (success)
+  - `Android tablet verification`: Run 43439808435 (success)
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).

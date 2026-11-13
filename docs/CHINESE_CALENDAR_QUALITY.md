@@ -1,6 +1,6 @@
 # 2.4.0: Testplan, Anfaelligkeiten und Sicherheitsgates
 
-Status: Kernmatrix am 2026-11-13 lokal (JDK 21, JVM + linuxX64) und in Remote-CI auf `1ab841e70b6fb7ab35b16e970715b500b91f95a2` sowie auf dem Review-Fixstand `e80c00f` ausgefuehrt. Die Nachbesserungen auf `6fac725` (`5cf640d`) sind lokal geprueft; Remote-CI fuer diesen Commit ist noch nicht bestaetigt.
+Status: Kernmatrix am 2026-11-13 lokal (JDK 21, JVM + linuxX64) und in Remote-CI auf `1ab841e70b6fb7ab35b16e970715b500b91f95a2` sowie auf dem Review-Fixstand `e80c00f` ausgefuehrt. Die Nachbesserungen auf `6fac725` (`5cf640d`) sind lokal geprueft; der gepushte Baum `952bbb6` ist in allen vier Remote-Workflows success.
 Geraete-, UI-, Benchmark- und Advisory-Pruefungen sind offen. Dieser Plan behauptet weder
 Schwachstellenfreiheit noch einen aktuellen CVE-Scan.
 
@@ -62,7 +62,7 @@ Vor Freigabe Benchmarks fuer Konvertierung, Monatsaufbau, 13-Monats-Heatmap und 
 | Sample | `assembleDebug`, 60 Unit-Tests und `compileDebugAndroidTestKotlin` erfolgreich; neue Single-/Pager-Boundary-Tests nur kompiliert |
 | API/Consumer | bestehende Dumps `0` Diff; Engine-JVM-Consumer; Android-BOM-Consumer `assembleDebug` |
 | Python-Referenzpruefung | 6 Tests: fehlende Dateien/Starts, Jahres-/Schaltmonatsstatus, dokumentierter Konflikt, Verify-Fehlerstatus, Instant-Gleichheit/Zeitzonen/Toleranz und NASA-1914-Wert |
-| Remote-CI | Evidenzbaum `1ab841e`: verification `43401491446`, publishing `43401491433`, instrumentation `43401491452`, tablet `43401491675`; Fixstand `e80c00f`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286` - alle success. Fuer `5cf640d` noch offen. |
+| Remote-CI | Evidenzbaum `1ab841e`: verification `43401491446`, publishing `43401491433`, instrumentation `43401491452`, tablet `43401491675`; Fixstand `e80c00f`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286`; Nachbesserungsbaum `952bbb6` (enthaelt `5cf640d`): verification `43439808516`, publishing `43439808420`, instrumentation `43439808384`, tablet `43439808435` - alle success. |
 | Offen | chinesische UI-Interaktion auf realen Geraeten/Folds, TalkBack/Grossschrift/RTL, Touch-Target-Messung, Benchmarks, Advisory-/CVE-Scan, JitPack |
 
 ## Nachweisformat

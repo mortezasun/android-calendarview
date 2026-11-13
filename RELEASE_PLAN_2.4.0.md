@@ -2,8 +2,8 @@
 
 Stand: 2026-11-13. Zielbranch: `update`. Status: Umsetzung und Review-Nachbesserungen
 lokal verifiziert; Remote-CI fuer den Evidenzbaum `1ab841e` und den Fixstand `e80c00f` gruen.
-Die Nachbesserungen auf Basis `6fac725` sind als `5cf640d` lokal verifiziert; ihre Remote-CI ist
-offen. JitPack, Geraetegates, Tag und Release offen.
+Die Nachbesserungen auf Basis `6fac725` sind als `5cf640d` lokal verifiziert; der gepushte Baum
+`952bbb6` ist mit allen vier Remote-Workflows gruen. JitPack, Geraetegates, Tag und Release offen.
 Gepruefte Branchbasis: `a9642f13d596fd35137945bc234dbf2827e6e398`. Letzter per GitHub API
 bestaetigter Release: `2.3.0`, Tag-Commit `8b7bea42e888785752fff199b2d53c04ab9888e4`,
 veroeffentlicht am 2026-11-13. Abweichende historische Datumsangaben nicht ungeprueft
@@ -91,7 +91,7 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 ### P6 - Release Candidate und 2.4.0
 
 - [x] Erst nach gruenen Produktgates Versionen synchron auf 2.4.0 vorbereiten; Sample versionCode 20400 nur nach Monotoniepruefung, versionName 2.4.0. (20300 -> 20400.)
-- [ ] RC-Nachweise fuer einen exakten Commit sammeln; alle Veroeffentlichungs- und Consumer-Pruefungen aus dem Releaseplan ausfuehren. (Evidenzbaum `1ab841e70b6fb7ab35b16e970715b500b91f95a2` und Review-Fixstand `e80c00f` auf `origin/update`; isolierte Publikation, zwei Consumer und alle vier Remote-Workflows bestanden. Remote-JitPack und die unabhaengige JitPack-Consumer-Pruefung weiterhin offen.)
+- [ ] RC-Nachweise fuer einen exakten Commit sammeln; alle Veroeffentlichungs- und Consumer-Pruefungen aus dem Releaseplan ausfuehren. (Evidenzbaum `1ab841e70b6fb7ab35b16e970715b500b91f95a2`, Review-Fixstand `e80c00f` und Nachbesserungsbaum `952bbb6` auf `origin/update`; isolierte Publikation, zwei Consumer und alle vier Remote-Workflows bestanden. Remote-JitPack und die unabhaengige JitPack-Consumer-Pruefung weiterhin offen.)
 - [ ] Separate ausdrueckliche Freigabe fuer Merge, Tag und GitHub Release einholen. Kein Tag 2.4.0 mit offenen Pflichtgates.
 - [ ] Nach Tagging tatsaechliche Remote-Artefakte/Varianten und unabhaengige Consumer verifizieren. Erst dann erfolgreiche Distribution behaupten.
 
@@ -113,20 +113,22 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 
 | Finding | Fix (Datei) | Regressionstest | Ausgefuehrte Pruefung |
 |---|---|---|---|
-| P1 Fenster an Engine-Grenzen | `calendarviewsample/.../CalendarSampleWindow.kt`: Center wird validiert; an einer endlichen Grenze wird die ungueltige Fensterseite weggelassen, der Grenzmonat bleibt erster/letzter Eintrag. | `CalendarSampleWindowTest.chineseWindowIsTruncatedAtBothEngineBounds`; `ChineseComposeRegressionTest.chineseBoundaryWindowRendersAndNavigatesInSingleMode` und `...InPager`. | Sample-JVM 60 Tests, 0 Fehler; AndroidTest kompiliert; neue UI-Tests lokal nicht ausgefuehrt (kein Emulator), Remote-CI offen. |
+| P1 Fenster an Engine-Grenzen | `calendarviewsample/.../CalendarSampleWindow.kt`: Center wird validiert; an einer endlichen Grenze wird die ungueltige Fensterseite weggelassen, der Grenzmonat bleibt erster/letzter Eintrag. | `CalendarSampleWindowTest.chineseWindowIsTruncatedAtBothEngineBounds`; `ChineseComposeRegressionTest.chineseBoundaryWindowRendersAndNavigatesInSingleMode` und `...InPager`. | Sample-JVM 60 Tests, 0 Fehler; AndroidTest kompiliert; neue UI-Tests lokal nicht ausgefuehrt (kein Emulator); Remote-Instrumentation `43439808384` success, keine separate chinesische Geraetematrix. |
 | P2 Zeitketten-/Referenzaudit | `tools/chinese-calendar/generate.py`: strukturierte NASA-Referenz, explizite UTC-/UTC+8-Offsets, Gleichheit beider Instants und dokumentierte 60-s-Toleranz. | `test_conflict_instants_must_agree_and_use_structured_reference_tolerance` (manipulierte Zeiten, fehlende Zeitzonen, Toleranzverletzung). | `test_generate.py`: 6 Tests, 0 Fehler; `--verify-reference`: 2.458 + 3 = 2.461, 0 fehlend, Exit 0. |
-| P2 NASA-Wert/HKO-Erklaerung | `reference-conflicts.json`: 1914-11-17 auf 16:02 UT korrigiert; 1916/1920 auf 16:05 UT bestaetigt; HKO-UT-Erklaerung als ungeklaert markiert. Manifest, Spezifikation, Quality- und Release-Doku synchronisiert. | `test_1914_reference_uses_the_actual_nasa_minute_and_marks_hko_reason_unresolved`. | Generator-/Manifestpruefung und Python-Tests gruen; Remote-CI offen. |
-| P2 Today-Callback | Kein Produktionscode noetig; Test tauscht zwei echte `FixedToday`-Callback-Instanzen nach dem Restore aus. | `ChineseComposeRegressionTest.chineseMonthStateSurvivesRestorationAndUsesAReplacedTodayCallback`. | AndroidTest kompiliert; Geraeteausfuehrung lokal nicht moeglich, Remote-CI offen. |
+| P2 NASA-Wert/HKO-Erklaerung | `reference-conflicts.json`: 1914-11-17 auf 16:02 UT korrigiert; 1916/1920 auf 16:05 UT bestaetigt; HKO-UT-Erklaerung als ungeklaert markiert. Manifest, Spezifikation, Quality- und Release-Doku synchronisiert. | `test_1914_reference_uses_the_actual_nasa_minute_and_marks_hko_reason_unresolved`. | Generator-/Manifestpruefung und Python-Tests gruen; Remote-CI `43439808516`/`43439808420` success. |
+| P2 Today-Callback | Kein Produktionscode noetig; Test tauscht zwei echte `FixedToday`-Callback-Instanzen nach dem Restore aus. | `ChineseComposeRegressionTest.chineseMonthStateSurvivesRestorationAndUsesAReplacedTodayCallback`. | AndroidTest kompiliert; Geraeteausfuehrung lokal nicht moeglich; Remote-Instrumentation `43439808384` success, keine separate chinesische Geraetematrix. |
 
-Diese Nachbesserungen sind lokal getestet. Remote-CI fuer `5cf640d` ist noch nicht bestaetigt;
-Geraete-, Fold-, TalkBack-, Benchmark-, Advisory- und JitPack-Gates bleiben offen.
+Diese Nachbesserungen sind lokal getestet. Remote-CI fuer `952bbb6` (enthaelt `5cf640d`):
+verification `43439808516`, publishing `43439808420`, instrumentation `43439808384`, tablet
+`43439808435` - alle success. Geraete-, Fold-, TalkBack-, Benchmark-, Advisory- und
+JitPack-Gates bleiben offen.
 
 #### Weiterhin offene Gates
 
 - [ ] JitPack-Build `2.4.0` und JitPack-Only-Consumer ohne `mavenLocal`/`includeBuild`; die JitPack-2.3.0-Pruefung bleibt ebenfalls offen.
 - [ ] Chinesische Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix und Benchmarks. Die Remote-Instrumentation auf API 29 ist kein Ersatz fuer reale Geraete/Folds.
 - [ ] Advisory-/CVE-Scan fuer die aufgeloesten direkten und transitiven Abhaengigkeiten.
-- [ ] Remote-CI fuer den Nachbesserungscommit `5cf640d` auf `update`.
+- [x] Remote-CI fuer den Nachbesserungsbaum `952bbb6` (enthaelt `5cf640d`) auf `update`: verification `43439808516`, publishing `43439808420`, instrumentation `43439808384`, tablet `43439808435` - alle success.
 - [ ] Merge, Tag `2.4.0` und GitHub Release nur nach separater ausdruecklicher Freigabe; bis dahin kein Tag und keine Publikation.
 
 ## Arbeitsregel fuer die Implementierung
