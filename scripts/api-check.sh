@@ -114,7 +114,7 @@ for module in "${MODULES[@]}" "$ENGINE_MODULE"; do
         # part of the Kotlin public surface but are public in the JVM bytecode.
         grep -E '^(public |  |\})' <<<"$output" \
             | grep -vE '\$stable|DefaultConstructorMarker|\$default|access\$|synthetic' \
-            | grep -vE 'solarHijriMonthTitle|hijriDayCellForEpoch|solarHijriNativeDayCellForEpoch' \
+            | grep -vE 'solarHijriMonthTitle|hijriDayCellForEpoch|solarHijriNativeDayCellForEpoch|defaultChineseMonth' \
             | grep -v '\$com_github_mortezasun_' \
             | sed -E 's/([A-Za-z0-9_]+)-[A-Za-z0-9_]+\(/\1(/' \
             >> "$dump"
