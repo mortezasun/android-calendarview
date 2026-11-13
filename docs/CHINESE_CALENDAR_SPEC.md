@@ -1,84 +1,122 @@
-# Chinesischer Kalender: API- und Datenvertrag fuer 2.4.0
+# Chinese calendar: API and data contract for 2.4.0
 
-Status: implementiert auf Branch `update` (2.4.0-Releasekandidat); API-Dumps unter `api/`.
+Status: implemented on branch `update` (2.4.0 release candidate); public API dumps are under
+`api/`. Current verified remote HEAD is `dc3abe22f1d67ad2dd78fe43b99515f49ee97f27`.
 
-## Kalenderkonvention
+## Calendar convention
 
-Moderner chinesischer Lunisolarkalender mit dokumentierter ziviler UTC+08:00-Referenz. Keine Zusage historischer Ortszeitregeln oder Gleichheit mit vietnamesischen/koreanischen Varianten. Ein Epoch Day bezeichnet wie bisher das ganzzahlige ISO-Datum relativ zu 1970-01-01, nicht einen Instant und nicht eine lokale Mitternacht in Millisekunden. Dieselbe Tagesidentitaet muss in allen Kalendern erhalten bleiben.
+Modern Chinese lunisolar calendar with a documented civil UTC+08:00 reference. It makes no
+promise about historical local-time rules or equality with Vietnamese/Korean variants. An epoch
+day, as before, is the integer ISO date relative to 1970-01-01, not an instant and not local
+midnight expressed in milliseconds. The same day identity must be preserved across all
+calendars.
 
-`year` bezeichnet das gregorianische Jahr, in dem das betreffende chinesische Neujahr beginnt. Nicht ungeprueft mit ICU YEAR oder EXTENDED_YEAR gleichsetzen. `monthNumber` liegt in 1..12; Schaltmonate werden durch ein eigenes Flag unterschieden, niemals als Monat 13 kodiert.
+`year` is the Gregorian year in which the relevant Chinese New Year begins. Do not equate it
+with ICU `YEAR` or `EXTENDED_YEAR` without verification. `monthNumber` is in 1..12; leap months
+are distinguished by a separate flag and are never encoded as month 13.
 
-## Implementierte Engine-API
+## Implemented engine API
 
-Paket: `com.develotter.calendarview.calendars.chineseNative`.
+Package: `com.develotter.calendarview.calendars.chineseNative`.
 
-- `ChineseMonth`: `year`, `monthNumber`, `isLeapMonth`; privater Konstruktor, Factory `of`, `fromEpochDay`.
-- `ChineseDate`: `year`, `monthNumber`, `isLeapMonth`, `dayOfMonth`; Factory `of`, `fromEpochDay`.
-- Beide sind keine data classes; Validierung im Konstruktor, manuelles `equals`/`hashCode`, kein `copy()`-Pfad.
-- `ChineseCalendarEngine`: `MIN_YEAR`/`MAX_YEAR`, `MIN_EPOCH_DAY`/`MAX_EPOCH_DAY`, `isSupported`, `fromEpochDay`, `toEpochDay`, `monthsInYear`, `monthOf`, `lengthOfMonth`, `lengthOfYear`, `monthStartEpochDay`, `firstMonthOfYear`, `lastMonthOfYear`, `nextMonth`, `previousMonth`, `leapMonth`, `hasLeapMonth`.
-- `ChineseDateOutOfRangeException : IllegalArgumentException` fuer nicht unterstuetzte Werte; ungueltige Monate/Tage werfen `IllegalArgumentException`.
+- `ChineseMonth`: `year`, `monthNumber`, `isLeapMonth`; private constructor, factories `of` and
+  `fromEpochDay`.
+- `ChineseDate`: `year`, `monthNumber`, `isLeapMonth`, `dayOfMonth`; factories `of` and
+  `fromEpochDay`.
+- Neither type is a data class; validation happens in the constructor, equality/hash code are
+  manual, and there is no `copy()` path.
+- `ChineseCalendarEngine`: `MIN_YEAR`/`MAX_YEAR`, `MIN_EPOCH_DAY`/`MAX_EPOCH_DAY`,
+  `isSupported`, `fromEpochDay`, `toEpochDay`, `monthsInYear`, `monthOf`, `lengthOfMonth`,
+  `lengthOfYear`, `monthStartEpochDay`, `firstMonthOfYear`, `lastMonthOfYear`, `nextMonth`,
+  `previousMonth`, `leapMonth`, and `hasLeapMonth`.
+- `ChineseDateOutOfRangeException : IllegalArgumentException` for unsupported values; invalid
+  months/days throw `IllegalArgumentException`.
 - `ChineseFormat`/`ChineseTextStyle`: English, SimplifiedChinese, TraditionalChinese, Numeric.
-- Tagesarithmetik ueber Epoch Days mit gepruefter Addition; Monatsarithmetik ueber die tatsaechliche Reihenfolge der 12/13 Monate. Bei gleichem Tag in kuerzerem Zielmonat wird auf dessen letzten Tag geklemmt; ein nicht vorhandener Schaltmonat wird niemals erfunden.
-- Monate des Jahres werden chronologisch geliefert, z.B. regulaerer Monat N, Schaltmonat N, regulaerer Monat N+1. Keine fixe Liste mit genau zwoelf Eintraegen.
-- Datumsvergleich erfolgt chronologisch; gleiche Monatsnummer mit anderem Schaltflag ist nicht derselbe Monat.
+- Day arithmetic uses epoch days with checked addition; month arithmetic follows the actual
+  order of the 12/13 months. When the day does not exist in a shorter target month, it is clamped
+  to that month's last day; a missing leap month is never invented.
+- Months of a year are returned chronologically, for example regular month N, leap month N,
+  regular month N+1. There is no fixed list containing exactly twelve entries.
+- Date comparison is chronological; the same month number with a different leap flag is not the
+  same month.
 
-Invalides Datum: IllegalArgumentException oder dokumentierter spezialisierter Untertyp. Nicht unterstuetztes Datum: konsistenter dokumentierter Bereichsfehler. Keine Rueckgabe von Null-/Ersatzdaten, kein stilles Clamping der Datumsumrechnung. Vor Tabellenzugriff Jahr und Grenzen pruefen. Numerische Extremwerte und Long.MIN_VALUE als Rechenoperand explizit abfangen.
+Invalid date: `IllegalArgumentException` or a documented specialized subtype. Unsupported date:
+a consistent documented range error. Never return null/substitute data and never silently clamp
+date conversion. Check the year and bounds before accessing tables. Explicitly guard numeric
+extremes and `Long.MIN_VALUE` as arithmetic operands.
 
-## Daten und Grenzen
+## Data and bounds
 
-Implementierter Bereich: chinesische Jahre `1901..2099`, also Gregorian `1901-02-19` bis
-`2100-02-08` (72.674 Tage, 2.461 Monate, 73 Schaltjahre). Die Tabelle enthaelt vollstaendige
-chinesische Jahre; ausserhalb liegende Tage werden abgelehnt, nicht extrapoliert. Teilweise
-sichtbare Randmonate werden in der Compose-Fassade als leere, deaktivierte Zellen behandelt.
-Der Generator verglich **2.461 Monatsstarts** mit HKO-Referenzen: **2.458 exakt + 3 auditierte
-Abweichungen = 2.461, 0 fehlende Referenzen/Dateien**. Die drei Abweichungen sind unten und im
-Manifest dokumentiert. Es wird keine HKO-Tabelle ausgeliefert.
+Implemented range: Chinese years `1901..2099`, corresponding to Gregorian `1901-02-19` through
+`2100-02-08` (72,674 days, 2,461 months, 73 leap years). The table contains complete Chinese
+years; days outside the range are rejected rather than extrapolated. Partially visible boundary
+months are represented as empty, disabled cells in the Compose facade. The generator compared
+**2,461 month starts** with HKO references: **2,458 exact + 3 audited differences = 2,461,
+0 missing references/files**. The three differences are documented below and in the manifest.
+No HKO table is shipped.
 
-Eigener Datensatz: Monatsbeginn als Epoch Day, Monatsnummer, Schaltflag und Laenge, bzw. aequivalente selbst definierte Kompaktkodierung. Invarianten beim Generieren pruefen: streng steigende Starts, lueckenlose Tage, gueltige Laengen, gueltige Monatsfolge und konsistente Jahresstarts. Praefixindizes fuer begrenzte Suche; keine mutable globale Kalenderinstanz.
+Own data set: month start as an epoch day, month number, leap flag and length, or an equivalent
+self-defined compact encoding. Validate invariants during generation: strictly increasing
+starts, gapless days, valid lengths, valid month order and consistent year starts. Use prefix
+indexes for bounded search; do not use a mutable global calendar instance.
 
-Pflichtmanifest: Quelle und Abrufdatum, Nutzungsbedingungen/Attribution, Quellen-Hash, Generatorversion, Datensatzversion und -Hash, exakter Bereich, Referenzkonvention, Konfliktliste und Reviewer. Generator und gepruefte Eingabe muessen reproduzierbar sein; Laufzeit und normale Consumer-Builds brauchen keinen Referenzserver.
+Required manifest: source and retrieval date, terms of use/attribution, source hash, generator
+version, data-set version and hash, exact range, reference convention, conflict list and
+reviewer. The generator and checked input must be reproducible; runtime and normal consumer
+builds must not require a reference server.
 
-Ereignisse nahe lokaler Mitternacht koennen je nach Referenz um einen Tag abweichen. Der
-Generator dokumentiert drei solche Faelle: 1914-11-18, 1916-02-04 und 1920-11-11. Fuer jeden
-Fall nennt `tools/chinese-calendar/reference-conflicts.json` JDE (TT), Delta-T, UTC-Instant,
-UTC+8-Tagesdatum, eine strukturierte unabhaengige NASA/GSFC-Referenz (UTC-Zeit, Quelle, URL
-und dokumentierte Toleranz von 60 s) und die Einordnung: der Neumond liegt 1m43s, 5m16s bzw.
-4m50s nach UTC+8-Mitternacht. Die NASA-Tabelle nennt fuer 1914-11-17 16:02 UT, fuer 1916-02-03
-16:05 UT und fuer 1920-11-10 16:05 UT. `--verify-reference` prueft, dass `newMoonUtc` und
-`newMoonUtcPlus8` denselben Zeitpunkt bezeichnen, beide explizite Offsets tragen und die
-NASA-Zeit innerhalb der dokumentierten Toleranz zum neu berechneten UTC-Wert liegt. Die HKO-Zeile
-traegt jeweils den vorherigen UT-Kalendertag; das ist mit Pekinger Ortszeit (UT+7:45:40) vor 1929
-vereinbar. Die Library trifft eine bewusste Produktentscheidung: Sie wendet ueber den gesamten
-Bereich die moderne UTC+8-Konvention an und uebernimmt keine historische Ortszeitregel. Eine
-pauschale Umstellung auf Ortszeit wuerde nach dem durchgefuehrten Audit auch weitere Monatsstarts
-verschieben (z. B. 1906-04-24); sie ist daher nicht Teil dieser Entscheidung. Die drei HKO-Zeilen
-sind dokumentierte historische Referenzunterschiede, keine offene Datenfrage. Die Tabelle bleibt
-auf dem dokumentierten UTC+8-Datum; es gibt keine undokumentierte Tabellenkorrektur. `--verify-reference` prueft alle erwarteten Dateien und
-Monatsstarts sowie Jahr und Schaltstatus und beendet sich bei Abweichungen mit Status 1.
-Datensatzversion `2026.11-astronomical-v1`, Ausgabe-SHA256 und VSOP87D-Eingabe-SHA256 stehen im
-Manifest. Aenderungen muessen in spaeteren Releases nachvollziehbar versioniert werden; keine
-willkuerlichen Sonderfaelle.
+Events near local midnight can differ by one day depending on the reference. The generator
+documents three such cases: 1914-11-18, 1916-02-04 and 1920-11-11. For each case,
+`tools/chinese-calendar/reference-conflicts.json` records JDE (TT), Delta-T, the UTC instant,
+the UTC+8 calendar date, a structured independent NASA/GSFC reference (UTC time, source, URL
+and documented 60 s tolerance) and the classification: the new moon occurs 1m43s, 5m16s and
+4m50s after UTC+8 midnight respectively. The NASA table gives 1914-11-17 16:02 UT,
+1916-02-03 16:05 UT and 1920-11-10 16:05 UT. `--verify-reference` checks that `newMoonUtc` and
+`newMoonUtcPlus8` denote the same instant, that both carry explicit offsets, and that the NASA
+time is within the documented tolerance of the newly calculated UTC value. The HKO row carries
+the preceding UT calendar day; this is consistent with Beijing local time (UT+7:45:40) before
+1929. The library makes a deliberate product decision: it applies the modern UTC+8 convention
+across the entire range and does not adopt a historical local-time rule. A blanket switch to
+local time would, according to the audit performed, also move other month starts (for example
+1906-04-24); it is therefore not part of this decision. The three HKO rows are documented
+historical reference differences, not an open data question. The table remains on the
+documented UTC+8 date; there is no undocumented table correction. `--verify-reference` checks
+all expected files and month starts as well as year and leap status, exiting with status 1 on
+differences. Data-set version `2026.11-astronomical-v1`, output SHA-256 and VSOP87D input
+SHA-256 are recorded in the manifest. Changes must be traceably versioned in later releases; no
+arbitrary special cases.
 
-## Compose-Vertrag
+## Compose contract
 
-Paket: `com.develotter.calendarview.calendars.chineseCompose`. Implementiert:
+Package: `com.develotter.calendarview.calendars.chineseCompose`. Implemented:
 `ChineseCalendarMonth`, `GregorianChineseCalendarMonth`, `ChineseMonthData`, `ChineseWeekData`
-mit `chineseWeekData`, `ChineseMonthState` mit `rememberChineseMonthState`, `ChineseMonthSnapshot`,
-`chineseMonthData`, `chineseMonthOfOrNull`, `chineseYearHeatmap` und `chineseMonthHeatmap`.
+with `chineseWeekData`, `ChineseMonthState` with `rememberChineseMonthState`,
+`ChineseMonthSnapshot`, `chineseMonthData`, `chineseMonthOfOrNull`, `chineseYearHeatmap` and
+`chineseMonthHeatmap`.
 
-- CalendarMonthData/CalendarWeekData und den vorhandenen Renderer verwenden.
-- Auswahl, Marker und Click-Mapping bleiben Epoch-Day-basiert.
-- Zustandsspeicherung umfasst Jahr, Monatsnummer und Schaltflag sowie benoetigte Bereichsparameter; keine plattformgebundenen Datumsobjekte serialisieren.
-- Deterministische Konvertierung kennt weder Uhr noch Geraetezeitzone. Heute wird der UI als Epoch Day injiziert; ein plattformspezifischer Komfortadapter darf es explizit berechnen. Anzeigezeitzone fuer Heute und feste Kalenderreferenz sind getrennte Entscheidungen.
-- Min/Max-Navigation, goTo, Wiederherstellung und Tag-Clamping dokumentieren. An Grenzen keine nicht unterstuetzten Nebenmonatsdaten erzeugen.
-- Titel und Screenreader-Text enthalten das Schaltmonatmerkmal. Keys enthalten die vollstaendige Monatsidentitaet.
-- Formatierung ist nicht Berechnung: englische und chinesische Labels, vereinfachte/traditionelle Zeichen und numerischer Fallback separat testen. Keine java.util.Locale-Typen im gemeinsamen Engine-Vertrag.
-- Stateless Composables, State nur fuer vom Aufrufer gewuenschte Navigation; keine neue ViewModel-/Flow-/DI-Architektur.
+- Use `CalendarMonthData`/`CalendarWeekData` and the existing renderer.
+- Selection, markers and click mapping remain epoch-day based.
+- State saving includes year, month number and leap flag as well as required range parameters;
+  do not serialize platform-bound date objects.
+- Deterministic conversion knows neither the clock nor the device time zone. Today is injected
+  into the UI as an epoch day; a platform-specific convenience adapter may calculate it
+  explicitly. The display time zone for today and the fixed calendar reference are separate
+  decisions.
+- Document min/max navigation, `goTo`, restoration and day clamping. Do not create unsupported
+  adjacent-month data at the bounds.
+- Titles and screen-reader text include the leap-month marker. Keys include the full month
+  identity.
+- Formatting is not calculation: test English and Chinese labels, simplified/traditional
+  characters and the numeric fallback separately. Do not put `java.util.Locale` types in the
+  shared engine contract.
+- Stateless composables; state only for navigation requested by the caller; no new
+  ViewModel/Flow/DI architecture.
 
-## Referenzen fuer die Implementierung
+## Implementation references
 
-- HKO Umrechnung und Unsicherheiten: https://www.hko.gov.hk/en/gts/time/conversion.htm
-- HKO Referenz 2033: https://www.hko.gov.hk/en/gts/time/calendar/text/files/T2033e.txt
-- Android ICU Kalenderkonventionen, nur als Entwicklungsreferenz: https://developer.android.com/reference/kotlin/android/icu/util/ChineseCalendar
+- HKO conversion and uncertainties: https://www.hko.gov.hk/en/gts/time/conversion.htm
+- HKO reference 2033: https://www.hko.gov.hk/en/gts/time/calendar/text/files/T2033e.txt
+- Android ICU calendar conventions, development reference only:
+  https://developer.android.com/reference/kotlin/android/icu/util/ChineseCalendar
 
-Referenz bedeutet keine erteilte Lizenz zur Weiterveroeffentlichung. Nutzungsbedingungen separat pruefen.
+A reference does not grant permission to redistribute. Check terms of use separately.

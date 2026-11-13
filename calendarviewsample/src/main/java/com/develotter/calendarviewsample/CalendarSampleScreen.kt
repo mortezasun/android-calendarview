@@ -93,6 +93,9 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
             CalendarSampleAdaptiveLayout(
                 header = {
                     Text("Compose Calendar Demo", style = MaterialTheme.typography.headlineSmall)
+                    Button(onClick = ui::showChineseDemo) {
+                        Text("Chinese 2.4.0 demo: leap month")
+                    }
                     CalendarSampleControls(ui)
                 },
                 content = {

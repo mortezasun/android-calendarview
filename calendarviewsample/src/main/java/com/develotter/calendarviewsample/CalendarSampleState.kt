@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
+import com.develotter.calendarview.calendars.chineseNative.ChineseDate
 import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.enums.TypeSelectDay
@@ -112,6 +113,19 @@ internal class CalendarSampleState(
 
     private fun chineseRangeMessage(epochDay: Long): String =
         "Chinese calendar supports 1901-02-19..2100-02-08; showing ${LocalDate.ofEpochDay(epochDay)}"
+
+    /**
+     * Opens a deterministic 2.4.0 showcase: a real leap month rendered by the native engine
+     * through [com.develotter.calendarview.calendars.chineseCompose.GregorianChineseCalendarMonth]
+     * or its Chinese month facade, with the conversion details visible.
+     */
+    fun showChineseDemo() {
+        anchor = ChineseDate(2023, 2, true, 1).toEpochDay()
+        chineseGregorianGrid = false
+        chineseStyleName = ChineseTextStyle.English.name
+        showChineseDetails = true
+        selectCalendar(SampleCalendar.Chinese)
+    }
 
     /** Sets the anchor from a settled visible month and clears a stale navigation error. */
     fun showMonth(epochDay: Long) {

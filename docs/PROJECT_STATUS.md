@@ -81,7 +81,7 @@ committed as `5cf640d` and locally tested; remote CI for the pushed tree `952bbb
 
 | Check | Result |
 |---|---|
-| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 210 JVM tests (196 Android JVM + 14 KMP JVM, incl. benchmark reporting), 0 failed, 0 skipped |
+| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 211 JVM tests (197 Android JVM + 14 KMP JVM, incl. benchmark reporting), 0 failed, 0 skipped |
 | `./gradlew :calendar-chinese-native:linuxX64Test` | BUILD SUCCESSFUL; 14 tests, 0 failed, 0 skipped |
 | `./gradlew :calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
 | `./gradlew ... lintDebug` for core, all five calendar modules and sample | BUILD SUCCESSFUL |

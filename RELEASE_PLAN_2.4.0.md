@@ -1,302 +1,410 @@
-# Releaseplan 2.4.0: eigener chinesischer Kalender
+# Release plan 2.4.0: native Chinese calendar
 
-Stand: 2026-11-13. Zielbranch: `update`. Status: Umsetzung und Review-Nachbesserungen
-lokal verifiziert; Remote-CI fuer den Evidenzbaum `1ab841e` und den Fixstand `e80c00f` gruen.
-Die Nachbesserungen auf Basis `6fac725` sind als `5cf640d` lokal verifiziert; der gepushte Baum
-`952bbb6` ist mit allen vier Remote-Workflows gruen. Die Review-Findings gegen `54bf23d` sind im
-Arbeitsbaum lokal behoben, publiziert und mit isolierten Consumern geprueft. Der Nachbesserungs-
-block ist als `09e3a73` auf `update`; alle vier Remote-Workflows sind success. Die
-Publishing-URL-Nachbesserung auf Basis `acf3bfc` ist lokal verifiziert. Der Folgeblock ist als
-`9fd3b50` auf `update`; alle vier Remote-Workflows sind success. Die Nachbesserung auf Basis
-`9fd3b50` ist als `a138306` gepusht und mit allen vier Remote-Workflows gruen. JitPack ist fuer
-`2.3.0` sowie den Commit `7a51e24` nachgewiesen; der 2.4.0-Tag-/BOM-Consumer bleibt ohne Tag
-blockiert. Benchmarks und der Advisory-Scan sind ausgefuehrt. Die chinesische
-Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix sowie Tag und Release bleiben offen.
-Gepruefte Branchbasis: `a9642f13d596fd35137945bc234dbf2827e6e398`. Letzter per GitHub API
-bestaetigter Release: `2.3.0`, Tag-Commit `8b7bea42e888785752fff199b2d53c04ab9888e4`,
-veroeffentlicht am 2026-11-13. Abweichende historische Datumsangaben nicht ungeprueft
-uebernehmen.
+Date: 2026-11-13. Target branch: `update`. Status: implementation and review follow-ups are
+locally verified; remote CI for the evidence tree `1ab841e` and the fix commit `e80c00f` is
+green. The follow-ups based on `6fac725` are locally verified as `5cf640d`; pushed tree
+`952bbb6` is green in all four remote workflows. The review findings against `54bf23d` are
+fixed locally, published and checked with isolated consumers. The follow-up block is
+`09e3a73` on `update`; all four remote workflows succeeded. The publishing URL follow-up based
+on `acf3bfc` is locally verified. The next block is `9fd3b50` on `update`; all four remote
+workflows succeeded. The follow-up based on `9fd3b50` is pushed as `a138306` and green in all
+four remote workflows. The current remote HEAD is
+`dc3abe22f1d67ad2dd78fe43b99515f49ee97f27`; verification `43520705754`, publishing
+`43520705242`, instrumentation `43520705461` and tablet `43520705438` all succeeded. JitPack is
+verified for `2.3.0` and commit `7a51e24`; the 2.4.0 tag/BOM consumer remains blocked without a
+tag. Benchmarks and the advisory scan were executed. A software-emulated API 29 phone smoke test
+reached the sample's leap-month details; the real-device/fold/TalkBack/large-font/RTL matrix, plus
+tag and release, remain open.
 
-## Verbindlicher Auftrag
+Verified branch base: `a9642f13d596fd35137945bc234dbf2827e6e398`. Last GitHub API-confirmed
+release: `2.3.0`, tag commit `8b7bea42e888785752fff199b2d53c04ab9888e4`, published on
+2026-11-13. Do not adopt differing historical dates without verification.
 
-Ein selbstgeschriebenes chinesisches Kalendersystem als zusaetzliche, optional einbindbare
-Library-Familie. Keine fremde Kalender-Engine, kein Wrapper um ICU und keine Portierung fremden
-Kalendercodes. Berechnung in reinem Kotlin; Darstellung in Compose ohne XML, WebView oder JNI.
-Unabhaengig von Gregorian-, Hijri- und Solar-Hijri-Modulen. Der existierende gemeinsame
-Compose-Kern darf fuer die Darstellung verwendet werden; die Engine muss ohne diesen Kern
-nutzbar sein.
+## Binding assignment
 
-Bestehender Code und bestehende Releases bleiben unveraendert. Die Checkboxen werden nur mit
-tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
+Build a self-written Chinese calendar system as an additional, optionally includable library
+family. No foreign calendar engine, no ICU wrapper and no porting of foreign calendar code.
+Calculation in pure Kotlin; presentation in Compose without XML, WebView or JNI. Independent of
+the Gregorian, Hijri and Solar Hijri modules. The existing shared Compose core may be used for
+presentation; the engine must be usable without that core.
 
-## Dokumente und Lesereihenfolge
+Existing code and releases remain unchanged. Checkboxes are checked only with actual evidence;
+open points remain explicitly open.
 
-1. Dieser Plan: Umfang, Reihenfolge und Arbeitsauftraege.
-2. [ADR 0005](docs/decisions/0005-independent-native-chinese-calendar.md): Unabhaengigkeit und Modulgrenzen.
-3. [API und Kalendervertrag](docs/CHINESE_CALENDAR_SPEC.md): Datenmodell, Zeitkonvention, Grenzen.
-4. [Tests und Risiken](docs/CHINESE_CALENDAR_QUALITY.md): Testmatrix, Anfaelligkeiten und Sicherheitsgates.
-5. [Release 2.4.0](docs/releases/2.4.0.md): Integrationsinventar, Freigabe und Nachweise.
-6. Bestehende `docs/RELEASE_CHECKLIST.md`, `docs/PROJECT_STATUS.md` und Releasebericht 2.3.0 als historische Baseline, nicht als Testnachweis fuer 2.4.0.
+## Documents and reading order
 
-## Architektur und Lieferumfang
+1. This plan: scope, order and work assignments.
+2. [ADR 0005](docs/decisions/0005-independent-native-chinese-calendar.md): independence and
+   module boundaries.
+3. [API and calendar contract](docs/CHINESE_CALENDAR_SPEC.md): data model, time convention,
+   bounds.
+4. [Tests and risks](docs/CHINESE_CALENDAR_QUALITY.md): test matrix, vulnerabilities and
+   security gates.
+5. [Release 2.4.0](docs/releases/2.4.0.md): integration inventory, approval and evidence.
+6. Existing `docs/RELEASE_CHECKLIST.md`, `docs/PROJECT_STATUS.md` and the 2.3.0 release report
+   as historical baseline, not as test evidence for 2.4.0.
 
-- `:calendar-chinese-native`: separat veroeffentlichbare Kotlin-Multiplatform-Engine; Kotlin-Standardbibliothek, keine Compose-, Android-, Java-Datums- oder fremden Kalender-Abhaengigkeiten im gemeinsamen Code.
-- `:calendar-chinese-compose`: separat veroeffentlichbare Compose-Fassade; abhaengig nur von der neuen Engine, `:library` und bereits genehmigten Compose-/Plattform-Bausteinen. Die bestehende Android-API und der gemeinsame Renderer werden wiederverwendet.
-- Bestehende Kalender duerfen keine Abhaengigkeit auf eines der neuen Module erhalten.
-- KMP-/Kotlin-Native-Nachweise gelten in 2.4.0 fuer die Engine. Die Compose-Fassade bleibt Android, solange `:library` Android-spezifisch ist. Keine Bewerbung als iOS-Compose-Library ohne tatsaechliche Migration und Consumer-Tests. Eine komplette Migration bestehender Module ist nicht Teil dieses additiven Releases.
-- Zielumfang: bidirektionale Datumsumrechnung, Schaltmonate, validierte Datumswerte, Tages- und Monatsnavigation, Monats-/Wochendaten, Compose-Monatsansicht, Saveable-Zustand, Agenda-/Pager-/Heatmap-Anbindung und Playground.
-- Nicht enthalten: BaZi, Horoskope, amtliche Arbeits-/Ausgleichstage, vollstaendige astronomische Langzeitberechnung und exakte Sonnenabschnittszeiten.
+## Architecture and deliverables
 
-## Umsetzung: immer nur eine Phase abschliessen
+- `:calendar-chinese-native`: separately publishable Kotlin Multiplatform engine; Kotlin standard
+  library only, with no Compose, Android, Java date or foreign calendar dependencies in common
+  code.
+- `:calendar-chinese-compose`: separately publishable Compose facade; depends only on the new
+  engine, `:library` and already approved Compose/platform building blocks. The existing Android
+  API and shared renderer are reused.
+- Existing calendars must not gain a dependency on either new module.
+- KMP/Kotlin-Native evidence applies to the engine in 2.4.0. The Compose facade remains Android
+  while `:library` is Android-specific. Do not advertise an iOS Compose library without actual
+  migration and consumer tests. A complete migration of existing modules is not part of this
+  additive release.
+- Target scope: bidirectional date conversion, leap months, validated date values, day and month
+  navigation, month/week data, Compose month view, saveable state, agenda/pager/heatmap
+  integration and a playground.
+- Not included: BaZi, horoscopes, official workdays/compensatory days, complete long-range
+  astronomical calculation and exact solar-term times.
 
-### P0 - Baseline und Build-Machbarkeit
+## Implementation: complete one phase at a time
 
-- [x] Arbeitsbaum und Branch pruefen; fremde lokale Aenderungen erhalten. Keine Force-Pushes oder automatischen Merges. (Branch `update`; unabhaengige `artifacts/`-Datei bleibt untracked.)
-- [x] README, AGENTS, Architektur, Entwicklungsregeln und aktuellen Status vollstaendig lesen; Buildskripte und Veroeffentlichungsworkflows inventarisieren.
-- [x] Bestehende Tests, Lint, API-Guard und Sample-Build als Baseline ausfuehren; bestehende Fehler getrennt dokumentieren. (Baseline `test` gruen; keine bestehenden Fehler gefunden.)
-- [x] Exakte Kotlin-/AGP-/Gradle-/Compose-Versionen aus dem Repository ermitteln; kompatible KMP-Plugin-/Android-Target-Konfiguration in einem kleinen Build-Prototyp pruefen. Kein blindes Upgrade auf angeblich letzte Versionen. (Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00; KMP-Plugin ohne eigene Version, da AGP Kotlin bereits bereitstellt.)
-- [x] Engine-Targets: Android-kompatibles Artefakt sowie mindestens ein ausgefuehrtes Kotlin/Native-Ziel; iOS-Geraete-/Simulator-Artefakte und Simulator-Consumer auf macOS verifizieren, bevor iOS-Support zugesagt wird. Exakte Targets und Testtasks nach Build-Prototyp dokumentieren. (`jvm()` von `:calendar-chinese-compose` konsumiert; `linuxX64Test` 14 Tests. iOS nicht deklariert.)
-- [x] Offene JitPack-2.3.0-Pruefung nachholen oder Ursache und Auswirkung auf 2.4.0 dokumentieren. Ein HTTP-500-Probeversuch ist kein bestaetigter Buildfehler und kein Consumer-Nachweis. (2.3.0-Buildlog HTTP 200 mit allen fuenf Modulen und BOM; JitPack-only Android-BOM-Consumer mit `library` kompiliert: `BUILD SUCCESSFUL`; 2.4.0-Tag bleibt separat blockiert, siehe Gate-Nachtrag.)
+### P0 - Baseline and build feasibility
 
-### P1 - Datenvertrag und Datenherkunft
+- [x] Check working tree and branch; preserve foreign local changes. No force pushes or automatic
+  merges. (Branch `update`; independent `artifacts/` files remain untracked.)
+- [x] Read README, AGENTS, architecture, development rules and current status fully; inventory
+  build scripts and publication workflows.
+- [x] Run existing tests, lint, API guard and sample build as baseline; document existing failures
+  separately. (Baseline `test` green; no existing failures found.)
+- [x] Determine exact Kotlin/AGP/Gradle/Compose versions from the repository; verify a compatible
+  KMP plugin/Android target configuration in a small build prototype. Do not blindly upgrade to
+  supposedly latest versions. (Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00;
+  KMP plugin without its own version because AGP already provides Kotlin.)
+- [x] Engine targets: Android-compatible artifact and at least one executed Kotlin/Native target;
+  verify iOS device/simulator artifacts and a simulator consumer on macOS before promising iOS
+  support. Document exact targets and test tasks after the build prototype. (`jvm()` consumed by
+  `:calendar-chinese-compose`; `linuxX64Test` 14 tests. iOS not declared.)
+- [x] Complete the open JitPack 2.3.0 check or document cause and impact on 2.4.0. An HTTP 500
+  probe is not a confirmed build failure and not a consumer proof. (2.3.0 build log HTTP 200 with
+  all five modules and BOM; JitPack-only Android BOM consumer with `library` compiles:
+  `BUILD SUCCESSFUL`; 2.4.0 tag remains separately blocked, see gate addendum.)
 
-- [x] Vertrag aus CHINESE_CALENDAR_SPEC final pruefen und API-Entwurf reviewen.
-- [x] Referenzdaten, Weiterverwendungsrechte und erforderliche Hinweise klaeren. Keine fremden Bitmaskentabellen oder Quelltexte kopieren. (HKO-IP-Hinweis: keine Daten uebernommen; Generator nutzt veroeffentlichte astronomische Reihen, VSOP87D-Eingabe nicht redistribuiert.)
-- [x] Eigene deterministische Import-/Generierungswerkzeuge und ein Datenmanifest erstellen. Referenzabruf ist ein Entwicklungsprozess, nie Laufzeitfunktion der Library. (`tools/chinese-calendar/generate.py`, `manifest.json`, Ausgabe-SHA256 dokumentiert.)
-- [x] Exakten unterstuetzten Epoch-Day-Bereich und benoetigte Randmonate aus den geprueften Daten bestimmen. Ziel ist der gregorianische Zeitraum 1901-2100; keine unbewiesene Zusage vollstaendiger chinesischer Jahre an den Grenzen. (Chinesische Jahre 1901..2099 = 1901-02-19..2100-02-08, 72.674 Tage.)
-- [x] Gate: keine Engine-Freigabe mit ungeklaerter Datenlizenz, unbekannter Herkunft oder nicht erklaerten Referenzabweichungen. (2.458/2.461 HKO-Monatsstarts exakt; drei Abweichungen mit JDE/TT, Delta-T, UTC/UTC+8, NASA-Referenz und reproduzierbarem Audit in `reference-conflicts.json`; `--verify-reference` prueft vollstaendige Abdeckung.)
+### P1 - Data contract and provenance
 
-### P2 - Eigenstaendige Kotlin-Engine
+- [x] Finalize the CHINESE_CALENDAR_SPEC contract and review the API design.
+- [x] Clarify reference data, reuse rights and required notices. Do not copy foreign bitmask
+  tables or source text. (HKO IP note: no data incorporated; generator uses published
+  astronomical series, VSOP87D input not redistributed.)
+- [x] Create deterministic import/generation tools and a data manifest. Reference retrieval is a
+  development process, never a runtime library function. (`tools/chinese-calendar/generate.py`,
+  `manifest.json`, output SHA-256 documented.)
+- [x] Determine the exact supported epoch-day range and required boundary months from checked
+  data. Target is Gregorian 1901-2100; no unproven promise of complete Chinese years at the
+  bounds. (Chinese years 1901..2099 = 1901-02-19..2100-02-08, 72,674 days.)
+- [x] Gate: no engine release with unresolved data license, unknown provenance or unexplained
+  reference differences. (2,458/2,461 HKO month starts exact; three differences documented with
+  JDE/TT, Delta-T, UTC/UTC+8, NASA reference and reproducible audit in
+  `reference-conflicts.json`; `--verify-reference` checks complete coverage.)
 
-- [x] Neues Engine-Modul mit echten Implementierungen anlegen, keine TODO-Stubs.
-- [x] Validierte immutable Werte, Umrechnung, Monatslisten, Schaltmonate, Arithmetik und explizite Bereichsfehler implementieren.
-- [x] Tabellen und Indizes immutable halten; Tagesrechnung ausschliesslich ganzzahlig auf Epoch Days.
-- [x] Vollstaendige Bereichstests und unabhaengigen Referenzabgleich bestehen; gleiche Fixtures auf JVM und Kotlin/Native ausfuehren. (72.674-Tage-Roundtrip, 2.461 Monate lueckenlos, Generator-Referenzabgleich; `jvmTest` und `linuxX64Test` je 14 Tests.)
-- [x] Gate: Engine ist ohne Android SDK, Compose und andere Kalender-Module als eigenstaendiger Consumer nutzbar. (JVM-Consumer mit `javac`, nur Engine-Jar + `kotlin-stdlib`; keine AndroidX/Compose/Android-Klassen im Jar.)
+### P2 - Independent Kotlin engine
 
-### P3 - Compose-Integration
+- [x] Create a new engine module with real implementations, no TODO stubs.
+- [x] Implement validated immutable values, conversion, month lists, leap months, arithmetic and
+  explicit range errors.
+- [x] Keep tables and indexes immutable; day calculation uses integer epoch days only.
+- [x] Pass complete range tests and independent reference comparison; run the same fixtures on JVM
+  and Kotlin/Native. (72,674-day round trip, 2,461 gapless months, generator reference
+  comparison; `jvmTest` and `linuxX64Test` 14 tests each.)
+- [x] Gate: engine is usable without Android SDK, Compose or other calendar modules as an
+  independent consumer. (JVM consumer with `javac`, only engine jar + `kotlin-stdlib`; no
+  AndroidX/Compose/Android classes in the jar.)
 
-- [x] Compose-Modul, MonthData, WeekData, State/Saver und Kalender-Composable implementieren.
-- [x] Vorhandenen Renderer, Auswahl und Epoch-Day-Marker wiederverwenden; keine zweite Selection-Engine.
-- [x] Normale und Schaltmonate in Navigation, Titeln, Keys, Saver und Heatmap-Jahreslisten unterscheiden.
-- [x] Nebenmonatszellen an Datenbereichsgrenzen leer/deaktiviert behandeln; keine ungepruefte Konvertierung ausserhalb des Bereichs.
-- [x] Alle bestehenden Darstellungsoptionen bewusst abgleichen; Ausnahmen dokumentieren statt Paritaet ungeprueft zu behaupten. (Bewusste Abweichungen: `todayEpochDay` statt `LocalDate`, `ChineseTextStyle` statt `dateProvider`; Header/Weekday/Adjacent/FixedRows/Markers/WeekNumber vorhanden.)
+### P3 - Compose integration
 
-### P4 - Sample und Playground
+- [x] Implement the Compose module, MonthData, WeekData, state/saver and calendar composable.
+- [x] Reuse the existing renderer, selection and epoch-day markers; no second selection engine.
+- [x] Distinguish regular and leap months in navigation, titles, keys, saver and heatmap year
+  lists.
+- [x] Treat adjacent-month cells at data-range bounds as empty/disabled; no unverified conversion
+  outside the range.
+- [x] Deliberately align all existing display options; document exceptions instead of claiming
+  parity without proof. (Deliberate differences: `todayEpochDay` instead of `LocalDate`,
+  `ChineseTextStyle` instead of `dateProvider`; header/weekday/adjacent/fixed rows/markers/week
+  number present.)
 
-- [x] Chinesischen Kalender als eigene Auswahl integrieren. Chinesischen Monat und gregorianisches Gitter mit chinesischer Zusatzbeschriftung anbieten.
-- [x] Steuerung gruppieren: Kalender, Datum/Navigation, Auswahl, Darstellung, Grenzen und Details. Details zeigen Epoch Day, gregorianisches Datum, chinesisches Datum und Schaltmonatstatus.
-- [ ] Telefon, Tablet, Mehrspalten, Split-Screen und Fold-Transitions mit vorhandener adaptiver Architektur testen. (Lokaler Emulator fehlt; Remote-Instrumentation und -Tablet sind fuer die bestehende Suite gruen, eine chinesische Geraete-/Fold-Matrix wurde nicht separat ausgefuehrt.)
-- [ ] Auswahl und sichtbaren Monat bei Rotation, Zustandswiederherstellung und Kalenderwechsel erhalten. Ein begrenzter Anzeigemonat darf nicht stillschweigend die globale Auswahl veraendern. (Saver-/Navigationslogik per Unit-Test und bestehender Restoration-Suite abgedeckt; echte Activity-Recreation mit Chinese nicht separat ausgefuehrt.)
+### P4 - Sample and playground
 
-### P5 - Haertung und Dokumentationssynchronisation
+- [x] Integrate the Chinese calendar as its own selection. Offer a Chinese month and a Gregorian
+  grid with Chinese secondary labels.
+- [x] Group controls: calendar, date/navigation, selection, presentation, bounds and details.
+  Details show epoch day, Gregorian date, Chinese date and leap-month status.
+- [x] Provide a deterministic leap-month showcase entry that opens the native engine/Compose
+  facade with Chinese details visible. (`showChineseDemo`; JVM regression test and debug
+  sample build.)
+- [ ] Test phone, tablet, multiple columns, split-screen and fold transitions with the existing
+  adaptive architecture. (Local API 29 software emulator renders the sample and the Chinese
+  leap-month details; tablet/split-screen/fold transitions were not executed locally, and the
+  remote instrumentation/tablet suites are not a real device/fold matrix.)
+- [ ] Preserve selection and visible month through rotation, state restoration and calendar
+  switching. A bounded display month must not silently alter the global selection. (Saver/navigation
+  logic covered by unit tests and the existing restoration suite; real activity recreation with
+  Chinese was not executed separately.)
 
-- [ ] Gesamte Matrix in CHINESE_CALENDAR_QUALITY ausfuehren und Findings schliessen. (Funktionale Kernmatrix, Regression und Remote-Suite ausgefuehrt; Benchmarks und Advisory-Scan mit realen Ergebnissen nachgetragen; chinesische Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix und physische Benchmark-Abnahme offen.)
-- [x] README, ARCHITECTURE, DEVELOPMENT, SETUP, CI, PROJECT_STATUS, RELEASE_CHECKLIST, CHANGELOG und AGENTS auf tatsaechlich implementierten Stand bringen. Bestehende historische Nachweise erhalten.
-- [x] Fehlenden API-Dump und Consumer-Beispiele ergaenzen; Lizenz-/NOTICE- und Publikationsmetadaten pruefen.
-- [x] Bestehende API-Dumps gegen 2.3.0 vergleichen; neue Module duerfen keine versteckten Breaking Changes verursachen. (Fuenf bestehende Dumps `0` Diff; zwei neue Dumps.)
+### P5 - Hardening and documentation synchronization
 
-### P6 - Release Candidate und 2.4.0
+- [ ] Execute the complete CHINESE_CALENDAR_QUALITY matrix and close findings. (Functional core
+  matrix, regression and remote suite executed; benchmarks and advisory scan added with real
+  results; Chinese device/fold/TalkBack/large-font/RTL matrix and physical benchmark acceptance
+  remain open.)
+- [x] Synchronize README, ARCHITECTURE, DEVELOPMENT, SETUP, CI, PROJECT_STATUS, RELEASE_CHECKLIST,
+  CHANGELOG and AGENTS with the actually implemented state. Preserve existing historical
+  evidence.
+- [x] Add the missing API dump and consumer examples; check license/NOTICE and publication
+  metadata.
+- [x] Compare existing API dumps against 2.3.0; new modules must not introduce hidden breaking
+  changes. (Five existing dumps `0` diff; two new dumps.)
 
-- [x] Erst nach gruenen Produktgates Versionen synchron auf 2.4.0 vorbereiten; Sample versionCode 20400 nur nach Monotoniepruefung, versionName 2.4.0. (20300 -> 20400.)
-- [ ] RC-Nachweise fuer einen exakten Commit sammeln; alle Veroeffentlichungs- und Consumer-Pruefungen aus dem Releaseplan ausfuehren. (Evidenzbaum `1ab841e70b6fb7ab35b16e970715b500b91f95a2`, Review-Fixstand `e80c00f` und Nachbesserungsbaum `952bbb6` auf `origin/update`; isolierte Publikation, zwei Consumer und alle vier Remote-Workflows bestanden. JitPack-Commit-Build `7a51e24` und direkter Engine-Consumer bestanden; der 2.4.0-Tag-/BOM-Consumer ist ohne Tag blockiert, siehe Gate-Nachtrag.)
-- [ ] Separate ausdrueckliche Freigabe fuer Merge, Tag und GitHub Release einholen. Kein Tag 2.4.0 mit offenen Pflichtgates.
-- [ ] Nach Tagging tatsaechliche Remote-Artefakte/Varianten und unabhaengige Consumer verifizieren. Erst dann erfolgreiche Distribution behaupten.
+### P6 - Release candidate and 2.4.0
 
-### Review-Nachbesserungen 2026-11-13 (Basis `6970b92`)
+- [x] Prepare versions synchronously as 2.4.0 only after green product gates; sample versionCode
+  20400 only after the monotonicity check, versionName 2.4.0. (20300 -> 20400.)
+- [ ] Collect RC evidence for an exact commit; execute all publication and consumer checks from
+  the release plan. (Evidence tree `1ab841e70b6fb7ab35b16e970715b500b91f95a2`, review-fix state
+  `e80c00f` and follow-up tree `952bbb6` on `origin/update`; isolated publication, two consumers
+  and all four remote workflows passed. JitPack commit build `7a51e24` and direct engine
+  consumer passed; the 2.4.0 tag/BOM consumer is blocked without a tag, see gate addendum.
+  Current HEAD `dc3abe2` is green in all four workflows: verification `43520705754`, publishing
+  `43520705242`, instrumentation `43520705461`, tablet `43520705438`.)
+- [ ] Obtain separate explicit approval for merge, tag and GitHub Release. No 2.4.0 tag with open
+  mandatory gates.
+- [ ] After tagging, verify actual remote artifacts/variants and independent consumers. Only then
+  claim successful distribution.
 
-| Finding | Fix (Datei) | Regressionstest | Ausgefuehrte Pruefung |
+### Review follow-ups 2026-11-13 (base `6970b92`)
+
+| Finding | Fix (file) | Regression test | Executed check |
 |---|---|---|---|
-| P1 Heute-Navigation | `calendar-chinese-compose/.../ChineseMonthState.kt`: `canGoToday` und `goToToday` pruefen beide `minMonth..maxMonth`; ausserhalb der Bounds bleibt der Monat unveraendert. | `ChineseComposeDataTest.monthStateTodayNavigationHonoursConfiguredBounds`; bestehender Leap-/Bounds-Test korrigiert. | `:calendar-chinese-compose:testDebugUnitTest` und `:calendarviewsample:testDebugUnitTest` gruen. |
-| P1 Referenzabweichungen | `tools/chinese-calendar/generate.py`: Referenzdateien, Jahres-/Schaltstatus, vollstaendige Abdeckung und `--verify-reference`; `reference-conflicts.json` mit JDE/TT, Delta-T, UTC, UTC+8, strukturierter NASA/GSFC-Zeit und Toleranz; `manifest.json` neu erzeugt. Keine Tabellenkorrektur. | `tools/chinese-calendar/test_generate.py` (fehlende Dateien/Starts, Jahres-/Leap-Mismatch, Konfliktaudit, Verify-Fehlerstatus, Zeitketten-/Toleranzpruefung); `ChineseCalendarEngineTest.documentedHkoConflictsRemainOnTheUtcPlus8CivilDate`. | `test_generate.py`: 7 Tests, 0 Fehler. Generator `--verify-reference`: 2.458 exakt + 3 auditiert = 2.461, 0 fehlende Referenzen, `complete=True`, Exit 0. Manifest-Output/-Coverage und der SHA-256 der geprueften Kotlin-Daten stimmen mit dem Manifest. |
-| P2 Overlay-Navigation | `CalendarSampleMonthNavigation.kt`, `CalendarSampleViewport.kt`, `CalendarSampleScreen.kt`, `CalendarSampleNavigation.kt`: gregorianische Monatsanker, Header und Pager-/Listenidentitaeten fuer `chineseGregorianGrid`. | `CalendarSampleNavigationTest.chineseOverlayUsesGregorianMonthStepsAndIdentities`; `ChineseComposeRegressionTest.gregorianOverlayHeaderAndPagerStepGregorianMonths`. | Sample-JVM-Tests gruen; `compileDebugAndroidTestKotlin` gruen; Remote-Instrumentation der Core-/Sample-Suite auf API 29 success. Keine separate chinesische Geraetematrix. |
-| P2 Agenda | `CalendarSampleScreen.kt`: `chineseStyle` ist `remember`-Key. | `CalendarSampleMonthDataTest.chineseAgendaLabelsFollowTheSelectedStyleWithoutChangingTheDate`; `ChineseComposeRegressionTest.agendaRebuildsLabelsWhenTheStyleChangesWithoutADateChange`. | Sample-JVM-Tests und AndroidTest-Kompilierung gruen; Remote-Suite success. |
-| P2 Today-Callback | `ChineseMonthState.kt`: `rememberUpdatedState` fuer Zustand und Saver; `ChineseMonthSnapshot.decode` lehnt Flags ausserhalb `0/1` ab. | `ChineseComposeDataTest.monthStateRejectsNonBinaryLeapFlagsWhenRestoring`; `ChineseComposeRegressionTest.chineseMonthStateSurvivesRestorationAndUsesAReplacedTodayCallback`. | Compose-JVM-Tests gruen; AndroidTest-Kompilierung gruen; Remote-Suite success. |
-| P2 Kalenderwechsel | `CalendarSampleState.kt`, `CalendarSampleMonthNavigation.kt`: Anchor-Fallback an beiden Grenzen mit Meldung; Auswahl unveraendert; Header clamp't ungueltige Anchors. | `CalendarSampleStateTest.switchingToChineseClampsUnsupportedAnchorsAtBothEnds`; `ChineseComposeRegressionTest.unsupportedAnchorFallbackKeepsTheSharedSelection`. | Sample-JVM-Tests gruen; AndroidTest-Kompilierung gruen; Remote-Suite success. |
+| P1 today navigation | `calendar-chinese-compose/.../ChineseMonthState.kt`: `canGoToday` and `goToToday` both check `minMonth..maxMonth`; outside the bounds the month remains unchanged. | `ChineseComposeDataTest.monthStateTodayNavigationHonoursConfiguredBounds`; existing leap/bounds test corrected. | `:calendar-chinese-compose:testDebugUnitTest` and `:calendarviewsample:testDebugUnitTest` green. |
+| P1 reference differences | `tools/chinese-calendar/generate.py`: reference files, year/leap status, complete coverage and `--verify-reference`; `reference-conflicts.json` with JDE/TT, Delta-T, UTC, UTC+8, structured NASA/GSFC time and tolerance; `manifest.json` regenerated. No table correction. | `tools/chinese-calendar/test_generate.py` (missing files/starts, year/leap mismatch, conflict audit, verify failure status, time-chain/tolerance check); `ChineseCalendarEngineTest.documentedHkoConflictsRemainOnTheUtcPlus8CivilDate`. | `test_generate.py`: 7 tests, 0 failures. Generator `--verify-reference`: 2,458 exact + 3 audited = 2,461, 0 missing references, `complete=True`, exit 0. Manifest output/coverage and the SHA-256 of the checked Kotlin data match the manifest. |
+| P2 overlay navigation | `CalendarSampleMonthNavigation.kt`, `CalendarSampleViewport.kt`, `CalendarSampleScreen.kt`, `CalendarSampleNavigation.kt`: Gregorian month anchors, header and pager/list identities for `chineseGregorianGrid`. | `CalendarSampleNavigationTest.chineseOverlayUsesGregorianMonthStepsAndIdentities`; `ChineseComposeRegressionTest.gregorianOverlayHeaderAndPagerStepGregorianMonths`. | Sample JVM tests green; `compileDebugAndroidTestKotlin` green; remote instrumentation of the core/sample suite on API 29 successful. No separate Chinese device matrix. |
+| P2 agenda | `CalendarSampleScreen.kt`: `chineseStyle` is a `remember` key. | `CalendarSampleMonthDataTest.chineseAgendaLabelsFollowTheSelectedStyleWithoutChangingTheDate`; `ChineseComposeRegressionTest.agendaRebuildsLabelsWhenTheStyleChangesWithoutADateChange`. | Sample JVM tests and AndroidTest compilation green; remote suite successful. |
+| P2 today callback | `ChineseMonthState.kt`: `rememberUpdatedState` for state and saver; `ChineseMonthSnapshot.decode` rejects flags outside `0/1`. | `ChineseComposeDataTest.monthStateRejectsNonBinaryLeapFlagsWhenRestoring`; `ChineseComposeRegressionTest.chineseMonthStateSurvivesRestorationAndUsesAReplacedTodayCallback`. | Compose JVM tests green; AndroidTest compilation green; remote suite successful. |
+| P2 calendar switch | `CalendarSampleState.kt`, `CalendarSampleMonthNavigation.kt`: anchor fallback at both bounds with a message; selection unchanged; header clamps invalid anchors. | `CalendarSampleStateTest.switchingToChineseClampsUnsupportedAnchorsAtBothEnds`; `ChineseComposeRegressionTest.unsupportedAnchorFallbackKeepsTheSharedSelection`. | Sample JVM tests green; AndroidTest compilation green; remote suite successful. |
 
-- [x] Release-Dokumentation: Der fruehere Widerspruch zwischen fehlendem Remote-Run und erfolgreichen Runs ist entfernt; die genannten Runs `1ab841e` und `e80c00f` gehoeren zu tatsaechlich gepushten Commits. Der Doku-Abschluss `2491c09` ist ebenfalls auf `update`; die vier zugehoerigen Remote-Workflows waren success (verification `43414411458`, publishing `43414411492`, instrumentation `43414411441`, tablet `43414411446`).
-- [x] Remote-CI fuer den Fix-Commit `e80c00f` auf `update`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286` - alle success.
+- [x] Release documentation: the earlier contradiction between a missing remote run and successful
+  runs is removed; the named runs `1ab841e` and `e80c00f` belong to actually pushed commits. The
+  documentation completion `2491c09` is also on `update`; its four remote workflows succeeded
+  (verification `43414411458`, publishing `43414411492`, instrumentation `43414411441`, tablet
+  `43414411446`).
+- [x] Remote CI for fix commit `e80c00f` on `update`: verification `43412948314`, publishing
+  `43412948284`, instrumentation `43412948316`, tablet `43412948286` - all successful.
 
-### Review-Nachbesserungen 2026-11-13 (Basis `6fac725`)
+### Review follow-ups 2026-11-13 (base `6fac725`)
 
-| Finding | Fix (Datei) | Regressionstest | Ausgefuehrte Pruefung |
+| Finding | Fix (file) | Regression test | Executed check |
 |---|---|---|---|
-| P1 Fenster an Engine-Grenzen | `calendarviewsample/.../CalendarSampleWindow.kt`: Center wird validiert; an einer endlichen Grenze wird die ungueltige Fensterseite weggelassen, der Grenzmonat bleibt erster/letzter Eintrag. | `CalendarSampleWindowTest.chineseWindowIsTruncatedAtBothEngineBounds`; `ChineseComposeRegressionTest.chineseBoundaryWindowRendersAndNavigatesInSingleMode` und `...InPager`. | Sample-JVM 60 Tests, 0 Fehler; AndroidTest kompiliert; neue UI-Tests lokal nicht ausgefuehrt (kein Emulator); Remote-Instrumentation `43439808384` success, keine separate chinesische Geraetematrix. |
-| P2 Zeitketten-/Referenzaudit | `tools/chinese-calendar/generate.py`: strukturierte NASA-Referenz, explizite UTC-/UTC+8-Offsets, Gleichheit beider Instants und dokumentierte 60-s-Toleranz. | `test_conflict_instants_must_agree_and_use_structured_reference_tolerance` (manipulierte Zeiten, fehlende Zeitzonen, Toleranzverletzung). | `test_generate.py`: 7 Tests, 0 Fehler; `--verify-reference`: 2.458 + 3 = 2.461, 0 fehlend, Exit 0. |
-| P2 NASA-Wert/HKO-Erklaerung | `reference-conflicts.json`: 1914-11-17 auf 16:02 UT korrigiert; 1916/1920 auf 16:05 UT bestaetigt; die drei HKO-Zeilen als bewusste UTC+8-Produktentscheidung dokumentiert (Pekinger Ortszeit erklaert sie, eine pauschale LMT-Umstellung verschiebt aber auch 1906-04-24). Manifest, Spezifikation, Quality- und Release-Doku synchronisiert. | `test_1914_reference_uses_the_actual_nasa_minute_and_records_hko_difference`. | Generator-/Manifestpruefung und Python-Tests gruen; Remote-CI `43439808516`/`43439808420` success. |
-| P2 Today-Callback | Kein Produktionscode noetig; Test tauscht zwei echte `FixedToday`-Callback-Instanzen nach dem Restore aus. | `ChineseComposeRegressionTest.chineseMonthStateSurvivesRestorationAndUsesAReplacedTodayCallback`. | AndroidTest kompiliert; Geraeteausfuehrung lokal nicht moeglich; Remote-Instrumentation `43439808384` success, keine separate chinesische Geraetematrix. |
+| P1 window at engine bounds | `calendarviewsample/.../CalendarSampleWindow.kt`: center validated; at a finite bound only the invalid window side is omitted, the boundary month remains the first/last entry. | `CalendarSampleWindowTest.chineseWindowIsTruncatedAtBothEngineBounds`; `ChineseComposeRegressionTest.chineseBoundaryWindowRendersAndNavigatesInSingleMode` and `...InPager`. | Sample JVM 60 tests, 0 failures; AndroidTest compiled; new UI tests not executed locally (no emulator); remote instrumentation `43439808384` successful, no separate Chinese device matrix. |
+| P2 time-chain/reference audit | `tools/chinese-calendar/generate.py`: structured NASA reference, explicit UTC/UTC+8 offsets, equality of both instants and documented 60 s tolerance. | `test_conflict_instants_must_agree_and_use_structured_reference_tolerance` (manipulated times, missing time zones, tolerance violation). | `test_generate.py`: 7 tests, 0 failures; `--verify-reference`: 2,458 + 3 = 2,461, 0 missing, exit 0. |
+| P2 NASA value/HKO explanation | `reference-conflicts.json`: 1914-11-17 corrected to 16:02 UT; 1916/1920 confirmed at 16:05 UT; the three HKO rows documented as a deliberate UTC+8 product decision (Beijing local time explains them, but a blanket LMT switch also moves 1906-04-24). Manifest, specification, quality and release documentation synchronized. | `test_1914_reference_uses_the_actual_nasa_minute_and_records_hko_difference`. | Generator/manifest check and Python tests green; remote CI `43439808516`/`43439808420` successful. |
+| P2 today callback | No production code needed; the test exchanges two real `FixedToday` callback instances after restore. | `ChineseComposeRegressionTest.chineseMonthStateSurvivesRestorationAndUsesAReplacedTodayCallback`. | AndroidTest compiled; device execution not possible locally; remote instrumentation `43439808384` successful, no separate Chinese device matrix. |
 
-Diese Nachbesserungen sind lokal getestet. Remote-CI fuer `952bbb6` (enthaelt `5cf640d`):
-verification `43439808516`, publishing `43439808420`, instrumentation `43439808384`, tablet
-`43439808435` - alle success. Geraete-, Fold-, TalkBack-, Benchmark-, Advisory- und
-JitPack-Gates bleiben offen.
+These follow-ups are locally tested. Remote CI for `952bbb6` (contains `5cf640d`): verification
+`43439808516`, publishing `43439808420`, instrumentation `43439808384`, tablet `43439808435` -
+all successful. Device, fold, TalkBack, benchmark, advisory and JitPack gates remain open.
 
-### Review-Nachbesserungen 2026-11-13 (Basis `54bf23d`)
+### Review follow-ups 2026-11-13 (base `54bf23d`)
 
-| Finding | Fix (Datei) | Regressionstest | Ausgefuehrte Pruefung |
+| Finding | Fix (file) | Regression test | Executed check |
 |---|---|---|---|
-| P1 Viewport-Recovery | `calendarviewsample/.../CalendarSampleViewport.kt`: ein `LaunchedEffect` setzt bei gueltigem `desired` und fehlgeschlagenem Fenster das Center auf `desired`; ungueltiges `desired` bleibt im Fehlerzweig. | `ChineseComposeRegressionTest.invalidCenterRecoversWhenAValidAnchorArrivesWithoutCompositionRestart` (ungueltiger Center, dann gueltiger Anchor ohne Neustart) und `switchingFromGregorianOverlayToChineseMonthsRebuildsTheWindow`. | `compileDebugKotlin`, `compileDebugAndroidTestKotlin` und `testDebugUnitTest` gruen; UI-Tests lokal nicht ausfuehrbar (kein Emulator), Remote-Instrumentation nach Push offen. |
-| P2 README/Consumer | `README.md`: `ChineseDate.of(2024, monthNumber = 1, isLeapMonth = false, dayOfMonth = 1)`. Neuer isolierter JVM-Consumer unter `tools/consumer-check/jvm-consumer` kompiliert und fuehrt genau dieses Beispiel aus. | JVM-Consumer `Main.kt` mit Asserts fuer Epoch 19763, Roundtrip, 13 Monate und `2023-2L`. | `:jvm-consumer:run` mit `/tmp/m2-review-final` als einziger Kalender-Repository-Quelle: `JVM consumer OK`, Exit 0. |
-| P2 Publishing-CI | `scripts/verify-publication.sh`: exakte AAR-/JAR-/Klib-/POM-/Module-/Sources-Pfade, ZIP-/Klassen-/Klib-Inhalte, alle `files`-/`available-at`-Referenzen der `.module`-Dateien sowie POM-/BOM-Abhaengigkeiten. Fehlende Target-Binaries und gebrochene Metadatenreferenzen schlagen fehl. Workflow ruft den Check und zwei isolierte Consumer auf. Die spaetere URL-Nachbesserung auf Basis `acf3bfc` loest `files[].url` gegen die `.module`-Datei auf und prueft `name` separat. | Negativtests: geloeschte JVM-JAR, manipulierte Klib-Referenz, fehlende `url` und kaputte `url` bei vorhandener `name`-Datei fuehren jeweils zu Exit 1. Positivtest: vollstaendige lokale Publikation Exit 0. | `scripts/verify-publication.sh /tmp/m2-review-final 2.4.0` passed; Android-Consumer `:android-consumer:compileDebugKotlin` und JVM-Consumer `:jvm-consumer:run` aus `tools/consumer-check` erfolgreich. |
-| P2 API-Guard | `scripts/api-check.sh`: Version aus `build.gradle.kts`, exakter Pfad `calendar-chinese-native-jvm-${VERSION}.jar`, genau ein nicht-Sources-JVM-Jar; abweichende/stale Jars sind ein Fehler. | Manueller Negativtest mit zusaetzlichem `-jvm-2.3.0.jar`: Exit 1 mit Liste der gefundenen Jars; danach entfernt. | `bash scripts/api-check.sh` nach Entfernen des stale Jars: `Public API matches the checked-in dumps`, Exit 0. |
-| Zusatzfund Publikationsmetadaten | `calendar-chinese-native/build.gradle.kts`: Root-Metadata-JAR, Root-Sources-JAR und linuxX64-Klib werden auf die in Gradle Module Metadata referenzierten Dateinamen normalisiert. Vorher referenzierten die `.module`-Dateien `calendar-chinese-native-metadata-*.jar`/`-kotlin-*-sources.jar` und `...linuxX64Main-*.klib`, die im Repository nicht unter diesen Namen lagen. | `scripts/verify-publication.sh` prueft jede Metadatenreferenz; der Android-/JVM-Consumer loest die Varianten aus dem publizierten Repo auf. | Isolierte Publikation und beide Consumer erfolgreich; der Check schlaegt bei manipulierter Referenz fehl. |
+| P1 viewport recovery | `calendarviewsample/.../CalendarSampleViewport.kt`: a `LaunchedEffect` resets the center to `desired` when the window failed and `desired` is valid; invalid `desired` remains in the error branch. | `ChineseComposeRegressionTest.invalidCenterRecoversWhenAValidAnchorArrivesWithoutCompositionRestart` (invalid center, then valid anchor without a composition restart) and `switchingFromGregorianOverlayToChineseMonthsRebuildsTheWindow`. | `compileDebugKotlin`, `compileDebugAndroidTestKotlin` and `testDebugUnitTest` green; UI tests not locally executable (no emulator); remote instrumentation open after push. |
+| P2 README/consumer | `README.md`: `ChineseDate.of(2024, monthNumber = 1, isLeapMonth = false, dayOfMonth = 1)`. New isolated JVM consumer under `tools/consumer-check/jvm-consumer` compiles and runs exactly this example. | JVM consumer `Main.kt` with assertions for epoch 19763, round trip, 13 months and `2023-2L`. | `:jvm-consumer:run` with `/tmp/m2-review-final` as the only calendar repository source: `JVM consumer OK`, exit 0. |
+| P2 publishing CI | `scripts/verify-publication.sh`: exact AAR/JAR/Klib/POM/module/sources paths, ZIP/class/Klib contents, all `files`/`available-at` references of `.module` files and POM/BOM dependencies. Missing target binaries and broken metadata references fail. Workflow also runs the check and two isolated consumers. The later URL follow-up based on `acf3bfc` resolves `files[].url` against the `.module` file and checks `name` separately. | Negative tests: deleted JVM jar, manipulated Klib reference, missing `url` and broken `url` with an existing `name` file each exit 1. Positive test: complete local publication exits 0. | `scripts/verify-publication.sh /tmp/m2-review-final 2.4.0` passed; Android consumer `:android-consumer:compileDebugKotlin` and JVM consumer `:jvm-consumer:run` from `tools/consumer-check` successful. |
+| P2 API guard | `scripts/api-check.sh`: version from `build.gradle.kts`, exact path `calendar-chinese-native-jvm-${VERSION}.jar`, exactly one non-sources JVM jar; differing/stale jars are an error. | Manual negative test with an additional `-jvm-2.3.0.jar`: exit 1 with the list of found jars; removed afterwards. | `bash scripts/api-check.sh` after removing the stale jar: `Public API matches the checked-in dumps`, exit 0. |
+| Additional publication metadata finding | `calendar-chinese-native/build.gradle.kts`: root metadata jar, root sources jar and linuxX64 Klib are normalized to the file names referenced in Gradle module metadata. Previously the `.module` files referenced `calendar-chinese-native-metadata-*.jar`/`-kotlin-*-sources.jar` and `...linuxX64Main-*.klib`, which did not exist under those names in the repository. | `scripts/verify-publication.sh` checks every metadata reference; the Android/JVM consumer resolves the variants from the published repository. | Isolated publication and both consumers successful; the check fails with a manipulated reference. |
 
-Lokale Regression: `test :calendar-chinese-native:jvmTest :calendar-chinese-native:linuxX64Test`
-und `:calendarviewsample:assembleDebug` BUILD SUCCESSFUL; 193 Android-JVM- + 14 KMP-JVM-Tests
-sowie 14 linuxX64-Tests ohne Fehler. Die beiden neuen Compose-Tests sind kompiliert, aber ohne
-lokalen Emulator nicht ausgefuehrt. Remote-CI fuer `09e3a73`: verification `43447073439`,
-publishing `43447073475`, instrumentation `43447073390`, tablet `43447073539` - alle success.
+Local regression: `test :calendar-chinese-native:jvmTest :calendar-chinese-native:linuxX64Test`
+and `:calendarviewsample:assembleDebug` BUILD SUCCESSFUL; 193 Android JVM + 14 KMP JVM tests and
+14 linuxX64 tests without failures. The two new Compose tests are compiled but not executed
+without a local emulator. Remote CI for `09e3a73`: verification `43447073439`, publishing
+`43447073475`, instrumentation `43447073390`, tablet `43447073539` - all successful.
 
-### Review-Nachbesserung 2026-11-13 (Basis `acf3bfc`)
+### Review follow-up 2026-11-13 (base `acf3bfc`)
 
-| Finding | Fix (Datei) | Regressionstest | Ausgefuehrte Pruefung |
+| Finding | Fix (file) | Regression test | Executed check |
 |---|---|---|---|
-| P1 Publishing-Pruefluecke | `scripts/publication_metadata.py` (importierbarer Check) und `scripts/verify-publication.sh`: `files[].url` ist Pflicht, wird per `urlsplit` validiert und relativ gegen die `.module`-Datei aufgeloest; das Ziel muss existieren und nicht leer sein. `files[].name` wird nur separat auf Vorhandensein geprueft und nie als Pfad verwendet. `available-at.url` nutzt denselben Check. Nicht-lokale URLs werden als nicht pruefbar abgelehnt. | `scripts/test_publication_metadata.py`: gueltige relative URL bei abweichendem `name`, fehlende URL, kaputte URL bei vorhandener `name`-Datei und fehlender Name. Zusaetzlich Integrationstests gegen eine kopierte vollstaendige Publikation mit entfernter bzw. gebrochener URL. | `python3 -m unittest discover -s scripts -p 'test_*.py'`: 12 Tests gruen; Verifier gegen `/tmp/m2-review-final`: Exit 0; beide manipulierten Module: Exit 1 mit `missing url` bzw. `missing/empty`. |
+| P1 publishing verification gap | `scripts/publication_metadata.py` (importable check) and `scripts/verify-publication.sh`: `files[].url` is mandatory, validated with `urlsplit` and resolved relatively against the `.module` file; the target must exist and be non-empty. `files[].name` is checked separately and never used as a path. `available-at.url` uses the same check. Non-local URLs are rejected as unverifiable. | `scripts/test_publication_metadata.py`: valid relative URL with a differing `name`, missing URL, broken URL with an existing `name` file and missing name. Additional integration tests against a copied complete publication with removed/broken URL. | `python3 -m unittest discover -s scripts -p 'test_*.py'`: 12 tests green; verifier against `/tmp/m2-review-final`: exit 0; both manipulated modules: exit 1 with `missing url` or `missing/empty`. |
 
-Plattformabdeckung dieses Nachweises: Der JVM-Consumer loest die Root-Modul-Metadaten und die JVM-Variante auf und fuehrt `ChineseDate.of` aus. Der Android-Consumer kompiliert die Compose-Fassade und ihre veroeffentlichten AAR-Abhaengigkeiten. Die linuxX64-Klib wird auf Datei-/Archiv- und Metadatenebene geprueft, aber in diesem Lauf **nicht von einem Kotlin/Native-Consumer konsumiert**. Die Pruefung ist kein JitPack- oder Remote-Consumer-Nachweis.
+Platform coverage of this evidence: the JVM consumer resolves the root module metadata and the JVM
+variant and executes `ChineseDate.of`. The Android consumer compiles the Compose facade and its
+published AAR dependencies. The linuxX64 Klib is checked at file/archive and metadata level but is
+**not consumed by a Kotlin/Native consumer** in this run. This check is not JitPack or remote
+consumer evidence.
 
-Remote-CI fuer `9fd3b50`: verification `43459739249`, publishing `43459739473`, instrumentation `43459739435`, tablet `43459739230` - alle success.
+Remote CI for `9fd3b50`: verification `43459739249`, publishing `43459739473`, instrumentation
+`43459739435`, tablet `43459739230` - all successful.
 
-### Nachbesserung 2026-11-13 (Basis `9fd3b50`)
+### Follow-up 2026-11-13 (base `9fd3b50`)
 
-| Punkt | Umsetzung | Nachweis |
+| Item | Implementation | Evidence |
 |---|---|---|
-| HKO-Datenkonvention | Bewusste UT+8-Produktentscheidung: Die drei HKO-Zeilen sind mit Pekinger Ortszeit vor 1929 vereinbar, eine pauschale LMT-Umstellung verschiebt aber auch 1906-04-24. `unresolved` ist entfernt; Daten und Ausgabe-Hash bleiben unveraendert. | Generator `--verify-reference`: 2.458 exakt + 3 dokumentiert = 2.461, `complete=True`; `ChineseCalendarData.kt` byte-identisch; Manifest-Hash `2636c523...`; Audit der LMT-Variante lokal ausgefuehrt. |
-| Default-Monat | `defaultChineseMonth` klemmt den Standard-`initialMonth` auf `MIN_EPOCH_DAY..MAX_EPOCH_DAY`; bei einem Host-Datum ausserhalb des Datenbereichs wird der naechste unterstuetzte Monat angezeigt. | `ChineseComposeDataTest.defaultMonthIsClampedToTheSupportedDataSet` mit `Long.MIN_VALUE`, `Long.MAX_VALUE` und einem Datum im Bereich; Fokustest gruen, XML `failures="0"`. |
-| Workflow-Version | `.github/workflows/android-publishing.yml` liest die Version aus `build.gradle.kts`, prueft sie auf leer und verwendet sie fuer Verifier und Native-POM; keine hartkodierte `2.4.0`. | YAML-Parse OK; lokale Versionsermittlung `2.4.0`; `grep` findet keine hartkodierte Version. |
-| Daten-Hash-Test | `test_checked_in_kotlin_source_matches_manifest_sha256` vergleicht den SHA-256 von `ChineseCalendarData.kt` mit `manifest.json`. | `python3 -m unittest discover -s tools/chinese-calendar -p 'test_*.py'`: 7 Tests, 0 Fehler. |
+| HKO data convention | Deliberate UT+8 product decision: the three HKO rows are consistent with Beijing local time before 1929, but a blanket LMT switch also moves 1906-04-24. `unresolved` removed; data and output hash unchanged. | Generator `--verify-reference`: 2,458 exact + 3 documented = 2,461, `complete=True`; `ChineseCalendarData.kt` byte-identical; manifest hash `2636c523...`; LMT variant audit executed locally. |
+| Default month | `defaultChineseMonth` clamps the default `initialMonth` to `MIN_EPOCH_DAY..MAX_EPOCH_DAY`; a host date outside the data range shows the next supported month. | `ChineseComposeDataTest.defaultMonthIsClampedToTheSupportedDataSet` with `Long.MIN_VALUE`, `Long.MAX_VALUE` and an in-range date; focused test green, XML `failures="0"`. |
+| Workflow version | `.github/workflows/android-publishing.yml` reads the version from `build.gradle.kts`, checks for empty and uses it for the verifier and native POM; no hard-coded `2.4.0`. | YAML parse OK; local version resolution `2.4.0`; `grep` finds no hard-coded version. |
+| Data hash test | `test_checked_in_kotlin_source_matches_manifest_sha256` compares the SHA-256 of `ChineseCalendarData.kt` with `manifest.json`. | `python3 -m unittest discover -s tools/chinese-calendar -p 'test_*.py'`: 7 tests, 0 failures. |
 
-Commits: `95c1cc3` (vier Nachbesserungen) und `a138306` (interner Helper aus dem JVM-API-Dump gefiltert). Der erste Verification-Run fuer `95c1cc3` schlug am API-Guard fehl, weil der interne Top-Level-Helper als JVM-Methode sichtbar war; der API-Dump blieb unveraendert. Remote-CI fuer `a138306`: verification `43472900415`, publishing `43472900052`, instrumentation `43472901643`, tablet `43472900502` - alle success.
+Commits: `95c1cc3` (four follow-ups) and `a138306` (internal helper filtered from the JVM API
+dump). The first verification run for `95c1cc3` failed at the API guard because the internal
+top-level helper was visible as a JVM method; the API dump remained unchanged. Remote CI for
+`a138306`: verification `43472900415`, publishing `43472900052`, instrumentation `43472901643`,
+tablet `43472900502` - all successful.
 
-#### Weiterhin offene Gates
+#### Remaining open gates
 
-- [ ] JitPack-Build `2.4.0` und JitPack-Only-Consumer ohne `mavenLocal`/`includeBuild`. Teilnachweis: 2.3.0 und Commit `7a51e24` bestanden; der 2.4.0-Tag-/BOM-Consumer ist ohne Tag blockiert (siehe unten).
-- [ ] Chinesische Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix. Die Remote-Instrumentation auf API 29 ist kein Ersatz fuer reale Geraete/Folds; ein lokaler Emulator scheitert an fehlender KVM-Berechtigung.
-- [ ] Benchmarks: JVM-Baseline und provisorische Budgets sind erhoben; physische Geraeteabnahme und finale Budgetfreigabe stehen aus.
-- [ ] Advisory-/CVE-Scan: Laufzeitgraph ohne Treffer; bekannte Buildscript-Findings benoetigen eine Maintainer-Akzeptanz oder einen AGP-Upgrade.
-- [ ] Merge, Tag `2.4.0` und GitHub Release nur nach separater ausdruecklicher Freigabe; bis dahin kein Tag und keine Publikation.
+- [ ] JitPack build `2.4.0` and JitPack-only consumer without `mavenLocal`/`includeBuild`. Partial
+  evidence: 2.3.0 and commit `7a51e24` passed; the 2.4.0 tag/BOM consumer is blocked without a
+  tag (see below).
+- [ ] Chinese device/fold/TalkBack/large-font/RTL matrix. Remote instrumentation on API 29 is not
+  a substitute for real devices/folds. A software-accelerated local API 29 phone booted and the
+  sample reached the leap-month details; fold, TalkBack, large-font and full RTL checks remain
+  unexecuted.
+- [ ] Benchmarks: JVM baseline and provisional budgets collected; physical device acceptance and
+  final budget approval remain open.
+- [ ] Advisory/CVE scan: runtime graph clean; known buildscript findings need maintainer
+  acceptance or an AGP upgrade.
+- [ ] Merge, tag `2.4.0` and GitHub Release only after separate explicit approval; no tag or
+  publication until then.
 
-### Release-Gate-Nachtrag 2026-11-13
+### Release gate addendum 2026-11-13
 
 #### JitPack
 
-| Punkt | Ergebnis |
+| Item | Result |
 |---|---|
-| JitPack `2.3.0` | Buildlog HTTP 200; listet `library`, `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native` und `calendar-bom`. Ein temporaerer Android-Consumer mit BOM `2.3.0` und `library` kompilierte JitPack-only ohne `mavenLocal`/`includeBuild`: `BUILD SUCCESSFUL in 54s`, `:android-consumer:compileDebugKotlin` Exit 0. |
-| JitPack `2.4.0` Tag | Noch nicht vorhanden: der Buildlog-Endpunkt antwortet HTTP 404 mit `Tag or commit not found: 2.4.0`. Ohne separaten Tag-/Release-Auftrag ist der echte 2.4.0-Consumer nicht ausfuehrbar. |
-| JitPack Commit `7a51e24` | Commit-Build erfolgreich; Buildlog listet BOM, `calendar-chinese-native` (Metadata, JVM, linuxX64), `calendar-chinese-compose` und die fuenf bestehenden Module. Der direkte JVM-Engine-Consumer gegen `calendar-chinese-native:7a51e24` lief ohne BOM: `JVM consumer OK: newYear=2024-1-1 epochDay=19763 months=13`, Exit 0. |
-| JitPack-BOM bei Commit-Hash | **Blockiert:** Das von JitPack veroeffentlichte BOM-POM `7a51e24` hat zwar `<version>7a51e24</version>`, constrainiert die Module aber weiterhin auf `2.4.0`. JitPack schreibt bei Commit-Builds die eigene POM-Version um, nicht die `dependencyManagement`-Werte. Der BOM-Consumer scheitert daher mit `Could not find ...calendar-chinese-native:2.4.0`; das ist kein lokaler Repository- oder Cache-Fehler. Bei einem echten Tag `2.4.0` stimmen Constraint und JitPack-Version ueberein. |
+| JitPack `2.3.0` | Build log HTTP 200; lists `library`, `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native` and `calendar-bom`. A temporary Android consumer with BOM `2.3.0` and `library` compiled JitPack-only without `mavenLocal`/`includeBuild`: `BUILD SUCCESSFUL in 54s`, `:android-consumer:compileDebugKotlin` exit 0. |
+| JitPack `2.4.0` tag | Not present yet: the build log endpoint returns HTTP 404 with `Tag or commit not found: 2.4.0`. Without a separate tag/release assignment the real 2.4.0 consumer cannot run. |
+| JitPack commit `7a51e24` | Commit build successful; build log lists BOM, `calendar-chinese-native` (metadata, JVM, linuxX64), `calendar-chinese-compose` and the five existing modules. Direct JVM engine consumer against `calendar-chinese-native:7a51e24` ran without BOM: `JVM consumer OK: newYear=2024-1-1 epochDay=19763 months=13`, exit 0. |
+| JitPack BOM at commit hash | **Blocked:** the JitPack-published BOM POM `7a51e24` has `<version>7a51e24</version>` but still constrains the modules to `2.4.0`. JitPack rewrites its own POM version for commit builds, not the `dependencyManagement` values. The BOM consumer therefore fails with `Could not find ...calendar-chinese-native:2.4.0`; this is not a local repository or cache error. With a real `2.4.0` tag, constraint and JitPack version match. |
 
-Reproduktion der JitPack-Nachweise:
+Reproducing the JitPack evidence:
 
 ```bash
 curl -fsSL https://jitpack.io/com/github/mortezasun/android-calendarview/2.3.0/build.log
 curl -fsSL https://jitpack.io/com/github/mortezasun/android-calendarview/7a51e24/build.log
 curl -sS -o /dev/null -w '%{http_code}\n' https://jitpack.io/com/github/mortezasun/android-calendarview/2.4.0/build.log
 
-# 2.3.0: temporaere Kopie von tools/consumer-check, nur google()/mavenCentral()/jitpack.io,
-# BOM 2.3.0 + library, dann:
+# 2.3.0: temporary copy of tools/consumer-check, only google()/mavenCentral()/jitpack.io,
+# BOM 2.3.0 + library, then:
 ./gradlew -p /tmp/jitpack-230-consumer :android-consumer:compileDebugKotlin --refresh-dependencies
 
-# 2.4.0-Commit: BOM entfernen und direkt calendar-chinese-native:7a51e24 anfordern, dann:
+# 2.4.0 commit: remove the BOM and request calendar-chinese-native:7a51e24 directly, then:
 ./gradlew -p /tmp/jitpack-240-engine :jvm-consumer:run --refresh-dependencies
 
-# Nach separater Tag-/Release-Freigabe: Tag 2.4.0 erstellen, JitPack-Build abwarten und
-# tools/consumer-check mit JitPack-Repository (ohne mavenLocal/includeBuild) ausfuehren.
+# After separate tag/release approval: create tag 2.4.0, wait for the JitPack build and run
+# tools/consumer-check against the JitPack repository (without mavenLocal/includeBuild).
 ```
 
 #### Benchmarks
 
-Der Test `ChineseJvmBenchmarkTest.reportJvmPerformanceBaseline` ist Teil der JVM-Tests und gibt
-reproduzierbare `BENCHMARK`-Zeilen aus; er hat bewusst keine zeitbasierte Assertion. Gemessen wurde
-am 2026-11-13 auf der Freebuff-Cloud-VM (Linux amd64, 8 vCPU, AMD-KVM, JDK 21.0.13 Temurin,
-Max-Heap 512 MiB), Median aus fuenf Messungen nach zwei Aufwaermlaeufen. Die JVM-Allokationen
-kommen aus dem HotSpot-Thread-Allocation-Counter.
+The test `ChineseJvmBenchmarkTest.reportJvmPerformanceBaseline` is part of the JVM tests and
+prints reproducible `BENCHMARK` lines; it deliberately has no time-based assertion. Measurements
+were taken on 2026-11-13 on the Freebuff cloud VM (Linux amd64, 8 vCPU, AMD-KVM, JDK 21.0.13
+Temurin, max heap 512 MiB), median of five measurements after two warm-up runs. JVM allocations
+come from the HotSpot thread-allocation counter.
 
-| Operation | Messwert | Allokation | Datensatz pro Messung |
+| Operation | Measurement | Allocation | Data set per measurement |
 |---|---:|---:|---:|
-| Konvertierung Epoch Day -> chinesisch -> Epoch Day | 58,77 ns/Op | 56,01 B/Op | 72.674 Tage |
-| Monatsaufbau (`chineseMonthData`) | 16.074,47 ns/Monat | 15.630,53 B/Monat | 2.461 Monate |
-| 13-Monats-Heatmap (`chineseYearHeatmap(2023)`) | 355.526 ns/Jahr | 248.328 B/Jahr | 13 Monate |
-| Wiederholte Navigation (`next`/`previous`) | 53,79 ns/Schritt | 48,01 B/Schritt | 100.000 Schritte |
+| Conversion epoch day -> Chinese -> epoch day | 58.77 ns/op | 56.01 B/op | 72,674 days |
+| Month construction (`chineseMonthData`) | 16,074.47 ns/month | 15,630.53 B/month | 2,461 months |
+| 13-month heatmap (`chineseYearHeatmap(2023)`) | 355,526 ns/year | 248,328 B/year | 13 months |
+| Repeated navigation (`next`/`previous`) | 53.79 ns/step | 48.01 B/step | 100,000 steps |
 
-Artefaktgroessen des lokalen Release-Builds: Engine-Metadata-JAR 6.989 B, Engine-JVM-JAR 32.436 B,
-linuxX64-Klib 41.288 B, Compose-AAR 36.116 B. Provisorische JVM-Budgets mit mindestens 6-fachem Laufzeit- und Allokationspuffer:
-Konvertierung <= 1.000 ns und <= 512 B/Op; Monatsaufbau <= 100.000 ns und <= 100 KB/Op;
-Heatmap <= 5 ms und <= 1,5 MB/Jahr; Navigation <= 1.000 ns und <= 512 B/Schritt. Diese Budgets
-sind noch keine physische Geraeteabnahme; sie muessen vor RC auf der benannten Zielhardware
-bestaetigt oder angepasst werden.
+Artifact sizes of the local release build: engine metadata jar 6,989 B, engine JVM jar 32,436 B,
+linuxX64 Klib 41,288 B, Compose AAR 36,116 B. Provisional JVM budgets with at least 6x runtime
+and allocation headroom: conversion <= 1,000 ns and <= 512 B/op; month construction <= 100,000 ns
+and <= 100 KB/op; heatmap <= 5 ms and <= 1.5 MB/year; navigation <= 1,000 ns and <= 512 B/step.
+These budgets are not physical device acceptance; they must be confirmed or adjusted on the named
+target hardware before RC.
 
 ```bash
 ./gradlew :calendar-chinese-compose:testDebugUnitTest --tests '*ChineseJvmBenchmarkTest*'
 ```
 
-#### Advisory-/CVE-Scan
+#### Advisory/CVE scan
 
-Gescannt wurden die aufgeloesten Laufzeitgraphen von Engine (`jvmRuntimeClasspath`), Compose
-(`releaseRuntimeClasspath`) und Sample (`debugRuntimeClasspath`): 101 eindeutige Maven-Koordinaten.
-Die OSV-`querybatch`-Abfrage (POST, `https://api.osv.dev/v1/querybatch`, Maven-Ökosystem) lieferte
-**0 betroffene Laufzeitkoordinaten**.
+Scanned the resolved runtime graphs of engine (`jvmRuntimeClasspath`), Compose
+(`releaseRuntimeClasspath`) and sample (`debugRuntimeClasspath`): 101 unique Maven coordinates.
+The OSV `querybatch` query (POST, `https://api.osv.dev/v1/querybatch`, Maven ecosystem) returned
+**0 affected runtime coordinates**.
 
-Zusaetzlich wurden 334 Koordinaten aus Laufzeit- plus `buildEnvironment`-Graph geprueft. Die
-Treffer liegen ausschliesslich im AGP-9.5.1-Buildscript-Classpath, nicht in den ausgelieferten
-AARs/JARs: Guava 33.4.0-jre (`GHSA-xxph-c9ww-hj94`, fixed 33.7.2), commons-lang3 3.16.0
+Additionally, 334 coordinates from the runtime plus `buildEnvironment` graph were checked. Findings
+are exclusively in the AGP 9.5.1 buildscript classpath, not in the shipped AARs/JARs: Guava
+33.4.0-jre (`GHSA-xxph-c9ww-hj94`, fixed 33.7.2), commons-lang3 3.16.0
 (`GHSA-j288-q9x7-2f5v`, fixed 3.18.0), jose4j 0.9.5 (`GHSA-3677-xxcr-wjqv`, fixed 0.9.6),
 bcpkix/bcprov-jdk18on 1.80.2 (`GHSA-wg6q-6289-32hp`, `GHSA-9pwp-9qqc-pr26`,
-`GHSA-qp49-qgx5-5m26`, fixed 1.84/1.85) und jdom2 2.0.6 (`GHSA-2363-cqg2-863c`, fixed 2.0.6.1).
-Der Laufzeitgraph enthaelt diese Pakete nicht; `com.google.guava:listenablefuture:1.0` ist nur ein
-leerer Kompatibilitaetsmarker. Ein `kotlin-stdlib {strictly ...}`-Treffer war ein Parserartefakt
-aus der Gradle-Ausgabe, keine reale Koordinate; aufgeloest ist Kotlin 2.4.21, oberhalb der
-betroffenen Bereiche. Fuer 2.4.0 wurde kein riskanter Buildscript-Zwangsumstieg vorgenommen;
-die Findings benoetigen eine dokumentierte Maintainer-Akzeptanz (Owner/Expiry) oder einen
-separaten AGP-Upgrade. Der Laufzeit-Scan ist damit bestanden, der Build-Tooling-Teil bleibt offen.
+`GHSA-qp49-qgx5-5m26`, fixed 1.84/1.85) and jdom2 2.0.6 (`GHSA-2363-cqg2-863c`, fixed 2.0.6.1).
+The runtime graph does not contain these packages; `com.google.guava:listenablefuture:1.0` is only
+an empty compatibility marker. A `kotlin-stdlib {strictly ...}` finding was a parser artifact
+from Gradle output, not a real coordinate; resolved Kotlin is 2.4.21, above the affected ranges.
+No risky forced buildscript upgrade was made for 2.4.0; the findings need documented maintainer
+acceptance (owner/expiry) or a separate AGP upgrade. The runtime scan therefore passes; the
+build-tooling part remains open.
 
 ```bash
 ./gradlew :calendar-chinese-native:dependencies --configuration jvmRuntimeClasspath \
   :calendar-chinese-compose:dependencies --configuration releaseRuntimeClasspath \
   :calendarviewsample:dependencies --configuration debugRuntimeClasspath --console=plain > /tmp/gradle-deps.log
-# Danach die group:artifact:version-Koordinaten per OSV /v1/querybatch (Maven) pruefen.
+# Then check the group:artifact:version coordinates with OSV /v1/querybatch (Maven).
 ```
 
-#### Geraete-, Fold-, TalkBack- und Emulator-Nachweis
+#### Device, fold, TalkBack and emulator evidence
 
-`adb devices` ist leer und es gibt kein lokales Geraet. Der nachinstallierte API-29-Emulator
-konnte nicht booten, weil der Benutzer nicht in der Gruppe `kvm` ist:
+There is no physical device and KVM is unavailable:
 `ProbeKVM: This user doesn't have permissions to use KVM (/dev/kvm); The KVM line is kvm:x:994:`.
-Ein x86_64-Emulator verlangt Hardwarebeschleunigung; ohne KVM-/Gruppenfreigabe ist der lokale
-Lauf nicht moeglich. Die Remote-Instrumentation und -Tablet-Suite auf API 29 sind gruen, ersetzen
-aber weder reale Foldables noch TalkBack/Grossschrift/RTL. Die Matrix bleibt daher offen; die
-bestehenden UI-Tests sind kompiliert und remote ausgefuehrt, nicht als chinesische Geraetematrix.
+A software-accelerated API 29 x86_64 AVD (`codebuff_api29`, 1080x1920, 420 dpi) was nevertheless
+booted with `-accel off -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect`. It reached
+`dev.bootcomplete=1` and exposed `emulator-5554`; the debug sample installed, `LauncherActivity`
+started, and the main screen rendered. Tapping `Chinese 2.4.0 demo: leap month` showed
+`2023 Leap 2nd Month`; after scrolling, `Details` showed epoch day 19445, Gregorian `2023-03-29`
+and `Chinese: 2023 Leap 2nd Month, day 8`. No app `FATAL EXCEPTION` appeared. Under software CPU
+emulation System UI and Google Play services raised ANRs, and `am start -W` timed out at 21.9 s
+although the app process stayed alive; this is not hardware or performance evidence. Screenshots
+and logcat are kept locally under `artifacts/screenshots/` and `artifacts/logcat/` (untracked).
+
+Remote instrumentation and tablet suites on API 29 are green, but replace neither real devices or
+foldables nor TalkBack/large-font/RTL. The device matrix therefore remains open; existing UI tests
+are compiled and executed remotely, not as a Chinese device/accessibility matrix.
 
 ```bash
 adb devices
-# Nach KVM-Freigabe durch den Administrator (z. B. Benutzer in Gruppe kvm, neue Login-Sitzung):
-emulator -avd <avd-name> -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
+# Without KVM (slow, software CPU):
+emulator -avd codebuff_api29 -accel off -no-window -no-audio -no-boot-anim \
+  -gpu swiftshader_indirect -no-snapshot
+adb install -r calendarviewsample/build/outputs/apk/debug/calendarviewsample-debug.apk
+adb shell am start -n com.develotter.calendarviewsample/.LauncherActivity
+# Instrumentation was not run on this software-emulated AVD in this session:
 ./gradlew :calendarviewsample:connectedDebugAndroidTest
 ```
 
-Manuell verbleiben: Telefon/Tablet/Foldable mit Buch-/Tabletop-Posture, Landscape/Split-Screen,
-TalkBack mit chinesischen und englischen Labels, grosse Schrift, RTL, deaktivierte Tage, sichtbare
-Schaltmonatkennzeichnung und Touch-Target-Messung. Die konkrete Checkliste steht in
+Manual work remains: phone/tablet/foldable with book/tabletop posture, landscape/split-screen,
+TalkBack with Chinese and English labels, large font, RTL, disabled days, visible leap-month
+marker and touch-target measurement. The concrete checklist is in
 `docs/CHINESE_CALENDAR_QUALITY.md`.
 
-#### Ergebnis der lokalen Regressionspruefung
+#### Local regression result
 
-`./gradlew test :calendar-chinese-native:linuxX64Test` war erfolgreich; der fokussierte
-Benchmark-Test ebenfalls. `bash scripts/api-check.sh` meldet `Public API matches the checked-in
-dumps.`; die Python-Suites liefen mit 7 + 12 Tests ohne Fehler. Der Evidenzcommit `4ce4d3f`
-(Code und Gate-Dokumentation) ist auf `origin/update`; alle vier Remote-Workflows sind success:
-verification `43479911419`, publishing `43479911387`, instrumentation `43479911196`, tablet
-`43479911275`. Kein Merge, Tag oder Release wurde erstellt.
+`./gradlew test :calendar-chinese-native:linuxX64Test` was successful; the focused benchmark test
+as well. `bash scripts/api-check.sh` reports `Public API matches the checked-in dumps.`; the Python
+suites ran 7 + 12 tests without failures. Evidence commit `4ce4d3f` (code and gate documentation)
+is on `origin/update`; all four remote workflows succeeded: verification `43479911419`, publishing
+`43479911387`, instrumentation `43479911196`, tablet `43479911275`. Current HEAD `dc3abe2` is
+green: verification `43520705754`, publishing `43520705242`, instrumentation `43520705461`,
+tablet `43520705438`. No merge, tag or release was created.
 
-## Arbeitsregel fuer die Implementierung
+## Implementation work rule
 
-Pro Phase: kleinste zusammenhaengende Aenderung, Tests, Diff-Review, Dokumentationsupdate und
-klarer Bericht ueber ausgefuehrte/nicht ausgefuehrte Pruefungen. Keine Checkbox ohne
-Ergebnisnachweis abhaken. Ein fehlender Runner, eine ungepruefte Lizenz oder ein gebrochener
-Remote-Consumer ist ein offener Blocker, keine stillschweigende Ausnahme.
+Per phase: smallest coherent change, tests, diff review, documentation update and a clear report
+of executed/not executed checks. Do not check a box without evidence. A missing runner, unreviewed
+license or broken remote consumer is an open blocker, not a silent exception.
 
-## Nachweise
+## Evidence
 
-Details, Kommandos und Ergebnisse: [PROJECT_STATUS.md](docs/PROJECT_STATUS.md#current-development-240-chinese-calendar-unreleased-2026-11-13)
-und [releases/2.4.0.md](docs/releases/2.4.0.md#verifikation-2026-11-13-lokaler-arbeitsbaum).
+Details, commands and results:
+[PROJECT_STATUS.md](docs/PROJECT_STATUS.md#current-development-240-chinese-calendar-unreleased-2026-11-13)
+and [releases/2.4.0.md](docs/releases/2.4.0.md#verification-2026-11-13-local-working-tree).

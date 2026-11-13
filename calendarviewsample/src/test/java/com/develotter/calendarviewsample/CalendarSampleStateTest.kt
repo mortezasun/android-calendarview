@@ -4,8 +4,10 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
 import com.develotter.calendarview.calendars.chineseNative.ChineseDate
+import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.enums.TypeSelectDay
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -116,6 +118,20 @@ class CalendarSampleStateTest {
         ).startEpochDay(), above.anchor)
         above.move(1)
         assertEquals(lastMonthStart, above.anchor)
+    }
+
+    @Test
+    fun chineseDemoOpensLeapMonthWithDetails() {
+        val state = sampleState(LocalDate.of(2026, 6, 15).toEpochDay())
+
+        state.showChineseDemo()
+
+        assertEquals(SampleCalendar.Chinese, state.calendar)
+        assertEquals(ChineseDate(2023, 2, true, 1).toEpochDay(), state.anchor)
+        assertEquals(ChineseTextStyle.English, state.chineseStyle)
+        assertTrue(state.showChineseDetails)
+        assertFalse(state.chineseGregorianGrid)
+        assertNull(state.error)
     }
 
     @Test

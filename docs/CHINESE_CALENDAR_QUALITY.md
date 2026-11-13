@@ -1,115 +1,170 @@
-# 2.4.0: Testplan, Anfaelligkeiten und Sicherheitsgates
+# 2.4.0: Test plan, vulnerabilities and security gates
 
-Status: Kernmatrix am 2026-11-13 lokal (JDK 21, JVM + linuxX64) und in Remote-CI auf `1ab841e70b6fb7ab35b16e970715b500b91f95a2` sowie auf dem Review-Fixstand `e80c00f` ausgefuehrt. Die Nachbesserungen auf `6fac725` (`5cf640d`) sind lokal geprueft; der gepushte Baum `952bbb6` ist in allen vier Remote-Workflows success. Am 2026-11-13 wurden zusaetzlich eine JVM-Benchmark-Baseline und ein OSV-Advisory-Scan ausgefuehrt. Die chinesische Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix bleibt offen. Dieser Plan behauptet weder Schwachstellenfreiheit des Build-Toolings noch eine abgeschlossene physische Geraeteabnahme.
+Status: the core matrix was executed locally on 2026-11-13 (JDK 21, JVM + linuxX64) and in
+remote CI on `1ab841e70b6fb7ab35b16e970715b500b91f95a2`, on review-fix commit `e80c00f`,
+and on the current remote HEAD `dc3abe22f1d67ad2dd78fe43b99515f49ee97f27`. The follow-up fixes
+on `6fac725` (`5cf640d`) were verified locally; pushed tree `952bbb6` succeeded in all four
+remote workflows. On 2026-11-13 a JVM benchmark baseline and an OSV advisory scan were also
+executed. The Chinese device/fold/TalkBack/large-font/RTL matrix remains open. This plan claims
+neither that the build tooling is vulnerability-free nor that physical device acceptance is
+complete.
 
-## Funktionale Pflichtmatrix
+## Functional mandatory matrix
 
-- [x] Jeden unterstuetzten Epoch Day nach chinesisch und zurueck konvertieren; jeden gueltigen chinesischen Tag umgekehrt pruefen. (72.674 Tage, `wholeRangeRoundTrips`.)
-- [x] Zusaetzlich unabhaengige Referenzdaten vergleichen. Roundtrips allein beweisen keine richtige Kalenderzuordnung. (Generator: 2.458 exakt + 3 auditierte Abweichungen = 2.461 HKO-Monatsstarts, 0 fehlende Referenzen; die Abweichungen sind mit strukturierter NASA/GSFC-Neumondzeit und 60-s-Toleranz belegt; `--verify-reference` verlangt vollstaendige Datei-/Startabdeckung, Jahres-/Schaltmonatsstatus, identische UTC-/UTC+8-Instants und explizite Zeitzonen. Die HKO-Zeilen sind mit Pekinger Ortszeit vor 1929 vereinbar; die Library bleibt bewusst bei UTC+8 und behandelt sie als dokumentierte historische Referenzunterschiede.)
-- [x] Alle Jahres-/Monatswechsel, 29-/30-Tage-Monate, alle Schaltmonate und insbesondere 2033/2034 gegen Referenz pruefen. (2.461 Monate lueckenlos; Leap-Fixtures inkl. 2033/2034.)
-- [x] Randjahre, Randmonate, Nebenmonatszellen, min/max +/- 1 und ungueltige Schaltmonate pruefen.
-- [x] Gregorianische Jahrhundertgrenzen einschliesslich 1900/2000/2100 soweit unterstuetzt bzw. als ablehnender Grenztest abdecken. (Range endet 2100-02-08; 1900/2100 ausserhalb werden abgelehnt.)
-- [x] Grosse positive/negative Operanden, Int-/Long-Grenzen, Overflow und ungueltige Tageszahlen pruefen.
-- [x] UTC, UTC+08, Europe/Berlin mit Sommerzeit und weitere Geraetezonen liefern fuer denselben Epoch Day dasselbe Engine-Ergebnis. Keine Millisekunden/86400000-Tagesrechnung. (Engine nutzt ausschliesslich Epoch Days und enthaelt keine java.time-/Zeitzonen-Nutzung; Jar-Scan.)
-- [x] Monatsarithmetik mit Schaltmonaten und Tag-Clamping, naechster/vorheriger Monat sowie Anfang/Ende testen.
-- [x] Identische Fixtures auf JVM und einem ausgefuehrten Kotlin/Native-Target. Fuer beworbenes iOS: Simulator-Runtime und unabhaengiger Consumer auf macOS. Nur Kompilieren ist kein Runtime-Test. (JVM 14 + linuxX64 14; iOS nicht beworben.)
+- [x] Convert every supported epoch day to Chinese and back; verify every valid Chinese day in
+  reverse. (72,674 days, `wholeRangeRoundTrips`.)
+- [x] Compare against additional independent reference data. Round trips alone do not prove a
+  correct calendar mapping. (Generator: 2,458 exact + 3 audited differences = 2,461 HKO month
+  starts, 0 missing references; the differences are documented with structured NASA/GSFC new
+  moon times and a 60 s tolerance; `--verify-reference` requires complete file/start coverage,
+  year/leap status, identical UTC/UTC+8 instants and explicit time zones. The HKO rows are
+  consistent with Beijing local time before 1929; the library deliberately remains on UTC+8 and
+  treats them as documented historical reference differences.)
+- [x] Verify all year/month transitions, 29/30-day months, every leap month and especially
+  2033/2034 against the reference. (2,461 gapless months; leap fixtures including 2033/2034.)
+- [x] Check boundary years, boundary months, adjacent-month cells, min/max +/- 1 and invalid
+  leap months.
+- [x] Cover Gregorian century boundaries including 1900/2000/2100 where supported or as
+  rejecting boundary tests. (Range ends 2100-02-08; 1900/2100 are outside and rejected.)
+- [x] Check large positive/negative operands, Int/Long boundaries, overflow and invalid day
+  counts.
+- [x] UTC, UTC+08, Europe/Berlin with daylight saving time and other device zones produce the
+  same engine result for the same epoch day. No milliseconds/86400000 day arithmetic. (The
+  engine uses only epoch days and contains no java.time or time-zone use; JAR scan.)
+- [x] Test month arithmetic with leap months and day clamping, next/previous month, and the
+  beginning/end.
+- [x] Identical fixtures on JVM and one executed Kotlin/Native target. For advertised iOS:
+  simulator runtime and an independent consumer on macOS. Compilation alone is not a runtime
+  test. (JVM 14 + linuxX64 14; iOS is not advertised.)
 
-## Compose- und Regressionsmatrix
+## Compose and regression matrix
 
-- [ ] None/Single/Multiple/Range, deaktivierte Tage und Marker; Epoch-Day-Identitaet beim Wechsel zwischen allen Kalendern erhalten.
-- [x] Navigation normaler Monat -> Schaltmonat -> Folgemonat, Jahreswechsel, Grenzen und Heute ausserhalb des Bereichs. (JVM-Bounds-Tests, Boundary-Window-Tests fuer beide Engine-Grenzen sowie Compose-Single-/Pager-Regressionstests ergaenzt; Geraete-Ausfuehrung offen.)
-- [x] Saver-Roundtrip und echte StateRestorationTester-/Activity-Recreation-Tests einschliesslich Schaltflag und alter gespeicherter Sample-Zustaende. Neue Enum-Eintraege duerfen alte ordinalbasierte Saves nicht umdeuten. (`ChineseMonthSnapshot`-Decode-Tests und `StateRestorationTester`-Test fuer den Schaltmonat mit Austausch zweier Callback-Instanzen ergaenzt; lokal kompiliert, Remote-Instrumentation der Sample-Suite auf API 29 erfolgreich, aber keine separate chinesische Geraetematrix.)
-- [ ] Monat, Woche, Agenda, Pager/Liste und Jahresheatmap mit 12 und 13 Monaten.
-- [ ] Telefon/Tablet, schmale Breite, Landscape, Mehrspalten, Split-Screen, simulierte Folds und kontinuierliche Layoutwechsel. Reale Foldable-Tests separat ausweisen.
-- [ ] LTR/RTL, chinesische/englische Beschriftung, grosse Schrift, TalkBack, deaktivierte Semantik und sichtbare Schaltmonatkennzeichnung.
-- [ ] Bestehende Touch-Target-Regeln und bekannte schmale-Viewport-Einschraenkungen erhalten; keine pauschale 48-dp-Garantie ohne Messung.
-- [x] Regression aller vorhandenen Module: Tests, Lint, Sample,   API-Guard und eigenstaendige Consumer. (210 JVM inkl. Benchmark + 14 Native, Lint, Sample-APK, API-Guard, JVM- und Android-Consumer.)
+- [ ] None/Single/Multiple/Range, disabled days and markers; preserve epoch-day identity when
+  switching between all calendars.
+- [x] Navigation from a regular month to a leap month to the following month, year transitions,
+  bounds and today outside the range. (JVM bounds tests, boundary-window tests for both engine
+  bounds and Compose single/pager regression tests added; device execution remains open.)
+- [x] Saver round trip and real `StateRestorationTester`/activity recreation tests including the
+  leap flag and old saved sample states. New enum entries must not reinterpret old
+  ordinal-based saves. (`ChineseMonthSnapshot` decode tests and a `StateRestorationTester` test
+  for the leap month with two exchanged callback instances added; compiled locally and the
+  remote instrumentation of the sample suite on API 29 succeeded, but there is no separate
+  Chinese device matrix.)
+- [ ] Month, week, agenda, pager/list and year heatmap with 12 and 13 months.
+- [ ] Phone/tablet, narrow width, landscape, multiple columns, split-screen, simulated folds and
+  continuous layout changes. Report real foldable tests separately.
+- [ ] LTR/RTL, Chinese/English labels, large font, TalkBack, disabled semantics and visible
+  leap-month identification.
+- [ ] Preserve existing touch-target rules and known narrow-viewport limitations; do not claim a
+  blanket 48 dp guarantee without measurement.
+- [x] Regression of all existing modules: tests, lint, sample, API guard and independent
+  consumers. (211 JVM including benchmark + 14 native, lint, sample APK, API guard, JVM and
+  Android consumers.)
 
-## Risikoregister
+## Risk register
 
-| Risiko | Gegenmassnahme / Freigabegate |
+| Risk | Mitigation / release gate |
 |---|---|
-| Falsche oder ungeklart lizenzierte Datentabellen | Herkunftsmanifest, Rechts-/Attributionspruefung, deterministischer Generator, zweiter Review; Blocker bis geklaert |
-| Rundlauf funktioniert trotz falscher Zuordnung | Unabhaengiger Referenzvergleich ueber den gesamten zugesagten Bereich |
-| Schaltmonat geht in Key/Saver/Navigation verloren | Vollstaendige Monatsidentitaet und explizite Schaltmonat-Fixtures |
-| Zukuenftige Referenzabweichungen | HKO-Hinweise und Datensatzversion dokumentieren; keine universelle astronomische Genauigkeit versprechen |
-| Overflow oder teure Aufrufe durch ungueltige Eingaben | Vorabvalidierung, checked arithmetic, begrenzte Suche/Iteration und Extremwerttests |
-| Netzwerk-/Datenschutzrisiko | Keine Netzwerkberechtigung, Telemetrie, dynamischen Downloads oder Datumsprotokolle im neuen Modul |
-| Verdeckte fremde Kalenderabhaengigkeit | Dependency-Graph, POM/Gradle-Metadata und Artefaktinhalt pruefen; Engine-Consumer ohne Compose/Android/andere Engines |
-| Supply-Chain / manipulierte Artefakte | Feste Versionen, Repository-Scopes, Wrapper-Pruefsumme, gepruefte Gradle-Verifikationsmetadaten; keine dynamischen Releaseversionen |
-| Bekannte verwundbare Abhaengigkeiten | OSV-Scan 2026-11-13: 101 Laufzeitkoordinaten ohne Treffer; 334 Laufzeit-/Buildscript-Koordinaten mit Treffern ausschliesslich im AGP-Buildscript (nicht ausgeliefert). Build-Tooling-Akzeptanz oder AGP-Upgrade bleibt eine Maintainer-Entscheidung; Pruefsummen sind kein CVE-Scan |
-| CI-Token oder Release-Manipulation | Minimale Workflow-Permissions, keine Secrets in fremden PR-Jobs, Actions auf gepruefte Commit-SHAs pinnen, Releasefreigabe trennen |
-| API-/Consumer-Bruch | 2.3.0-Baseline unveraendert pruefen, neue API-Dumps, Publikations- und Binarkompatibilitaetstests |
-| JitPack/KMP-Varianten nicht konsumierbar | Isolierte Publikation plus Remote-Consumer fuer jede beworbene Variante; kein mavenLocal/includeBuild als Ersatz |
+| Incorrect or unclearly licensed data tables | Provenance manifest, legal/attribution review, deterministic generator, second review; blocker until resolved |
+| Round trip works despite an incorrect mapping | Independent reference comparison over the entire promised range |
+| Leap month is lost in a key/saver/navigation path | Full month identity and explicit leap-month fixtures |
+| Future reference differences | Document HKO notes and data-set version; do not promise universal astronomical accuracy |
+| Overflow or expensive calls from invalid input | Up-front validation, checked arithmetic, bounded search/iteration and extreme-value tests |
+| Network/privacy risk | No network permission, telemetry, dynamic downloads or date logging in the new module |
+| Hidden foreign calendar dependency | Inspect dependency graph, POM/Gradle metadata and artifact content; engine consumer without Compose/Android/other engines |
+| Supply chain / tampered artifacts | Fixed versions, repository scopes, wrapper checksum, verified Gradle verification metadata; no dynamic release versions |
+| Known vulnerable dependencies | OSV scan 2026-11-13: 101 runtime coordinates with no findings; 334 runtime/buildscript coordinates with findings only in the AGP buildscript (not shipped). Build-tooling acceptance or an AGP upgrade remains a maintainer decision; checksums are not a CVE scan |
+| CI token or release manipulation | Minimal workflow permissions, no secrets in foreign PR jobs, pin actions to verified commit SHAs, separate release approval |
+| API/consumer breakage | Verify the unchanged 2.3.0 baseline, new API dumps, publication and binary-compatibility tests |
+| JitPack/KMP variants cannot be consumed | Isolated publication plus a remote consumer for every advertised variant; no mavenLocal/includeBuild substitute |
 
-## Sicherheits- und Leistungspolitik
+## Security and performance policy
 
-Release-Blocker: unerklaerte Kalenderabweichung, kaputte Datenintegritaet, fehlende Lizenz, gebrochene bestehende API oder erforderliche Builds/Consumer. Anwendbare Critical-/High-Sicherheitsfindings muessen behoben oder vor Freigabe vom Maintainer mit Begruendung, Reichweite und Ablaufdatum ausdruecklich akzeptiert werden; keine stillen Ausnahmen. Medium/Low ebenfalls mit Owner und Frist dokumentieren. Keine neue Scan-Abhaengigkeit ohne Genehmigung einfuehren.
+Release blockers: unexplained calendar differences, broken data integrity, missing license,
+broken existing API, or required builds/consumers. Applicable Critical/High security findings
+must be fixed or explicitly accepted by the maintainer before release with justification, scope
+and expiration date; no silent exceptions. Document Medium/Low findings with an owner and
+deadline as well. Do not introduce a new scan dependency without approval.
 
-Gradle dependency verification prueft Integritaet/Signaturen, verhindert aber nicht die Nutzung bekannter verwundbarer Versionen. Automatisch erzeugte Vertrauensmetadaten muessen unabhaengig geprueft werden; blindes Bootstrapping kann kompromittierte Downloads festschreiben. Referenz: https://docs.gradle.org/current/userguide/dependency_verification.html
+Gradle dependency verification checks integrity/signatures but does not prevent use of known
+vulnerable versions. Automatically generated trust metadata must be independently reviewed;
+blind bootstrapping can pin compromised downloads. Reference:
+https://docs.gradle.org/current/userguide/dependency_verification.html
 
-Vor Freigabe Benchmarks fuer Konvertierung, Monatsaufbau, 13-Monats-Heatmap und wiederholte Navigation auf benannter Hardware sammeln. Datensatzgroesse, Artefaktgroesse, Allokationen und Laufzeiten aufzeichnen und begruendete Budgets vor RC einfrieren. UI-Recomposition darf nicht den ganzen Referenzbereich scannen; keine unbeschraenkten globalen Caches oder Range-Interior-Listen.
+Before release, collect benchmarks for conversion, month construction, the 13-month heatmap and
+repeated navigation on named hardware. Record data-set size, artifact size, allocations and
+runtimes, and freeze justified budgets before RC. UI recomposition must not scan the entire
+reference range; no unbounded global caches or range-interior lists.
 
-## Ausfuehrung 2026-11-13
+## Execution 2026-11-13
 
-| Punkt | Ergebnis |
+| Item | Result |
 |---|---|
-| JVM | `test :calendar-chinese-native:jvmTest`: 210 JVM-Tests (196 Android JVM + 14 KMP JVM), 0 Fehler, 0 Skip; enthaelt den neuen Benchmark-Reporting-Test |
-| Kotlin/Native | `:calendar-chinese-native:linuxX64Test`: 14 Tests, 0 Fehler, 0 Skip |
-| Compose-Daten/State | 12 Tests: Monat/Woche/State/Saver/Heatmap/Overlay und Benchmark-Reporting, inkl. 12/13 Monate, Bounds und Decode-Validierung |
-| Sample | `assembleDebug`, 60 Unit-Tests und `compileDebugAndroidTestKotlin` erfolgreich; neue Single-/Pager-Boundary-Tests nur kompiliert |
-| API/Consumer | bestehende Dumps `0` Diff; Engine-JVM-Consumer; Android-BOM-Consumer `assembleDebug` |
-| Python-Referenzpruefung | 7 Tests: fehlende Dateien/Starts, Jahres-/Schaltmonatsstatus, dokumentierter Konflikt, Verify-Fehlerstatus, Instant-Gleichheit/Zeitzonen/Toleranz, NASA-1914-Wert und SHA-256 der Kotlin-Daten gegen das Manifest |
-| Remote-CI | Evidenzbaum `1ab841e`: verification `43401491446`, publishing `43401491433`, instrumentation `43401491452`, tablet `43401491675`; Fixstand `e80c00f`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286`; Nachbesserungsbaum `952bbb6` (enthaelt `5cf640d`): verification `43439808516`, publishing `43439808420`, instrumentation `43439808384`, tablet `43439808435` - alle success. |
-| JitPack | 2.3.0-Buildlog HTTP 200; Android-BOM-Consumer `BUILD SUCCESSFUL`; Commit `7a51e24` mit BOM, Engine (Metadata/JVM/linuxX64), Compose und fuenf bestehenden Modulen; direkter Engine-JVM-Consumer `JVM consumer OK`, Exit 0. 2.4.0-Tag/BOM-Consumer ohne Tag blockiert; Commit-BOM constrainiert weiterhin `2.4.0`. |
-| Benchmark | JVM-Baseline auf Freebuff-VM, JDK 21.0.13, 8 vCPU: Konvertierung 58,77 ns/Op, Monatsaufbau 16.074,47 ns/Monat, 13-Monats-Heatmap 355.526 ns/Jahr, Navigation 53,79 ns/Schritt; Allokationen 56,01 B / 15.630,53 B / 248.328 B / 48,01 B pro Operation. Fokustest gruen; physische Geraeteabnahme offen. |
-| Advisory | 101 Laufzeitkoordinaten, OSV `querybatch`: 0 Treffer. 334 Laufzeit-/Buildscript-Koordinaten: Treffer nur im AGP-9.5.1-Buildscript (Guava, commons-lang3, jose4j, Bouncy Castle, JDOM2); nicht in AAR/JAR. Maintainer-Akzeptanz/AGP-Upgrade offen. |
-| Emulator | API-29-x86_64-Image und Emulator installiert; Boot scheitert an `ProbeKVM: This user doesn't have permissions to use KVM (/dev/kvm)`, Benutzer nicht in Gruppe `kvm`. Keine lokale Geraeteausfuehrung. |
-| Gate-Evidenz-Remote-CI | `4ce4d3f`: verification `43479911419`, publishing `43479911387`, instrumentation `43479911196`, tablet `43479911275` - alle success. |
-| Offen | chinesische UI-Interaktion auf realen Geraeten/Folds, TalkBack/Grossschrift/RTL, Touch-Target-Messung, physische Benchmark-Abnahme, finale Budgetfreigabe, Buildscript-Advisory-Akzeptanz, Tag/JitPack-2.4.0 |
+| JVM | `test :calendar-chinese-native:jvmTest`: 211 JVM tests (197 Android JVM + 14 KMP JVM), 0 failures, 0 skipped; includes the new benchmark-reporting test |
+| Kotlin/Native | `:calendar-chinese-native:linuxX64Test`: 14 tests, 0 failures, 0 skipped |
+| Compose data/state | 12 tests: month/week/state/saver/heatmap/overlay and benchmark reporting, including 12/13 months, bounds and decode validation |
+| Sample | `assembleDebug`, 62 unit tests and `compileDebugAndroidTestKotlin` successful; new single/pager boundary tests compiled only |
+| API/consumer | Existing dumps `0` diff; engine JVM consumer; Android BOM consumer `assembleDebug` |
+| Python reference check | 7 tests: missing files/starts, year/leap status, documented conflict, verify failure status, instant equality/time zones/tolerance, NASA 1914 value and SHA-256 of the Kotlin data against the manifest |
+| Remote CI | Evidence tree `1ab841e`: verification `43401491446`, publishing `43401491433`, instrumentation `43401491452`, tablet `43401491675`; fix commit `e80c00f`: verification `43412948314`, publishing `43412948284`, instrumentation `43412948316`, tablet `43412948286`; follow-up tree `952bbb6` (contains `5cf640d`): verification `43439808516`, publishing `43439808420`, instrumentation `43439808384`, tablet `43439808435` - all successful. Current `dc3abe2`: verification `43520705754`, publishing `43520705242`, instrumentation `43520705461`, tablet `43520705438` - all successful. |
+| JitPack | 2.3.0 build log HTTP 200; Android BOM consumer `BUILD SUCCESSFUL`; commit `7a51e24` with BOM, engine (metadata/JVM/linuxX64), Compose and five existing modules; direct engine JVM consumer `JVM consumer OK`, exit 0. 2.4.0 tag/BOM consumer is blocked without a tag; the commit BOM still constrains `2.4.0`. |
+| Benchmark | JVM baseline on Freebuff VM, JDK 21.0.13, 8 vCPU: conversion 58.77 ns/op, month construction 16,074.47 ns/month, 13-month heatmap 355,526 ns/year, navigation 53.79 ns/step; allocations 56.01 B / 15,630.53 B / 248,328 B / 48.01 B per operation. Focused test green; physical device acceptance remains open. |
+| Advisory | 101 runtime coordinates, OSV `querybatch`: 0 findings. 334 runtime/buildscript coordinates: findings only in the AGP 9.5.1 buildscript (Guava, commons-lang3, jose4j, Bouncy Castle, JDOM2); not in AAR/JAR. Maintainer acceptance/AGP upgrade remains open. |
+| Emulator | API 29 x86_64 image; KVM unavailable (`ProbeKVM`). A software-accelerated AVD booted with `-accel off` at 1080x1920/420 dpi (`dev.bootcomplete=1`). The debug sample installed and rendered; `Chinese 2.4.0 demo: leap month` showed `2023 Leap 2nd Month` and details `Epoch day: 19445`, `Gregorian: 2023-03-29`, `Chinese: 2023 Leap 2nd Month, day 8`. No app `FATAL EXCEPTION`; System UI/GMS ANRs occurred under software CPU emulation. This is phone smoke evidence, not hardware, fold, TalkBack or performance evidence. |
+| Gate evidence remote CI | `4ce4d3f`: verification `43479911419`, publishing `43479911387`, instrumentation `43479911196`, tablet `43479911275` - all successful. |
+| Open | Chinese UI interaction on real devices/folds, TalkBack, large font, full RTL, touch-target measurement, physical benchmark acceptance, final budget approval, buildscript advisory acceptance, tag/JitPack 2.4.0 |
 
-## Benchmark-Budgets (provisorisch, 2026-11-13)
+## Benchmark budgets (provisional, 2026-11-13)
 
-Die Messung ist eine JVM-Baseline, keine Zielgeraete-Abnahme. Die Budgets sind bewusst mit mindestens 6-fachem Puffer zu den gemessenen Medianen gesetzt und werden erst nach einer Messung auf
-der benannten Zielhardware final eingefroren.
+The measurement is a JVM baseline, not target-device acceptance. Budgets deliberately have at
+least a 6x margin over the measured medians and will be frozen only after measurement on the
+named target hardware.
 
-| Operation | Messwert (Median) | Provisorisches Budget |
+| Operation | Measurement (median) | Provisional budget |
 |---|---:|---:|
-| Konvertierung Hin/Rueck | 58,77 ns/Op, 56,01 B/Op | <= 1.000 ns/Op, <= 512 B/Op |
-| Monatsaufbau | 16.074,47 ns/Monat, 15.630,53 B/Monat | <= 100.000 ns/Monat, <= 100 KB/Monat |
-| 13-Monats-Heatmap | 355.526 ns/Jahr, 248.328 B/Jahr | <= 5 ms/Jahr, <= 1,5 MB/Jahr |
-| Navigation | 53,79 ns/Schritt, 48,01 B/Schritt | <= 1.000 ns/Schritt, <= 512 B/Schritt |
+| Convert there/back | 58.77 ns/op, 56.01 B/op | <= 1,000 ns/op, <= 512 B/op |
+| Month construction | 16,074.47 ns/month, 15,630.53 B/month | <= 100,000 ns/month, <= 100 KB/month |
+| 13-month heatmap | 355,526 ns/year, 248,328 B/year | <= 5 ms/year, <= 1.5 MB/year |
+| Navigation | 53.79 ns/step, 48.01 B/step | <= 1,000 ns/step, <= 512 B/step |
 
-Der Benchmark ist `ChineseJvmBenchmarkTest`; er gibt die Rohwerte aus und hat keine
-zeitbasierte Assertion. Der Testlauf ist Teil von `./gradlew test`, der fokussierte Befehl ist:
+The benchmark is `ChineseJvmBenchmarkTest`; it prints raw values and deliberately has no
+time-based assertion. The test run is part of `./gradlew test`; the focused command is:
 
 ```bash
 ./gradlew :calendar-chinese-compose:testDebugUnitTest --tests '*ChineseJvmBenchmarkTest*'
 ```
 
-## Manuelle Geraete-/Accessibility-Matrix
+## Manual device/accessibility matrix
 
-Mindestens auf einem Telefon, einem Tablet und einem Foldable (Buch- und Tabletop-Posture)
-ausfuehren, jeweils mit chinesischem Monat, Schaltmonat, Jahresheatmap und
-`chineseGregorianGrid`:
+Execute on at least a phone, a tablet and a foldable (book and tabletop postures), each with a
+Chinese month, leap month, year heatmap and `chineseGregorianGrid`:
 
-- [ ] Telefon hoch/quer, Tablet hoch/quer, Split-Screen und kontinuierliche Breitenaenderung; keine abgeschnittenen Tage oder Header.
-- [ ] Foldable: Inhalt wechselt an der Falz, Buch-/Tabletop-Posture, keine Bedienelemente unter dem Scharnier; synthetische `sampleLocalFold`-Tests sind kein Ersatz.
-- [ ] TalkBack: chinesische und englische Labels, ISO-Datum im Accessibility-Text, Schaltmonat `M2L`/`闰`, deaktivierte Tage, Auswahl und Heute; Fokusreihenfolge im Grid.
-- [ ] Grosse Schrift (mind. 200 %) und RTL (Arabisch/Hebraeisch): kein Clipping, korrekte Leserichtung, Touch-Targets messbar (nicht pauschal 48 dp behaupten).
-- [ ] Wiederholte Navigation ueber normale Monate, Schaltmonate und Jahresgrenzen; keine Recomposition, die den gesamten Bereich scannt.
-- [ ] Activity-Recreation/Rotation mit chinesischem Monat, Auswahl und Gregorian-Overlay; Saver darf den Schaltmonat nicht verlieren.
+- [ ] Phone portrait/landscape, tablet portrait/landscape, split-screen and continuous width
+  changes; no clipped days or headers.
+- [ ] Foldable: content switches at the fold, book/tabletop posture, no controls under the
+  hinge; synthetic `sampleLocalFold` tests are not a substitute.
+- [ ] TalkBack: Chinese and English labels, ISO date in accessibility text, leap month
+  `M2L`/`闰`, disabled days, selection and today; focus order in the grid.
+- [ ] Large font (at least 200%) and RTL (Arabic/Hebrew): no clipping, correct reading direction,
+  measurable touch targets (do not claim 48 dp across the board).
+- [ ] Repeated navigation across regular months, leap months and year boundaries; no
+  recomposition that scans the entire range.
+- [ ] Activity recreation/rotation with Chinese month, selection and Gregorian overlay; the
+  saver must not lose the leap month.
 
-Fuer eine verfuegbare lokale/remote Geraeteverbindung:
+For an available local/remote device connection:
 
 ```bash
 adb devices
 ./gradlew :calendarviewsample:connectedDebugAndroidTest
 ```
 
-Der lokale API-29-Emulator konnte wegen fehlender KVM-Gruppenberechtigung nicht booten; die
-Remote-API-29-Suite ist gruen, deckt aber weder reale Foldables noch TalkBack ab.
+The software-accelerated local API 29 emulator booted after KVM was unavailable; it provides a
+phone smoke check of the sample and leap-month rendering, but covers neither real foldables nor
+TalkBack, large font or a complete RTL matrix.
 
-## Nachweisformat
+## Evidence format
 
-Jedes Ergebnis: Datum, exakter Commit, Toolchain/Target, Task/Befehl, Runner/Geraet, Ergebnis, Testanzahl/Skipzahl, Berichtspfad bzw. CI-Run und offene Findings. Nicht ausgefuehrte Tests bleiben offen. Historische gruenen Runs belegen keinen spaeter veraenderten Releasebaum.
+Every result: date, exact commit, toolchain/target, task/command, runner/device, result, test and
+skip counts, report path or CI run, and open findings. Tests not executed remain open.
+Historical green runs do not prove a later changed release tree.

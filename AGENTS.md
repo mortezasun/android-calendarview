@@ -89,7 +89,7 @@ These commands were executed successfully with JDK 21.0 and Android SDK Platform
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew test :calendar-chinese-native:jvmTest    # 210 JVM tests (196 Android + 14 KMP)
+./gradlew test :calendar-chinese-native:jvmTest    # 211 JVM tests (197 Android + 14 KMP)
 ./gradlew :calendar-chinese-native:linuxX64Test    # 14 Kotlin/Native tests
 ./gradlew :library:lintDebug                      # lint for the core library
 ./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
