@@ -35,7 +35,7 @@ if [[ ! -x "$JAVAP" || ! -x "$JAR" ]]; then
     exit 1
 fi
 
-MODULES=(library calendar-gregorian calendar-hijri calendar-solarHijri)
+MODULES=(library calendar-gregorian calendar-hijri calendar-solarHijri calendar-solarHijri-native)
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -45,7 +45,7 @@ for module in "${MODULES[@]}"; do
     aar="$module/build/outputs/aar/${module}-release.aar"
     if [[ ! -f "$aar" ]]; then
         echo "Missing $aar." >&2
-        echo "Run: ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease" >&2
+        echo "Run: ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease :calendar-solarHijri-native:assembleRelease" >&2
         exit 1
     fi
     classes_jar="$TMP/${module}.jar"
@@ -79,7 +79,7 @@ for module in "${MODULES[@]}"; do
         # part of the Kotlin public surface but are public in the JVM bytecode.
         grep -E '^(public |  |\})' <<<"$output" \
             | grep -vE '\$stable|DefaultConstructorMarker|\$default|access\$|synthetic' \
-            | grep -vE 'solarHijriMonthTitle|hijriDayCellForEpoch' \
+            | grep -vE 'solarHijriMonthTitle|hijriDayCellForEpoch|solarHijriNativeDayCellForEpoch' \
             | sed -E 's/([A-Za-z0-9_]+)-[A-Za-z0-9_]+\(/\1(/' \
             >> "$dump"
         printf '\n' >> "$dump"

@@ -1,6 +1,16 @@
 # Release acceptance
 
-Status: `2.2.1` is released and published on GitHub Releases. `2.2.0` remains the previous published release.
+Status: `2.3.0` is prepared on `update` (not yet released). `2.2.1` is the current published release and published on GitHub Releases. `2.2.0` remains the previous published release.
+
+## 0. Upcoming release: 2.3.0 (in preparation on `update`)
+
+- [x] Root version set to `2.3.0` in root `build.gradle.kts`, sample `versionCode` `20300` / `versionName` `"2.3.0"`.
+- [x] New `:calendar-solarHijri-native` module implemented (`SolarHijriEngine`, `SolarHijriDate`, `SolarHijriLocale`, Compose parity, boundary guards, `Clock` injection).
+- [x] `:calendar-solarHijri-native` added to `settings.gradle.kts`, `calendar-bom`, `jitpack.yml`, `scripts/api-check.sh`, CI workflows, and `calendarviewsample`.
+- [x] `api/calendar-solarHijri-native.api` generated; existing `api/*.api` dumps unchanged (`0` diff).
+- [ ] All required CI checks passing on `update` (`assemble`, `unit-tests`, `lint`, `publishing`, `Core and sample instrumentation`, `Core and sample tablet instrumentation`).
+- [ ] Empty release commit `release: 2.3.0` pushed to `update` and published via `publish-2-3-0.yml`.
+- [ ] JitPack `2.3.0` build verified (all 5 modules + BOM) and consumer smoke test passed without `ir.huri:jalalicalendar`.
 
 ## 1. Current release: 2.2.1 (2026-11-12)
 

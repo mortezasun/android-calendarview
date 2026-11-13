@@ -12,8 +12,8 @@ extensions.configure<ApplicationExtension> {
         applicationId = "com.develotter.calendarviewsample"
         minSdk = 27
         targetSdk = 37
-        versionCode = 20201
-        versionName = "2.2.1"
+        versionCode = 20300
+        versionName = "2.3.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":library"))
     implementation(project(":calendar-gregorian"))
     implementation(project(":calendar-solarHijri"))
+    implementation(project(":calendar-solarHijri-native"))
     implementation(project(":calendar-hijri"))
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.foundation)

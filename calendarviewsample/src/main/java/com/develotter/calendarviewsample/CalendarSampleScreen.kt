@@ -29,6 +29,9 @@ import com.develotter.calendarview.calendars.hijri.compose.hijriWeekData
 import com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriCalendarMonth
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriWeekData
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
+import com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeCalendarMonth
+import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeWeekData
 import com.develotter.calendarview.compose.CalendarAgenda
 import com.develotter.calendarview.compose.CalendarDayMarker
 import com.develotter.calendarview.compose.CalendarMonthHeader
@@ -246,6 +249,14 @@ private fun SampleMonth(
             todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider,
         )
+        SampleCalendar.SolarHijriNative -> SolarHijriNativeCalendarMonth(
+            month = SolarHijriDate.fromLocalDate(date), selection = state.selection,
+            onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+            showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
+            today = SolarHijriDate.fromLocalDate(LocalDate.now()),
+            todayDescription = todayDescription, markers = sampleMarkers(date),
+            showHeader = showHeader, weekNumber = weekNumberProvider,
+        )
     }
 }
 
@@ -270,6 +281,7 @@ private fun SampleWeek(
             dateProvider = hijriProvider,
         )
         SampleCalendar.SolarHijri -> solarHijriWeekData(JalaliCalendar(date), locale)
+        SampleCalendar.SolarHijriNative -> solarHijriNativeWeekData(SolarHijriDate.fromLocalDate(date), locale)
     }
     val weekNumber = if (showWeekNumbers) {
         week.weekNumber ?: sampleWeekNumber(week.days.first().epochDay, locale)

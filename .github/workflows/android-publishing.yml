@@ -44,7 +44,7 @@ jobs:
           set -euo pipefail
           mkdir -p .ci-diagnostics
           git rev-parse HEAD | tee .ci-diagnostics/publishing-sha.txt
-          bash ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal :calendar-bom:publishToMavenLocal \
+          bash ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal :calendar-solarHijri-native:publishToMavenLocal :calendar-bom:publishToMavenLocal \
             -Dmaven.repo.local="$RUNNER_TEMP/calendar-maven" \
             --no-daemon --stacktrace --console=plain 2>&1 | tee .ci-diagnostics/publishing.txt
 
@@ -54,7 +54,7 @@ jobs:
           set -euo pipefail
           base="$RUNNER_TEMP/calendar-maven/com/github/mortezasun/android-calendarview"
           mkdir -p .ci-diagnostics/publications
-          for module in library calendar-gregorian calendar-hijri calendar-solarHijri; do
+          for module in library calendar-gregorian calendar-hijri calendar-solarHijri calendar-solarHijri-native; do
             directory="$base/$module"
             for suffix in .aar .pom .module -sources.jar; do
               file=$(find "$directory" -type f -name "${module}-*${suffix}" -size +0c -print -quit)
@@ -66,6 +66,11 @@ jobs:
             done
             cp -R "$directory" .ci-diagnostics/publications/
           done
+          native_pom=$(find "$base/calendar-solarHijri-native" -type f -name 'calendar-solarHijri-native-*.pom' -print -quit)
+          if grep -q 'jalalicalendar' "$native_pom"; then
+            echo "calendar-solarHijri-native POM must not depend on jalalicalendar" >&2
+            exit 1
+          fi
           bom_base="$base/calendar-bom"
           for suffix in .pom .module; do
             file=$(find "$bom_base" -type f -name "calendar-bom-*${suffix}" -size +0c -print -quit)

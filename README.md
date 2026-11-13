@@ -67,7 +67,8 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 | `:calendar-gregorian` | `…calendars.gregorian` | `GregorianCalendarMonth`, backed by `java.time`. |
 | `:calendar-hijri` | `…calendars.hijri` | `HijriCalendarMonth`, backed by `HijrahDate`. |
 | `:calendar-solarHijri` | `…calendars.solarHijri` | `SolarHijriCalendarMonth`, backed by `ir.huri:jalalicalendar` (exposed as `api`). |
-| `:calendar-bom` | – | Version constraints for the four published library artifacts. No runtime code. |
+| `:calendar-solarHijri-native` | `…calendars.solarHijriNative` | `SolarHijriNativeCalendarMonth`, dependency-free Borkowski engine (`-61..3177` AP), immutable `SolarHijriDate`, injectable `Clock`. |
+| `:calendar-bom` | – | Version constraints for the five published library artifacts. No runtime code. |
 | `:calendarviewsample` | `com.develotter.calendarviewsample` | Interactive demo app (month views, containers, agenda, adaptive columns, markers, week numbers, styles, range policy, month header and Hijri method offset, heatmaps). |
 
 Every calendar module depends on `:library` via `api`, so adding an engine is enough to get the core. `:calendar-bom` aligns the published versions but is not a runtime dependency.
@@ -94,25 +95,28 @@ Add the engines you need to your module's `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core only (needed if you build your own calendar on top of CalendarMonthGrid)
-    implementation("com.github.mortezasun.android-calendarview:library:2.2.1")
+    implementation("com.github.mortezasun.android-calendarview:library:2.3.0")
 
     // Calendar engines (each one already includes :library)
-    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.2.1")
-    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.2.1")
-    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.2.1")
+    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.3.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.3.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.3.0")
+    // Or dependency-free native Solar Hijri engine (immutable SolarHijriDate, no jalalicalendar):
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri-native:2.3.0")
 }
 ```
 
-### Bill of Materials (2.2.1)
+### Bill of Materials (2.3.0)
 
-The BOM is published with `2.2.1` and constrains the core and all three engines:
+The BOM is published with `2.3.0` and constrains the core and all four engines:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.2.1"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.3.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
     implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri-native")
 }
 ```
 
@@ -131,7 +135,7 @@ directly, move them to the BOM and bump the platform:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.2.1"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.3.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
 }
@@ -217,6 +221,22 @@ selection remains keyed by absolute epoch day. The click callback receives the d
 `HijrahDate`, so map it back through `epochDayFor` before storing a selected day.
 
 ### Solar Hijri / Jalali (Persian)
+
+For new projects that do not need `ir.huri.jcal.JalaliCalendar`, prefer `:calendar-solarHijri-native` (`SolarHijriNativeCalendarMonth` + immutable `SolarHijriDate`):
+
+```kotlin
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
+import com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeCalendarMonth
+
+SolarHijriNativeCalendarMonth(
+    month = SolarHijriDate.now(),
+    selection = selection,
+    onDateClick = { date -> /* SolarHijriDate(year, month, day) */ },
+)
+```
+
+Legacy `:calendar-solarHijri` (`JalaliCalendar`):
+
 
 ```kotlin
 @Composable
@@ -548,12 +568,14 @@ cd android-calendarview
 
 # Public JVM API guard (after the release AARs are built)
 ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
-  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease
+  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease \
+  :calendar-solarHijri-native:assembleRelease
 bash scripts/api-check.sh
 
 # Publish all artifacts, including the BOM, into the local Maven repository
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
   :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal \
+  :calendar-solarHijri-native:publishToMavenLocal \
   :calendar-bom:publishToMavenLocal
 ```
 

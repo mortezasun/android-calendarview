@@ -136,6 +136,8 @@ class CalendarSampleStateTest {
         )
         state.selectCalendar(SampleCalendar.SolarHijri)
         assertEquals(SampleCalendar.SolarHijri, state.calendar)
+        state.selectCalendar(SampleCalendar.SolarHijriNative)
+        assertEquals(SampleCalendar.SolarHijriNative, state.calendar)
         assertNull(state.error)
     }
 }

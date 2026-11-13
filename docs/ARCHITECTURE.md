@@ -23,6 +23,7 @@ The architecture follows standard Compose state and rendering patterns:
 | `:calendar-gregorian` | Gregorian calendar engine backed by `java.time.YearMonth` and `java.time.LocalDate`. Provides `GregorianCalendarMonth`, month/week data builders and day cells. |
 | `:calendar-hijri` | Islamic Hijri calendar engine backed by `java.time.chrono.HijrahDate`. Provides `HijriCalendarMonth`, month/week data builders and day cells. |
 | `:calendar-solarHijri` | Solar Hijri / Jalali calendar engine backed by `ir.huri:jalalicalendar`. Provides `SolarHijriCalendarMonth`, month/week data builders and day cells. |
+| `:calendar-solarHijri-native` | Dependency-free Solar Hijri engine (`SolarHijriEngine`, immutable `SolarHijriDate`, `SolarHijriLocale`, `SolarHijriNativeCalendarMonth`) using the Borkowski (1996) break-table algorithm (`-61..3177` AP). |
 | `:calendar-bom` | `java-platform` constraints for the four published library artifacts; no runtime classes. |
 | `:calendarviewsample` | Interactive Compose demo app illustrating configuration, selection modes, navigation, dialogs, and heatmaps. |
 
@@ -78,7 +79,7 @@ State is managed declaratively and cleanly separated from UI rendering:
 
 ## Distribution
 
-- `:calendar-bom` is a `java-platform` publication. Its POM has `dependencyManagement` constraints for `library`, `calendar-gregorian`, `calendar-hijri` and `calendar-solarHijri` at the root version.
+- `:calendar-bom` is a `java-platform` publication. Its POM has `dependencyManagement` constraints for `library`, `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri` and `calendar-solarHijri-native` at the root version.
 - Root `build.gradle.kts` owns group, version and the shared POM block (name, description, URL, Apache-2.0 license, developer, SCM). Module POMs inherit it.
 - JitPack and the publishing CI publish the BOM together with the four AAR modules. Maven Central signing, namespace verification and upload are not configured; the metadata is a prerequisite only.
 - Release `2.1.0` publishes the BOM and all four modules on JitPack. The tag build and a JitPack-only consumer were verified on 2026-11-11; see [PROJECT_STATUS.md](PROJECT_STATUS.md).

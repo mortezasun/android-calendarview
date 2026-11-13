@@ -5,6 +5,8 @@ import com.develotter.calendarview.calendars.hijri.HijriDateProvider
 import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.calendars.hijri.compose.hijriMonthData
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthData
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
+import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
 import com.develotter.calendarview.compose.CalendarMonthData
 import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
@@ -36,6 +38,11 @@ fun sampleMonthData(
             month = JalaliCalendar(date),
             locale = locale,
             today = JalaliCalendar(today),
+        )
+        SampleCalendar.SolarHijriNative -> solarHijriNativeMonthData(
+            month = SolarHijriDate.fromLocalDate(date),
+            locale = locale,
+            today = SolarHijriDate.fromLocalDate(today),
         )
     }
 }

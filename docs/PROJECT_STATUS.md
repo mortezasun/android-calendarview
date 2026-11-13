@@ -4,6 +4,19 @@ Last updated: 2026-11-12
 Version: `2.2.1` (published tag `2.2.1` at `dd20e49`)
 Branch: `update`
 
+## Upcoming release 2.3.0: `:calendar-solarHijri-native` (branch `update`, 2026-11-12)
+
+- Added dependency-free `:calendar-solarHijri-native` module (`com.develotter.calendarview.calendars.solarHijriNative`) per [ADR 0004](decisions/0004-native-solar-hijri-module.md), keeping `:calendar-solarHijri` and `api/calendar-solarHijri.api` completely unchanged.
+- Implemented `SolarHijriEngine` (Borkowski 1996 break-table port from `jalaali-js`, MIT, attributed in `NOTICE`, years `-61..3177` AP), immutable `SolarHijriDate`, `SolarHijriLocale` (`fa`, `fa-AF`/`prs`, `en`), and Compose parity (`SolarHijriNativeCalendarMonth`, `SolarHijriNativeMonthData`, `SolarHijriNativeWeekData`, `SolarHijriNativeMonthState` / `rememberSolarHijriNativeMonthState` with injectable `Clock` and boundary guards).
+- Integrated `:calendar-solarHijri-native` into `settings.gradle.kts`, `calendar-bom`, `jitpack.yml`, `scripts/api-check.sh`, CI workflows (`android-verification.yml`, `android-publishing.yml`, `android-tablet.yml`), `calendarviewsample` (`SampleCalendar.SolarHijriNative`), and `2.3.0` release preparation (`build.gradle.kts`, `CHANGELOG.md`, `docs/releases/2.3.0.md`, `publish-2-3-0.yml`, `update-2-3-0-release-notes.yml`).
+- Verified locally on `update` (JDK 17.0.21, Android SDK Platform 37.0, untracked `local.properties`):
+  - `./gradlew test`: 176 JVM unit tests passed (0 failed, 0 skipped; 27 in `:calendar-solarHijri-native`, 56 `:library`, 53 `:calendarviewsample`, 18 `:calendar-hijri`, 11 `:calendar-gregorian`, 11 `:calendar-solarHijri`), including exhaustive bijection across all days of `-61..3177` AP and `1280..1450` AP cross-check against `ir.huri:jalalicalendar` (note: `ir.huri` diverges by 1 day around 1900 CE / 1278 AP).
+  - `./gradlew :calendarviewsample:assembleDebug`, `:library:lintDebug`, `:calendar-solarHijri-native:lintDebug`, `:calendarviewsample:lintDebug`, `:library:compileDebugAndroidTestKotlin`, `:calendarviewsample:compileDebugAndroidTestKotlin`: passed.
+  - Release AARs for all 5 library modules + `bash scripts/api-check.sh`: passed (`api/calendar-solarHijri-native.api` added; existing 4 `.api` dumps have 0 diff).
+  - `publishToMavenLocal` to `/tmp/m2`: verified `calendar-solarHijri-native-2.3.0.pom` has no `jalalicalendar` dependency and `calendar-bom-2.3.0.pom` constrains all 5 library modules.
+  - `python3 -m unittest discover -s scripts -p 'test_*.py'`: 8 tests passed.
+- Not run locally: instrumented/tablet emulator suites (require KVM/emulator in CI) and remote JitPack/consumer verification (pending push/release approval).
+
 ## Post-2.2.0 Adaptive Review and Hardening (branch `update`, Arbeitspakete A–I)
 
 Following the published `2.2.0` release, a comprehensive independent code review identified and resolved

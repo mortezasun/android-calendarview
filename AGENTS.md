@@ -18,7 +18,7 @@ is not part of your task and never reset, stash or overwrite it without explicit
 - Multi-module Android **library** project, not an app-first project.
 - `:library` contains the Compose core: month grid, selection engine, scrolling containers and
   heatmaps.
-- `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` are calendar engines that depend
+- `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri`, `:calendar-solarHijri-native` are calendar engines that depend
   on `:library`. `:calendar-bom` is a `java-platform` publication that constrains their versions;
   `:calendarviewsample` is the demo app and depends on all modules.
 - Public API lives in `com.develotter.calendarview.*`; calendar-specific types live in
@@ -78,6 +78,7 @@ chmod +x gradlew                                  # if the checkout lost the exe
 ./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
   :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal \
+  :calendar-solarHijri-native:publishToMavenLocal \
   :calendar-bom:publishToMavenLocal  # into ~/.m2
 
 # After the four release AARs are built:

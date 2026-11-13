@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.3.0 - 2026-11-12
+
+New dependency-free `:calendar-solarHijri-native` module (Borkowski engine, immutable `SolarHijriDate`, injectable `Clock`).
+
+### Added
+
+- New `:calendar-solarHijri-native` module (`com.develotter.calendarview.calendars.solarHijriNative`) with zero external calendar library dependencies:
+  - `SolarHijriEngine`: pure-Kotlin port of the Borkowski (1996) break-table algorithm (`-61..3177` AP, MIT-licensed `jalaali-js` logic, attributed in `NOTICE`), using a single leap-year source (`jalCal`).
+  - `SolarHijriDate`: `@Immutable` `Comparable` value type with `plusDays`/`minusDays`/`plusMonths`/`minusMonths` (clamping), `withYear`/`withMonth`/`withDayOfMonth`, `toEpochDay()` matching `LocalDate.toEpochDay()`, and `now(clock: Clock)`.
+  - `SolarHijriLocale`: Persian (`fa`), Dari (`fa-AF` / `prs`), and English month names with locale-aware digits.
+  - Compose parity: `SolarHijriNativeCalendarMonth`, `SolarHijriNativeMonthData`, `SolarHijriNativeWeekData`, `SolarHijriNativeMonthState` (`rememberSolarHijriNativeMonthState` with `Clock` support and engine-bound clamping), and blank/disabled adjacent-cell guards at `-61-01` and `3177-12`.
+- Added `:calendar-solarHijri-native` to `:calendar-bom`, `jitpack.yml`, `scripts/api-check.sh`, CI verification/publishing workflows, and the `calendarviewsample` demo app (`SampleCalendar.SolarHijriNative`).
+
+### Compatibility
+
+- 100% binary-compatible with `2.2.1`, `2.2.0`, `2.1.0`, and `2.0.1`. `:calendar-solarHijri` and its public API (`api/calendar-solarHijri.api`) remain completely unchanged.
+
 ## 2.2.1 - 2026-11-12
 
 Adaptive layout hardening, minimum touch targets, fold geometry, state restoration suite and tablet CI.

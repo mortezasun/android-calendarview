@@ -11,6 +11,8 @@ import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.calendars.hijri.compose.rememberHijriMonthState
 import com.develotter.calendarview.calendars.solarHijri.compose.rememberSolarHijriMonthState
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
+import com.develotter.calendarview.calendars.solarHijriNative.compose.rememberSolarHijriNativeMonthState
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
 import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
@@ -85,6 +87,19 @@ internal fun rememberSampleMonthNavigation(
                 if (state.year != target.year || state.monthNumber != target.month) {
                     state.goTo(target)
                 }
+            }
+            SampleMonthNavigation(title = state.title(locale), state = state)
+        }
+        SampleCalendar.SolarHijriNative -> {
+            val initialMonth = remember { SolarHijriDate.fromLocalDate(date) }
+            val state = rememberSolarHijriNativeMonthState(initialMonth)
+            LaunchedEffect(state.year, state.monthNumber) {
+                val epochDay = state.month.toEpochDay()
+                if (epochDay != anchor) onChanged(epochDay)
+            }
+            LaunchedEffect(anchor) {
+                val target = SolarHijriDate.fromEpochDay(anchor).withDayOfMonth(1)
+                if (state.month != target) state.goTo(target)
             }
             SampleMonthNavigation(title = state.title(locale), state = state)
         }

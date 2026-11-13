@@ -131,8 +131,8 @@ values, annotations or source compatibility. Review `git diff api/` together wit
 
 - The published version lives once in the root `build.gradle.kts` (`allprojects` group and version)
   and is shared by every module. The artifact id is the module name: `library`,
-  `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`.
-- The four library modules apply `maven-publish` and publish their `release` variant with a sources
+  `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native`.
+- The five library modules apply `maven-publish` and publish their `release` variant with a sources
   jar under `com.github.mortezasun.android-calendarview`. `:calendarviewsample` is not published.
 - `:calendar-bom` is a `java-platform` publication whose constraints use the same root version.
   Publish it together with the modules and update `jitpack.yml`/CI if the module set changes.
@@ -158,3 +158,10 @@ interactive slot from `slotModifier`, which is sized to at least
 `LocalMinimumInteractiveComponentSize`. `WeeksAsColumns` sizes both slot edges; `WeeksAsRows`
 sizes only the height and lets `weight` share the row width, because seven columns must fit. Do not
 move the click handling onto the small visual box.
+
+### Bounded calendar engines and adjacent-day guards
+
+When a calendar engine supports a finite year range (such as `SolarHijriEngine`'s `-61..3177` AP),
+the month state must clamp navigation (`canGoPrevious`/`canGoNext`) to the engine bounds even when
+caller bounds are `null`, and `adjacentDayProvider` / week builders must return a blank, disabled
+`CalendarDayCell` for out-of-range epoch days instead of throwing.

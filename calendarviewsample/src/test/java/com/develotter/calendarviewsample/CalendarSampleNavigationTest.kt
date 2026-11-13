@@ -1,6 +1,7 @@
 package com.develotter.calendarviewsample
 
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import ir.huri.jcal.JalaliCalendar
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -35,5 +36,13 @@ class CalendarSampleNavigationTest {
         assertEquals(solarHijriEpochDay(JalaliCalendar(1398, 12, 1)), moveSampleMonth(SampleCalendar.SolarHijri, anchor, -13))
         assertEquals(solarHijriEpochDay(JalaliCalendar(1401, 2, 1)), moveSampleMonth(SampleCalendar.SolarHijri, anchor, 13))
         assertEquals(solarHijriEpochDay(JalaliCalendar(1400, 1, 1)), moveSampleMonth(SampleCalendar.SolarHijri, anchor, 0))
+    }
+
+    @Test
+    fun jalaliNativeMovesAcrossYearAndOffsets() {
+        val anchor = SolarHijriDate(1399, 12, 15).toEpochDay()
+        assertEquals(SolarHijriDate(1400, 1, 1).toEpochDay(), moveSampleMonth(SampleCalendar.SolarHijriNative, anchor, 1))
+        assertEquals(SolarHijriDate(1399, 11, 1).toEpochDay(), moveSampleMonth(SampleCalendar.SolarHijriNative, anchor, -1))
+        assertEquals(SolarHijriDate(1401, 2, 1).toEpochDay(), moveSampleMonth(SampleCalendar.SolarHijriNative, SolarHijriDate(1400, 1, 15).toEpochDay(), 13))
     }
 }

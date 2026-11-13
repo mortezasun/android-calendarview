@@ -11,6 +11,7 @@ dependencies {
         api("${project.group}:calendar-gregorian:${project.version}")
         api("${project.group}:calendar-hijri:${project.version}")
         api("${project.group}:calendar-solarHijri:${project.version}")
+        api("${project.group}:calendar-solarHijri-native:${project.version}")
     }
 }
 

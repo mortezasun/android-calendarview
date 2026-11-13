@@ -85,7 +85,7 @@ Repositories are defined centrally in `settings.gradle.kts` with
 - `mavenCentral()` for Kotlin/JUnit and `ir.huri:jalalicalendar`,
 - `https://jitpack.io` for JitPack consumption.
 
-`:calendar-solarHijri` is the only module that declares `ir.huri:jalalicalendar`, and it exposes it
+`:calendar-solarHijri` is the only module that declares `ir.huri:jalalicalendar` as a published dependency (`:calendar-solarHijri-native` uses it in `testImplementation` only), and `:calendar-solarHijri` exposes it
 with `api`, so consumers of that engine get the library transitively while `:library` stays free
 of it.
 
@@ -101,7 +101,7 @@ The release AARs have a checked-in public JVM API dump in `api/`. After assembli
 
 ```bash
 ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
-  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease
+  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease :calendar-solarHijri-native:assembleRelease
 bash scripts/api-check.sh
 ```
 
@@ -124,12 +124,13 @@ publishes the BOM together with the modules.
   :calendar-gregorian:publishToMavenLocal \
   :calendar-hijri:publishToMavenLocal \
   :calendar-solarHijri:publishToMavenLocal \
+  :calendar-solarHijri-native:publishToMavenLocal \
   :calendar-bom:publishToMavenLocal
 ```
 
 Artifacts land in `~/.m2/repository/com/github/mortezasun/android-calendarview/`. Check the
 generated POMs: each `calendar-*` module must depend on `...:library` in compile scope,
-`calendar-solarHijri` must additionally carry `ir.huri:jalalicalendar`, and the BOM must list all
+`calendar-solarHijri` must additionally carry `ir.huri:jalalicalendar` (while `calendar-solarHijri-native` must not), and the BOM must list all
 four modules in `dependencyManagement` with the root version. The shared POM fields (name,
 description, URL, license, developer, SCM) come from the root build. Maven Central signing and
 upload are not configured. JitPack built release `2.1.0` and a JitPack-only consumer resolved the

@@ -1,6 +1,7 @@
 package com.develotter.calendarviewsample
 
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import ir.huri.jcal.JalaliCalendar
 import java.text.NumberFormat
 import java.time.LocalDate
@@ -12,7 +13,7 @@ import java.time.temporal.WeekFields
 import java.util.Locale
 
 /** Calendar identifiers for this demo only, not a shared-library abstraction. */
-enum class SampleCalendar { Gregorian, Hijri, SolarHijri }
+enum class SampleCalendar { Gregorian, Hijri, SolarHijri, SolarHijriNative }
 
 /** Host-formatted week number; the library deliberately leaves the convention to the caller. */
 fun sampleWeekNumber(epochDay: Long, locale: Locale): String {
@@ -39,5 +40,9 @@ fun moveSampleMonth(calendar: SampleCalendar, anchorEpochDay: Long, offset: Int)
             val month = Math.floorMod(index, 12L).toInt() + 1
             solarHijriEpochDay(JalaliCalendar(year, month, 1))
         }
+        SampleCalendar.SolarHijriNative -> SolarHijriDate.fromLocalDate(date)
+            .withDayOfMonth(1)
+            .plusMonths(offset.toLong())
+            .toEpochDay()
     }
 }

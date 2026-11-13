@@ -88,3 +88,4 @@ jobs:
             calendar-gregorian/build/reports/tests/**
             calendar-hijri/build/reports/tests/**
             calendar-solarHijri/build/reports/tests/**
+            calendar-solarHijri-native/build/reports/tests/**

@@ -6,6 +6,8 @@ import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.calendars.hijri.compose.hijriMonthData
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthData
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
+import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
 import com.develotter.calendarview.compose.HeatmapMonthData
 import com.develotter.calendarview.compose.toHeatmap
 import ir.huri.jcal.JalaliCalendar
@@ -60,6 +62,15 @@ fun sampleHeatmapYear(
         )
         data.toHeatmap { sampleHeatmapIntensity(it) }
     }
+    SampleCalendar.SolarHijriNative -> (1..12).map { month ->
+        val data = solarHijriNativeMonthData(
+            SolarHijriDate(year, month, 1), locale,
+            firstDayOfWeek = firstDayOfWeek ?: DayOfWeek.SATURDAY,
+            today = SolarHijriDate.fromLocalDate(today),
+            isDateEnabled = { isDateEnabled(it.toLocalDate()) },
+        )
+        data.toHeatmap { sampleHeatmapIntensity(it) }
+    }
 }
 
 /** Current calendar year, used to reset navigation when the calendar changes. */
@@ -71,6 +82,7 @@ fun sampleHeatmapCurrentYear(
     SampleCalendar.Gregorian -> today.year
     SampleCalendar.Hijri -> hijriDateProvider.dateForEpochDay(today.toEpochDay()).get(ChronoField.YEAR)
     SampleCalendar.SolarHijri -> JalaliCalendar(today).year
+    SampleCalendar.SolarHijriNative -> SolarHijriDate.fromLocalDate(today).year
 }
 
 /** Bounded demo ranges that the platform chronologies and JalaliCalendar support. */
@@ -78,6 +90,7 @@ fun sampleHeatmapYearRange(calendar: SampleCalendar): IntRange = when (calendar)
     SampleCalendar.Gregorian -> 1900..2100
     SampleCalendar.Hijri -> 1300..1600
     SampleCalendar.SolarHijri -> 1200..1600
+    SampleCalendar.SolarHijriNative -> 1200..1600
 }
 
 /** Deterministic synthetic values in 0..0.9, matching the previous demo's rhythm. */

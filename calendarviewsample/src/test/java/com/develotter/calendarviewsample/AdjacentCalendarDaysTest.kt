@@ -6,6 +6,9 @@ import com.develotter.calendarview.calendars.hijri.compose.hijriDayCell
 import com.develotter.calendarview.calendars.hijri.compose.hijriMonthData
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriDayCell
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthData
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
+import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeDayCell
+import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
 import com.develotter.calendarview.compose.buildCalendarMonthCells
 import ir.huri.jcal.JalaliCalendar
 import org.junit.Assert.assertEquals
@@ -59,5 +62,18 @@ class AdjacentCalendarDaysTest {
         val original = JalaliCalendar(1400, 1, 1)
         assertFalse(solarHijriDayCell(original, Locale.US) { false }.enabled)
         assertEquals(1, original.day)
+        assertFalse(solarHijriNativeDayCell(SolarHijriDate(1400, 1, 1), Locale.US) { false }.enabled)
+    }
+
+    @Test
+    fun jalaliNativeNowruzUsesPreviousYearsLastDay() {
+        val data = solarHijriNativeMonthData(SolarHijriDate(1400, 1, 1), Locale.US)
+        val cells = buildCalendarMonthCells(data.days, data.firstDayOffset, true, true) {
+            solarHijriNativeDayCell(SolarHijriDate.fromEpochDay(it), Locale.US)
+        }.filterNotNull()
+        assertEquals(LocalDate.of(2021, 3, 20).toEpochDay(), cells.first().epochDay)
+        assertEquals("30", cells.first().label)
+        assertFalse(cells.first().isCurrentMonth)
+        assertTrue(cells.zipWithNext().all { (a, b) -> b.epochDay == a.epochDay + 1 })
     }
 }
