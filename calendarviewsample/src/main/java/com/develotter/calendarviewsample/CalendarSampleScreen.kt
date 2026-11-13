@@ -290,7 +290,7 @@ private fun SampleMonth(
                 onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
                 style = chineseStyle, showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
                 fixedSixRows = fixedSixRows, todayDescription = todayDescription, markers = sampleMarkers(date),
-                showHeader = showHeader,
+                showHeader = showHeader, weekNumber = weekNumberProvider,
             )
         } else {
             ChineseCalendarMonth(

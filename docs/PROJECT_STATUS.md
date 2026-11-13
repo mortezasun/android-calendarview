@@ -81,7 +81,7 @@ committed as `5cf640d` and locally tested; remote CI for the pushed tree `952bbb
 
 | Check | Result |
 |---|---|
-| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 209 JVM tests (195 Android JVM + 14 KMP JVM, incl. benchmark reporting), 0 failed, 0 skipped |
+| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 210 JVM tests (196 Android JVM + 14 KMP JVM, incl. benchmark reporting), 0 failed, 0 skipped |
 | `./gradlew :calendar-chinese-native:linuxX64Test` | BUILD SUCCESSFUL; 14 tests, 0 failed, 0 skipped |
 | `./gradlew :calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
 | `./gradlew ... lintDebug` for core, all five calendar modules and sample | BUILD SUCCESSFUL |
@@ -153,7 +153,7 @@ committed as `5cf640d` and locally tested; remote CI for the pushed tree `952bbb
   - `Android publishing verification`: Run `43375002125` (success)
   - `Android instrumentation`: Run `43375002077` (success)
   - `Android tablet verification`: Run `43375002074` (success)
-- Pending external check: remote JitPack `2.3.0` build & consumer smoke test (initial probe to `jitpack.io` returned HTTP 500).
+- JitPack status (2026-11-13): `2.3.0` build and JitPack-only BOM consumer passed; commit `7a51e24` also builds and its direct engine consumer passed. The `2.4.0` tag/BOM consumer remains open until a separately approved tag exists.
 
 ## Post-2.2.0 Adaptive Review and Hardening (branch `update`, Arbeitspakete A–I)
 

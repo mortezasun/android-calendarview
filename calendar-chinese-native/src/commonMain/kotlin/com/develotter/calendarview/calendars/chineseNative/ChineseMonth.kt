@@ -64,7 +64,7 @@ class ChineseMonth private constructor(
 }
 
 /** Mathematical floor modulus for a positive divisor; avoids platform-specific remainder rules. */
-internal fun floorMod7(value: Long): Int {
+private fun floorMod7(value: Long): Int {
     val remainder = value % 7L
     return (if (remainder < 0) remainder + 7L else remainder).toInt()
 }

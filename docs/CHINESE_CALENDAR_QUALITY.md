@@ -23,7 +23,7 @@ Status: Kernmatrix am 2026-11-13 lokal (JDK 21, JVM + linuxX64) und in Remote-CI
 - [ ] Telefon/Tablet, schmale Breite, Landscape, Mehrspalten, Split-Screen, simulierte Folds und kontinuierliche Layoutwechsel. Reale Foldable-Tests separat ausweisen.
 - [ ] LTR/RTL, chinesische/englische Beschriftung, grosse Schrift, TalkBack, deaktivierte Semantik und sichtbare Schaltmonatkennzeichnung.
 - [ ] Bestehende Touch-Target-Regeln und bekannte schmale-Viewport-Einschraenkungen erhalten; keine pauschale 48-dp-Garantie ohne Messung.
-- [x] Regression aller vorhandenen Module: Tests, Lint, Sample,   API-Guard und eigenstaendige Consumer. (209 JVM inkl. Benchmark + 14 Native, Lint, Sample-APK, API-Guard, JVM- und Android-Consumer.)
+- [x] Regression aller vorhandenen Module: Tests, Lint, Sample,   API-Guard und eigenstaendige Consumer. (210 JVM inkl. Benchmark + 14 Native, Lint, Sample-APK, API-Guard, JVM- und Android-Consumer.)
 
 ## Risikoregister
 
@@ -54,7 +54,7 @@ Vor Freigabe Benchmarks fuer Konvertierung, Monatsaufbau, 13-Monats-Heatmap und 
 
 | Punkt | Ergebnis |
 |---|---|
-| JVM | `test :calendar-chinese-native:jvmTest`: 209 JVM-Tests (195 Android JVM + 14 KMP JVM), 0 Fehler, 0 Skip; enthaelt den neuen Benchmark-Reporting-Test |
+| JVM | `test :calendar-chinese-native:jvmTest`: 210 JVM-Tests (196 Android JVM + 14 KMP JVM), 0 Fehler, 0 Skip; enthaelt den neuen Benchmark-Reporting-Test |
 | Kotlin/Native | `:calendar-chinese-native:linuxX64Test`: 14 Tests, 0 Fehler, 0 Skip |
 | Compose-Daten/State | 12 Tests: Monat/Woche/State/Saver/Heatmap/Overlay und Benchmark-Reporting, inkl. 12/13 Monate, Bounds und Decode-Validierung |
 | Sample | `assembleDebug`, 60 Unit-Tests und `compileDebugAndroidTestKotlin` erfolgreich; neue Single-/Pager-Boundary-Tests nur kompiliert |

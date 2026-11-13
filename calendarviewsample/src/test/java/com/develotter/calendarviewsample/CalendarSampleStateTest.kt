@@ -81,6 +81,44 @@ class CalendarSampleStateTest {
     }
 
     @Test
+    fun switchingOffChineseOverlayClampsOutOfRangeAnchorsToMonthBoundaries() {
+        val firstMonthStart = ChineseCalendarEngine.firstMonthOfYear(ChineseCalendarEngine.MIN_YEAR).startEpochDay()
+        val lastMonthStart = ChineseCalendarEngine.lastMonthOfYear(ChineseCalendarEngine.MAX_YEAR).startEpochDay()
+
+        val below = sampleState(
+            anchor = ChineseCalendarEngine.MIN_EPOCH_DAY - 1,
+            calendar = SampleCalendar.Chinese,
+            chineseGregorianGrid = true,
+        )
+        below.chineseGregorianGrid = false
+        assertEquals(firstMonthStart, below.anchor)
+        assertNotNull(below.error)
+        assertTrue(below.error!!.contains("1901-02-19"))
+        below.move(1)
+        assertEquals(ChineseCalendarEngine.nextMonth(
+            ChineseCalendarEngine.firstMonthOfYear(ChineseCalendarEngine.MIN_YEAR),
+        ).startEpochDay(), below.anchor)
+        below.move(-1)
+        assertEquals(firstMonthStart, below.anchor)
+
+        val above = sampleState(
+            anchor = ChineseCalendarEngine.MAX_EPOCH_DAY + 1,
+            calendar = SampleCalendar.Chinese,
+            chineseGregorianGrid = true,
+        )
+        above.chineseGregorianGrid = false
+        assertEquals(lastMonthStart, above.anchor)
+        assertNotNull(above.error)
+        assertTrue(above.error!!.contains("2100-02-08"))
+        above.move(-1)
+        assertEquals(ChineseCalendarEngine.previousMonth(
+            ChineseCalendarEngine.lastMonthOfYear(ChineseCalendarEngine.MAX_YEAR),
+        ).startEpochDay(), above.anchor)
+        above.move(1)
+        assertEquals(lastMonthStart, above.anchor)
+    }
+
+    @Test
     fun chineseOverlayMovesByGregorianMonths() {
         val state = sampleState(LocalDate.of(2023, 2, 15).toEpochDay())
         state.chineseGregorianGrid = true
@@ -97,8 +135,12 @@ class CalendarSampleStateTest {
         assertEquals(ChineseDate(2023, 3, false, 1).toEpochDay(), state.anchor)
     }
 
-    private fun sampleState(anchor: Long): CalendarSampleState = CalendarSampleState(
-        calendarNameState = mutableStateOf(SampleCalendar.Gregorian.name),
+    private fun sampleState(
+        anchor: Long,
+        calendar: SampleCalendar = SampleCalendar.Gregorian,
+        chineseGregorianGrid: Boolean = false,
+    ): CalendarSampleState = CalendarSampleState(
+        calendarNameState = mutableStateOf(calendar.name),
         modeNameState = mutableStateOf(TypeSelectDay.Single.name),
         localeTagState = mutableStateOf("en"),
         rtlState = mutableStateOf(false),
@@ -115,6 +157,7 @@ class CalendarSampleStateTest {
         anchorState = mutableStateOf(anchor),
         showDialogState = mutableStateOf(false),
         errorState = mutableStateOf(null),
+        chineseGregorianGridState = mutableStateOf(chineseGregorianGrid),
     )
 
     @Test

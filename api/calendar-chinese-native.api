@@ -89,7 +89,6 @@ public final class com.develotter.calendarview.calendars.chineseNative.ChineseMo
 }
 
 public final class com.develotter.calendarview.calendars.chineseNative.ChineseMonthKt {
-  public static final int floorMod7(long);
 }
 
 public final class com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle extends java.lang.Enum<com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle> {

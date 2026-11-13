@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
+import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.enums.TypeSelectDay
 import java.time.LocalDate
@@ -62,7 +63,19 @@ internal class CalendarSampleState(
     var error: String? by errorState
     var chineseStyleName: String by chineseStyleNameState
     var showChineseDetails: Boolean by showChineseDetailsState
-    var chineseGregorianGrid: Boolean by chineseGregorianGridState
+
+    /**
+     * Gregorian overlay toggle. Turning it off returns to the Chinese month grid; an anchor that
+     * left the supported epoch range while the overlay was active is clamped to the nearest
+     * supported month start. Selection belongs to the caller and is intentionally untouched.
+     */
+    var chineseGregorianGrid: Boolean
+        get() = chineseGregorianGridState.value
+        set(value) {
+            val wasEnabled = chineseGregorianGridState.value
+            chineseGregorianGridState.value = value
+            if (wasEnabled && !value) clampChineseAnchorIfUnsupported()
+        }
 
     val calendar: SampleCalendar get() = SampleCalendar.valueOf(calendarName)
     val mode: TypeSelectDay get() = TypeSelectDay.valueOf(modeName)
@@ -80,11 +93,25 @@ internal class CalendarSampleState(
                 ChineseCalendarEngine.MIN_EPOCH_DAY,
                 ChineseCalendarEngine.MAX_EPOCH_DAY,
             )
-            error = "Chinese calendar supports 1901-02-19..2100-02-08; showing ${LocalDate.ofEpochDay(anchor)}"
+            error = chineseRangeMessage(anchor)
         } else {
             error = null
         }
     }
+
+    /** Clamps an out-of-range Chinese anchor to the nearest supported month boundary. */
+    private fun clampChineseAnchorIfUnsupported() {
+        if (calendar != SampleCalendar.Chinese || ChineseCalendarEngine.isSupported(anchor)) return
+        anchor = if (anchor < ChineseCalendarEngine.MIN_EPOCH_DAY) {
+            ChineseMonth.fromEpochDay(ChineseCalendarEngine.MIN_EPOCH_DAY).startEpochDay()
+        } else {
+            ChineseMonth.fromEpochDay(ChineseCalendarEngine.MAX_EPOCH_DAY).startEpochDay()
+        }
+        error = chineseRangeMessage(anchor)
+    }
+
+    private fun chineseRangeMessage(epochDay: Long): String =
+        "Chinese calendar supports 1901-02-19..2100-02-08; showing ${LocalDate.ofEpochDay(epochDay)}"
 
     /** Sets the anchor from a settled visible month and clears a stale navigation error. */
     fun showMonth(epochDay: Long) {
@@ -96,6 +123,9 @@ internal class CalendarSampleState(
 
     /** Moves the anchor by whole months; unsupported dates are reported in [error]. */
     fun move(offset: Int) {
+        if (calendar == SampleCalendar.Chinese && !chineseGregorianGrid) {
+            clampChineseAnchorIfUnsupported()
+        }
         try {
             anchor = moveSampleMonth(sampleMonthNavigationCalendar(calendar, chineseGregorianGrid), anchor, offset)
             error = null
