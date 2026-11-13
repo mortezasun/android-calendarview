@@ -1,24 +1,24 @@
-# ADR 0005: selbstgeschriebener chinesischer Kalender
+# ADR 0005: Self-written native Chinese calendar
 
-Datum: 2026-11-13. Status: umgesetzt auf Branch `update` (2.4.0-Releasekandidat); Tag/Release offen.
+Date: 2026-11-13. Status: implemented on branch `update` (2.4.0 release candidate); tag/release open.
 
-## Kontext
+## Context
 
-2.3.0 enthaelt bereits einen gemeinsamen Compose-Kern und getrennte Kalender-Module. Der neue chinesische Kalender muss selbstgeschrieben, optional einbindbar und von anderen Kalender-Engines unabhaengig sein. Native bedeutet hier eigene plattformunabhaengige Kotlin-Berechnung, nicht lediglich ein Kotlin-Wrapper um Android ICU.
+2.3.0 already includes a shared Compose core and separate calendar modules. The new Chinese calendar must be self-written, optionally includable, and independent of other calendar engines. Native here means our own platform-independent Kotlin calculation, not merely a Kotlin wrapper around Android ICU.
 
-## Entscheidung
+## Decision
 
-Zwei getrennte Artefakte: `:calendar-chinese-native` fuer Berechnung und immutable Datumswerte; `:calendar-chinese-compose` fuer Darstellung und UI-Zustand. Abhaengigkeitsrichtung: Compose -> Engine und bestehender UI-Kern. Engine -> Kotlin-Standardbibliothek. Bestehende Engines und UI-Kern -> keine neue Engine.
+Two separate artifacts: `:calendar-chinese-native` for calculation and immutable date values; `:calendar-chinese-compose` for rendering and UI state. Dependency direction: Compose -> engine and existing UI core. Engine -> Kotlin standard library. Existing engines and UI core -> no new engine.
 
-Keine Uebernahme oder Portierung von lunar-java, ICU, Internet-Snippets oder fremden Kalenderalgorithmen-Implementierungen. Kalenderdaten sind getrennt vom eigenen Code zu behandeln: Herkunft, Nutzungsrechte und Erzeugungsverfahren muessen nachgewiesen sein. Selbstgeschriebener Code bedeutet nicht selbst beobachtete astronomische Daten.
+No adoption or porting of lunar-java, ICU, internet snippets, or third-party calendar algorithm implementations. Calendar data must be treated separately from our own code: provenance, usage rights, and generation process must be verified. Self-written code does not mean self-observed astronomical data.
 
-Die erste Engine benutzt eigene ganzzahlige Umrechnungslogik mit versionierten, kompakten Monatsdaten
-(Chinese years `1901..2099`, generated at development time from VSOP87D/Meeus; no HKO or ICU data embedded). Das ist eine native Offline-Implementierung, aber keine astronomische Echtzeitberechnung. Unterstuetzter Bereich und Datensatzversion sind Teil des Vertrags. Keine extrapolierten Ergebnisse ausserhalb des Bereichs.
+The first engine uses our own integer conversion logic with versioned, compact month data
+(Chinese years `1901..2099`, generated at development time from VSOP87D/Meeus; no HKO or ICU data embedded). This is a native offline implementation, not real-time astronomical calculation. Supported range and dataset version are part of the contract. No extrapolated results outside the range.
 
-Bestehende Compose-APIs bleiben unveraendert. KMP-/Kotlin-Native-Unterstuetzung der Engine wird durch echte Builds und Tests belegt. Die Android-Compose-Fassade wird nicht als iOS-faehig bezeichnet, solange ihr gemeinsamer Kern nicht nachweislich multiplatform ist.
+Existing Compose APIs remain unchanged. KMP/Kotlin-Native support of the engine is proven by real builds and tests. The Android Compose facade is not advertised as iOS-capable as long as its shared core is not demonstrably multiplatform.
 
-## Folgen und Alternativen
+## Consequences and alternatives
 
-Vorteile: Engine ohne UI nutzbar, klare Abhaengigkeitspruefung, identische Berechnung ueber Plattformen, additive Einfuehrung. Kosten: zwei Publikationen, Datensatzpflege und zusaetzliche Native-CI. Ein einzelnes Android-Modul waere einfacher, wuerde aber echte UI-Unabhaengigkeit und Native-Verifikation erschweren. Eine komplette KMP-Migration aller bestehenden Module ist eine separate Architekturaufgabe.
+Benefits: engine usable without UI, clear dependency verification, identical calculation across platforms, additive introduction. Costs: two publications, dataset maintenance, and additional Native CI. A single Android module would be simpler, but would make true UI independence and Native verification harder. A complete KMP migration of all existing modules is a separate architectural task.
 
-Verbindliche Ausfuehrung: [Releaseplan](../../RELEASE_PLAN_2.4.0.md), [Spezifikation](../CHINESE_CALENDAR_SPEC.md), [Qualitaet](../CHINESE_CALENDAR_QUALITY.md).
+Binding execution: [Release plan](../../RELEASE_PLAN_2.4.0.md), [Specification](../CHINESE_CALENDAR_SPEC.md), [Quality](../CHINESE_CALENDAR_QUALITY.md).

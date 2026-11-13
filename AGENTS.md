@@ -109,6 +109,9 @@ for smaller changes. Report any command that could not be run and why.
 
 ## Rules for changes
 
+- **English only:** all code, comments, KDoc, commit messages, and documentation (including
+  `README.md`, `RELEASE_PLAN_*.md`, ADRs, specs, quality reports, and release notes) must be
+  written exclusively in English.
 - **Minimal invasive:** change only the files required by the task. No drive-by refactoring, no
   reformatting of untouched code, no renames.
 - **No new dependencies** without explicit approval. Prefer what is already in
