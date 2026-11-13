@@ -131,7 +131,51 @@ class ChineseComposeDataTest {
         } catch (expected: IllegalArgumentException) {
             assertTrue(expected.message!!.contains("minMonth"))
         }
+        assertFalse(state.canGoToday)
+        val visible = state.month
+        state.goToToday()
+        assertEquals(visible, state.month)
+    }
+
+    @Test
+    fun monthStateTodayNavigationHonoursConfiguredBounds() {
+        var today = ChineseMonth.of(2022, 12).startEpochDay()
+        val state = ChineseMonthState(
+            initialMonth = ChineseMonth.of(2023, 2),
+            minMonth = ChineseMonth.of(2023, 1),
+            maxMonth = ChineseMonth.of(2023, 3),
+            today = { today },
+        )
+
+        // Before the configured minimum: neither the flag nor the action may leave the bounds.
+        assertFalse(state.canGoToday)
+        state.goToToday()
+        assertEquals(ChineseMonth.of(2023, 2), state.month)
+
+        today = ChineseMonth.of(2023, 3).startEpochDay()
         assertTrue(state.canGoToday)
+        state.goToToday()
+        assertEquals(ChineseMonth.of(2023, 3), state.month)
+
+        today = ChineseMonth.of(2023, 4).startEpochDay()
+        assertFalse(state.canGoToday)
+        state.goToToday()
+        assertEquals(ChineseMonth.of(2023, 3), state.month)
+
+        // Moving back inside the range makes today navigation available again.
+        today = ChineseMonth.of(2023, 1).startEpochDay()
+        assertTrue(state.canGoToday)
+        state.goToToday()
+        assertEquals(ChineseMonth.of(2023, 1), state.month)
+    }
+
+    @Test
+    fun monthStateRejectsNonBinaryLeapFlagsWhenRestoring() {
+        assertEquals(ChineseMonth.of(2024, 2), ChineseMonthSnapshot.decode(listOf(2024, 2, 0)))
+        assertEquals(ChineseMonth.of(2033, 11, true), ChineseMonthSnapshot.decode(listOf(2033, 11, 1)))
+        assertNull(ChineseMonthSnapshot.decode(listOf(2024, 2, 2)))
+        assertNull(ChineseMonthSnapshot.decode(listOf(2024, 2, -1)))
+        assertNull(ChineseMonthSnapshot.decode(listOf(2024, 2)))
     }
 
     @Test

@@ -1,7 +1,8 @@
 # Releaseplan 2.4.0: eigener chinesischer Kalender
 
-Stand: 2026-11-13. Zielbranch: `update`. Status: Umsetzung abgeschlossen, lokaler
-Releasekandidat verifiziert; Commit/Push, Remote-CI, Tag und Release offen.
+Stand: 2026-11-13. Zielbranch: `update`. Status: Umsetzung und Review-Nachbesserungen
+lokal verifiziert; Remote-CI fuer den Evidenzbaum `1ab841e` gruen. Fix-Commit, Remote-CI fuer
+diesen Fixstand, JitPack, Geraetegates, Tag und Release offen.
 Gepruefte Branchbasis: `a9642f13d596fd35137945bc234dbf2827e6e398`. Letzter per GitHub API
 bestaetigter Release: `2.3.0`, Tag-Commit `8b7bea42e888785752fff199b2d53c04ab9888e4`,
 veroeffentlicht am 2026-11-13. Abweichende historische Datumsangaben nicht ungeprueft
@@ -45,7 +46,7 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 - [x] README, AGENTS, Architektur, Entwicklungsregeln und aktuellen Status vollstaendig lesen; Buildskripte und Veroeffentlichungsworkflows inventarisieren.
 - [x] Bestehende Tests, Lint, API-Guard und Sample-Build als Baseline ausfuehren; bestehende Fehler getrennt dokumentieren. (Baseline `test` gruen; keine bestehenden Fehler gefunden.)
 - [x] Exakte Kotlin-/AGP-/Gradle-/Compose-Versionen aus dem Repository ermitteln; kompatible KMP-Plugin-/Android-Target-Konfiguration in einem kleinen Build-Prototyp pruefen. Kein blindes Upgrade auf angeblich letzte Versionen. (Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00; KMP-Plugin ohne eigene Version, da AGP Kotlin bereits bereitstellt.)
-- [x] Engine-Targets: Android-kompatibles Artefakt sowie mindestens ein ausgefuehrtes Kotlin/Native-Ziel; iOS-Geraete-/Simulator-Artefakte und Simulator-Consumer auf macOS verifizieren, bevor iOS-Support zugesagt wird. Exakte Targets und Testtasks nach Build-Prototyp dokumentieren. (`jvm()` von `:calendar-chinese-compose` konsumiert; `linuxX64Test` 13 Tests. iOS nicht deklariert.)
+- [x] Engine-Targets: Android-kompatibles Artefakt sowie mindestens ein ausgefuehrtes Kotlin/Native-Ziel; iOS-Geraete-/Simulator-Artefakte und Simulator-Consumer auf macOS verifizieren, bevor iOS-Support zugesagt wird. Exakte Targets und Testtasks nach Build-Prototyp dokumentieren. (`jvm()` von `:calendar-chinese-compose` konsumiert; `linuxX64Test` 14 Tests. iOS nicht deklariert.)
 - [ ] Offene JitPack-2.3.0-Pruefung nachholen oder Ursache und Auswirkung auf 2.4.0 dokumentieren. Ein HTTP-500-Probeversuch ist kein bestaetigter Buildfehler und kein Consumer-Nachweis. (Weiterhin offen: Remote-JitPack fuer 2.3.0 ungeprueft; 2.4.0-Remote-Gate bleibt blockierend.)
 
 ### P1 - Datenvertrag und Datenherkunft
@@ -54,14 +55,14 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 - [x] Referenzdaten, Weiterverwendungsrechte und erforderliche Hinweise klaeren. Keine fremden Bitmaskentabellen oder Quelltexte kopieren. (HKO-IP-Hinweis: keine Daten uebernommen; Generator nutzt veroeffentlichte astronomische Reihen, VSOP87D-Eingabe nicht redistribuiert.)
 - [x] Eigene deterministische Import-/Generierungswerkzeuge und ein Datenmanifest erstellen. Referenzabruf ist ein Entwicklungsprozess, nie Laufzeitfunktion der Library. (`tools/chinese-calendar/generate.py`, `manifest.json`, Ausgabe-SHA256 dokumentiert.)
 - [x] Exakten unterstuetzten Epoch-Day-Bereich und benoetigte Randmonate aus den geprueften Daten bestimmen. Ziel ist der gregorianische Zeitraum 1901-2100; keine unbewiesene Zusage vollstaendiger chinesischer Jahre an den Grenzen. (Chinesische Jahre 1901..2099 = 1901-02-19..2100-02-08, 72.674 Tage.)
-- [x] Gate: keine Engine-Freigabe mit ungeklaerter Datenlizenz, unbekannter Herkunft oder nicht erklaerten Referenzabweichungen. (2.458/2.461 HKO-Monatsstarts gleich; drei dokumentierte Minutenfaelle.)
+- [x] Gate: keine Engine-Freigabe mit ungeklaerter Datenlizenz, unbekannter Herkunft oder nicht erklaerten Referenzabweichungen. (2.458/2.461 HKO-Monatsstarts exakt; drei Abweichungen mit JDE/TT, Delta-T, UTC/UTC+8, NASA-Referenz und reproduzierbarem Audit in `reference-conflicts.json`; `--verify-reference` prueft vollstaendige Abdeckung.)
 
 ### P2 - Eigenstaendige Kotlin-Engine
 
 - [x] Neues Engine-Modul mit echten Implementierungen anlegen, keine TODO-Stubs.
 - [x] Validierte immutable Werte, Umrechnung, Monatslisten, Schaltmonate, Arithmetik und explizite Bereichsfehler implementieren.
 - [x] Tabellen und Indizes immutable halten; Tagesrechnung ausschliesslich ganzzahlig auf Epoch Days.
-- [x] Vollstaendige Bereichstests und unabhaengigen Referenzabgleich bestehen; gleiche Fixtures auf JVM und Kotlin/Native ausfuehren. (72.674-Tage-Roundtrip, 2.461 Monate lueckenlos, Generator-Referenzabgleich; `jvmTest` und `linuxX64Test` je 13 Tests.)
+- [x] Vollstaendige Bereichstests und unabhaengigen Referenzabgleich bestehen; gleiche Fixtures auf JVM und Kotlin/Native ausfuehren. (72.674-Tage-Roundtrip, 2.461 Monate lueckenlos, Generator-Referenzabgleich; `jvmTest` und `linuxX64Test` je 14 Tests.)
 - [x] Gate: Engine ist ohne Android SDK, Compose und andere Kalender-Module als eigenstaendiger Consumer nutzbar. (JVM-Consumer mit `javac`, nur Engine-Jar + `kotlin-stdlib`; keine AndroidX/Compose/Android-Klassen im Jar.)
 
 ### P3 - Compose-Integration
@@ -92,6 +93,17 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 - [ ] RC-Nachweise fuer einen exakten Commit sammeln; alle Veroeffentlichungs- und Consumer-Pruefungen aus dem Releaseplan ausfuehren. (Evidenzbaum `1ab841e70b6fb7ab35b16e970715b500b91f95a2` auf `origin/update`; isolierte Publikation, zwei Consumer und alle vier Remote-Workflows bestanden. Remote-JitPack weiterhin offen.)
 - [ ] Separate ausdrueckliche Freigabe fuer Merge, Tag und GitHub Release einholen. Kein Tag 2.4.0 mit offenen Pflichtgates.
 - [ ] Nach Tagging tatsaechliche Remote-Artefakte/Varianten und unabhaengige Consumer verifizieren. Erst dann erfolgreiche Distribution behaupten.
+
+### Review-Nachbesserungen 2026-11-13 (Basis `6970b92`)
+
+- [x] P1 Heute-Navigation: `canGoToday`/`goToToday` respektieren `minMonth..maxMonth`; Tests vor, innerhalb und nach den Grenzen.
+- [x] P1 Referenzabweichungen: drei Konflikte astronomisch und mit unabhaengiger NASA/GSFC-Zeit belegt; Generator prueft fehlende Dateien, Jahres-/Schaltmonatsstatus und vollstaendige Abdeckung und beendet den Verify-Modus bei Fehlern mit Status 1; Python-Regressionstests ergaenzt.
+- [x] P2 Overlay-Navigation: `chineseGregorianGrid` nutzt gregorianische Monatsanker, Header und Pager-/Listenidentitaeten; der chinesische Modus behaelt die Schaltmonatsnavigation. Header- und Pager-Pfad als Compose-Regressionstest ergaenzt (Kompilierung, nicht auf Geraet ausgefuehrt).
+- [x] P2 Agenda: `chineseStyle` ist `remember`-Key; Wechsel aller vier Stile ohne Datumswechsel getestet.
+- [x] P2 Today-Callback: `rememberUpdatedState` versorgt Zustand und Saver mit dem aktuellen Callback; Callbackwechsel und echte `StateRestorationTester`-Wiederherstellung getestet. Nichtbinaere Schaltflags werden beim Decode abgelehnt.
+- [x] P2 Kalenderwechsel: Anker ausserhalb des Engine-Bereichs wird an beiden Grenzen auf den naechsten unterstuetzten Tag begrenzt, mit Fehlermeldung; die gemeinsame Auswahl bleibt unveraendert. Tests fuer beide Grenzen und den Fallback ergaenzt.
+- [x] Release-Dokumentation: Widerspruch zwischen fehlendem Remote-Run und den vier erfolgreichen Runs auf `1ab841e` korrigiert; Fixstand ist nicht als remote geprueft markiert.
+- [ ] Remote-CI fuer den Fix-Commit auf `update`, JitPack, echte Geraete-/Fold-/TalkBack-Matrix, Benchmarks und Advisory-Scan bleiben offen.
 
 ## Arbeitsregel fuer die Implementierung
 

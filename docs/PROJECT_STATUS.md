@@ -6,8 +6,9 @@ Branch: `update`
 
 ## Current development: 2.4.0 Chinese calendar (unreleased, 2026-11-13)
 
-Status: implemented, committed, locally verified and remotely CI-green on branch `update` at `1ab841e70b6fb7ab35b16e970715b500b91f95a2`;
-**not tagged, merged or published**. No claim is made for remote CI, JitPack,
+Status: implemented, committed, locally verified and remotely CI-green on branch `update` at `1ab841e70b6fb7ab35b16e970715b500b91f95a2`. The review fixes on top of
+`6970b924c855bb02792dee2bf818f63fe1b66500` are locally tested; their own remote-CI evidence is
+still pending. **Not tagged, merged or published.** No claim is made for JitPack,
 emulator/instrumentation or other devices.
 
 - Added `:calendar-chinese-native`, a Kotlin Multiplatform engine with `jvm()` and `linuxX64()`
@@ -17,10 +18,19 @@ emulator/instrumentation or other devices.
   73 leap years).
 - Data provenance: `tools/chinese-calendar/generate.py` derives month starts at development time
   from VSOP87D Earth series, Meeus chapters 25/49 and Espenak–Meeus ΔT. HKO tables were used only
-  as a development-time comparison (2,458/2,461 month starts equal; the three 1–5-minute-after-
-  midnight cases 1914-11-18, 1916-02-04 and 1920-11-11 are recorded in
-  `tools/chinese-calendar/manifest.json`). No HKO data, ICU, lunar-java or other calendar code is
-  embedded or redistributed.
+  as a development-time comparison: 2,458/2,461 month starts match exactly. The three cases
+  1914-11-18, 1916-02-04 and 1920-11-11 are audited in
+  `tools/chinese-calendar/reference-conflicts.json` with JDE/TT, ΔT, UTC, UTC+8 and independent
+  NASA/GSFC new-moon times; HKO labels the UT date (previous day), so the table keeps the
+  documented UTC+8 date. `--verify-reference` checks complete file/start coverage, year and leap
+  status and exits non-zero on undocumented deviations. No HKO data, ICU, lunar-java or other
+  calendar code is embedded or redistributed.
+- Review fixes (base `6970b92`): today navigation honours configured month bounds; the reference
+  comparison rejects missing files/starts and checks year/leap status; the Gregorian Chinese
+  overlay uses Gregorian header/pager identities; agenda keys include the text style; the today
+  callback is kept current without resetting navigation; snapshot decoding rejects non-binary
+  leap flags; switching to Chinese clamps an unsupported anchor with a visible message while the
+  shared selection stays unchanged. Targeted JVM and compiled Compose regression tests were added.
 - Added `:calendar-chinese-compose`: `ChineseCalendarMonth`, `GregorianChineseCalendarMonth`,
   `chineseMonthData`, `ChineseWeekData`, `ChineseMonthState`/`rememberChineseMonthState` with
   leap-month identity in title, keys, saver and heatmap titles, plus `chineseYearHeatmap` /
@@ -37,11 +47,12 @@ emulator/instrumentation or other devices.
 
 | Check | Result |
 |---|---|
-| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 198 tests (185 Android JVM + 13 KMP JVM), 0 failed, 0 skipped |
-| `./gradlew :calendar-chinese-native:linuxX64Test` | BUILD SUCCESSFUL; 13 tests, 0 failed, 0 skipped |
+| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 205 JVM tests (191 Android JVM + 14 KMP JVM), 0 failed, 0 skipped |
+| `./gradlew :calendar-chinese-native:linuxX64Test` | BUILD SUCCESSFUL; 14 tests, 0 failed, 0 skipped |
 | `./gradlew :calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
 | `./gradlew ... lintDebug` for core, all five calendar modules and sample | BUILD SUCCESSFUL |
 | `./gradlew :calendarviewsample:compileDebugAndroidTestKotlin` | BUILD SUCCESSFUL (compile only; not executed) |
+| `python3 -m unittest tools/chinese-calendar/test_generate.py` | 4 tests, 0 failed; missing reference files/starts, year/leap checks and documented-conflict audit |
 | `bash scripts/api-check.sh` | passed; existing five dumps `0` diff, two new dumps added |
 | isolated `publishToMavenLocal` to `/tmp/m2test` | engine root/jvm/linuxx64, compose and BOM published; POMs inspected: engine only `kotlin-stdlib`, compose `library` + engine + material3 runtime, BOM lists seven modules |
 | standalone JVM consumer (`javac` + engine jar) | 2024-02-10 → epoch 19763, round-trip OK, 2023 has 13 months and leap month `2023-2L`; jar contains no AndroidX/Compose/Android classes |
@@ -56,7 +67,8 @@ emulator/instrumentation or other devices.
   - `Android tablet verification`: Run 43401491675 (success).
 - Remote GitHub Actions are green for `1ab841e70b6fb7ab35b16e970715b500b91f95a2`, including the new `native-engine` job. This run
   executes the existing instrumentation/tablet suites; it is not a Chinese-specific device,
-  fold, TalkBack or benchmark matrix.
+  fold, TalkBack or benchmark matrix. The review-fix commit on `update` still needs its own
+  remote-CI run.
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).

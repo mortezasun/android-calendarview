@@ -313,7 +313,11 @@ def build_table(series, first_year, last_year):
 
 # --------------------------------------------------------------------------- HKO
 def load_hko(path):
-    """Reference month starts from an HKO English conversion table."""
+    """Reference month starts from an HKO English conversion table.
+
+    HKO prints the first day of a lunar month with an ordinal such as ``10th Lunar month``;
+    ordinary days only carry their day number. Only the former are month starts.
+    """
     starts = {}
     with open(path, encoding="latin-1") as handle:
         for line in handle:
@@ -321,48 +325,235 @@ def load_hko(path):
                 continue
             parts = line.split()
             year, month, day = map(int, parts[0].split("/"))
-            number = int(re.match(r"(\d+)", parts[1]).group(1))
-            starts[datetime.date(year, month, day)] = number
+            parsed = re.match(r"(\d+)", parts[1])
+            if parsed is None:
+                continue
+            starts[datetime.date(year, month, day)] = int(parsed.group(1))
     return starts
 
 
-def compare_with_hko(table, hko_dir):
-    compared = 0
-    mismatches = []
-    cache = {}
+def reference_years(table):
+    """Gregorian year files needed to cover every generated month start."""
+    last_start = table[-1]["startEpochDay"] + sum(table[-1]["monthLengths"][:-1])
+    return range(table[0]["year"], civil_date(last_start).year + 1)
 
-    def reference_for(year):
-        if year not in cache:
-            path = os.path.join(hko_dir, "T%de.txt" % year)
-            cache[year] = load_hko(path) if os.path.exists(path) else {}
-        return cache[year]
+
+def load_hko_reference(table, hko_dir):
+    """Load the complete HKO sequence, including year and leap-month metadata.
+
+    Returns ``(entries_by_date, missing_files)``. A missing year file is retained as an
+    explicit coverage gap: it is never silently treated as an empty reference. The Chinese
+    year is derived from the most recent month-1 start, and a repeated month number marks a
+    leap month. Both are checked in addition to the bare month number.
+    """
+    entries = []
+    missing_files = []
+    for year in reference_years(table):
+        path = os.path.join(hko_dir, "T%de.txt" % year)
+        if not os.path.exists(path):
+            missing_files.append(os.path.basename(path))
+            continue
+        for day, number in load_hko(path).items():
+            entries.append({"date": day, "number": number})
+    entries.sort(key=lambda item: item["date"])
+
+    previous = None
+    chinese_year = None
+    by_date = {}
+    for entry in entries:
+        number = entry["number"]
+        if number == 1 and (previous is None or previous["number"] != 1):
+            chinese_year = entry["date"].year
+        entry["chineseYear"] = chinese_year
+        entry["isLeapMonth"] = previous is not None and previous["number"] == number
+        by_date[entry["date"]] = entry
+        previous = entry
+    return by_date, missing_files
+
+
+def load_conflicts(path):
+    if not path:
+        return []
+    with open(path, encoding="utf-8") as handle:
+        data = json.load(handle)
+    conflicts = data.get("conflicts", [])
+    if not isinstance(conflicts, list):
+        raise ValueError("conflicts must be a JSON list")
+    return conflicts
+
+
+def new_moon_for_epoch_day(epoch_day):
+    """Find the new-moon syzygy whose UTC+8 civil date is ``epoch_day``."""
+    reference_2000 = datetime.date(2000, 1, 6).toordinal() - EPOCH_ORDINAL
+    guess = round((epoch_day - reference_2000) / 29.530588861)
+    for k in range(guess - 3, guess + 4):
+        jde = new_moon_jde(k)
+        if local_epoch_day(jde, 2000 + k / 12.3685) == epoch_day:
+            return k, jde
+    raise AssertionError("no new moon found for epoch day %d" % epoch_day)
+
+
+def verify_conflict_astronomy(conflict, epoch_day, number, chinese_year, leap):
+    """Recompute the documented time-scale chain; never trust recorded numbers alone."""
+    errors = []
+    required = (
+        "newMoonJde", "deltaTSeconds", "newMoonUtc", "newMoonUtcPlus8",
+        "independentReference", "independentReferenceUrl", "classification",
+    )
+    for key in required:
+        if key not in conflict or conflict[key] in (None, ""):
+            errors.append("missing %s" % key)
+    if errors:
+        return errors
+    k, jde = new_moon_for_epoch_day(epoch_day)
+    delta_t = delta_t_days(2000 + k / 12.3685)
+    utc = jde - delta_t
+    quarter_second = 1.0 / 86400.0 / 4.0
+    if abs(jde - float(conflict["newMoonJde"])) > quarter_second:
+        errors.append("newMoonJde %.6f differs from recomputed %.6f" % (conflict["newMoonJde"], jde))
+    if abs(delta_t * 86400.0 - float(conflict["deltaTSeconds"])) > 0.02:
+        errors.append("deltaTSeconds differs from recomputed %.2f" % (delta_t * 86400.0))
+    try:
+        recorded_utc = datetime.datetime.fromisoformat(conflict["newMoonUtc"].replace("Z", "+00:00"))
+        recorded_local = datetime.datetime.fromisoformat(conflict["newMoonUtcPlus8"])
+    except ValueError as error:
+        return errors + ["invalid ISO instant: %s" % error]
+    if abs(recorded_utc.timestamp() - (utc - EPOCH_JD) * 86400.0) > 1.0:
+        errors.append("newMoonUtc differs from recomputed UTC")
+    if recorded_local.utcoffset() != datetime.timedelta(hours=8):
+        errors.append("newMoonUtcPlus8 must carry a +08:00 offset")
+    if recorded_local.date() != civil_date(epoch_day):
+        errors.append("UTC+8 date differs from generated month start")
+    if conflict.get("chineseYear") != chinese_year or conflict.get("monthNumber") != number:
+        errors.append("conflict year/month metadata differs from generated month")
+    if conflict.get("isLeapMonth") != leap:
+        errors.append("conflict leap metadata differs from generated month")
+    if conflict.get("generatedDate") != civil_date(epoch_day).isoformat():
+        errors.append("generatedDate differs from generated month start")
+    return errors
+
+
+def compare_with_hko(table, hko_dir, conflicts=()):
+    """Compare every generated month start against the independent HKO sequence.
+
+    A date missing from HKO is only accepted when a documented conflict supplies the HKO
+    date and a reproducible astronomical audit. Year assignment, leap status and the bare
+    month number are all compared. The returned report proves complete coverage instead of
+    reporting only the number of dates that happened to match.
+    """
+    reference, missing_files = load_hko_reference(table, hko_dir)
+    conflict_by_date = {item.get("generatedDate"): item for item in conflicts}
+    used_conflicts = set()
+    mismatches = []
+    missing_starts = []
+    exact = 0
+    documented = 0
+    expected = 0
+    generated_dates = set()
 
     for entry in table:
-        for index, length in enumerate(entry["monthLengths"]):
-            epoch_day = entry["startEpochDay"] + sum(entry["monthLengths"][:index])
+        epoch_day = entry["startEpochDay"]
+        for index, _length in enumerate(entry["monthLengths"]):
             current = civil_date(epoch_day)
-            number = index + 1 if entry["leapMonth"] == 0 or index < entry["leapMonth"] else index
-            # month number in chronological order
+            generated_dates.add(current)
             number = month_number_at(entry, index)
-            reference = reference_for(current.year)
-            compared += 1
-            if current not in reference:
-                nearby = sorted(
-                    (day, value) for day, value in reference.items()
-                    if abs((day - current).days) <= 3
-                )
-                mismatches.append({
-                    "date": current.isoformat(),
-                    "ours": number,
-                    "hko": None,
-                    "nearestHko": [
-                        {"date": day.isoformat(), "month": value} for day, value in nearby
-                    ],
-                })
-            elif reference[current] != number:
-                mismatches.append({"date": current.isoformat(), "ours": number, "hko": reference[current]})
-            _ = length
-    return compared, mismatches
+            leap = entry["leapMonth"] != 0 and index == entry["leapMonth"]
+            expected += 1
+            reference_entry = reference.get(current)
+            conflict = conflict_by_date.get(current.isoformat())
+
+            if reference_entry is None:
+                if conflict is None:
+                    missing_starts.append(current.isoformat())
+                    mismatches.append({
+                        "date": current.isoformat(),
+                        "ours": number,
+                        "oursLeap": leap,
+                        "kind": "missingReferenceDate",
+                    })
+                else:
+                    used_conflicts.add(current.isoformat())
+                    errors = verify_conflict_astronomy(conflict, epoch_day, number, entry["year"], leap)
+                    hko_entry = reference.get(datetime.date.fromisoformat(conflict["hkoDate"])) \
+                        if conflict.get("hkoDate") else None
+                    if hko_entry is None:
+                        errors.append("documented hkoDate is absent from the HKO files")
+                    elif hko_entry["number"] != number or hko_entry["chineseYear"] != entry["year"] \
+                            or hko_entry["isLeapMonth"]:
+                        errors.append("HKO entry at documented hkoDate does not match the audited month")
+                    if errors:
+                        mismatches.append({
+                            "date": current.isoformat(), "ours": number, "oursLeap": leap,
+                            "kind": "invalidDocumentedConflict", "details": errors,
+                        })
+                    else:
+                        documented += 1
+            else:
+                issues = []
+                if reference_entry["number"] != number:
+                    issues.append("monthNumber ours=%d hko=%d" % (number, reference_entry["number"]))
+                if reference_entry["chineseYear"] != entry["year"]:
+                    issues.append("chineseYear ours=%d hko=%s" % (entry["year"], reference_entry["chineseYear"]))
+                if reference_entry["isLeapMonth"] != leap:
+                    issues.append("leap ours=%s hko=%s" % (leap, reference_entry["isLeapMonth"]))
+                if issues:
+                    mismatches.append({
+                        "date": current.isoformat(), "ours": number, "oursLeap": leap,
+                        "hko": reference_entry["number"], "hkoLeap": reference_entry["isLeapMonth"],
+                        "kind": "fieldMismatch", "details": issues,
+                    })
+                else:
+                    exact += 1
+            epoch_day += _length
+
+    allowed_hko_dates = {
+        datetime.date.fromisoformat(item["hkoDate"])
+        for item in conflicts if item.get("hkoDate")
+    }
+    first, last = civil_date(table[0]["startEpochDay"]), max(generated_dates)
+    unexpected = sorted(
+        day.isoformat() for day in reference
+        if first <= day <= last and day not in generated_dates and day not in allowed_hko_dates
+    )
+    stale = sorted(set(conflict_by_date) - used_conflicts)
+    report = {
+        "monthsExpected": expected,
+        "monthsExactMatch": exact,
+        "monthsDocumentedConflict": documented,
+        "monthsMissing": len(missing_starts),
+        "missingReferenceFiles": sorted(missing_files),
+        "missingReferenceDates": missing_starts,
+        "unexpectedReferenceStarts": unexpected,
+        "staleConflicts": stale,
+        "mismatches": mismatches,
+        "firstGeneratedMonthStart": first.isoformat(),
+        "lastGeneratedMonthStart": last.isoformat(),
+        "referenceFirstDate": min(reference).isoformat() if reference else None,
+        "referenceLastDate": max(reference).isoformat() if reference else None,
+    }
+    report["complete"] = (
+        not missing_files and not missing_starts and not unexpected and not stale
+        and not mismatches and exact + documented == expected
+    )
+    return report
+
+
+def verify_reference(report):
+    """Return fatal errors for the automatic verification mode."""
+    errors = []
+    if report["missingReferenceFiles"]:
+        errors.append("missing reference files: %s" % ", ".join(report["missingReferenceFiles"]))
+    if report["missingReferenceDates"]:
+        errors.append("missing reference dates: %s" % ", ".join(report["missingReferenceDates"]))
+    if report["unexpectedReferenceStarts"]:
+        errors.append("unexpected reference starts: %s" % ", ".join(report["unexpectedReferenceStarts"]))
+    for mismatch in report["mismatches"]:
+        errors.append("reference mismatch %s: %s" % (mismatch["date"], mismatch.get("details", mismatch["kind"])))
+    if report["staleConflicts"]:
+        errors.append("documented conflicts were not used: %s" % ", ".join(report["staleConflicts"]))
+    if report["monthsExactMatch"] + report["monthsDocumentedConflict"] != report["monthsExpected"]:
+        errors.append("incomplete month coverage")
+    return errors
 
 
 def month_number_at(entry, index):
@@ -370,7 +561,7 @@ def month_number_at(entry, index):
     leap = entry["leapMonth"]
     if leap == 0:
         return (index % 12) + 1
-    # months before and including the repeated month, then the following numbers
+    # Months before and including the repeated month, then the following numbers.
     if index <= leap:
         return min(index + 1, leap)
     return index
@@ -415,20 +606,33 @@ def main():
     parser.add_argument("--last-year", type=int, default=2099)
     parser.add_argument("--output", default="")
     parser.add_argument("--manifest", default="")
+    parser.add_argument(
+        "--conflicts",
+        default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "reference-conflicts.json"),
+    )
+    parser.add_argument("--verify-reference", action="store_true")
     parser.add_argument("--dataset-version", default="2026.11-astronomical-v1")
     args = parser.parse_args()
     if not args.vsop or not os.path.exists(args.vsop):
         sys.exit("VSOP87D.ear missing; pass --vsop or set VSOP87D_EAR")
+    if args.verify_reference and not args.hko_dir:
+        sys.exit("--verify-reference requires --hko-dir")
 
     with open(args.vsop, "rb") as handle:
         vsop_hash = hashlib.sha256(handle.read()).hexdigest()
     series = parse_vsop(args.vsop)
     table = build_table(series, args.first_year, args.last_year)
+    conflicts = load_conflicts(args.conflicts)
 
-    compared = 0
-    mismatches = []
+    report = None
     if args.hko_dir:
-        compared, mismatches = compare_with_hko(table, args.hko_dir)
+        report = compare_with_hko(table, args.hko_dir, conflicts)
+        if args.verify_reference:
+            errors = verify_reference(report)
+            if errors:
+                for error in errors:
+                    print("reference verification error:", error, file=sys.stderr)
+                sys.exit(1)
 
     source = kotlin_source(table, args.dataset_version)
     source_hash = hashlib.sha256(source.encode()).hexdigest()
@@ -439,7 +643,7 @@ def main():
     manifest = {
         "datasetVersion": args.dataset_version,
         "generator": "tools/chinese-calendar/generate.py",
-        "generatorVersion": 1,
+        "generatorVersion": 2,
         "range": {"firstYear": args.first_year, "lastYear": args.last_year},
         "sources": {
             "vsop87d": {
@@ -458,8 +662,25 @@ def main():
                 "url": "https://www.hko.gov.hk/en/gts/time/conversion.htm",
                 "usage": "Development-time comparison only; no HKO content is embedded.",
                 "terms": "https://www.hko.gov.hk/en/readme/readme.htm",
-                "monthsCompared": compared,
-                "mismatches": mismatches,
+                "convention": "A month starts on the UTC+8 civil date of the astronomical new moon; JDE is Terrestrial Time, UTC = JDE - Delta T.",
+                "coverage": report or {
+                    "complete": False,
+                    "monthsExpected": sum(len(entry["monthLengths"]) for entry in table),
+                    "monthsExactMatch": 0,
+                    "monthsDocumentedConflict": 0,
+                    "monthsMissing": None,
+                },
+                "monthsCompared": report["monthsExactMatch"] if report else 0,
+                "documentedConflicts": [
+                    {
+                        **item,
+                        "verified": bool(report) and not any(
+                            mismatch.get("date") == item.get("generatedDate")
+                            for mismatch in report["mismatches"]
+                        ),
+                    }
+                    for item in conflicts
+                ],
             },
         },
         "output": {
@@ -475,9 +696,16 @@ def main():
             json.dump(manifest, handle, indent=2, sort_keys=True)
             handle.write("\n")
     print(json.dumps({k: manifest["output"][k] for k in ("years", "months", "leapYears", "sha256")}, indent=2))
-    print("reference compared:", compared, "mismatches:", len(mismatches))
-    for item in mismatches[:20]:
-        print("  ", item)
+    if report:
+        print(
+            "reference coverage:", report["monthsExactMatch"], "exact,",
+            report["monthsDocumentedConflict"], "documented conflicts,",
+            report["monthsMissing"], "missing, complete=", report["complete"],
+        )
+        for item in report["mismatches"][:20]:
+            print("  ", item)
+    else:
+        print("reference comparison skipped; pass --hko-dir for independent coverage")
 
 
 if __name__ == "__main__":

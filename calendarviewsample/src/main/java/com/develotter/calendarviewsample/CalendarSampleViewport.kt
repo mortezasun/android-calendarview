@@ -47,6 +47,7 @@ internal enum class SampleDisplayMode { Single, VerticalList, HorizontalList, Ho
 internal fun CalendarSampleViewport(
     calendar: SampleCalendar,
     anchor: Long,
+    monthCalendar: SampleCalendar = calendar,
     onVisibleMonthChanged: (Long) -> Unit = {},
     showModeSelector: Boolean = true,
     showWindowLabel: Boolean = true,
@@ -56,10 +57,10 @@ internal fun CalendarSampleViewport(
     monthContent: @Composable (Long) -> Unit,
 ) {
     var modeName by rememberSaveable { mutableStateOf(SampleDisplayMode.Single.name) }
-    var center by rememberSaveable(calendar.name) { mutableStateOf(anchor) }
+    var center by rememberSaveable(calendar.name, monthCalendar.name) { mutableStateOf(anchor) }
     val mode = forcedMode ?: SampleDisplayMode.valueOf(modeName)
-    val request = remember(calendar, anchor) { runCatching { moveSampleMonth(calendar, anchor, 0) } }
-    val window = remember(calendar, center) { runCatching { sampleMonthWindow(calendar, center) } }
+    val request = remember(monthCalendar, anchor) { runCatching { moveSampleMonth(monthCalendar, anchor, 0) } }
+    val window = remember(monthCalendar, center) { runCatching { sampleMonthWindow(monthCalendar, center) } }
     val desired = request.getOrNull()
     val months = window.getOrNull()
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -76,10 +77,10 @@ internal fun CalendarSampleViewport(
                 color = MaterialTheme.colorScheme.error,
             )
             desired !in months -> {
-                LaunchedEffect(calendar, desired) { center = desired }
+                LaunchedEffect(monthCalendar, desired) { center = desired }
                 Text("Updating month window")
             }
-            else -> key(calendar.name, center, mode) {
+            else -> key(calendar.name, monthCalendar.name, center, mode) {
                 SynchronizedMonthViewport(
                     mode = mode,
                     months = months,

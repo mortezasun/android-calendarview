@@ -1,6 +1,7 @@
 package com.develotter.calendarviewsample
 
 import com.develotter.calendarview.calendars.chineseNative.ChineseDate
+import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import ir.huri.jcal.JalaliCalendar
@@ -15,6 +16,19 @@ import java.util.Locale
 
 /** Calendar identifiers for this demo only, not a shared-library abstraction. */
 enum class SampleCalendar { Gregorian, Hijri, SolarHijri, SolarHijriNative, Chinese }
+
+/**
+ * Month stepping / pager identity for the current rendering mode. The Gregorian overlay of the
+ * Chinese calendar is a Gregorian month grid, so it must not step through Chinese lunar months.
+ */
+internal fun sampleMonthNavigationCalendar(
+    calendar: SampleCalendar,
+    chineseGregorianGrid: Boolean,
+): SampleCalendar = if (calendar == SampleCalendar.Chinese && chineseGregorianGrid) {
+    SampleCalendar.Gregorian
+} else {
+    calendar
+}
 
 /** Host-formatted week number; the library deliberately leaves the convention to the caller. */
 fun sampleWeekNumber(epochDay: Long, locale: Locale): String {

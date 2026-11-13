@@ -55,6 +55,9 @@ class CalendarSampleStateRestorationTest {
                     Text("anchor:${ui.anchor}")
                     Text("showDialog:${ui.showDialog}")
                     Text("error:${ui.error ?: "none"}")
+                    Text("chineseStyle:${ui.chineseStyleName}")
+                    Text("showChineseDetails:${ui.showChineseDetails}")
+                    Text("chineseGregorianGrid:${ui.chineseGregorianGrid}")
 
                     Button(onClick = {
                         ui.selectCalendar(SampleCalendar.Hijri)
@@ -73,6 +76,9 @@ class CalendarSampleStateRestorationTest {
                         ui.hijriOffset = 2
                         ui.showMonth(12345L)
                         ui.showDialog = true
+                        ui.chineseStyleName = "SimplifiedChinese"
+                        ui.showChineseDetails = true
+                        ui.chineseGregorianGrid = true
                     }) {
                         Text("modify")
                     }
@@ -98,6 +104,9 @@ class CalendarSampleStateRestorationTest {
         compose.onNodeWithText("hijriOffset:2").assertExists()
         compose.onNodeWithText("anchor:12345").assertExists()
         compose.onNodeWithText("showDialog:true").assertExists()
+        compose.onNodeWithText("chineseStyle:SimplifiedChinese").assertExists()
+        compose.onNodeWithText("showChineseDetails:true").assertExists()
+        compose.onNodeWithText("chineseGregorianGrid:true").assertExists()
 
         restoration.emulateSavedInstanceStateRestore()
 
@@ -117,6 +126,9 @@ class CalendarSampleStateRestorationTest {
         compose.onNodeWithText("hijriOffset:2").assertTextEquals("hijriOffset:2")
         compose.onNodeWithText("anchor:12345").assertTextEquals("anchor:12345")
         compose.onNodeWithText("showDialog:true").assertTextEquals("showDialog:true")
+        compose.onNodeWithText("chineseStyle:SimplifiedChinese").assertTextEquals("chineseStyle:SimplifiedChinese")
+        compose.onNodeWithText("showChineseDetails:true").assertTextEquals("showChineseDetails:true")
+        compose.onNodeWithText("chineseGregorianGrid:true").assertTextEquals("chineseGregorianGrid:true")
     }
 
     @Test

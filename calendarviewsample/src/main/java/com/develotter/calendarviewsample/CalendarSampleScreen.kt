@@ -103,6 +103,7 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                             locale = locale,
                             hijriDateProvider = hijriProvider,
                             chineseStyle = ui.chineseStyle,
+                            chineseGregorianGrid = ui.chineseGregorianGrid,
                         ) { visible -> ui.showMonth(visible) }
                         CalendarMonthHeader(
                             title = navigation.title,
@@ -122,6 +123,7 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                     CalendarSampleViewport(
                         calendar = calendar,
                         anchor = ui.anchor,
+                        monthCalendar = sampleMonthNavigationCalendar(calendar, ui.chineseGregorianGrid),
                         onVisibleMonthChanged = { ui.showMonth(it) },
                         minMonthWidth = sampleTargetMonthWidth(ui.showWeekNumbers),
                     ) { monthAnchor ->
@@ -198,6 +200,7 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                         CalendarSampleViewport(
                             calendar = calendar,
                             anchor = ui.anchor,
+                            monthCalendar = sampleMonthNavigationCalendar(calendar, ui.chineseGregorianGrid),
                             onVisibleMonthChanged = { ui.showMonth(it) },
                             showModeSelector = false,
                             showWindowLabel = false,
@@ -350,7 +353,7 @@ private fun SampleWeek(
 
 /** Demo-only agenda for the current month, built from the shared CalendarMonthData contract. */
 @Composable
-private fun SampleAgenda(
+internal fun SampleAgenda(
     calendar: SampleCalendar,
     anchor: Long,
     locale: Locale,
@@ -359,7 +362,7 @@ private fun SampleAgenda(
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
-    val data = remember(calendar, anchor, locale, hijriProvider) {
+    val data = remember(calendar, anchor, locale, hijriProvider, chineseStyle) {
         runCatching {
             sampleMonthData(
                 calendar = calendar,

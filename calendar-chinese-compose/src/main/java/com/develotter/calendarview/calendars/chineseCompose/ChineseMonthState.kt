@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -50,7 +51,11 @@ class ChineseMonthState(
         get() = month < maxMonth
 
     override val canGoToday: Boolean
-        get() = ChineseCalendarEngine.isSupported(today())
+        get() {
+            val epochDay = today()
+            return ChineseCalendarEngine.isSupported(epochDay) &&
+                ChineseMonth.fromEpochDay(epochDay) in minMonth..maxMonth
+        }
 
     override fun previous() {
         if (canGoPrevious) month = ChineseCalendarEngine.previousMonth(month)
@@ -62,7 +67,11 @@ class ChineseMonthState(
 
     override fun goToToday() {
         val epochDay = today()
-        if (ChineseCalendarEngine.isSupported(epochDay)) month = ChineseMonth.fromEpochDay(epochDay)
+        if (ChineseCalendarEngine.isSupported(epochDay) &&
+            ChineseMonth.fromEpochDay(epochDay) in minMonth..maxMonth
+        ) {
+            month = ChineseMonth.fromEpochDay(epochDay)
+        }
     }
 
     /** Moves to an exact in-range month; out-of-range targets fail instead of clamping. */
@@ -84,6 +93,7 @@ internal object ChineseMonthSnapshot {
     /** Returns null for malformed values or a month that is not valid in the current data set. */
     fun decode(values: List<Int>): ChineseMonth? {
         if (values.size != 3) return null
+        if (values[2] != 0 && values[2] != 1) return null
         return runCatching { ChineseMonth.of(values[0], values[1], values[2] == 1) }.getOrNull()
     }
 }
@@ -101,6 +111,10 @@ fun rememberChineseMonthState(
     maxMonth: ChineseMonth = ChineseCalendarEngine.lastMonthOfYear(ChineseCalendarEngine.MAX_YEAR),
     today: () -> Long = { LocalDate.now().toEpochDay() },
 ): ChineseMonthState {
+    // The callback is an input, not an initializer: a recomposition may replace it while the
+    // visible month and the restored state must stay untouched. The delegated read keeps the
+    // provider current inside the saver too; rememberUpdatedState itself is composition-stable.
+    val currentToday by rememberUpdatedState(today)
     val saver = remember(minMonth, maxMonth) {
         listSaver<ChineseMonthState, Int>(
             save = { state -> ChineseMonthSnapshot.encode(state.month) },
@@ -109,12 +123,12 @@ fun rememberChineseMonthState(
                 if (restored == null || restored !in minMonth..maxMonth) {
                     null
                 } else {
-                    ChineseMonthState(restored, minMonth, maxMonth, today)
+                    ChineseMonthState(restored, minMonth, maxMonth) { currentToday() }
                 }
             },
         )
     }
     return rememberSaveable(initialMonth, minMonth, maxMonth, saver = saver) {
-        ChineseMonthState(initialMonth, minMonth, maxMonth, today)
+        ChineseMonthState(initialMonth, minMonth, maxMonth) { currentToday() }
     }
 }

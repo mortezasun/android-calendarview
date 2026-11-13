@@ -39,6 +39,8 @@ tools/chinese-calendar/generate.py from published astronomical algorithms: VSOP8
 series (Bretagnon & Francou 1988), Meeus, Astronomical Algorithms, 2nd ed., chapters 25 and 49,
 and the Espenak & Meeus Delta T expressions. The VSOP87D input file is not redistributed and no
 Hong Kong Observatory conversion table, ICU data or third-party calendar code is embedded.
-Reference comparisons and the three documented near-midnight deviations are recorded in
-tools/chinese-calendar/manifest.json. The generator and its output are covered by the project's
-Apache-2.0 license; the cited algorithms and reference data remain subject to their own terms.
+Reference comparisons and the three documented deviations (each audited with JDE, Delta T, UTC,
+UTC+8 and an independent NASA/GSFC new-moon time) are recorded in
+tools/chinese-calendar/manifest.json and tools/chinese-calendar/reference-conflicts.json. The
+generator and its output are covered by the project's Apache-2.0 license; the cited algorithms
+and reference data remain subject to their own terms.

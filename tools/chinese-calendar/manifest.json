@@ -1,7 +1,7 @@
 {
   "datasetVersion": "2026.11-astronomical-v1",
   "generator": "tools/chinese-calendar/generate.py",
-  "generatorVersion": 1,
+  "generatorVersion": 2,
   "output": {
     "kotlinFile": "ChineseCalendarData.kt",
     "leapYears": 73,
@@ -20,42 +20,71 @@
       "Espenak & Meeus Delta T polynomial expressions."
     ],
     "reference": {
-      "mismatches": [
+      "convention": "A month starts on the UTC+8 civil date of the astronomical new moon; JDE is Terrestrial Time, UTC = JDE - Delta T.",
+      "coverage": {
+        "complete": true,
+        "firstGeneratedMonthStart": "1901-02-19",
+        "lastGeneratedMonthStart": "2100-01-10",
+        "mismatches": [],
+        "missingReferenceDates": [],
+        "missingReferenceFiles": [],
+        "monthsDocumentedConflict": 3,
+        "monthsExactMatch": 2458,
+        "monthsExpected": 2461,
+        "monthsMissing": 0,
+        "referenceFirstDate": "1901-01-20",
+        "referenceLastDate": "2100-12-31",
+        "staleConflicts": [],
+        "unexpectedReferenceStarts": []
+      },
+      "documentedConflicts": [
         {
-          "date": "1914-11-18",
-          "hko": null,
-          "nearestHko": [
-            {
-              "date": "1914-11-17",
-              "month": 10
-            }
-          ],
-          "ours": 10
+          "chineseYear": 1914,
+          "classification": "The HKO table labels the UT calendar date (1914-11-17); the documented UTC+8 rule puts the new moon 1m43s after local midnight on 1914-11-18, so this dataset keeps 1914-11-18.",
+          "deltaTSeconds": 16.92,
+          "generatedDate": "1914-11-18",
+          "hkoDate": "1914-11-17",
+          "independentReference": "NASA/GSFC phases table: 1914 Nov 17 16:01 UT",
+          "independentReferenceUrl": "https://eclipse.gsfc.nasa.gov/phase/phases1901.html",
+          "isLeapMonth": false,
+          "monthNumber": 10,
+          "newMoonJde": 2420454.168054,
+          "newMoonUtc": "1914-11-17T16:01:42.986Z",
+          "newMoonUtcPlus8": "1914-11-18T00:01:42.986+08:00",
+          "verified": true
         },
         {
-          "date": "1916-02-04",
-          "hko": null,
-          "nearestHko": [
-            {
-              "date": "1916-02-03",
-              "month": 1
-            }
-          ],
-          "ours": 1
+          "chineseYear": 1916,
+          "classification": "The HKO table labels the UT calendar date (1916-02-03); the documented UTC+8 rule puts the new moon 5m16s after local midnight on 1916-02-04, so this dataset keeps 1916-02-04.",
+          "deltaTSeconds": 18.34,
+          "generatedDate": "1916-02-04",
+          "hkoDate": "1916-02-03",
+          "independentReference": "NASA/GSFC phases table: 1916 Feb 3 16:05 UT",
+          "independentReferenceUrl": "https://eclipse.gsfc.nasa.gov/phase/phases1901.html",
+          "isLeapMonth": false,
+          "monthNumber": 1,
+          "newMoonJde": 2420897.170539,
+          "newMoonUtc": "1916-02-03T16:05:16.197Z",
+          "newMoonUtcPlus8": "1916-02-04T00:05:16.197+08:00",
+          "verified": true
         },
         {
-          "date": "1920-11-11",
-          "hko": null,
-          "nearestHko": [
-            {
-              "date": "1920-11-10",
-              "month": 10
-            }
-          ],
-          "ours": 10
+          "chineseYear": 1920,
+          "classification": "The HKO table labels the UT calendar date (1920-11-10); the documented UTC+8 rule puts the new moon 4m50s after local midnight on 1920-11-11, so this dataset keeps 1920-11-11.",
+          "deltaTSeconds": 21.86,
+          "generatedDate": "1920-11-11",
+          "hkoDate": "1920-11-10",
+          "independentReference": "NASA/GSFC phases table: 1920 Nov 10 16:05 UT",
+          "independentReferenceUrl": "https://eclipse.gsfc.nasa.gov/phase/phases1901.html",
+          "isLeapMonth": false,
+          "monthNumber": 10,
+          "newMoonJde": 2422639.170271,
+          "newMoonUtc": "1920-11-10T16:04:49.587Z",
+          "newMoonUtcPlus8": "1920-11-11T00:04:49.587+08:00",
+          "verified": true
         }
       ],
-      "monthsCompared": 2461,
+      "monthsCompared": 2458,
       "name": "Hong Kong Observatory Gregorian-Lunar conversion tables",
       "terms": "https://www.hko.gov.hk/en/readme/readme.htm",
       "url": "https://www.hko.gov.hk/en/gts/time/conversion.htm",

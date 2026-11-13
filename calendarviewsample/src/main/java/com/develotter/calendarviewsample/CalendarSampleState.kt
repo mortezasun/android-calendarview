@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.enums.TypeSelectDay
 import java.time.LocalDate
@@ -71,7 +72,18 @@ internal class CalendarSampleState(
     /** Switches the calendar engine and clears a stale navigation error. */
     fun selectCalendar(item: SampleCalendar) {
         calendarName = item.name
-        error = null
+        // The Chinese engine has a smaller range than the Gregorian date type. Keep the switch
+        // usable at an unsupported anchor by showing the nearest supported month and saying so;
+        // the shared selection is intentionally untouched. All conversions below stay in range.
+        if (item == SampleCalendar.Chinese && !ChineseCalendarEngine.isSupported(anchor)) {
+            anchor = anchor.coerceIn(
+                ChineseCalendarEngine.MIN_EPOCH_DAY,
+                ChineseCalendarEngine.MAX_EPOCH_DAY,
+            )
+            error = "Chinese calendar supports 1901-02-19..2100-02-08; showing ${LocalDate.ofEpochDay(anchor)}"
+        } else {
+            error = null
+        }
     }
 
     /** Sets the anchor from a settled visible month and clears a stale navigation error. */
@@ -85,7 +97,7 @@ internal class CalendarSampleState(
     /** Moves the anchor by whole months; unsupported dates are reported in [error]. */
     fun move(offset: Int) {
         try {
-            anchor = moveSampleMonth(calendar, anchor, offset)
+            anchor = moveSampleMonth(sampleMonthNavigationCalendar(calendar, chineseGregorianGrid), anchor, offset)
             error = null
         } catch (exception: RuntimeException) {
             error = exception.message ?: "Date outside the supported calendar range"

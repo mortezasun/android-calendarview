@@ -64,6 +64,10 @@ jobs:
         if: matrix.check == 'unit-tests'
         run: python3 -m unittest discover -s scripts -p 'test_*.py'
 
+      - name: Test Chinese calendar reference comparison
+        if: matrix.check == 'unit-tests'
+        run: python3 -m unittest discover -s tools/chinese-calendar -p 'test_*.py'
+
       - name: Check the public API surface
         if: matrix.check == 'assemble'
         run: bash scripts/api-check.sh

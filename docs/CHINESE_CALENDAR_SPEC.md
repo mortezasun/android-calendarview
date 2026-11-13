@@ -30,18 +30,23 @@ Implementierter Bereich: chinesische Jahre `1901..2099`, also Gregorian `1901-02
 `2100-02-08` (72.674 Tage, 2.461 Monate, 73 Schaltjahre). Die Tabelle enthaelt vollstaendige
 chinesische Jahre; ausserhalb liegende Tage werden abgelehnt, nicht extrapoliert. Teilweise
 sichtbare Randmonate werden in der Compose-Fassade als leere, deaktivierte Zellen behandelt.
-Der Generator verglich 2.461 Monatsstarts mit HKO-Referenzen (2.458 gleich); die drei
-Minutenfaelle sind unten und im Manifest dokumentiert. Es wird keine HKO-Tabelle ausgeliefert.
+Der Generator verglich 2.461 Monatsstarts mit HKO-Referenzen (2.458 exakt gleich); die drei
+Abweichungen sind unten und im Manifest dokumentiert. Es wird keine HKO-Tabelle ausgeliefert.
 
 Eigener Datensatz: Monatsbeginn als Epoch Day, Monatsnummer, Schaltflag und Laenge, bzw. aequivalente selbst definierte Kompaktkodierung. Invarianten beim Generieren pruefen: streng steigende Starts, lueckenlose Tage, gueltige Laengen, gueltige Monatsfolge und konsistente Jahresstarts. Praefixindizes fuer begrenzte Suche; keine mutable globale Kalenderinstanz.
 
 Pflichtmanifest: Quelle und Abrufdatum, Nutzungsbedingungen/Attribution, Quellen-Hash, Generatorversion, Datensatzversion und -Hash, exakter Bereich, Referenzkonvention, Konfliktliste und Reviewer. Generator und gepruefte Eingabe muessen reproduzierbar sein; Laufzeit und normale Consumer-Builds brauchen keinen Referenzserver.
 
 Ereignisse nahe lokaler Mitternacht koennen je nach Referenz um einen Tag abweichen. Der
-Generator dokumentiert drei solche Faelle: 1914-11-18, 1916-02-04 und 1920-11-11 (Neumond
-1-5 Minuten nach Mitternacht; HKO nennt den Vortag). Datensatzversion
-`2026.11-astronomical-v1`, Ausgabe-SHA256 und VSOP87D-Eingabe-SHA256 stehen im Manifest.
-Aenderungen muessen in spaeteren Releases nachvollziehbar versioniert werden; keine
+Generator dokumentiert drei solche Faelle: 1914-11-18, 1916-02-04 und 1920-11-11. Fuer jeden
+Fall nennt `tools/chinese-calendar/reference-conflicts.json` JDE (TT), Delta-T, UTC-Instant,
+UTC+8-Tagesdatum, die unabhaengige NASA/GSFC-Neumondzeit und die Einordnung: der Neumond liegt
+1m43s, 5m16s bzw. 4m50s nach UTC+8-Mitternacht, waehrend die HKO-Zeile den UT-Kalendertag
+(Vortag) traegt. Die Tabelle bleibt auf dem dokumentierten UTC+8-Datum; es gibt keine
+undokumentierte Tabellenkorrektur. `--verify-reference` prueft alle erwarteten Dateien und
+Monatsstarts sowie Jahr und Schaltstatus und beendet sich bei Abweichungen mit Status 1.
+Datensatzversion `2026.11-astronomical-v1`, Ausgabe-SHA256 und VSOP87D-Eingabe-SHA256 stehen im
+Manifest. Aenderungen muessen in spaeteren Releases nachvollziehbar versioniert werden; keine
 willkuerlichen Sonderfaelle.
 
 ## Compose-Vertrag

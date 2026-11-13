@@ -1,5 +1,6 @@
 package com.develotter.calendarviewsample
 
+import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.calendars.hijri.OffsetHijriDateProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -43,6 +44,24 @@ class CalendarSampleMonthDataTest {
 
         assertEquals(firstEpochDay, data.days.first().epochDay)
         assertEquals(first, provider.dateForEpochDay(data.days.first().epochDay))
+    }
+
+    @Test
+    fun chineseAgendaLabelsFollowTheSelectedStyleWithoutChangingTheDate() {
+        val anchor = LocalDate.of(2023, 3, 22).toEpochDay()
+        val titles = ChineseTextStyle.entries.associateWith { style ->
+            sampleMonthData(
+                calendar = SampleCalendar.Chinese,
+                anchorEpochDay = anchor,
+                locale = locale,
+                chineseStyle = style,
+            ).title
+        }
+        assertEquals(4, titles.values.toSet().size)
+        assertTrue(titles.getValue(ChineseTextStyle.English).contains("Leap 2nd Month"))
+        assertTrue(titles.getValue(ChineseTextStyle.Numeric).contains("M2L"))
+        assertTrue(titles.getValue(ChineseTextStyle.SimplifiedChinese).contains("闰二月"))
+        assertTrue(titles.getValue(ChineseTextStyle.TraditionalChinese).contains("閏二月"))
     }
 
     @Test

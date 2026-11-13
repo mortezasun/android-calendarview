@@ -73,6 +73,31 @@ class ChineseCalendarEngineTest {
     }
 
     @Test
+    fun documentedHkoConflictsRemainOnTheUtcPlus8CivilDate() {
+        // The HKO reference labels the UT date for these three legacy cases. The audited
+        // new-moon instants (JDE - Delta T) fall a few minutes after UTC+8 midnight, so the
+        // generated table deliberately keeps the following civil date. See
+        // tools/chinese-calendar/reference-conflicts.json for the independent NASA times.
+        val cases = listOf(
+            -20133L to Triple(1914, 10, false),
+            -19690L to Triple(1916, 1, false),
+            -17948L to Triple(1920, 10, false),
+        )
+        cases.forEach { (epochDay, expected) ->
+            val (year, monthNumber, leap) = expected
+            val date = ChineseCalendarEngine.fromEpochDay(epochDay)
+            assertEquals(year, date.year)
+            assertEquals(monthNumber, date.monthNumber)
+            assertEquals(leap, date.isLeapMonth)
+            assertEquals(1, date.dayOfMonth)
+            assertEquals(epochDay, date.toEpochDay())
+            assertEquals(epochDay, ChineseCalendarEngine.monthStartEpochDay(date.month))
+            assertTrue(ChineseCalendarEngine.fromEpochDay(epochDay - 1).dayOfMonth > 1)
+        }
+        assertEquals(-19690L, ChineseCalendarEngine.yearStartEpochDay(1916))
+    }
+
+    @Test
     fun wholeRangeRoundTrips() {
         var epochDay = ChineseCalendarEngine.MIN_EPOCH_DAY
         var days = 0

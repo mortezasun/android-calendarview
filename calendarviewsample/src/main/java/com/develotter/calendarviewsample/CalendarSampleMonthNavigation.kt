@@ -5,6 +5,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
 import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.calendars.chineseCompose.rememberChineseMonthState
@@ -41,6 +42,7 @@ internal fun rememberSampleMonthNavigation(
     locale: Locale,
     hijriDateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
+    chineseGregorianGrid: Boolean = false,
     onMonthChanged: (Long) -> Unit,
 ): SampleMonthNavigation {
     val date = LocalDate.ofEpochDay(anchor)
@@ -94,15 +96,40 @@ internal fun rememberSampleMonthNavigation(
             }
             SampleMonthNavigation(title = state.title(locale), state = state)
         }
-        SampleCalendar.Chinese -> {
-            val initialMonth = remember { ChineseMonth.fromEpochDay(anchor) }
+        SampleCalendar.Chinese -> if (chineseGregorianGrid) {
+            // The overlay is a Gregorian month grid, including its header, previous/next and
+            // pager identities. Selection remains the shared epoch-day selection.
+            val initialMonth = remember { YearMonth.from(date) }
+            val state = rememberGregorianMonthState(initialMonth)
+            LaunchedEffect(state.month) {
+                val epochDay = state.month.atDay(1).toEpochDay()
+                if (epochDay != anchor) onChanged(epochDay)
+            }
+            LaunchedEffect(anchor) {
+                val target = YearMonth.from(LocalDate.ofEpochDay(anchor))
+                if (state.month != target) state.goTo(target)
+            }
+            SampleMonthNavigation(title = state.title(locale), state = state)
+        } else {
+            // A saved or externally supplied sample anchor may predate the Chinese range.
+            // Clamp only this header's input and report the normalized month back; never call
+            // ChineseMonth.fromEpochDay with an unsupported day.
+            val safeAnchor = anchor.coerceIn(
+                ChineseCalendarEngine.MIN_EPOCH_DAY,
+                ChineseCalendarEngine.MAX_EPOCH_DAY,
+            )
+            val initialMonth = remember { ChineseMonth.fromEpochDay(safeAnchor) }
             val state = rememberChineseMonthState(initialMonth)
             LaunchedEffect(state.month) {
                 val epochDay = state.month.startEpochDay()
                 if (epochDay != anchor) onChanged(epochDay)
             }
             LaunchedEffect(anchor) {
-                val target = ChineseMonth.fromEpochDay(anchor)
+                val epochDay = anchor.coerceIn(
+                    ChineseCalendarEngine.MIN_EPOCH_DAY,
+                    ChineseCalendarEngine.MAX_EPOCH_DAY,
+                )
+                val target = ChineseMonth.fromEpochDay(epochDay)
                 if (state.month != target) state.goTo(target)
             }
             SampleMonthNavigation(title = state.title(chineseStyle), state = state)

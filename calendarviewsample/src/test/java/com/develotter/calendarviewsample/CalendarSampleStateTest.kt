@@ -2,9 +2,13 @@ package com.develotter.calendarviewsample
 
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
+import com.develotter.calendarview.calendars.chineseNative.ChineseDate
 import com.develotter.calendarview.enums.TypeSelectDay
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
 
@@ -47,6 +51,71 @@ class CalendarSampleStateTest {
         assertEquals(LocalDate.now().toEpochDay(), state.anchor)
         assertNull(state.error)
     }
+
+    @Test
+    fun switchingToChineseClampsUnsupportedAnchorsAtBothEnds() {
+        val below = sampleState(ChineseCalendarEngine.MIN_EPOCH_DAY - 1)
+        below.selectCalendar(SampleCalendar.Chinese)
+        assertEquals(SampleCalendar.Chinese, below.calendar)
+        assertEquals(ChineseCalendarEngine.MIN_EPOCH_DAY, below.anchor)
+        assertNotNull(below.error)
+        assertTrue(below.error!!.contains("1901-02-19"))
+
+        val above = sampleState(ChineseCalendarEngine.MAX_EPOCH_DAY + 1)
+        above.selectCalendar(SampleCalendar.Chinese)
+        assertEquals(SampleCalendar.Chinese, above.calendar)
+        assertEquals(ChineseCalendarEngine.MAX_EPOCH_DAY, above.anchor)
+        assertNotNull(above.error)
+        assertTrue(above.error!!.contains("2100-02-08"))
+
+        // Both inclusive boundaries are supported and switch without a fallback message.
+        val lowerBound = sampleState(ChineseCalendarEngine.MIN_EPOCH_DAY)
+        lowerBound.selectCalendar(SampleCalendar.Chinese)
+        assertEquals(ChineseCalendarEngine.MIN_EPOCH_DAY, lowerBound.anchor)
+        assertNull(lowerBound.error)
+
+        val upperBound = sampleState(ChineseCalendarEngine.MAX_EPOCH_DAY)
+        upperBound.selectCalendar(SampleCalendar.Chinese)
+        assertEquals(ChineseCalendarEngine.MAX_EPOCH_DAY, upperBound.anchor)
+        assertNull(upperBound.error)
+    }
+
+    @Test
+    fun chineseOverlayMovesByGregorianMonths() {
+        val state = sampleState(LocalDate.of(2023, 2, 15).toEpochDay())
+        state.chineseGregorianGrid = true
+        state.selectCalendar(SampleCalendar.Chinese)
+        assertNull(state.error)
+        state.move(1)
+        assertEquals(LocalDate.of(2023, 3, 1).toEpochDay(), state.anchor)
+        state.move(-1)
+        assertEquals(LocalDate.of(2023, 2, 1).toEpochDay(), state.anchor)
+
+        state.chineseGregorianGrid = false
+        state.showMonth(ChineseDate(2023, 2, true, 1).toEpochDay())
+        state.move(1)
+        assertEquals(ChineseDate(2023, 3, false, 1).toEpochDay(), state.anchor)
+    }
+
+    private fun sampleState(anchor: Long): CalendarSampleState = CalendarSampleState(
+        calendarNameState = mutableStateOf(SampleCalendar.Gregorian.name),
+        modeNameState = mutableStateOf(TypeSelectDay.Single.name),
+        localeTagState = mutableStateOf("en"),
+        rtlState = mutableStateOf(false),
+        previousDaysState = mutableStateOf(false),
+        nextDaysState = mutableStateOf(false),
+        fixedSixRowsState = mutableStateOf(false),
+        showWeekState = mutableStateOf(false),
+        showAgendaState = mutableStateOf(false),
+        showWeekNumbersState = mutableStateOf(false),
+        customStyleState = mutableStateOf(false),
+        useHeaderApiState = mutableStateOf(false),
+        limitRangeState = mutableStateOf(false),
+        hijriOffsetState = mutableIntStateOf(0),
+        anchorState = mutableStateOf(anchor),
+        showDialogState = mutableStateOf(false),
+        errorState = mutableStateOf(null),
+    )
 
     @Test
     fun sampleStatePreservesDisplaySettings() {
