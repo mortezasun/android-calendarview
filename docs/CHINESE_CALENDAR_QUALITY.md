@@ -1,6 +1,6 @@
 # 2.4.0: Testplan, Anfaelligkeiten und Sicherheitsgates
 
-Status: Kernmatrix am 2026-11-13 lokal auf `d5416403d2f9a77a60b30eb2bf93f6302959059b` ausgefuehrt (JDK 21, JVM + linuxX64). Geraete-, UI-,
+Status: Kernmatrix am 2026-11-13 lokal (JDK 21, JVM + linuxX64) und in Remote-CI auf `1ab841e70b6fb7ab35b16e970715b500b91f95a2` ausgefuehrt. Geraete-, UI-,
 Benchmark- und Advisory-Pruefungen sind offen. Dieser Plan behauptet weder Schwachstellenfreiheit
 noch einen aktuellen CVE-Scan.
 
@@ -61,7 +61,8 @@ Vor Freigabe Benchmarks fuer Konvertierung, Monatsaufbau, 13-Monats-Heatmap und 
 | Compose-Daten/State | 8 Tests: Monat/Woche/State/Saver/Heatmap/Overlay, inkl. 12/13 Monate |
 | Sample | `assembleDebug`, Unit-Tests und `compileDebugAndroidTestKotlin` erfolgreich |
 | API/Consumer | bestehende Dumps `0` Diff; Engine-JVM-Consumer; Android-BOM-Consumer `assembleDebug` |
-| Offen | Instrumentation/Compose-UI-Lauf, Telefon/Tablet/Fold, TalkBack/Grossschrift/RTL, Touch-Target-Messung, Benchmarks, Advisory-/CVE-Scan, Remote-CI/JitPack |
+| Remote-CI | verification `43401491446`, publishing `43401491433`, instrumentation `43401491452`, tablet `43401491675`: alle success |
+| Offen | chinesische UI-Interaktion auf realen Geraeten/Folds, TalkBack/Grossschrift/RTL, Touch-Target-Messung, Benchmarks, Advisory-/CVE-Scan, JitPack |
 
 ## Nachweisformat
 

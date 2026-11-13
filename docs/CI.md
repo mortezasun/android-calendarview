@@ -2,9 +2,10 @@
 
 Workflow: .github/workflows/android-verification.yml
 Branch: update
-Status: active; the `2.4.0` workflow changes have not run on GitHub yet, so this document describes
-the configured jobs, not a passed remote run. The last inspected remote runs were the `2.3.0`
-release-tree jobs on 2026-11-12.
+Status: active; the `2.4.0` workflow changes passed on `1ab841e` (2026-11-13):
+verification Run `43401491446`, publishing Run `43401491433`, instrumentation Run
+`43401491452` and tablet Run `43401491675`, all success. The local checks remain listed
+separately in [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ## Triggers and cost
 

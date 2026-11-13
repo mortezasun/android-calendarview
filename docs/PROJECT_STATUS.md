@@ -49,8 +49,14 @@ emulator/instrumentation or other devices.
 
 ### Open items
 
-- Evidence tree committed as `d5416403d2f9a77a60b30eb2bf93f6302959059b` and pushed to `origin/update`; documentation follow-up `0db4e1061b7b4fe6e322c0dd098e07fca73dc38e`.
-- Remote GitHub Actions for the new workflow job and `2.4.0` have not been inspected after the push.
+- Evidence tree and CI fix pushed to `origin/update`; remote workflows passed for `1ab841e70b6fb7ab35b16e970715b500b91f95a2`:
+  - `Android verification`: Run 43401491446 (success)
+  - `Android publishing verification`: Run 43401491433 (success)
+  - `Android instrumentation`: Run 43401491452 (success)
+  - `Android tablet verification`: Run 43401491675 (success).
+- Remote GitHub Actions are green for `1ab841e70b6fb7ab35b16e970715b500b91f95a2`, including the new `native-engine` job. This run
+  executes the existing instrumentation/tablet suites; it is not a Chinese-specific device,
+  fold, TalkBack or benchmark matrix.
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).
