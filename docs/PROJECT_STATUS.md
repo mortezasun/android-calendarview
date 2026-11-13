@@ -10,8 +10,7 @@ Status: implemented, committed, locally verified and remotely CI-green on branch
 `6970b924c855bb02792dee2bf818f63fe1b66500` are locally tested and CI-green at
 `e80c00fd1748a2d0e0c35db10abe8053d1176b66`. The further review fixes on base `6fac725` are
 committed as `5cf640d` and locally tested; remote CI for the pushed tree `952bbb6` (containing
-`5cf640d`) passed all four workflows. **Not tagged, merged or published.** No claim is made for JitPack, emulator/instrumentation device coverage or
-other devices.
+`5cf640d`) passed all four workflows. **Not tagged, merged or published.** JitPack is confirmed for `2.3.0` and commit `7a51e24`; the `2.4.0` tag/BOM consumer is blocked until a separately approved tag exists. No claim is made for real-device, foldable or TalkBack coverage.
 
 - Added `:calendar-chinese-native`, a Kotlin Multiplatform engine with `jvm()` and `linuxX64()`
   targets: immutable `ChineseMonth`/`ChineseDate`, `ChineseCalendarEngine`, `ChineseFormat`,
@@ -82,7 +81,7 @@ other devices.
 
 | Check | Result |
 |---|---|
-| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 207 JVM tests (193 Android JVM + 14 KMP JVM), 0 failed, 0 skipped |
+| `./gradlew test :calendar-chinese-native:jvmTest` | BUILD SUCCESSFUL; 209 JVM tests (195 Android JVM + 14 KMP JVM, incl. benchmark reporting), 0 failed, 0 skipped |
 | `./gradlew :calendar-chinese-native:linuxX64Test` | BUILD SUCCESSFUL; 14 tests, 0 failed, 0 skipped |
 | `./gradlew :calendarviewsample:assembleDebug` | BUILD SUCCESSFUL |
 | `./gradlew ... lintDebug` for core, all five calendar modules and sample | BUILD SUCCESSFUL |
@@ -97,6 +96,15 @@ other devices.
 | negative publication/API checks | missing target JVM jar, broken native `.module` reference, missing `files[].url` and broken `files[].url` (with the `name` file still present) each fail the verifier; a second stale `-jvm-2.3.0.jar` fails `scripts/api-check.sh` |
 | `python3 -m unittest discover -s scripts -p 'test_*.py'` | 12 tests, 0 failed; 4 new tests cover URL resolution and missing-name handling |
 | independent Android consumer (separate `/tmp` project, BOM + file Maven repo, `assembleDebug`) | BUILD SUCCESSFUL; APK produced, not installed or run |
+
+### Release-Gate-Nachtrag 2026-11-13
+
+- JitPack `2.3.0` ist nachgewiesen: Buildlog HTTP 200 mit fuenf Modulen und BOM; ein temporaerer Android-BOM-Consumer (`library`) kompilierte JitPack-only ohne `mavenLocal`/`includeBuild` (`BUILD SUCCESSFUL`, Exit 0).
+- JitPack-Commit `7a51e24` ist nachgewiesen: Buildlog success mit BOM, Engine (Metadata/JVM/linuxX64), Compose und fuenf bestehenden Modulen; der direkte Engine-JVM-Consumer lief (`JVM consumer OK`, Epoch 19763, 13 Monate, Exit 0). Der echte `2.4.0`-Tag/BOM-Consumer bleibt blockiert: Tag existiert nicht (HTTP 404), und das Commit-BOM constrainiert Module weiterhin auf `2.4.0`. Kein Tag/Release ohne separate Freigabe.
+- Benchmark-Baseline (Freebuff-VM, JDK 21.0.13, 8 vCPU): Konvertierung 58,77 ns/Op; Monatsaufbau 16.074,47 ns/Monat; 13-Monats-Heatmap 355.526 ns/Jahr; Navigation 53,79 ns/Schritt. Allokationen 56,01 B / 15.630,53 B / 248.328 B / 48,01 B pro Operation. Fokustest gruen; physische Zielhardware und finale Budgets offen.
+- Advisory-Scan: 101 Laufzeitkoordinaten ohne OSV-Treffer; 334 Laufzeit-/Buildscript-Koordinaten mit Treffern ausschliesslich im AGP-9.5.1-Buildscript (Guava, commons-lang3, jose4j, Bouncy Castle, JDOM2). Diese Pakete sind nicht in den ausgelieferten AAR/JARs; Maintainer-Akzeptanz oder AGP-Upgrade bleibt offen.
+- Lokaler API-29-Emulator installiert, Boot scheitert an fehlender KVM-Gruppenberechtigung (`/dev/kvm`); die Remote-API-29-Suite ist gruen, aber keine chinesische Geraete-/Fold-/TalkBack-Matrix.
+- `./gradlew test :calendar-chinese-native:linuxX64Test`, der Benchmark-Fokustest, `scripts/api-check.sh` und die Python-Suites waren erfolgreich. Kein Merge, Tag oder Release wurde erstellt.
 
 ### Open items
 
@@ -119,11 +127,13 @@ other devices.
   - `Android publishing verification`: Run 43439808420 (success)
   - `Android instrumentation`: Run 43439808384 (success)
   - `Android tablet verification`: Run 43439808435 (success)
-- Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
+- Remote JitPack `2.3.0` and commit `7a51e24` are confirmed (build + consumers). The tagged `2.4.0` BOM consumer remains blocked until a separately approved tag; the commit-hash BOM still constrains modules to `2.4.0`.
 - Remote CI for the review-fix commit `09e3a73` against `54bf23d` is success: verification `43447073439`, publishing `43447073475`, instrumentation `43447073390`, tablet `43447073539`. The documentation follow-up is a separate commit; local publication, both isolated consumers, the API guard and the native/JVM regression are green.
 - Remote CI for the URL-based publication follow-up `9fd3b50` on base `acf3bfc` is success: verification `43459739249`, publishing `43459739473`, instrumentation `43459739435`, tablet `43459739230`. The verifier, 12 script tests and both isolated consumers are locally green; the linuxX64 variant remains file-checked only.
-- Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
-  checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).
+- Instrumentation/Compose UI tests and real phone/tablet/fold transitions, TalkBack/large-font/RTL
+  checks were not executed locally (no usable device; KVM permission denied). JVM benchmarks and
+  the OSV advisory scan were executed; physical benchmark acceptance and buildscript finding
+  acceptance remain open. See [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).
 - No merge, tag, GitHub Release or publication was performed and none is authorized by this status.
 
 ## Current release status: 2.3.0 (published, branch `update`, 2026-11-12)

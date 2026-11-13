@@ -15,8 +15,8 @@ Status: `2.4.0` is a locally verified release candidate, not tagged or published
   - `Android publishing verification`: Run 43401491433 (success)
   - `Android instrumentation`: Run 43401491452 (success)
   - `Android tablet verification`: Run 43401491675 (success).
-- [ ] Remote JitPack `2.4.0` build and JitPack-only consumer without `mavenLocal`/`includeBuild`.
-- [ ] Instrumentation and device/fold/TalkBack/benchmark checks listed as open in `CHINESE_CALENDAR_QUALITY.md`.
+- [ ] Remote JitPack `2.4.0` build and JitPack-only consumer without `mavenLocal`/`includeBuild`. Verified: `2.3.0` build + Android BOM consumer; commit `7a51e24` build + direct engine JVM consumer. Blocked: `2.4.0` tag does not exist, and commit-hash BOM constrains modules to `2.4.0`.
+- [ ] Instrumentation and device/fold/TalkBack checks listed as open in `CHINESE_CALENDAR_QUALITY.md`. JVM benchmarks and the OSV runtime scan were executed; physical-device benchmark acceptance and buildscript advisory acceptance remain open.
 - [ ] Separate explicit approval for merge, tag `2.4.0` and GitHub Release.
 
 ## 1. Previous release: 2.3.0 (2026-11-12)
@@ -31,7 +31,7 @@ Status: `2.4.0` is a locally verified release candidate, not tagged or published
   - `Android instrumentation`: Run 43375002077 (success)
   - `Android tablet verification`: Run 43375002074 (success)
 - [x] Release commit `8b7bea4` (`release: 2.3.0`) is tagged `2.3.0`; GitHub Release `2.3.0` is published via `publish-2-3-0.yml` (Run 43375002033).
-- [ ] JitPack `2.3.0` build verified (all 5 modules + BOM) and consumer smoke test passed without `ir.huri:jalalicalendar` (initial JitPack probe returned HTTP 500; verify on `jitpack.io/#mortezasun/android-calendarview/2.3.0`).
+- [x] JitPack `2.3.0` build verified (all 5 modules + BOM): buildlog HTTP 200; JitPack-only Android BOM consumer compiled successfully without `mavenLocal`/`includeBuild` or `ir.huri:jalalicalendar`.
 
 ## 1. Current release: 2.2.1 (2026-11-12)
 

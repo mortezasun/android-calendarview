@@ -8,8 +8,10 @@ Arbeitsbaum lokal behoben, publiziert und mit isolierten Consumern geprueft. Der
 block ist als `09e3a73` auf `update`; alle vier Remote-Workflows sind success. Die
 Publishing-URL-Nachbesserung auf Basis `acf3bfc` ist lokal verifiziert. Der Folgeblock ist als
 `9fd3b50` auf `update`; alle vier Remote-Workflows sind success. Die Nachbesserung auf Basis
-`9fd3b50` ist als `a138306` gepusht und mit allen vier Remote-Workflows gruen. JitPack,
-Geraetegates, Tag und Release bleiben offen.
+`9fd3b50` ist als `a138306` gepusht und mit allen vier Remote-Workflows gruen. JitPack ist fuer
+`2.3.0` sowie den Commit `7a51e24` nachgewiesen; der 2.4.0-Tag-/BOM-Consumer bleibt ohne Tag
+blockiert. Benchmarks und der Advisory-Scan sind ausgefuehrt. Die chinesische
+Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix sowie Tag und Release bleiben offen.
 Gepruefte Branchbasis: `a9642f13d596fd35137945bc234dbf2827e6e398`. Letzter per GitHub API
 bestaetigter Release: `2.3.0`, Tag-Commit `8b7bea42e888785752fff199b2d53c04ab9888e4`,
 veroeffentlicht am 2026-11-13. Abweichende historische Datumsangaben nicht ungeprueft
@@ -54,7 +56,7 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 - [x] Bestehende Tests, Lint, API-Guard und Sample-Build als Baseline ausfuehren; bestehende Fehler getrennt dokumentieren. (Baseline `test` gruen; keine bestehenden Fehler gefunden.)
 - [x] Exakte Kotlin-/AGP-/Gradle-/Compose-Versionen aus dem Repository ermitteln; kompatible KMP-Plugin-/Android-Target-Konfiguration in einem kleinen Build-Prototyp pruefen. Kein blindes Upgrade auf angeblich letzte Versionen. (Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00; KMP-Plugin ohne eigene Version, da AGP Kotlin bereits bereitstellt.)
 - [x] Engine-Targets: Android-kompatibles Artefakt sowie mindestens ein ausgefuehrtes Kotlin/Native-Ziel; iOS-Geraete-/Simulator-Artefakte und Simulator-Consumer auf macOS verifizieren, bevor iOS-Support zugesagt wird. Exakte Targets und Testtasks nach Build-Prototyp dokumentieren. (`jvm()` von `:calendar-chinese-compose` konsumiert; `linuxX64Test` 14 Tests. iOS nicht deklariert.)
-- [ ] Offene JitPack-2.3.0-Pruefung nachholen oder Ursache und Auswirkung auf 2.4.0 dokumentieren. Ein HTTP-500-Probeversuch ist kein bestaetigter Buildfehler und kein Consumer-Nachweis. (Weiterhin offen: Remote-JitPack fuer 2.3.0 ungeprueft; 2.4.0-Remote-Gate bleibt blockierend.)
+- [x] Offene JitPack-2.3.0-Pruefung nachholen oder Ursache und Auswirkung auf 2.4.0 dokumentieren. Ein HTTP-500-Probeversuch ist kein bestaetigter Buildfehler und kein Consumer-Nachweis. (2.3.0-Buildlog HTTP 200 mit allen fuenf Modulen und BOM; JitPack-only Android-BOM-Consumer mit `library` kompiliert: `BUILD SUCCESSFUL`; 2.4.0-Tag bleibt separat blockiert, siehe Gate-Nachtrag.)
 
 ### P1 - Datenvertrag und Datenherkunft
 
@@ -89,7 +91,7 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 
 ### P5 - Haertung und Dokumentationssynchronisation
 
-- [ ] Gesamte Matrix in CHINESE_CALENDAR_QUALITY ausfuehren und Findings schliessen. (Funktionale Kernmatrix, Regression und Remote-Suite ausgefuehrt; chinesische Geraete-/Fold-/TalkBack-Matrix, Benchmarks und Advisory-Scan offen.)
+- [ ] Gesamte Matrix in CHINESE_CALENDAR_QUALITY ausfuehren und Findings schliessen. (Funktionale Kernmatrix, Regression und Remote-Suite ausgefuehrt; Benchmarks und Advisory-Scan mit realen Ergebnissen nachgetragen; chinesische Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix und physische Benchmark-Abnahme offen.)
 - [x] README, ARCHITECTURE, DEVELOPMENT, SETUP, CI, PROJECT_STATUS, RELEASE_CHECKLIST, CHANGELOG und AGENTS auf tatsaechlich implementierten Stand bringen. Bestehende historische Nachweise erhalten.
 - [x] Fehlenden API-Dump und Consumer-Beispiele ergaenzen; Lizenz-/NOTICE- und Publikationsmetadaten pruefen.
 - [x] Bestehende API-Dumps gegen 2.3.0 vergleichen; neue Module duerfen keine versteckten Breaking Changes verursachen. (Fuenf bestehende Dumps `0` Diff; zwei neue Dumps.)
@@ -97,7 +99,7 @@ tatsaechlichem Nachweis abgehakt; offene Punkte stehen ausdruecklich als offen.
 ### P6 - Release Candidate und 2.4.0
 
 - [x] Erst nach gruenen Produktgates Versionen synchron auf 2.4.0 vorbereiten; Sample versionCode 20400 nur nach Monotoniepruefung, versionName 2.4.0. (20300 -> 20400.)
-- [ ] RC-Nachweise fuer einen exakten Commit sammeln; alle Veroeffentlichungs- und Consumer-Pruefungen aus dem Releaseplan ausfuehren. (Evidenzbaum `1ab841e70b6fb7ab35b16e970715b500b91f95a2`, Review-Fixstand `e80c00f` und Nachbesserungsbaum `952bbb6` auf `origin/update`; isolierte Publikation, zwei Consumer und alle vier Remote-Workflows bestanden. Remote-JitPack und die unabhaengige JitPack-Consumer-Pruefung weiterhin offen.)
+- [ ] RC-Nachweise fuer einen exakten Commit sammeln; alle Veroeffentlichungs- und Consumer-Pruefungen aus dem Releaseplan ausfuehren. (Evidenzbaum `1ab841e70b6fb7ab35b16e970715b500b91f95a2`, Review-Fixstand `e80c00f` und Nachbesserungsbaum `952bbb6` auf `origin/update`; isolierte Publikation, zwei Consumer und alle vier Remote-Workflows bestanden. JitPack-Commit-Build `7a51e24` und direkter Engine-Consumer bestanden; der 2.4.0-Tag-/BOM-Consumer ist ohne Tag blockiert, siehe Gate-Nachtrag.)
 - [ ] Separate ausdrueckliche Freigabe fuer Merge, Tag und GitHub Release einholen. Kein Tag 2.4.0 mit offenen Pflichtgates.
 - [ ] Nach Tagging tatsaechliche Remote-Artefakte/Varianten und unabhaengige Consumer verifizieren. Erst dann erfolgreiche Distribution behaupten.
 
@@ -168,10 +170,122 @@ Commits: `95c1cc3` (vier Nachbesserungen) und `a138306` (interner Helper aus dem
 
 #### Weiterhin offene Gates
 
-- [ ] JitPack-Build `2.4.0` und JitPack-Only-Consumer ohne `mavenLocal`/`includeBuild`; die JitPack-2.3.0-Pruefung bleibt ebenfalls offen.
-- [ ] Chinesische Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix und Benchmarks. Die Remote-Instrumentation auf API 29 ist kein Ersatz fuer reale Geraete/Folds.
-- [ ] Advisory-/CVE-Scan fuer die aufgeloesten direkten und transitiven Abhaengigkeiten.
+- [ ] JitPack-Build `2.4.0` und JitPack-Only-Consumer ohne `mavenLocal`/`includeBuild`. Teilnachweis: 2.3.0 und Commit `7a51e24` bestanden; der 2.4.0-Tag-/BOM-Consumer ist ohne Tag blockiert (siehe unten).
+- [ ] Chinesische Geraete-/Fold-/TalkBack-/Grossschrift-/RTL-Matrix. Die Remote-Instrumentation auf API 29 ist kein Ersatz fuer reale Geraete/Folds; ein lokaler Emulator scheitert an fehlender KVM-Berechtigung.
+- [ ] Benchmarks: JVM-Baseline und provisorische Budgets sind erhoben; physische Geraeteabnahme und finale Budgetfreigabe stehen aus.
+- [ ] Advisory-/CVE-Scan: Laufzeitgraph ohne Treffer; bekannte Buildscript-Findings benoetigen eine Maintainer-Akzeptanz oder einen AGP-Upgrade.
 - [ ] Merge, Tag `2.4.0` und GitHub Release nur nach separater ausdruecklicher Freigabe; bis dahin kein Tag und keine Publikation.
+
+### Release-Gate-Nachtrag 2026-11-13
+
+#### JitPack
+
+| Punkt | Ergebnis |
+|---|---|
+| JitPack `2.3.0` | Buildlog HTTP 200; listet `library`, `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native` und `calendar-bom`. Ein temporaerer Android-Consumer mit BOM `2.3.0` und `library` kompilierte JitPack-only ohne `mavenLocal`/`includeBuild`: `BUILD SUCCESSFUL in 54s`, `:android-consumer:compileDebugKotlin` Exit 0. |
+| JitPack `2.4.0` Tag | Noch nicht vorhanden: der Buildlog-Endpunkt antwortet HTTP 404 mit `Tag or commit not found: 2.4.0`. Ohne separaten Tag-/Release-Auftrag ist der echte 2.4.0-Consumer nicht ausfuehrbar. |
+| JitPack Commit `7a51e24` | Commit-Build erfolgreich; Buildlog listet BOM, `calendar-chinese-native` (Metadata, JVM, linuxX64), `calendar-chinese-compose` und die fuenf bestehenden Module. Der direkte JVM-Engine-Consumer gegen `calendar-chinese-native:7a51e24` lief ohne BOM: `JVM consumer OK: newYear=2024-1-1 epochDay=19763 months=13`, Exit 0. |
+| JitPack-BOM bei Commit-Hash | **Blockiert:** Das von JitPack veroeffentlichte BOM-POM `7a51e24` hat zwar `<version>7a51e24</version>`, constrainiert die Module aber weiterhin auf `2.4.0`. JitPack schreibt bei Commit-Builds die eigene POM-Version um, nicht die `dependencyManagement`-Werte. Der BOM-Consumer scheitert daher mit `Could not find ...calendar-chinese-native:2.4.0`; das ist kein lokaler Repository- oder Cache-Fehler. Bei einem echten Tag `2.4.0` stimmen Constraint und JitPack-Version ueberein. |
+
+Reproduktion der JitPack-Nachweise:
+
+```bash
+curl -fsSL https://jitpack.io/com/github/mortezasun/android-calendarview/2.3.0/build.log
+curl -fsSL https://jitpack.io/com/github/mortezasun/android-calendarview/7a51e24/build.log
+curl -sS -o /dev/null -w '%{http_code}\n' https://jitpack.io/com/github/mortezasun/android-calendarview/2.4.0/build.log
+
+# 2.3.0: temporaere Kopie von tools/consumer-check, nur google()/mavenCentral()/jitpack.io,
+# BOM 2.3.0 + library, dann:
+./gradlew -p /tmp/jitpack-230-consumer :android-consumer:compileDebugKotlin --refresh-dependencies
+
+# 2.4.0-Commit: BOM entfernen und direkt calendar-chinese-native:7a51e24 anfordern, dann:
+./gradlew -p /tmp/jitpack-240-engine :jvm-consumer:run --refresh-dependencies
+
+# Nach separater Tag-/Release-Freigabe: Tag 2.4.0 erstellen, JitPack-Build abwarten und
+# tools/consumer-check mit JitPack-Repository (ohne mavenLocal/includeBuild) ausfuehren.
+```
+
+#### Benchmarks
+
+Der Test `ChineseJvmBenchmarkTest.reportJvmPerformanceBaseline` ist Teil der JVM-Tests und gibt
+reproduzierbare `BENCHMARK`-Zeilen aus; er hat bewusst keine zeitbasierte Assertion. Gemessen wurde
+am 2026-11-13 auf der Freebuff-Cloud-VM (Linux amd64, 8 vCPU, AMD-KVM, JDK 21.0.13 Temurin,
+Max-Heap 512 MiB), Median aus fuenf Messungen nach zwei Aufwaermlaeufen. Die JVM-Allokationen
+kommen aus dem HotSpot-Thread-Allocation-Counter.
+
+| Operation | Messwert | Allokation | Datensatz pro Messung |
+|---|---:|---:|---:|
+| Konvertierung Epoch Day -> chinesisch -> Epoch Day | 58,77 ns/Op | 56,01 B/Op | 72.674 Tage |
+| Monatsaufbau (`chineseMonthData`) | 16.074,47 ns/Monat | 15.630,53 B/Monat | 2.461 Monate |
+| 13-Monats-Heatmap (`chineseYearHeatmap(2023)`) | 355.526 ns/Jahr | 248.328 B/Jahr | 13 Monate |
+| Wiederholte Navigation (`next`/`previous`) | 53,79 ns/Schritt | 48,01 B/Schritt | 100.000 Schritte |
+
+Artefaktgroessen des lokalen Release-Builds: Engine-Metadata-JAR 6.989 B, Engine-JVM-JAR 32.436 B,
+linuxX64-Klib 41.288 B, Compose-AAR 36.116 B. Provisorische JVM-Budgets mit mindestens 6-fachem Laufzeit- und Allokationspuffer:
+Konvertierung <= 1.000 ns und <= 512 B/Op; Monatsaufbau <= 100.000 ns und <= 100 KB/Op;
+Heatmap <= 5 ms und <= 1,5 MB/Jahr; Navigation <= 1.000 ns und <= 512 B/Schritt. Diese Budgets
+sind noch keine physische Geraeteabnahme; sie muessen vor RC auf der benannten Zielhardware
+bestaetigt oder angepasst werden.
+
+```bash
+./gradlew :calendar-chinese-compose:testDebugUnitTest --tests '*ChineseJvmBenchmarkTest*'
+```
+
+#### Advisory-/CVE-Scan
+
+Gescannt wurden die aufgeloesten Laufzeitgraphen von Engine (`jvmRuntimeClasspath`), Compose
+(`releaseRuntimeClasspath`) und Sample (`debugRuntimeClasspath`): 101 eindeutige Maven-Koordinaten.
+Die OSV-`querybatch`-Abfrage (POST, `https://api.osv.dev/v1/querybatch`, Maven-Ökosystem) lieferte
+**0 betroffene Laufzeitkoordinaten**.
+
+Zusaetzlich wurden 334 Koordinaten aus Laufzeit- plus `buildEnvironment`-Graph geprueft. Die
+Treffer liegen ausschliesslich im AGP-9.5.1-Buildscript-Classpath, nicht in den ausgelieferten
+AARs/JARs: Guava 33.4.0-jre (`GHSA-xxph-c9ww-hj94`, fixed 33.7.2), commons-lang3 3.16.0
+(`GHSA-j288-q9x7-2f5v`, fixed 3.18.0), jose4j 0.9.5 (`GHSA-3677-xxcr-wjqv`, fixed 0.9.6),
+bcpkix/bcprov-jdk18on 1.80.2 (`GHSA-wg6q-6289-32hp`, `GHSA-9pwp-9qqc-pr26`,
+`GHSA-qp49-qgx5-5m26`, fixed 1.84/1.85) und jdom2 2.0.6 (`GHSA-2363-cqg2-863c`, fixed 2.0.6.1).
+Der Laufzeitgraph enthaelt diese Pakete nicht; `com.google.guava:listenablefuture:1.0` ist nur ein
+leerer Kompatibilitaetsmarker. Ein `kotlin-stdlib {strictly ...}`-Treffer war ein Parserartefakt
+aus der Gradle-Ausgabe, keine reale Koordinate; aufgeloest ist Kotlin 2.4.21, oberhalb der
+betroffenen Bereiche. Fuer 2.4.0 wurde kein riskanter Buildscript-Zwangsumstieg vorgenommen;
+die Findings benoetigen eine dokumentierte Maintainer-Akzeptanz (Owner/Expiry) oder einen
+separaten AGP-Upgrade. Der Laufzeit-Scan ist damit bestanden, der Build-Tooling-Teil bleibt offen.
+
+```bash
+./gradlew :calendar-chinese-native:dependencies --configuration jvmRuntimeClasspath \
+  :calendar-chinese-compose:dependencies --configuration releaseRuntimeClasspath \
+  :calendarviewsample:dependencies --configuration debugRuntimeClasspath --console=plain > /tmp/gradle-deps.log
+# Danach die group:artifact:version-Koordinaten per OSV /v1/querybatch (Maven) pruefen.
+```
+
+#### Geraete-, Fold-, TalkBack- und Emulator-Nachweis
+
+`adb devices` ist leer und es gibt kein lokales Geraet. Der nachinstallierte API-29-Emulator
+konnte nicht booten, weil der Benutzer nicht in der Gruppe `kvm` ist:
+`ProbeKVM: This user doesn't have permissions to use KVM (/dev/kvm); The KVM line is kvm:x:994:`.
+Ein x86_64-Emulator verlangt Hardwarebeschleunigung; ohne KVM-/Gruppenfreigabe ist der lokale
+Lauf nicht moeglich. Die Remote-Instrumentation und -Tablet-Suite auf API 29 sind gruen, ersetzen
+aber weder reale Foldables noch TalkBack/Grossschrift/RTL. Die Matrix bleibt daher offen; die
+bestehenden UI-Tests sind kompiliert und remote ausgefuehrt, nicht als chinesische Geraetematrix.
+
+```bash
+adb devices
+# Nach KVM-Freigabe durch den Administrator (z. B. Benutzer in Gruppe kvm, neue Login-Sitzung):
+emulator -avd <avd-name> -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
+./gradlew :calendarviewsample:connectedDebugAndroidTest
+```
+
+Manuell verbleiben: Telefon/Tablet/Foldable mit Buch-/Tabletop-Posture, Landscape/Split-Screen,
+TalkBack mit chinesischen und englischen Labels, grosse Schrift, RTL, deaktivierte Tage, sichtbare
+Schaltmonatkennzeichnung und Touch-Target-Messung. Die konkrete Checkliste steht in
+`docs/CHINESE_CALENDAR_QUALITY.md`.
+
+#### Ergebnis der lokalen Regressionspruefung
+
+`./gradlew test :calendar-chinese-native:linuxX64Test` war erfolgreich; der fokussierte
+Benchmark-Test ebenfalls. `bash scripts/api-check.sh` meldet `Public API matches the checked-in
+dumps.`; die Python-Suites liefen mit 7 + 12 Tests ohne Fehler. Kein Merge, Tag oder Release
+wurde erstellt.
 
 ## Arbeitsregel fuer die Implementierung
 
