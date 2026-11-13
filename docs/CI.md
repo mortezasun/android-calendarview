@@ -75,7 +75,8 @@ is checked at file/archive/metadata level but is not consumed by a Kotlin/Native
 The consumer receives the isolated repository through `-PconsumerRepo=...`; it does not use
 `mavenLocal()` by default. This is local-candidate verification, not a JitPack consumer test. The
 exact-binary and consumer checks were validated locally on 2026-11-13 and passed remotely in run
-`43447073475` for commit `09e3a73`.
+`43447073475` for commit `09e3a73`; the URL-based verifier passed in run `43459739473` for commit
+`9fd3b50`.
 
 ## Remaining priority-0 checks
 

@@ -60,7 +60,9 @@ other devices.
   path. `available-at.url` uses the same validation. A copied complete publication with a missing
   URL or a broken URL (while the `name` file still exists) now fails the verifier; 12 script unit
   tests pass. The JVM and Android consumers were re-run after the change; the linuxX64 klib is
-  file/metadata-checked but was not consumed by a Kotlin/Native consumer.
+  file/metadata-checked but was not consumed by a Kotlin/Native consumer. This block is `9fd3b50`
+  on `update`; verification `43459739249`, publishing `43459739473`, instrumentation
+  `43459739435` and tablet `43459739230` all passed.
 - Added `:calendar-chinese-compose`: `ChineseCalendarMonth`, `GregorianChineseCalendarMonth`,
   `chineseMonthData`, `ChineseWeekData`, `ChineseMonthState`/`rememberChineseMonthState` with
   leap-month identity in title, keys, saver and heatmap titles, plus `chineseYearHeatmap` /
@@ -116,7 +118,7 @@ other devices.
   - `Android tablet verification`: Run 43439808435 (success)
 - Remote JitPack build/consumer for `2.4.0` (and the still-open `2.3.0` JitPack check) are unconfirmed.
 - Remote CI for the review-fix commit `09e3a73` against `54bf23d` is success: verification `43447073439`, publishing `43447073475`, instrumentation `43447073390`, tablet `43447073539`. The documentation follow-up is a separate commit; local publication, both isolated consumers, the API guard and the native/JVM regression are green.
-- Remote CI for the URL-based publication follow-up on base `acf3bfc` is still to be verified after this block is pushed. The verifier, 12 script tests and both isolated consumers are locally green; the linuxX64 variant remains file-checked only.
+- Remote CI for the URL-based publication follow-up `9fd3b50` on base `acf3bfc` is success: verification `43459739249`, publishing `43459739473`, instrumentation `43459739435`, tablet `43459739230`. The verifier, 12 script tests and both isolated consumers are locally green; the linuxX64 variant remains file-checked only.
 - Instrumentation/Compose UI tests, real phone/tablet/fold transitions, TalkBack/large-font/RTL
   checks, and benchmarks/advisory scan were not executed; see [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).
 - No merge, tag, GitHub Release or publication was performed and none is authorized by this status.

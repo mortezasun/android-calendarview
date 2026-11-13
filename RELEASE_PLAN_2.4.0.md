@@ -6,9 +6,9 @@ Die Nachbesserungen auf Basis `6fac725` sind als `5cf640d` lokal verifiziert; de
 `952bbb6` ist mit allen vier Remote-Workflows gruen. Die Review-Findings gegen `54bf23d` sind im
 Arbeitsbaum lokal behoben, publiziert und mit isolierten Consumern geprueft. Der Nachbesserungs-
 block ist als `09e3a73` auf `update`; alle vier Remote-Workflows sind success. Die
-Publishing-URL-Nachbesserung auf Basis `acf3bfc` ist lokal verifiziert; der Folgeblock wird auf
-`update` committet, die Remote-CI ist separat zu pruefen. JitPack, Geraetegates, Tag und Release
-bleiben offen.
+Publishing-URL-Nachbesserung auf Basis `acf3bfc` ist lokal verifiziert. Der Folgeblock ist als
+`9fd3b50` auf `update`; alle vier Remote-Workflows sind success. JitPack, Geraetegates, Tag und
+Release bleiben offen.
 Gepruefte Branchbasis: `a9642f13d596fd35137945bc234dbf2827e6e398`. Letzter per GitHub API
 bestaetigter Release: `2.3.0`, Tag-Commit `8b7bea42e888785752fff199b2d53c04ab9888e4`,
 veroeffentlicht am 2026-11-13. Abweichende historische Datumsangaben nicht ungeprueft
@@ -151,6 +151,8 @@ publishing `43447073475`, instrumentation `43447073390`, tablet `43447073539` - 
 | P1 Publishing-Pruefluecke | `scripts/publication_metadata.py` (importierbarer Check) und `scripts/verify-publication.sh`: `files[].url` ist Pflicht, wird per `urlsplit` validiert und relativ gegen die `.module`-Datei aufgeloest; das Ziel muss existieren und nicht leer sein. `files[].name` wird nur separat auf Vorhandensein geprueft und nie als Pfad verwendet. `available-at.url` nutzt denselben Check. Nicht-lokale URLs werden als nicht pruefbar abgelehnt. | `scripts/test_publication_metadata.py`: gueltige relative URL bei abweichendem `name`, fehlende URL, kaputte URL bei vorhandener `name`-Datei und fehlender Name. Zusaetzlich Integrationstests gegen eine kopierte vollstaendige Publikation mit entfernter bzw. gebrochener URL. | `python3 -m unittest discover -s scripts -p 'test_*.py'`: 12 Tests gruen; Verifier gegen `/tmp/m2-review-final`: Exit 0; beide manipulierten Module: Exit 1 mit `missing url` bzw. `missing/empty`. |
 
 Plattformabdeckung dieses Nachweises: Der JVM-Consumer loest die Root-Modul-Metadaten und die JVM-Variante auf und fuehrt `ChineseDate.of` aus. Der Android-Consumer kompiliert die Compose-Fassade und ihre veroeffentlichten AAR-Abhaengigkeiten. Die linuxX64-Klib wird auf Datei-/Archiv- und Metadatenebene geprueft, aber in diesem Lauf **nicht von einem Kotlin/Native-Consumer konsumiert**. Die Pruefung ist kein JitPack- oder Remote-Consumer-Nachweis.
+
+Remote-CI fuer `9fd3b50`: verification `43459739249`, publishing `43459739473`, instrumentation `43459739435`, tablet `43459739230` - alle success.
 
 #### Weiterhin offene Gates
 
