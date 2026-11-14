@@ -176,8 +176,10 @@ open points remain explicitly open.
 - [x] Obtain separate explicit approval for merge, tag and GitHub Release. Approved 2026-11-14
   with the open device/benchmark/advisory gates explicitly documented; this does not mark those
   gates complete.
-- [ ] After tagging, verify actual remote artifacts/variants and independent consumers. Only then
-  claim successful distribution.
+- [x] Tag `2.4.0` and GitHub Release created by release workflow `43537597202` at
+  `291275b9e01da11a9b009f9ad77f05a5ef89a05e` on 2026-11-14.
+- [ ] Verify actual remote JitPack artifacts/variants and independent consumers. Only then claim
+  successful distribution.
 
 ### Review follow-ups 2026-11-13 (base `6970b92`)
 

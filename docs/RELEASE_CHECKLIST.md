@@ -1,8 +1,8 @@
 # Release acceptance
 
-Status: `2.4.0` was approved for release on 2026-11-14 with the documented external gates still open and is being published by the automated release workflow. `2.3.0` is the latest previously published release. `2.2.1` and `2.2.0` are earlier published releases.
+Status: `2.4.0` was released on 2026-11-14; tag `2.4.0` and the GitHub Release are published. The documented external gates remain open. `2.3.0` is the latest previous release; `2.2.1` and `2.2.0` are earlier published releases.
 
-## 0. Current release: 2.4.0 (release in progress, 2026-11-14)
+## 0. Current release: 2.4.0 (released, 2026-11-14)
 
 - [x] `:calendar-chinese-native` and `:calendar-chinese-compose` implemented, integrated and documented.
 - [x] Root version `2.4.0`; sample `versionCode 20400` (monotonic after `20300`) and `versionName "2.4.0"`.
@@ -16,10 +16,11 @@ Status: `2.4.0` was approved for release on 2026-11-14 with the documented exter
   - `Android publishing verification`: Run 43401491433 (success)
   - `Android instrumentation`: Run 43401491452 (success)
   - `Android tablet verification`: Run 43401491675 (success).
-- [ ] Remote JitPack `2.4.0` build and JitPack-only consumer without `mavenLocal`/`includeBuild`. Verified: `2.3.0` build + Android BOM consumer; commit `7a51e24` build + direct engine JVM consumer. Blocked: `2.4.0` tag does not exist, and commit-hash BOM constrains modules to `2.4.0`.
+- [ ] Remote JitPack `2.4.0` build and JitPack-only consumer without `mavenLocal`/`includeBuild`. Verified: `2.3.0` build + Android BOM consumer; commit `7a51e24` build + direct engine JVM consumer. The `2.4.0` tag exists; the JitPack build endpoint still returned `HTTP 404 Tag or commit not found` immediately after publication, so the build/consumer verification remains pending.
 - [ ] Instrumentation and device/fold/TalkBack checks listed as open in `CHINESE_CALENDAR_QUALITY.md`. JVM benchmarks and the OSV runtime scan were executed; physical-device benchmark acceptance and buildscript advisory acceptance remain open.
 - [x] Separate explicit approval for merge, tag `2.4.0` and GitHub Release was given on 2026-11-14; the open external gates are documented rather than marked complete.
-- [ ] Automated tag/GitHub Release workflow completed, and the `2.4.0` tag/BOM JitPack consumer verified.
+- [x] Automated tag/GitHub Release workflow completed: run `43537597202`; tag `291275b9e01da11a9b009f9ad77f05a5ef89a05e`; GitHub Release published with the short changelog.
+- [ ] `2.4.0` tag/BOM JitPack consumer verified without `mavenLocal`/`includeBuild`.
 
 ## 1. Previous release: 2.3.0 (2026-11-12)
 
