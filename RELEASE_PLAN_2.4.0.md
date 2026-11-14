@@ -11,8 +11,8 @@ workflows succeeded. The follow-up based on `9fd3b50` is pushed as `a138306` and
 four remote workflows. The verified release source HEAD is
 `4dc484ae8cff91bad0869cd8d24e0b71144ff8e9`; verification `43528254651`, publishing
 `43528254527`, instrumentation `43528254722` and tablet `43528254471` all succeeded. JitPack is
-verified for `2.3.0` and commit `7a51e24`; the 2.4.0 tag/BOM consumer remains blocked without a
-tag. Benchmarks and the advisory scan were executed. A software-emulated API 29 phone smoke test
+verified for `2.3.0` and commit `7a51e24`; tag `2.4.0` now exists, and the JitPack tag/BOM
+consumer verification is pending. Benchmarks and the advisory scan were executed. A software-emulated API 29 phone smoke test
 reached the sample's leap-month details; the real-device/fold/TalkBack/large-font/RTL matrix
 remains open. The maintainer approved the 2.4.0 release on 2026-11-14; tag and GitHub Release are
 created by the automated workflow with these gates documented as open.
@@ -170,7 +170,8 @@ open points remain explicitly open.
   the release plan. (Evidence tree `1ab841e70b6fb7ab35b16e970715b500b91f95a2`, review-fix state
   `e80c00f` and follow-up tree `952bbb6` on `origin/update`; isolated publication, two consumers
   and all four remote workflows passed. JitPack commit build `7a51e24` and direct engine
-  consumer passed; the 2.4.0 tag/BOM consumer is blocked without a tag, see gate addendum.
+  consumer passed; tag `2.4.0` was created on 2026-11-14, and the JitPack tag/BOM consumer still
+  needs verification, see gate addendum.
   Verified release source HEAD `4dc484a` is green in all four workflows: verification `43528254651`, publishing
   `43528254527`, instrumentation `43528254722`, tablet `43528254471`.)
 - [x] Obtain separate explicit approval for merge, tag and GitHub Release. Approved 2026-11-14
@@ -262,8 +263,8 @@ tablet `43472900502` - all successful.
 #### Remaining open gates
 
 - [ ] JitPack build `2.4.0` and JitPack-only consumer without `mavenLocal`/`includeBuild`. Partial
-  evidence: 2.3.0 and commit `7a51e24` passed; the 2.4.0 tag/BOM consumer is blocked without a
-  tag (see below).
+  evidence: 2.3.0 and commit `7a51e24` passed; tag `2.4.0` now exists, but the JitPack build and
+  tag/BOM consumer verification remain pending (see below).
 - [ ] Chinese device/fold/TalkBack/large-font/RTL matrix. Remote instrumentation on API 29 is not
   a substitute for real devices/folds. A software-accelerated local API 29 phone booted and the
   sample reached the leap-month details; fold, TalkBack, large-font and full RTL checks remain
@@ -282,7 +283,7 @@ tablet `43472900502` - all successful.
 | Item | Result |
 |---|---|
 | JitPack `2.3.0` | Build log HTTP 200; lists `library`, `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native` and `calendar-bom`. A temporary Android consumer with BOM `2.3.0` and `library` compiled JitPack-only without `mavenLocal`/`includeBuild`: `BUILD SUCCESSFUL in 54s`, `:android-consumer:compileDebugKotlin` exit 0. |
-| JitPack `2.4.0` tag | Not present yet: the build log endpoint returns HTTP 404 with `Tag or commit not found: 2.4.0`. Without a separate tag/release assignment the real 2.4.0 consumer cannot run. |
+| JitPack `2.4.0` tag | Tag `2.4.0` exists at `291275b9e01da11a9b009f9ad77f05a5ef89a05e` (published 2026-11-14). Immediately after publication the JitPack build-log endpoint returned HTTP 404 with `Tag or commit not found: 2.4.0`; the asynchronous build and BOM consumer verification remain pending. |
 | JitPack commit `7a51e24` | Commit build successful; build log lists BOM, `calendar-chinese-native` (metadata, JVM, linuxX64), `calendar-chinese-compose` and the five existing modules. Direct JVM engine consumer against `calendar-chinese-native:7a51e24` ran without BOM: `JVM consumer OK: newYear=2024-1-1 epochDay=19763 months=13`, exit 0. |
 | JitPack BOM at commit hash | **Blocked:** the JitPack-published BOM POM `7a51e24` has `<version>7a51e24</version>` but still constrains the modules to `2.4.0`. JitPack rewrites its own POM version for commit builds, not the `dependencyManagement` values. The BOM consumer therefore fails with `Could not find ...calendar-chinese-native:2.4.0`; this is not a local repository or cache error. With a real `2.4.0` tag, constraint and JitPack version match. |
 
