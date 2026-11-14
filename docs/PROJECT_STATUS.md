@@ -1,16 +1,20 @@
 # Project status
 
-Last updated: 2026-11-13
-Version: `2.4.0` development tree (latest published release: `2.3.0`)
+Last updated: 2026-11-14
+Version: `2.4.0` (released 2026-11-14; latest previous release: `2.3.0`)
 Branch: `update`
 
-## Current development: 2.4.0 Chinese calendar (unreleased, 2026-11-13)
+## Current release: 2.4.0 Chinese calendar (2026-11-14)
 
-Status: implemented, committed, locally verified and remotely CI-green on branch `update` at `1ab841e70b6fb7ab35b16e970715b500b91f95a2`. The review fixes on top of
+Status: implemented, committed, locally verified and remotely CI-green on branch `update` at
+`4dc484ae8cff91bad0869cd8d24e0b71144ff8e9`. The review fixes on top of
 `6970b924c855bb02792dee2bf818f63fe1b66500` are locally tested and CI-green at
 `e80c00fd1748a2d0e0c35db10abe8053d1176b66`. The further review fixes on base `6fac725` are
-committed as `5cf640d` and locally tested; remote CI for the pushed tree `952bbb6` (containing
-`5cf640d`) passed all four workflows. **Not tagged, merged or published.** JitPack is confirmed for `2.3.0` and commit `7a51e24`; the `2.4.0` tag/BOM consumer is blocked until a separately approved tag exists. No claim is made for real-device, foldable or TalkBack coverage.
+committed as `5cf640d`; remote CI for the pushed tree `952bbb6` (containing `5cf640d`) passed all
+four workflows. The 2.4.0 release was approved on 2026-11-14 with the documented external gates
+still open; tag and GitHub Release are created by the automated workflow. JitPack is confirmed
+for `2.3.0` and commit `7a51e24`; verify the `2.4.0` tag/BOM consumer after publication. No claim
+is made for real-device, foldable or TalkBack coverage.
 
 - Added `:calendar-chinese-native`, a Kotlin Multiplatform engine with `jvm()` and `linuxX64()`
   targets: immutable `ChineseMonth`/`ChineseDate`, `ChineseCalendarEngine`, `ChineseFormat`,

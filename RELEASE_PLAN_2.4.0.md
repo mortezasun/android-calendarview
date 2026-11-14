@@ -13,8 +13,9 @@ four remote workflows. The verified release source HEAD is
 `43528254527`, instrumentation `43528254722` and tablet `43528254471` all succeeded. JitPack is
 verified for `2.3.0` and commit `7a51e24`; the 2.4.0 tag/BOM consumer remains blocked without a
 tag. Benchmarks and the advisory scan were executed. A software-emulated API 29 phone smoke test
-reached the sample's leap-month details; the real-device/fold/TalkBack/large-font/RTL matrix, plus
-tag and release, remain open.
+reached the sample's leap-month details; the real-device/fold/TalkBack/large-font/RTL matrix
+remains open. The maintainer approved the 2.4.0 release on 2026-11-14; tag and GitHub Release are
+created by the automated workflow with these gates documented as open.
 
 Verified branch base: `a9642f13d596fd35137945bc234dbf2827e6e398`. Last GitHub API-confirmed
 release: `2.3.0`, tag commit `8b7bea42e888785752fff199b2d53c04ab9888e4`, published on
@@ -172,8 +173,9 @@ open points remain explicitly open.
   consumer passed; the 2.4.0 tag/BOM consumer is blocked without a tag, see gate addendum.
   Verified release source HEAD `4dc484a` is green in all four workflows: verification `43528254651`, publishing
   `43528254527`, instrumentation `43528254722`, tablet `43528254471`.)
-- [ ] Obtain separate explicit approval for merge, tag and GitHub Release. No 2.4.0 tag with open
-  mandatory gates.
+- [x] Obtain separate explicit approval for merge, tag and GitHub Release. Approved 2026-11-14
+  with the open device/benchmark/advisory gates explicitly documented; this does not mark those
+  gates complete.
 - [ ] After tagging, verify actual remote artifacts/variants and independent consumers. Only then
   claim successful distribution.
 
@@ -395,7 +397,8 @@ suites ran 7 + 12 tests without failures. Evidence commit `4ce4d3f` (code and ga
 is on `origin/update`; all four remote workflows succeeded: verification `43479911419`, publishing
 `43479911387`, instrumentation `43479911196`, tablet `43479911275`. Verified release source HEAD `4dc484a` is
 green: verification `43528254651`, publishing `43528254527`, instrumentation `43528254722`,
-tablet `43528254471`. No merge, tag or release was created.
+tablet `43528254471`. At that source-verification stage no merge, tag or release existed; the
+maintainer approved the 2.4.0 release on 2026-11-14 with the open gates documented.
 
 ## Implementation work rule
 

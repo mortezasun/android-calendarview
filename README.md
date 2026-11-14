@@ -11,9 +11,9 @@
   <img src="https://img.shields.io/badge/License-Apache%202.0-orange.svg" alt="License"/>
 </p>
 
-A native Jetpack Compose calendar library for Android. It ships one shared, calendar-independent core (month grid, selection engine, containers, heatmaps) plus pluggable calendar engines for **Gregorian**, **Islamic Hijri** and **Solar Hijri (Jalali / Persian)** — with full RTL support.
+A native Jetpack Compose calendar library for Android. It ships one shared, calendar-independent core (month grid, selection engine, containers, heatmaps) plus pluggable calendar engines for **Gregorian**, **Islamic Hijri**, **Solar Hijri (Jalali / Persian)** and the **Chinese lunisolar calendar** — with full RTL support.
 
-**Latest published release:** [`2.3.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.3.0). **Development version:** `2.4.0` on branch `update` adds the self-written Chinese lunisolar engine and Compose facade; it is prepared and verified locally but **not tagged, merged or published** yet. See the [2.4.0 plan](RELEASE_PLAN_2.4.0.md) and [release notes](docs/releases/2.4.0.md).
+**Current release:** [`2.4.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.4.0) adds the self-written Chinese lunisolar engine and Compose facade. See the [2.4.0 plan](RELEASE_PLAN_2.4.0.md), [short changelog](docs/releases/2.4.0-changelog.md) and [release notes](docs/releases/2.4.0.md). Verify the JitPack build for the new tag before pinning production dependencies.
 
 ---
 
@@ -97,58 +97,59 @@ Add the engines you need to your module's `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core only (needed if you build your own calendar on top of CalendarMonthGrid)
-    implementation("com.github.mortezasun.android-calendarview:library:2.3.0")
+    implementation("com.github.mortezasun.android-calendarview:library:2.4.0")
 
     // Calendar engines (each one already includes :library)
-    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.3.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.3.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.3.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.4.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.4.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.4.0")
     // Or dependency-free native Solar Hijri engine (immutable SolarHijriDate, no jalalicalendar):
-    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri-native:2.3.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri-native:2.4.0")
 
-    // The Chinese engine/facade are not in a published 2.4.0 coordinate yet.
-    // Do not add 2.4.0 dependencies; see the BOM note below for the JitPack status.
+    // Chinese lunisolar engine and optional Compose facade:
+    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-native:2.4.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-compose:2.4.0")
 }
 ```
 
-The latest installable release is `2.3.0`. The `2.4.0` development tree is not tagged or
-published, so there is no installable `2.4.0` coordinate.
+The current release is `2.4.0`. JitPack builds the release tag automatically; verify the
+`2.4.0` build and a consumer without local substitutions before pinning production dependencies.
 
-### Bill of Materials (2.3.0)
+### Bill of Materials (2.4.0)
 
-The latest published BOM is `2.3.0` and constrains all five published modules:
+The current BOM is `2.4.0` and constrains all seven published modules:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.3.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.4.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
     implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri")
     implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri-native")
+    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-native")
+    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-compose")
 }
 ```
 
 The BOM is part of the same publication set and is included by `jitpack.yml` and the
-publishing workflow. JitPack built `2.3.0` with all five modules and its BOM, and a JitPack-only
-BOM consumer passed on 2026-11-13. Commit `7a51e24` also builds all modules, but `2.4.0` is not
-tagged: its commit-hash BOM still constrains the modules to `2.4.0`, and the `2.4.0` tag/BOM
-consumer remains open. Do not use `2.4.0` as a dependency coordinate until the tag and consumer
-checks are approved and completed. The POM contains the metadata Maven Central requires, but
-signing, namespace verification and upload are not configured; JitPack remains the only
-configured remote repository.
+publishing workflow. JitPack built `2.3.0` with all five then-published modules and its BOM, and
+a JitPack-only BOM consumer passed on 2026-11-13. The `2.4.0` tag triggers the same seven-artifact
+publication; verify its JitPack build and BOM consumer before claiming distribution. The POM
+contains the metadata Maven Central requires, but signing, namespace verification and upload are
+not configured; JitPack remains the only configured remote repository.
 
 If you only need one engine, keep its explicit version and omit the BOM.
 
-### Upgrading to the latest published release (2.3.0)
+### Upgrading to the current release (2.4.0)
 
-The `2.4.0` work in this branch is additive: the checked-in public API dumps of all existing
+The `2.4.0` release is additive: the checked-in public API dumps of all existing
 modules are unchanged (`0` diff against `2.3.0`), and no existing engine depends on the new
-modules. Because `2.4.0` is not installable yet, use `2.3.0` for production. If your build pinned
-module versions directly, move them to the BOM and bump the platform:
+modules. If your build pinned module versions directly, move them to the BOM and bump the
+platform:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.3.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.4.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
 }
