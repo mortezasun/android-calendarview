@@ -3,10 +3,11 @@
 Binding working rules for coding agents in this repository. Read this file and the linked
 documents before changing any code.
 
-## Current work: 2.4.0 Chinese calendar (implemented, release candidate)
+## Current work: 2.4.0 Chinese calendar (released)
 
-The 2.4.0 Chinese calendar is implemented on branch `update` as a local release candidate, not
-tagged, merged or published. Read [RELEASE_PLAN_2.4.0.md](RELEASE_PLAN_2.4.0.md),
+The 2.4.0 Chinese calendar was released on 2026-11-14 with tag `2.4.0` and is merged into
+`master`. Read [docs/releases/2.4.0.md](docs/releases/2.4.0.md),
+[RELEASE_PLAN_2.4.0.md](RELEASE_PLAN_2.4.0.md),
 [ADR 0005](docs/decisions/0005-independent-native-chinese-calendar.md),
 [the specification](docs/CHINESE_CALENDAR_SPEC.md),
 [quality and security gates](docs/CHINESE_CALENDAR_QUALITY.md), and
@@ -16,7 +17,7 @@ done.
 The engine must stay self-written pure Kotlin and usable without Compose, Android or other
 calendar engines; the separate Compose facade may reuse `:library`. Do not copy/port external
 calendar code or data tables, add an ICU runtime wrapper, or claim unverified platform support.
-Do not bump versions, create a release tag, merge or publish 2.4.0 without separate approval.
+Do not move the `2.4.0` tag or rewrite published history; future releases need separate approval.
 
 ## Read first
 

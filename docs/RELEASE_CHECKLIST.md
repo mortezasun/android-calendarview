@@ -20,6 +20,7 @@ Status: `2.4.0` was released on 2026-11-14; tag `2.4.0` and the GitHub Release a
 - [ ] Instrumentation and device/fold/TalkBack checks listed as open in `CHINESE_CALENDAR_QUALITY.md`. JVM benchmarks and the OSV runtime scan were executed; physical-device benchmark acceptance and buildscript advisory acceptance remain open.
 - [x] Separate explicit approval for merge, tag `2.4.0` and GitHub Release was given on 2026-11-14; the open external gates are documented rather than marked complete.
 - [x] Automated tag/GitHub Release workflow completed: run `43537597202`; tag `291275b9e01da11a9b009f9ad77f05a5ef89a05e`; GitHub Release published with the short changelog.
+- [x] `update` fast-forwarded into `master` on 2026-11-14 (`a9642f1..d655959`).
 - [ ] `2.4.0` tag/BOM JitPack consumer verified without `mavenLocal`/`includeBuild`.
 
 ## 1. Previous release: 2.3.0 (2026-11-12)

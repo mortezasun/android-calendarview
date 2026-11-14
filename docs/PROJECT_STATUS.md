@@ -2,7 +2,7 @@
 
 Last updated: 2026-11-14
 Version: `2.4.0` (released 2026-11-14; latest previous release: `2.3.0`)
-Branch: `update`
+Branch: `master` (2.4.0 released and merged from `update` on 2026-11-14)
 
 ## Current release: 2.4.0 Chinese calendar (2026-11-14)
 
@@ -13,7 +13,8 @@ Status: implemented, committed, locally verified and remotely CI-green on branch
 committed as `5cf640d`; remote CI for the pushed tree `952bbb6` (containing `5cf640d`) passed all
 four workflows. The 2.4.0 release was approved on 2026-11-14 with the documented external gates
 still open; tag `2.4.0` and the GitHub Release were published on 2026-11-14 by release workflow
-`43537597202` at tag commit `291275b9e01da11a9b009f9ad77f05a5ef89a05e`. JitPack is confirmed
+`43537597202` at tag commit `291275b9e01da11a9b009f9ad77f05a5ef89a05e`. The release history was
+fast-forwarded to `master` on 2026-11-14. JitPack is confirmed
 for `2.3.0` and commit `7a51e24`; the `2.4.0` tag/BOM consumer still has to be verified. No claim
 is made for real-device, foldable or TalkBack coverage.
 
