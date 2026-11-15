@@ -216,7 +216,7 @@ class CalendarSampleStateTest {
     @Test
     fun moveCapturesExceptionAsError() {
         val state = CalendarSampleState(
-            calendarNameState = mutableStateOf(SampleCalendar.Gregorian.name),
+            calendarNameState = mutableStateOf(SampleCalendar.Chinese.name),
             modeNameState = mutableStateOf(TypeSelectDay.Single.name),
             localeTagState = mutableStateOf("en"),
             rtlState = mutableStateOf(false),
@@ -230,7 +230,7 @@ class CalendarSampleStateTest {
             useHeaderApiState = mutableStateOf(false),
             limitRangeState = mutableStateOf(false),
             hijriOffsetState = mutableIntStateOf(0),
-            anchorState = mutableStateOf(LocalDate.MAX.toEpochDay()),
+            anchorState = mutableStateOf(ChineseCalendarEngine.MAX_EPOCH_DAY),
             showDialogState = mutableStateOf(false),
             errorState = mutableStateOf(null),
         )

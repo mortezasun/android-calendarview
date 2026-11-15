@@ -33,14 +33,16 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.calendars.chineseCompose.ChineseCalendarMonth
 import com.develotter.calendarview.calendars.chineseCompose.GregorianChineseCalendarMonth
 import com.develotter.calendarview.calendars.chineseCompose.chineseWeekData
+import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.calendars.gregorian.compose.GregorianCalendarMonth
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianWeekData
+import com.develotter.calendarview.calendars.hijri.HijriDate
 import com.develotter.calendarview.calendars.hijri.HijriDateProvider
 import com.develotter.calendarview.calendars.hijri.OffsetHijriDateProvider
 import com.develotter.calendarview.calendars.hijri.compose.HijriCalendarMonth
 import com.develotter.calendarview.calendars.hijri.compose.hijriWeekData
 import com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriCalendarMonth
-import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
+import com.develotter.calendarview.calendars.solarHijri.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriWeekData
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeCalendarMonth
@@ -57,10 +59,7 @@ import com.develotter.calendarview.compose.rememberCalendarSelectionState
 import com.develotter.calendarview.enums.TypeSelectDay
 import com.develotter.calendarview.selection.CalendarRangePolicy
 import com.develotter.calendarview.selection.CalendarSelection
-import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
-import java.time.YearMonth
-import java.time.chrono.HijrahDate
 import java.util.Locale
 
 /** Saves UI configuration; selection and the settled visible month are shared with the dialog. */
@@ -271,7 +270,7 @@ private fun SampleMonth(
     nextDays: Boolean,
     fixedSixRows: Boolean,
     hijriProvider: HijriDateProvider,
-    hijriToday: HijrahDate,
+    hijriToday: HijriDate,
     showHeader: Boolean = true,
     showWeekNumbers: Boolean = false,
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
@@ -286,39 +285,39 @@ private fun SampleMonth(
     }
     when (calendar) {
         SampleCalendar.Gregorian -> GregorianCalendarMonth(
-            month = YearMonth.from(date), selection = state.selection,
-            onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+            month = GregorianYearMonth.fromEpochDay(anchor), selection = state.selection,
+            onDateClick = { state.onDayClick(it) }, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider,
         )
         SampleCalendar.Hijri -> HijriCalendarMonth(
             month = hijriProvider.dateForEpochDay(anchor), selection = state.selection,
-            onDateClick = { state.onDayClick(hijriProvider.epochDayFor(it)) },
-            locale = locale, modifier = Modifier.fillMaxWidth(),
+            onDateClick = { state.onDayClick(it) },
+            modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
-            today = hijriToday, todayDescription = todayDescription, markers = sampleMarkers(date),
+            todayEpochDay = hijriProvider.epochDayFor(hijriToday),
+            todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider, dateProvider = hijriProvider,
         )
         SampleCalendar.SolarHijri -> SolarHijriCalendarMonth(
-            month = JalaliCalendar(date), selection = state.selection,
-            onDateClick = { state.onDayClick(solarHijriEpochDay(it)) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+            month = SolarHijriDate.fromEpochDay(anchor), selection = state.selection,
+            onDateClick = { state.onDayClick(it) }, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider,
         )
         SampleCalendar.SolarHijriNative -> SolarHijriNativeCalendarMonth(
-            month = SolarHijriDate.fromLocalDate(date), selection = state.selection,
-            onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+            month = SolarHijriDate.fromEpochDay(anchor), selection = state.selection,
+            onDateClick = { state.onDayClick(it) }, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
-            today = SolarHijriDate.fromLocalDate(LocalDate.now()),
             todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider,
         )
         SampleCalendar.Chinese -> if (chineseGregorianGrid) {
             GregorianChineseCalendarMonth(
-                month = YearMonth.from(date), selection = state.selection,
-                onDateClick = { state.onDayClick(it.toEpochDay()) }, locale = locale, modifier = Modifier.fillMaxWidth(),
+                month = GregorianYearMonth.fromEpochDay(anchor), selection = state.selection,
+                onDateClick = { state.onDayClick(it) }, modifier = Modifier.fillMaxWidth(),
                 style = chineseStyle, showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
                 fixedSixRows = fixedSixRows, todayDescription = todayDescription, markers = sampleMarkers(date),
                 showHeader = showHeader, weekNumber = weekNumberProvider,
@@ -326,7 +325,7 @@ private fun SampleMonth(
         } else {
             ChineseCalendarMonth(
                 month = ChineseMonth.fromEpochDay(anchor), selection = state.selection,
-                onDateClick = state::onDayClick, locale = locale, modifier = Modifier.fillMaxWidth(),
+                onDateClick = state::onDayClick, modifier = Modifier.fillMaxWidth(),
                 style = chineseStyle, showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
                 fixedSixRows = fixedSixRows, todayDescription = todayDescription, markers = sampleMarkers(date),
                 showHeader = showHeader, weekNumber = weekNumberProvider,
@@ -343,25 +342,23 @@ private fun SampleWeek(
     locale: Locale,
     state: CalendarSelectionState,
     hijriProvider: HijriDateProvider,
-    hijriToday: HijrahDate,
+    hijriToday: HijriDate,
     showWeekNumbers: Boolean,
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
     val week: CalendarWeekData? = runCatching { when (calendar) {
-        SampleCalendar.Gregorian -> gregorianWeekData(date, locale)
+        SampleCalendar.Gregorian -> gregorianWeekData(anchor)
         SampleCalendar.Hijri -> hijriWeekData(
-            date = hijriProvider.dateForEpochDay(anchor),
-            locale = locale,
-            today = hijriToday,
+            dateEpochDay = anchor,
+            todayEpochDay = hijriProvider.epochDayFor(hijriToday),
             dateProvider = hijriProvider,
         )
-        SampleCalendar.SolarHijri -> solarHijriWeekData(JalaliCalendar(date), locale)
-        SampleCalendar.SolarHijriNative -> solarHijriNativeWeekData(SolarHijriDate.fromLocalDate(date), locale)
+        SampleCalendar.SolarHijri -> solarHijriWeekData(anchor)
+        SampleCalendar.SolarHijriNative -> solarHijriNativeWeekData(anchor)
         SampleCalendar.Chinese -> chineseWeekData(
             epochDay = anchor,
             style = chineseStyle,
-            locale = locale,
             todayEpochDay = LocalDate.now().toEpochDay(),
         )
     } }.getOrNull()

@@ -1,12 +1,12 @@
 package com.develotter.calendarviewsample
 
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
+import com.develotter.calendarview.calendars.hijri.HijriDate
 import com.develotter.calendarview.calendars.hijri.OffsetHijriDateProvider
+import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
-import java.time.LocalDate
-import java.time.chrono.HijrahDate
 import java.util.Locale
 
 class CalendarSampleMonthDataTest {
@@ -14,11 +14,11 @@ class CalendarSampleMonthDataTest {
 
     @Test
     fun hijriOffsetChangesAgendaEpochDaysWithoutChangingTheMonthLength() {
-        val first = HijrahDate.of(1447, 9, 1)
-        val base = sampleMonthData(SampleCalendar.Hijri, first.toEpochDay(), locale)
+        val firstEpochDay = UmmAlQuraHijriDateProvider.epochDayFor(HijriDate(1447, 9, 1))
+        val base = sampleMonthData(SampleCalendar.Hijri, firstEpochDay, locale)
         val shifted = sampleMonthData(
             calendar = SampleCalendar.Hijri,
-            anchorEpochDay = first.toEpochDay(),
+            anchorEpochDay = firstEpochDay,
             locale = locale,
             hijriDateProvider = OffsetHijriDateProvider(offsetDays = 1),
         )
@@ -33,7 +33,7 @@ class CalendarSampleMonthDataTest {
     @Test
     fun hijriMonthStartsAtTheProvidersAbsoluteMonthBoundary() {
         val provider = OffsetHijriDateProvider(offsetDays = 1)
-        val first = HijrahDate.of(1448, 1, 1)
+        val first = HijriDate(1448, 1, 1)
         val firstEpochDay = provider.epochDayFor(first)
         val data = sampleMonthData(
             calendar = SampleCalendar.Hijri,
@@ -48,7 +48,7 @@ class CalendarSampleMonthDataTest {
 
     @Test
     fun chineseAgendaLabelsFollowTheSelectedStyleWithoutChangingTheDate() {
-        val anchor = LocalDate.of(2023, 3, 22).toEpochDay()
+        val anchor = 19438L // 2023-03-22, the first day of the 2023 leap second month
         val titles = ChineseTextStyle.entries.associateWith { style ->
             sampleMonthData(
                 calendar = SampleCalendar.Chinese,
@@ -66,7 +66,7 @@ class CalendarSampleMonthDataTest {
 
     @Test
     fun weekNumberUsesTheLocaleWeekFields() {
-        val weekNumber = sampleWeekNumber(LocalDate.of(2026, 1, 5).toEpochDay(), Locale.US)
+        val weekNumber = sampleWeekNumber(19728L, Locale.US) // 2026-01-05
         assertTrue(weekNumber.isNotBlank())
         assertTrue(weekNumber.all(Char::isDigit))
     }

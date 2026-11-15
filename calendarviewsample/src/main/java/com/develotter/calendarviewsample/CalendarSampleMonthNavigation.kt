@@ -9,19 +9,15 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
 import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.calendars.chineseCompose.rememberChineseMonthState
+import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.calendars.gregorian.compose.rememberGregorianMonthState
 import com.develotter.calendarview.calendars.hijri.HijriDateProvider
 import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.calendars.hijri.compose.rememberHijriMonthState
 import com.develotter.calendarview.calendars.solarHijri.compose.rememberSolarHijriMonthState
-import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.rememberSolarHijriNativeMonthState
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
-import ir.huri.jcal.JalaliCalendar
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.temporal.ChronoField
 import java.util.Locale
 
 /** Title and navigation state exposed by the engine-specific saveable month state. */
@@ -34,6 +30,9 @@ internal data class SampleMonthNavigation(
  * Bridges the controlled sample anchor to the library's engine month states. Scrolling the
  * viewport updates the state through [anchor]; header navigation reports the normalized first
  * day back to the sample, which keeps the grid, pager and dialog in sync.
+ *
+ * The labels come from the platform formatter of each engine, so [locale] is only kept as part
+ * of the sample's public signature.
  */
 @Composable
 internal fun rememberSampleMonthNavigation(
@@ -45,22 +44,21 @@ internal fun rememberSampleMonthNavigation(
     chineseGregorianGrid: Boolean = false,
     onMonthChanged: (Long) -> Unit,
 ): SampleMonthNavigation {
-    val date = LocalDate.ofEpochDay(anchor)
     val onChanged by rememberUpdatedState(onMonthChanged)
     return when (calendar) {
         SampleCalendar.Gregorian -> {
             // Keep the state initializer stable; the anchor effect below is the controlled input.
-            val initialMonth = remember { YearMonth.from(date) }
+            val initialMonth = remember { GregorianYearMonth.fromEpochDay(anchor) }
             val state = rememberGregorianMonthState(initialMonth)
             LaunchedEffect(state.month) {
-                val epochDay = state.month.atDay(1).toEpochDay()
+                val epochDay = state.month.atDay(1)
                 if (epochDay != anchor) onChanged(epochDay)
             }
             LaunchedEffect(anchor) {
-                val target = YearMonth.from(LocalDate.ofEpochDay(anchor))
+                val target = GregorianYearMonth.fromEpochDay(anchor)
                 if (state.month != target) state.goTo(target)
             }
-            SampleMonthNavigation(title = state.title(locale), state = state)
+            SampleMonthNavigation(title = state.title(), state = state)
         }
         SampleCalendar.Hijri -> {
             val initialMonth = remember(hijriDateProvider) {
@@ -75,41 +73,38 @@ internal fun rememberSampleMonthNavigation(
                 if (epochDay != anchor) onChanged(epochDay)
             }
             LaunchedEffect(anchor) {
-                val target = hijriDateProvider.dateForEpochDay(anchor)
-                    .with(ChronoField.DAY_OF_MONTH, 1)
+                val target = hijriDateProvider.dateForEpochDay(anchor).copy(dayOfMonth = 1)
                 if (state.month != target) state.goTo(target)
             }
-            SampleMonthNavigation(title = state.title(locale), state = state)
+            SampleMonthNavigation(title = state.title(), state = state)
         }
         SampleCalendar.SolarHijri -> {
-            val initialMonth = remember { JalaliCalendar(date) }
+            val initialMonth = remember { SolarHijriDate.fromEpochDay(anchor) }
             val state = rememberSolarHijriMonthState(initialMonth)
             LaunchedEffect(state.year, state.monthNumber) {
-                val epochDay = solarHijriEpochDay(state.month)
+                val epochDay = state.month.toEpochDay()
                 if (epochDay != anchor) onChanged(epochDay)
             }
             LaunchedEffect(anchor) {
-                val target = JalaliCalendar(LocalDate.ofEpochDay(anchor))
-                if (state.year != target.year || state.monthNumber != target.month) {
-                    state.goTo(target)
-                }
+                val target = SolarHijriDate.fromEpochDay(anchor).withDayOfMonth(1)
+                if (state.month != target) state.goTo(target)
             }
-            SampleMonthNavigation(title = state.title(locale), state = state)
+            SampleMonthNavigation(title = state.title(), state = state)
         }
         SampleCalendar.Chinese -> if (chineseGregorianGrid) {
             // The overlay is a Gregorian month grid, including its header, previous/next and
             // pager identities. Selection remains the shared epoch-day selection.
-            val initialMonth = remember { YearMonth.from(date) }
+            val initialMonth = remember { GregorianYearMonth.fromEpochDay(anchor) }
             val state = rememberGregorianMonthState(initialMonth)
             LaunchedEffect(state.month) {
-                val epochDay = state.month.atDay(1).toEpochDay()
+                val epochDay = state.month.atDay(1)
                 if (epochDay != anchor) onChanged(epochDay)
             }
             LaunchedEffect(anchor) {
-                val target = YearMonth.from(LocalDate.ofEpochDay(anchor))
+                val target = GregorianYearMonth.fromEpochDay(anchor)
                 if (state.month != target) state.goTo(target)
             }
-            SampleMonthNavigation(title = state.title(locale), state = state)
+            SampleMonthNavigation(title = state.title(), state = state)
         } else {
             // A saved or externally supplied sample anchor may predate the Chinese range.
             // Clamp only this header's input and report the normalized month back; never call
@@ -135,7 +130,7 @@ internal fun rememberSampleMonthNavigation(
             SampleMonthNavigation(title = state.title(chineseStyle), state = state)
         }
         SampleCalendar.SolarHijriNative -> {
-            val initialMonth = remember { SolarHijriDate.fromLocalDate(date) }
+            val initialMonth = remember { SolarHijriDate.fromEpochDay(anchor) }
             val state = rememberSolarHijriNativeMonthState(initialMonth)
             LaunchedEffect(state.year, state.monthNumber) {
                 val epochDay = state.month.toEpochDay()
@@ -145,7 +140,7 @@ internal fun rememberSampleMonthNavigation(
                 val target = SolarHijriDate.fromEpochDay(anchor).withDayOfMonth(1)
                 if (state.month != target) state.goTo(target)
             }
-            SampleMonthNavigation(title = state.title(locale), state = state)
+            SampleMonthNavigation(title = state.title(), state = state)
         }
     }
 }

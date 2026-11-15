@@ -248,7 +248,6 @@ private fun HeatmapSample() {
                                 onDayClick = { day ->
                                     if (mode == TypeSelectDay.None) selected = day.epochDay else state.onDayClick(day.epochDay)
                                 },
-                                locale = locale,
                                 showWeekdayLabels = labels,
                                 showHeader = header,
                                 orientation = orientation,

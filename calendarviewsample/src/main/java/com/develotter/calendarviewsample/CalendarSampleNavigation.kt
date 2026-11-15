@@ -1,16 +1,13 @@
 package com.develotter.calendarviewsample
 
-import com.develotter.calendarview.calendars.chineseNative.ChineseDate
 import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
-import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriEpochDay
+import com.develotter.calendarview.calendars.chineseNative.ChineseDate
+import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
+import com.develotter.calendarview.calendars.hijri.HijriDate
+import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
-import ir.huri.jcal.JalaliCalendar
 import java.text.NumberFormat
 import java.time.LocalDate
-import java.time.YearMonth
-import java.time.chrono.HijrahDate
-import java.time.temporal.ChronoField
-import java.time.temporal.ChronoUnit
 import java.time.temporal.WeekFields
 import java.util.Locale
 
@@ -41,27 +38,33 @@ fun sampleWeekNumber(epochDay: Long, locale: Locale): String {
  * Uses calendar months, not fixed day offsets. Platform/library range errors propagate
  * so the UI can display an error and leave its current month unchanged.
  */
-fun moveSampleMonth(calendar: SampleCalendar, anchorEpochDay: Long, offset: Int): Long {
-    val date = LocalDate.ofEpochDay(anchorEpochDay)
-    return when (calendar) {
-        SampleCalendar.Gregorian -> YearMonth.from(date).plusMonths(offset.toLong()).atDay(1).toEpochDay()
-        SampleCalendar.Hijri -> HijrahDate.from(date)
-            .with(ChronoField.DAY_OF_MONTH, 1)
-            .plus(offset.toLong(), ChronoUnit.MONTHS).toEpochDay()
-        SampleCalendar.SolarHijri -> {
-            val jalali = JalaliCalendar(date)
-            val index = jalali.year.toLong() * 12 + jalali.month - 1 + offset.toLong()
-            val year = Math.toIntExact(Math.floorDiv(index, 12L))
-            val month = Math.floorMod(index, 12L).toInt() + 1
-            solarHijriEpochDay(JalaliCalendar(year, month, 1))
-        }
-        SampleCalendar.SolarHijriNative -> SolarHijriDate.fromLocalDate(date)
-            .withDayOfMonth(1)
-            .plusMonths(offset.toLong())
-            .toEpochDay()
-        SampleCalendar.Chinese -> ChineseDate.fromEpochDay(anchorEpochDay)
-            .withDayOfMonth(1)
-            .plusMonths(offset.toLong())
-            .toEpochDay()
+fun moveSampleMonth(calendar: SampleCalendar, anchorEpochDay: Long, offset: Int): Long = when (calendar) {
+    SampleCalendar.Gregorian -> GregorianYearMonth.fromEpochDay(anchorEpochDay)
+        .plusMonths(offset)
+        .atDay(1)
+    SampleCalendar.Hijri -> {
+        val provider = UmmAlQuraHijriDateProvider
+        val date = provider.dateForEpochDay(anchorEpochDay)
+        val index = date.year.toLong() * 12 + (date.month - 1) + offset
+        val year = floorDiv(index, 12L).toInt()
+        val month = floorMod(index, 12L).toInt() + 1
+        provider.epochDayFor(HijriDate(year, month, 1))
     }
+    SampleCalendar.SolarHijri, SampleCalendar.SolarHijriNative ->
+        SolarHijriDate.fromEpochDay(anchorEpochDay)
+            .withDayOfMonth(1)
+            .plusMonths(offset.toLong())
+            .toEpochDay()
+    SampleCalendar.Chinese -> ChineseDate.fromEpochDay(anchorEpochDay)
+        .withDayOfMonth(1)
+        .plusMonths(offset.toLong())
+        .toEpochDay()
 }
+
+/** Month index arithmetic shared by the Hijri month stepping above. */
+private fun floorDiv(value: Long, divisor: Long): Long {
+    val quotient = value / divisor
+    return if (value % divisor != 0L && (value xor divisor) < 0) quotient - 1 else quotient
+}
+
+private fun floorMod(value: Long, divisor: Long): Long = value - floorDiv(value, divisor) * divisor

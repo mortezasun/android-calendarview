@@ -3,6 +3,7 @@ package com.develotter.calendarviewsample
 import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.calendars.chineseCompose.chineseMonthData
+import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthData
 import com.develotter.calendarview.calendars.hijri.HijriDateProvider
 import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
@@ -11,9 +12,8 @@ import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthD
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
 import com.develotter.calendarview.compose.CalendarMonthData
-import ir.huri.jcal.JalaliCalendar
 import java.time.LocalDate
-import java.time.YearMonth
+import java.time.temporal.WeekFields
 import java.util.Locale
 
 /**
@@ -29,30 +29,32 @@ fun sampleMonthData(
     hijriDateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
 ): CalendarMonthData {
-    val date = LocalDate.ofEpochDay(anchorEpochDay)
+    val todayEpochDay = today.toEpochDay()
+    val localeFirstDay = WeekFields.of(locale).firstDayOfWeek.value
     return when (calendar) {
-        SampleCalendar.Gregorian -> gregorianMonthData(YearMonth.from(date), locale, today = today)
+        SampleCalendar.Gregorian -> gregorianMonthData(
+            month = GregorianYearMonth.fromEpochDay(anchorEpochDay),
+            firstDayOfWeek = localeFirstDay,
+            todayEpochDay = todayEpochDay,
+        )
         SampleCalendar.Hijri -> hijriMonthData(
             month = hijriDateProvider.dateForEpochDay(anchorEpochDay),
-            locale = locale,
-            today = hijriDateProvider.dateForEpochDay(today.toEpochDay()),
+            todayEpochDay = todayEpochDay,
             dateProvider = hijriDateProvider,
         )
         SampleCalendar.SolarHijri -> solarHijriMonthData(
-            month = JalaliCalendar(date),
-            locale = locale,
-            today = JalaliCalendar(today),
+            month = SolarHijriDate.fromEpochDay(anchorEpochDay),
+            todayEpochDay = todayEpochDay,
         )
         SampleCalendar.SolarHijriNative -> solarHijriNativeMonthData(
-            month = SolarHijriDate.fromLocalDate(date),
-            locale = locale,
-            today = SolarHijriDate.fromLocalDate(today),
+            month = SolarHijriDate.fromEpochDay(anchorEpochDay),
+            todayEpochDay = todayEpochDay,
         )
         SampleCalendar.Chinese -> chineseMonthData(
             month = ChineseMonth.fromEpochDay(anchorEpochDay),
             style = chineseStyle,
-            locale = locale,
-            todayEpochDay = today.toEpochDay(),
+            firstDayOfWeek = localeFirstDay,
+            todayEpochDay = todayEpochDay,
         )
     }
 }
