@@ -15,7 +15,6 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseFormat
 import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
-import java.time.LocalDate
 
 /**
  * Observable Chinese visible-month state with optional inclusive bounds.
@@ -33,7 +32,7 @@ class ChineseMonthState(
     initialMonth: ChineseMonth,
     val minMonth: ChineseMonth = ChineseCalendarEngine.firstMonthOfYear(ChineseCalendarEngine.MIN_YEAR),
     val maxMonth: ChineseMonth = ChineseCalendarEngine.lastMonthOfYear(ChineseCalendarEngine.MAX_YEAR),
-    private val today: () -> Long = { LocalDate.now().toEpochDay() },
+    private val today: () -> Long = { ChinesePlatform.currentEpochDay() },
 ) : CalendarMonthNavigationState {
     init {
         require(minMonth <= maxMonth) { "minMonth must not be after maxMonth" }
@@ -119,10 +118,10 @@ internal fun defaultChineseMonth(todayEpochDay: Long): ChineseMonth =
  */
 @Composable
 fun rememberChineseMonthState(
-    initialMonth: ChineseMonth = defaultChineseMonth(LocalDate.now().toEpochDay()),
+    initialMonth: ChineseMonth = defaultChineseMonth(ChinesePlatform.currentEpochDay()),
     minMonth: ChineseMonth = ChineseCalendarEngine.firstMonthOfYear(ChineseCalendarEngine.MIN_YEAR),
     maxMonth: ChineseMonth = ChineseCalendarEngine.lastMonthOfYear(ChineseCalendarEngine.MAX_YEAR),
-    today: () -> Long = { LocalDate.now().toEpochDay() },
+    today: () -> Long = { ChinesePlatform.currentEpochDay() },
 ): ChineseMonthState {
     // The callback is an input, not an initializer: a recomposition may replace it while the
     // visible month and the restored state must stay untouched. The delegated read keeps the

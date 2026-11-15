@@ -1,13 +1,10 @@
 package com.develotter.calendarview.calendars.chineseCompose
 
 import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
+import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.compose.HeatmapMonthData
 import com.develotter.calendarview.compose.toHeatmap
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.temporal.WeekFields
-import java.util.Locale
 
 /**
  * Year heatmap blocks for the Chinese calendar, one per month.
@@ -20,16 +17,14 @@ import java.util.Locale
 fun chineseYearHeatmap(
     year: Int,
     style: ChineseTextStyle = ChineseTextStyle.English,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek,
-    todayEpochDay: Long = LocalDate.now().toEpochDay(),
+    firstDayOfWeek: Int = ChinesePlatform.defaultFirstDayOfWeek(),
+    todayEpochDay: Long = ChinesePlatform.currentEpochDay(),
     isDateEnabled: (Long) -> Boolean = { true },
     intensity: (Long) -> Float = { 0f },
 ): List<HeatmapMonthData> = ChineseCalendarEngine.monthsInYear(year).map { month ->
     chineseMonthData(
         month = month,
         style = style,
-        locale = locale,
         firstDayOfWeek = firstDayOfWeek,
         todayEpochDay = todayEpochDay,
         isDateEnabled = isDateEnabled,
@@ -45,15 +40,13 @@ fun chineseMonthHeatmap(
     monthNumber: Int,
     isLeapMonth: Boolean,
     style: ChineseTextStyle = ChineseTextStyle.English,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek,
-    todayEpochDay: Long = LocalDate.now().toEpochDay(),
+    firstDayOfWeek: Int = ChinesePlatform.defaultFirstDayOfWeek(),
+    todayEpochDay: Long = ChinesePlatform.currentEpochDay(),
     isDateEnabled: (Long) -> Boolean = { true },
     intensity: (Long) -> Float = { 0f },
 ): HeatmapMonthData = chineseMonthData(
-    month = com.develotter.calendarview.calendars.chineseNative.ChineseMonth.of(year, monthNumber, isLeapMonth),
+    month = ChineseMonth.of(year, monthNumber, isLeapMonth),
     style = style,
-    locale = locale,
     firstDayOfWeek = firstDayOfWeek,
     todayEpochDay = todayEpochDay,
     isDateEnabled = isDateEnabled,

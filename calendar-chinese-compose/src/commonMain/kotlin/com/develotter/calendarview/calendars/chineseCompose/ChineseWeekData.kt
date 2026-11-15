@@ -8,11 +8,6 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseFormat
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.format.TextStyle
-import java.time.temporal.WeekFields
-import java.util.Locale
 
 /** Chinese seven-day snapshot; lists are read-only and [days] are consecutive epoch days. */
 @Immutable
@@ -23,7 +18,7 @@ data class ChineseWeekData(
 ) : CalendarWeekData
 
 /**
- * Builds the week containing [epochDay], aligned to [firstDayOfWeek].
+ * Builds the week containing [epochDay], aligned to [firstDayOfWeek] (ISO 1..7, Monday first).
  *
  * Unlike a month, a week cannot be partially rendered at the data-set boundaries: if any of its
  * seven days is outside the supported range this function throws
@@ -33,13 +28,11 @@ data class ChineseWeekData(
 fun chineseWeekData(
     epochDay: Long,
     style: ChineseTextStyle = ChineseTextStyle.English,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = WeekFields.of(locale).firstDayOfWeek,
-    todayEpochDay: Long = LocalDate.now().toEpochDay(),
+    firstDayOfWeek: Int = ChinesePlatform.defaultFirstDayOfWeek(),
+    todayEpochDay: Long = ChinesePlatform.currentEpochDay(),
     isDateEnabled: (Long) -> Boolean = { true },
 ): ChineseWeekData {
-    val offset = Math.floorMod(epochDay + 4L - firstDayOfWeek.value, 7L).toInt()
-    val start = epochDay - offset
+    val start = epochDay - chineseDayOfWeekOffset(epochDay, firstDayOfWeek)
     val end = start + 6
     if (!ChineseCalendarEngine.isSupported(start) || !ChineseCalendarEngine.isSupported(end)) {
         throw ChineseDateOutOfRangeException(
@@ -51,9 +44,7 @@ fun chineseWeekData(
     val last = ChineseDate.fromEpochDay(end)
     return ChineseWeekData(
         title = "${ChineseFormat.dateLabel(first, style)} – ${ChineseFormat.dateLabel(last, style)}",
-        weekdayLabels = List(7) { index ->
-            firstDayOfWeek.plus(index.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale)
-        },
+        weekdayLabels = chineseWeekdayLabels(firstDayOfWeek),
         days = List(7) { index ->
             chineseDayCell(
                 epochDay = start + index,

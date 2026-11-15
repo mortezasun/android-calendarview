@@ -29,6 +29,7 @@ kotlin {
         commonMain.dependencies {
             api(project(":library"))
             api(project(":calendar-chinese-native"))
+            api(project(":calendar-gregorian"))
             implementation(compose.material3)
         }
         commonTest.dependencies {
