@@ -8,8 +8,7 @@ public final class com.develotter.calendarview.calendars.solarHijriNative.SolarH
   public final int getMonth();
   public final int getDay();
   public final long toEpochDay();
-  public final java.time.LocalDate toLocalDate();
-  public final java.time.DayOfWeek dayOfWeek();
+  public final int isoWeekday();
   public final int lengthOfMonth();
   public final boolean isLeapYear();
   public final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate plusDays(long);
@@ -33,8 +32,11 @@ public final class com.develotter.calendarview.calendars.solarHijriNative.SolarH
 public final class com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate$Companion {
   public final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate of(int, int, int);
   public final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate fromEpochDay(long);
-  public final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate fromLocalDate(java.time.LocalDate);
-  public final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate now(java.time.Clock);
+  public final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate now();
+}
+
+public final class com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDateKt {
+  public static final int isoWeekdayOfEpochDay(long);
 }
 
 public final class com.develotter.calendarview.calendars.solarHijriNative.SolarHijriEngine {
@@ -49,17 +51,39 @@ public final class com.develotter.calendarview.calendars.solarHijriNative.SolarH
   public final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate fromEpochDay(long);
 }
 
+public final class com.develotter.calendarview.calendars.solarHijriNative.SolarHijriJvmConversionsKt {
+  public static final java.time.LocalDate toLocalDate(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate);
+  public static final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate toSolarHijri(java.time.LocalDate);
+}
+
 public final class com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLocale {
   public static final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLocale INSTANCE;
-  public final java.lang.String monthName(int, java.util.Locale);
-  public final java.lang.String formatNumber(int, java.util.Locale);
-  public final java.lang.String formatMonthYear(int, int, java.util.Locale);
+  public final java.lang.String monthName(int);
+  public final java.lang.String formatNumber(int);
+  public final java.lang.String formatMonthYear(int, int);
+}
+
+public final class com.develotter.calendarview.calendars.solarHijriNative.SolarHijriMathKt {
+  public static final int floorDiv(int, int);
+  public static final int floorMod(int, int);
+  public static final long floorDiv(long, long);
+  public static final long floorMod(long, long);
+}
+
+public final class com.develotter.calendarview.calendars.solarHijriNative.SolarHijriPlatform {
+  public static final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriPlatform INSTANCE;
+  public final long currentEpochDay();
+  public final java.lang.String localeLanguage();
+  public final java.lang.String localeCountry();
+  public final java.lang.String formatDayNumber(int);
+  public final java.lang.String weekdayShortLabel(int);
+  public final java.lang.String weekdayFullLabel(int);
 }
 
 public final class com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeCalendarMonthKt {
-  public static final com.develotter.calendarview.compose.CalendarDayCell solarHijriNativeDayCell(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, java.util.Locale, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, kotlin.jvm.functions.Function1<? super com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, java.lang.Boolean>);
-  public static final com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthData solarHijriNativeMonthData(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, java.util.Locale, java.time.DayOfWeek, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, kotlin.jvm.functions.Function1<? super com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, java.lang.Boolean>);
-  public static final void SolarHijriNativeCalendarMonth--t4yqeQ(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, kotlin.Unit>, androidx.compose.ui.Modifier, java.util.Locale, java.time.DayOfWeek, boolean, boolean, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map<java.lang.Long, ? extends java.util.List<com.develotter.calendarview.compose.CalendarDayMarker>>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, kotlin.jvm.functions.Function1<? super com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, java.lang.Boolean>, androidx.compose.runtime.Composer, int, int, int);
+  public static final com.develotter.calendarview.compose.CalendarDayCell solarHijriNativeDayCell(long, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
+  public static final com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthData solarHijriNativeMonthData(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, int, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
+  public static final void SolarHijriNativeCalendarMonth(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super java.lang.Long, kotlin.Unit>, androidx.compose.ui.Modifier, int, boolean, boolean, long, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map<java.lang.Long, ? extends java.util.List<com.develotter.calendarview.compose.CalendarDayMarker>>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, androidx.compose.runtime.Composer, int, int, int);
 }
 
 public final class com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthData implements com.develotter.calendarview.compose.CalendarMonthData {
@@ -79,7 +103,7 @@ public final class com.develotter.calendarview.calendars.solarHijriNative.compos
 }
 
 public final class com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthState implements com.develotter.calendarview.compose.CalendarMonthNavigationState {
-  public com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthState(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, java.time.Clock);
+  public com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthState(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, kotlin.jvm.functions.Function0<java.lang.Long>);
   public final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate getMinMonth();
   public final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate getMaxMonth();
   public final int getYear();
@@ -92,11 +116,11 @@ public final class com.develotter.calendarview.calendars.solarHijriNative.compos
   public void next();
   public void goToToday();
   public final void goTo(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate);
-  public final java.lang.String title(java.util.Locale);
+  public final java.lang.String title();
 }
 
 public final class com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthStateKt {
-  public static final com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthState rememberSolarHijriNativeMonthState(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, java.time.Clock, androidx.compose.runtime.Composer, int, int);
+  public static final com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthState rememberSolarHijriNativeMonthState(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, kotlin.jvm.functions.Function0<java.lang.Long>, androidx.compose.runtime.Composer, int, int);
 }
 
 public final class com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeWeekData implements com.develotter.calendarview.compose.CalendarWeekData {
@@ -116,5 +140,8 @@ public final class com.develotter.calendarview.calendars.solarHijriNative.compos
 }
 
 public final class com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeWeekDataKt {
-  public static final com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeWeekData solarHijriNativeWeekData(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, java.util.Locale, java.time.DayOfWeek, com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, kotlin.jvm.functions.Function1<? super com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, java.lang.Boolean>);
+  public static final int SolarHijriNativeDefaultFirstDayOfWeek;
+  public static final com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeWeekData solarHijriNativeWeekData(long, int, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
+  public static final java.util.List<java.lang.String> solarHijriNativeWeekdayLabels(int);
+  public static final int solarHijriNativeDayOfWeekOffset(long, int);
 }

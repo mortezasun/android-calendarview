@@ -3,15 +3,18 @@
 
 public final class com.develotter.calendarview.calendars.chineseCompose.ChineseCalendarMonthKt {
   public static final com.develotter.calendarview.compose.CalendarDayCell chineseDayCell(long, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
-  public static final com.develotter.calendarview.calendars.chineseCompose.ChineseMonthData chineseMonthData(com.develotter.calendarview.calendars.chineseNative.ChineseMonth, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, java.util.Locale, java.time.DayOfWeek, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
-  public static final void ChineseCalendarMonth(com.develotter.calendarview.calendars.chineseNative.ChineseMonth, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super java.lang.Long, kotlin.Unit>, androidx.compose.ui.Modifier, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, java.util.Locale, java.time.DayOfWeek, boolean, boolean, long, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map<java.lang.Long, ? extends java.util.List<com.develotter.calendarview.compose.CalendarDayMarker>>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, androidx.compose.runtime.Composer, int, int, int);
-  public static final void GregorianChineseCalendarMonth(java.time.YearMonth, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super java.time.LocalDate, kotlin.Unit>, androidx.compose.ui.Modifier, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, java.util.Locale, java.time.DayOfWeek, boolean, boolean, java.time.LocalDate, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map<java.lang.Long, ? extends java.util.List<com.develotter.calendarview.compose.CalendarDayMarker>>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, androidx.compose.runtime.Composer, int, int, int);
-  public static final com.develotter.calendarview.calendars.chineseNative.ChineseMonth chineseMonthOfOrNull(java.time.YearMonth);
+  public static final com.develotter.calendarview.calendars.chineseCompose.ChineseMonthData chineseMonthData(com.develotter.calendarview.calendars.chineseNative.ChineseMonth, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, int, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
+  public static final void ChineseCalendarMonth--t4yqeQ(com.develotter.calendarview.calendars.chineseNative.ChineseMonth, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super java.lang.Long, kotlin.Unit>, androidx.compose.ui.Modifier, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, int, boolean, boolean, long, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map<java.lang.Long, ? extends java.util.List<com.develotter.calendarview.compose.CalendarDayMarker>>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, androidx.compose.runtime.Composer, int, int, int);
+  public static final void GregorianChineseCalendarMonth(com.develotter.calendarview.calendars.gregorian.GregorianYearMonth, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super java.lang.Long, kotlin.Unit>, androidx.compose.ui.Modifier, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, int, boolean, boolean, long, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map<java.lang.Long, ? extends java.util.List<com.develotter.calendarview.compose.CalendarDayMarker>>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, androidx.compose.runtime.Composer, int, int, int);
+  public static final com.develotter.calendarview.calendars.chineseNative.ChineseMonth chineseMonthOfOrNull(com.develotter.calendarview.calendars.gregorian.GregorianYearMonth);
+  public static final java.util.List<java.lang.String> chineseWeekdayLabels(int);
+  public static final int chineseDayOfWeekOffset(long, int);
+  public static final java.lang.String chineseIsoDate(long);
 }
 
 public final class com.develotter.calendarview.calendars.chineseCompose.ChineseHeatmapKt {
-  public static final java.util.List<com.develotter.calendarview.compose.HeatmapMonthData> chineseYearHeatmap(int, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, java.util.Locale, java.time.DayOfWeek, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Float>);
-  public static final com.develotter.calendarview.compose.HeatmapMonthData chineseMonthHeatmap(int, int, boolean, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, java.util.Locale, java.time.DayOfWeek, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Float>);
+  public static final java.util.List<com.develotter.calendarview.compose.HeatmapMonthData> chineseYearHeatmap(int, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, int, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Float>);
+  public static final com.develotter.calendarview.compose.HeatmapMonthData chineseMonthHeatmap(int, int, boolean, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, int, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Float>);
 }
 
 public final class com.develotter.calendarview.calendars.chineseCompose.ChineseMonthData implements com.develotter.calendarview.compose.CalendarMonthData {
@@ -57,6 +60,16 @@ public final class com.develotter.calendarview.calendars.chineseCompose.ChineseM
   public static final com.develotter.calendarview.calendars.chineseCompose.ChineseMonthState rememberChineseMonthState(com.develotter.calendarview.calendars.chineseNative.ChineseMonth, com.develotter.calendarview.calendars.chineseNative.ChineseMonth, com.develotter.calendarview.calendars.chineseNative.ChineseMonth, kotlin.jvm.functions.Function0<java.lang.Long>, androidx.compose.runtime.Composer, int, int);
 }
 
+public final class com.develotter.calendarview.calendars.chineseCompose.ChinesePlatform {
+  public static final com.develotter.calendarview.calendars.chineseCompose.ChinesePlatform INSTANCE;
+  public final long currentEpochDay();
+  public final int defaultFirstDayOfWeek();
+  public final java.lang.String formatMonthYear(int, int);
+  public final java.lang.String formatFullDate(long);
+  public final java.lang.String formatDayNumber(int);
+  public final java.lang.String weekdayShortLabel(int);
+}
+
 public final class com.develotter.calendarview.calendars.chineseCompose.ChineseWeekData implements com.develotter.calendarview.compose.CalendarWeekData {
   public com.develotter.calendarview.calendars.chineseCompose.ChineseWeekData(java.lang.String, java.util.List<java.lang.String>, java.util.List<com.develotter.calendarview.compose.CalendarDayCell>);
   public java.lang.String getTitle();
@@ -73,5 +86,5 @@ public final class com.develotter.calendarview.calendars.chineseCompose.ChineseW
 }
 
 public final class com.develotter.calendarview.calendars.chineseCompose.ChineseWeekDataKt {
-  public static final com.develotter.calendarview.calendars.chineseCompose.ChineseWeekData chineseWeekData(long, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, java.util.Locale, java.time.DayOfWeek, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
+  public static final com.develotter.calendarview.calendars.chineseCompose.ChineseWeekData chineseWeekData(long, com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle, int, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
 }

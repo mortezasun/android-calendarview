@@ -45,10 +45,10 @@ CLASS_JARS=()
 CLASSPATH=""
 declare -A JARS
 for module in "${MODULES[@]}"; do
-    aar="$module/build/outputs/aar/${module}-release.aar"
+    aar="$module/build/outputs/aar/${module}.aar"
     if [[ ! -f "$aar" ]]; then
         echo "Missing $aar." >&2
-        echo "Run: ./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease :calendar-solarHijri-native:assembleRelease :calendar-chinese-compose:assembleRelease" >&2
+        echo "Run: ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal :calendar-solarHijri-native:publishToMavenLocal :calendar-chinese-compose:publishToMavenLocal" >&2
         exit 1
     fi
     classes_jar="$TMP/${module}.jar"

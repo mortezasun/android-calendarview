@@ -20,21 +20,21 @@ The architecture follows standard Compose state and rendering patterns:
 | Module | Responsibility |
 |--------|----------------|
 | `:library` | Core Compose views (`CalendarMonthGrid`, `CalendarWeekGrid`, `CalendarAgenda`, `CalendarQuarterHeatmap`, `CalendarYearHeatmap`), month containers (`CalendarMonthList`, `CalendarMonthPager`, `CalendarMonthColumns`), selection state machine (`CalendarSelection`, `CalendarSelectionState`, `CalendarRangePolicy`, `TypeSelectDay`), shared month/week data, markers, styling, month navigation, and cell data models. |
-| `:calendar-gregorian` | Gregorian calendar engine backed by `java.time.YearMonth` and `java.time.LocalDate`. Provides `GregorianCalendarMonth`, month/week data builders and day cells. |
-| `:calendar-hijri` | Islamic Hijri calendar engine backed by `java.time.chrono.HijrahDate`. Provides `HijriCalendarMonth`, month/week data builders and day cells. |
-| `:calendar-solarHijri` | Solar Hijri / Jalali calendar engine backed by `ir.huri:jalalicalendar`. Provides `SolarHijriCalendarMonth`, month/week data builders and day cells. |
-| `:calendar-solarHijri-native` | Dependency-free Solar Hijri engine (`SolarHijriEngine`, immutable `SolarHijriDate`, `SolarHijriLocale`, `SolarHijriNativeCalendarMonth`) using the Borkowski (1996) break-table algorithm (`-61..3177` AP). |
-| `:calendar-chinese-native` | Self-written Kotlin Multiplatform Chinese lunisolar engine (`ChineseCalendarEngine`, immutable `ChineseMonth`/`ChineseDate`, `ChineseFormat`, versioned month table). Targets `jvm()` and `linuxX64()`; no Android, Compose, Java date or third-party calendar dependency. |
-| `:calendar-chinese-compose` | Android Compose facade (`ChineseCalendarMonth`, `GregorianChineseCalendarMonth`, `ChineseMonthData`, `ChineseWeekData`, `ChineseMonthState`, `chineseYearHeatmap`) depending only on `:calendar-chinese-native` and `:library`. |
+| `:calendar-gregorian` | Gregorian calendar engine backed by the immutable `GregorianYearMonth` value type. Provides `GregorianCalendarMonth`, month/week data builders and day cells. |
+| `:calendar-hijri` | Islamic Hijri calendar engine backed by the immutable `HijriDate` value type and the platform Umm al-Qura chronology. Provides `HijriCalendarMonth`, month/week data builders and day cells. |
+| `:calendar-solarHijri` | Solar Hijri / Jalali facade over `:calendar-solarHijri-native`. Provides `SolarHijriCalendarMonth`, month/week data builders and day cells; no `ir.huri:jalalicalendar` dependency. |
+| `:calendar-solarHijri-native` | Dependency-free Solar Hijri engine (`SolarHijriEngine`, immutable `SolarHijriDate`, `SolarHijriLocale`, `SolarHijriNativeCalendarMonth`) using the Borkowski (1996) break-table algorithm (`-61..3177` AP); Android, JVM and iOS targets. |
+| `:calendar-chinese-native` | Self-written Kotlin Multiplatform Chinese lunisolar engine (`ChineseCalendarEngine`, immutable `ChineseMonth`/`ChineseDate`, `ChineseFormat`, versioned month table). Targets `jvm()`, `linuxX64()`, Android and iOS; no Compose, Java date or third-party calendar dependency. |
+| `:calendar-chinese-compose` | Compose facade (`ChineseCalendarMonth`, `GregorianChineseCalendarMonth`, `ChineseMonthData`, `ChineseWeekData`, `ChineseMonthState`, `chineseYearHeatmap`) depending on `:calendar-chinese-native`, `:calendar-gregorian` and `:library`. |
 | `:calendar-bom` | `java-platform` constraints for the seven published library artifacts; no runtime classes. |
 | `:calendarviewsample` | Interactive Compose demo app illustrating configuration, selection modes, navigation, dialogs, and heatmaps. |
 
 ### Dependency Rules
 
 - The dependency graph is strictly one-way: `calendar-* -> library` (except the standalone engine), `calendar-chinese-compose -> calendar-chinese-native + library`, `calendarviewsample -> all`.
-- `:library` does not depend on any specific calendar engine or third-party calendar library (such as `jcal`).
+- `:library` does not depend on any specific calendar engine or third-party calendar library.
 - `:calendar-chinese-native` depends only on the Kotlin standard library; no existing module depends on either Chinese module.
-- `calendar-solarHijri` is the only module that declares and encapsulates the `ir.huri:jalalicalendar` dependency.
+- `calendar-solarHijri` reuses the dependency-free `:calendar-solarHijri-native` engine through `api`, so it declares no third-party calendar dependency.
 - `:calendar-bom` constrains published versions but is not a dependency of the modules.
 - Root POM metadata is shared by all `maven-publish` publications; module publication blocks only choose the component and artifact.
 
@@ -43,7 +43,7 @@ The architecture follows standard Compose state and rendering patterns:
 ## Core Rendering Pipeline
 
 1. **Month Data Snapshot:**
-   The caller supplies a month descriptor (e.g. `YearMonth`, `HijrahDate`, or `JalaliCalendar`). The calendar engine computes the `firstDayOffset` (relative to the configured `firstDayOfWeek`) and formats localized `CalendarDayCell` items.
+   The caller supplies a month descriptor (e.g. `GregorianYearMonth`, `HijriDate`, `SolarHijriDate` or `ChineseMonth`). The calendar engine computes the `firstDayOffset` (relative to the configured `firstDayOfWeek`) and formats localized `CalendarDayCell` items.
 2. **Cell Grid Layout:**
    `buildCalendarMonthCells` creates complete 7-column rows. When `fixedSixRows = true`, the grid always produces 42 cells. Padding cells for previous and next months are either left blank (`null`) or populated with real adjacent day identities via `adjacentDayProvider`.
 3. **Compose Month Grid:**
@@ -73,7 +73,7 @@ State is managed declaratively and cleanly separated from UI rendering:
 ## Month Data and Navigation
 
 - **Shared month contract:** every engine month snapshot (`GregorianMonthData`, `HijriMonthData`, `SolarHijriMonthData`, `SolarHijriNativeMonthData`, `ChineseMonthData`) implements `CalendarMonthData`. The contract carries the localized title, seven weekday labels, the leading offset and the current-month `CalendarDayCell` list. `toHeatmap()` builds a `HeatmapMonthData` block from it, including full-week padding, `isToday`/`enabled` forwarding and intensity normalization, so the README no longer needs a hand-written adapter.
-- **Hijri method:** `HijriDateProvider` maps an absolute epoch day to the displayed `HijrahDate` and back. `UmmAlQuraHijriDateProvider` is the default; `OffsetHijriDateProvider` shifts a local method by whole days. Month/week builders derive the cell epoch from the provider's reverse mapping, so labels and selection identity stay consistent. The provider-aware `HijriMonthState` constructor and `rememberHijriMonthState` overload use the same mapping for today; the three-argument API keeps the Umm al-Qura default.
+- **Hijri method:** `HijriDateProvider` maps an absolute epoch day to the displayed `HijriDate` and back. `UmmAlQuraHijriDateProvider` is the default; `OffsetHijriDateProvider` shifts a local method by whole days. Month/week builders derive the cell epoch from the provider's reverse mapping, so labels and selection identity stay consistent. The provider-aware `HijriMonthState` constructor and `rememberHijriMonthState` overload use the same mapping for today; the three-argument API keeps the Umm al-Qura default.
 - **View model states:** `GregorianMonthState`, `HijriMonthState`, `SolarHijriMonthState`, `SolarHijriNativeMonthState` and `ChineseMonthState` are observable, saveable state holders that keep the visible month, normalize it to the first day, enforce inclusive `minMonth`/`maxMonth` bounds and expose `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`. They live in the calendar modules because month arithmetic is calendar-specific.
 - **Header:** `CalendarMonthHeader` is calendar-independent and stateless. It renders the title as a heading, exposes optional today/previous/next actions, and takes localized content descriptions from the caller because the library ships no UI strings.
 - **Semantics:** month titles are headings; the week container exposes one `CollectionInfo` and each day or optional week-number cell exposes `CollectionItemInfo`, so screen readers can announce one grid position. `todayDescription` is an optional caller-localized suffix for today's accessibility label; the default keeps the date-only label.
@@ -96,7 +96,7 @@ State is managed declaratively and cleanly separated from UI rendering:
 - **Adaptive months:** `CalendarMonthColumns` derives one or more columns from the available width and inter-column spacing, so each month keeps its minimum width, and exposes `LazyGridState`. It is a layout container, not a new calendar engine. Width rules, active-month definition and state contract: [ADAPTIVE_LAYOUT.md](ADAPTIVE_LAYOUT.md).
 - **Styling:** `LocalCalendarStyle` carries optional selected/surface/content/today colors and marker geometry. Null colors fall back to MaterialTheme; explicit `todayBorderColor` arguments still take precedence.
 - **Range policy:** `CalendarRangePolicy` validates complete ranges by inclusive length. `CalendarSelectionState` applies it to taps, external ranges, construction and saved-state restoration; it exposes `selectRange` for a caller-owned drag layer and does not install a gesture or enumerate range interiors.
-- **Hijri provider:** `HijriDateProvider`, `UmmAlQuraHijriDateProvider` and `OffsetHijriDateProvider` live in `:calendar-hijri` (not `:library`), because they depend on `HijrahDate`. The view, month data and week data take the provider as a defaulted parameter; no provider state is hidden in a composition local.
+- **Hijri provider:** `HijriDateProvider`, `UmmAlQuraHijriDateProvider` and `OffsetHijriDateProvider` live in `:calendar-hijri` (not `:library`), because they map the platform Hijri chronology to the shared epoch-day identity. The view, month data and week data take the provider as a defaulted parameter; no provider state is hidden in a composition local.
 
 ---
 

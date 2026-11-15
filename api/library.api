@@ -38,10 +38,10 @@ public final class com.develotter.calendarview.compose.CalendarDayMarker {
 
 public final class com.develotter.calendarview.compose.CalendarHeatmapKt {
   public static final float normalizeHeatmapIntensity(float);
-  public static final com.develotter.calendarview.compose.HeatmapQuarterData heatmapQuarterData(int, int, java.util.Map<java.time.LocalDate, java.lang.Float>, java.time.DayOfWeek);
-  public static final void CalendarQuarterHeatmap(int, int, java.util.Map<java.time.LocalDate, java.lang.Float>, kotlin.jvm.functions.Function1<? super java.time.LocalDate, kotlin.Unit>, androidx.compose.ui.Modifier, java.util.Locale, java.time.DayOfWeek, boolean, boolean, com.develotter.calendarview.compose.HeatmapOrientation, com.develotter.calendarview.compose.HeatmapStyle, java.time.LocalDate, kotlin.jvm.functions.Function1<? super java.time.LocalDate, java.lang.Boolean>, com.develotter.calendarview.selection.CalendarSelection, long, long, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function1<? super java.lang.Float, androidx.compose.ui.graphics.Color>, kotlin.jvm.functions.Function3<? super com.develotter.calendarview.compose.HeatmapDay, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int, int);
-  public static final void CalendarYearHeatmap(int, java.util.Map<java.time.LocalDate, java.lang.Float>, kotlin.jvm.functions.Function1<? super java.time.LocalDate, kotlin.Unit>, androidx.compose.ui.Modifier, java.util.Locale, java.time.DayOfWeek, boolean, boolean, com.develotter.calendarview.compose.HeatmapOrientation, com.develotter.calendarview.compose.HeatmapStyle, java.time.LocalDate, kotlin.jvm.functions.Function1<? super java.time.LocalDate, java.lang.Boolean>, com.develotter.calendarview.selection.CalendarSelection, long, long, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function1<? super java.lang.Float, androidx.compose.ui.graphics.Color>, kotlin.jvm.functions.Function3<? super com.develotter.calendarview.compose.HeatmapDay, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int, int);
-  public static final void CalendarYearHeatmap(java.util.List<com.develotter.calendarview.compose.HeatmapMonthData>, kotlin.jvm.functions.Function1<? super com.develotter.calendarview.compose.HeatmapDayData, kotlin.Unit>, androidx.compose.ui.Modifier, java.util.Locale, boolean, boolean, com.develotter.calendarview.compose.HeatmapOrientation, com.develotter.calendarview.compose.HeatmapStyle, com.develotter.calendarview.selection.CalendarSelection, long, long, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function1<? super java.lang.Float, androidx.compose.ui.graphics.Color>, kotlin.jvm.functions.Function3<? super com.develotter.calendarview.compose.HeatmapDayData, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int, int);
+  public static final com.develotter.calendarview.compose.HeatmapQuarterData heatmapQuarterData(int, int, java.util.Map<java.lang.Long, java.lang.Float>, int);
+  public static final void CalendarQuarterHeatmap(int, int, java.util.Map<java.lang.Long, java.lang.Float>, kotlin.jvm.functions.Function1<? super java.lang.Long, kotlin.Unit>, androidx.compose.ui.Modifier, int, boolean, boolean, com.develotter.calendarview.compose.HeatmapOrientation, com.develotter.calendarview.compose.HeatmapStyle, java.lang.Long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, com.develotter.calendarview.selection.CalendarSelection, long, long, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function1<? super java.lang.Float, androidx.compose.ui.graphics.Color>, kotlin.jvm.functions.Function3<? super com.develotter.calendarview.compose.HeatmapDay, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int, int);
+  public static final void CalendarYearHeatmap(int, java.util.Map<java.lang.Long, java.lang.Float>, kotlin.jvm.functions.Function1<? super java.lang.Long, kotlin.Unit>, androidx.compose.ui.Modifier, int, boolean, boolean, com.develotter.calendarview.compose.HeatmapOrientation, com.develotter.calendarview.compose.HeatmapStyle, java.lang.Long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, com.develotter.calendarview.selection.CalendarSelection, long, long, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function1<? super java.lang.Float, androidx.compose.ui.graphics.Color>, kotlin.jvm.functions.Function3<? super com.develotter.calendarview.compose.HeatmapDay, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int, int);
+  public static final void CalendarYearHeatmap(java.util.List<com.develotter.calendarview.compose.HeatmapMonthData>, kotlin.jvm.functions.Function1<? super com.develotter.calendarview.compose.HeatmapDayData, kotlin.Unit>, androidx.compose.ui.Modifier, boolean, boolean, com.develotter.calendarview.compose.HeatmapOrientation, com.develotter.calendarview.compose.HeatmapStyle, com.develotter.calendarview.selection.CalendarSelection, long, long, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function3<? super java.lang.String, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, kotlin.jvm.functions.Function1<? super java.lang.Float, androidx.compose.ui.graphics.Color>, kotlin.jvm.functions.Function3<? super com.develotter.calendarview.compose.HeatmapDayData, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int, int);
 }
 
 public final class com.develotter.calendarview.compose.CalendarMarkersKt {
@@ -162,12 +162,12 @@ public final class com.develotter.calendarview.compose.CalendarWeekGridKt {
 }
 
 public final class com.develotter.calendarview.compose.HeatmapDay {
-  public com.develotter.calendarview.compose.HeatmapDay(java.time.LocalDate, float);
-  public final java.time.LocalDate getDate();
+  public com.develotter.calendarview.compose.HeatmapDay(long, float);
+  public final long getEpochDay();
   public final float getIntensity();
-  public final java.time.LocalDate component1();
+  public final long component1();
   public final float component2();
-  public final com.develotter.calendarview.compose.HeatmapDay copy(java.time.LocalDate, float);
+  public final com.develotter.calendarview.compose.HeatmapDay copy(long, float);
   public java.lang.String toString();
   public int hashCode();
   public boolean equals(java.lang.Object);
@@ -213,15 +213,24 @@ public final class com.develotter.calendarview.compose.HeatmapOrientation extend
   public static kotlin.enums.EnumEntries<com.develotter.calendarview.compose.HeatmapOrientation> getEntries();
 }
 
+public final class com.develotter.calendarview.compose.HeatmapPlatformFormatter {
+  public static final com.develotter.calendarview.compose.HeatmapPlatformFormatter INSTANCE;
+  public final long currentEpochDay();
+  public final java.lang.String formatMonthYear(long);
+  public final java.lang.String formatFullDate(long);
+  public final java.lang.String weekdayShortLabel(int);
+  public final java.lang.String formatPercent(float);
+}
+
 public final class com.develotter.calendarview.compose.HeatmapQuarterData {
-  public com.develotter.calendarview.compose.HeatmapQuarterData(java.time.LocalDate, java.time.LocalDate, java.util.List<? extends java.util.List<com.develotter.calendarview.compose.HeatmapDay>>);
-  public final java.time.LocalDate getStart();
-  public final java.time.LocalDate getEnd();
+  public com.develotter.calendarview.compose.HeatmapQuarterData(long, long, java.util.List<? extends java.util.List<com.develotter.calendarview.compose.HeatmapDay>>);
+  public final long getStartEpochDay();
+  public final long getEndEpochDay();
   public final java.util.List<java.util.List<com.develotter.calendarview.compose.HeatmapDay>> getWeeks();
-  public final java.time.LocalDate component1();
-  public final java.time.LocalDate component2();
+  public final long component1();
+  public final long component2();
   public final java.util.List<java.util.List<com.develotter.calendarview.compose.HeatmapDay>> component3();
-  public final com.develotter.calendarview.compose.HeatmapQuarterData copy(java.time.LocalDate, java.time.LocalDate, java.util.List<? extends java.util.List<com.develotter.calendarview.compose.HeatmapDay>>);
+  public final com.develotter.calendarview.compose.HeatmapQuarterData copy(long, long, java.util.List<? extends java.util.List<com.develotter.calendarview.compose.HeatmapDay>>);
   public java.lang.String toString();
   public int hashCode();
   public boolean equals(java.lang.Object);

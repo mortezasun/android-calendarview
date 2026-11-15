@@ -11,7 +11,7 @@
   <img src="https://img.shields.io/badge/License-Apache%202.0-orange.svg" alt="License"/>
 </p>
 
-A native Jetpack Compose calendar library for Android. It ships one shared, calendar-independent core (month grid, selection engine, containers, heatmaps) plus pluggable calendar engines for **Gregorian**, **Islamic Hijri**, **Solar Hijri (Jalali / Persian)** and the **Chinese lunisolar calendar** — with full RTL support.
+A Kotlin Multiplatform Jetpack Compose calendar library for Android, the JVM and iOS. It ships one shared, calendar-independent core (month grid, selection engine, containers, heatmaps) plus pluggable calendar engines for **Gregorian**, **Islamic Hijri**, **Solar Hijri (Jalali / Persian)** and the **Chinese lunisolar calendar** — with full RTL support.
 
 **Current release:** [`2.4.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.4.0) adds the self-written Chinese lunisolar engine and Compose facade. See the [2.4.0 plan](RELEASE_PLAN_2.4.0.md), [short changelog](docs/releases/2.4.0-changelog.md) and [release notes](docs/releases/2.4.0.md). Verify the JitPack build for the new tag before pinning production dependencies.
 
@@ -43,7 +43,7 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 ## ✨ Features
 
 - **100% Jetpack Compose** – no XML layouts, ViewBinding or reflection.
-- **Multiple calendar systems** – Gregorian (`java.time`), Hijri (`java.time.chrono.HijrahDate`, Umm al-Qura by default), Solar Hijri (`ir.huri.jcal.JalaliCalendar`) and Chinese lunisolar (own dependency-free Kotlin engine with leap months, Chinese years 1901–2099). Hijri month and week data accept a `HijriDateProvider` for local method adjustments.
+- **Multiple calendar systems** – Gregorian (`GregorianYearMonth`), Hijri (`HijriDate`, Umm al-Qura by default), Solar Hijri (`SolarHijriDate`, own dependency-free engine) and Chinese lunisolar (own dependency-free Kotlin engine with leap months, Chinese years 1901–2099). Every engine shares epoch-day identities and platform formatters; Hijri month and week data accept a `HijriDateProvider` for local method adjustments.
 - **One selection engine for all calendars** – `None`, `Single`, `Multiple` and `Range`, keyed by absolute epoch days and saved across process death via `rememberSaveable`.
 - **Configurable month grid** – dynamic rows or fixed 6 rows (42 cells), independently toggleable previous/next-month days, header/weekday visibility, disabled dates and a customizable *today* border.
 - **Scrolling containers** – `CalendarMonthList` (`LazyColumn`/`LazyRow`) and `CalendarMonthPager` (`HorizontalPager`/`VerticalPager`).
@@ -64,12 +64,12 @@ A native Jetpack Compose calendar library for Android. It ships one shared, cale
 | Module | Package | Purpose |
 |--------|---------|---------|
 | `:library` | `com.develotter.calendarview` | Core: `CalendarMonthGrid`, selection engine, containers, heatmaps, shared month data and the month header. No calendar-engine dependencies. |
-| `:calendar-gregorian` | `…calendars.gregorian` | `GregorianCalendarMonth`, backed by `java.time`. |
-| `:calendar-hijri` | `…calendars.hijri` | `HijriCalendarMonth`, backed by `HijrahDate`. |
-| `:calendar-solarHijri` | `…calendars.solarHijri` | `SolarHijriCalendarMonth`, backed by `ir.huri:jalalicalendar` (exposed as `api`). |
-| `:calendar-solarHijri-native` | `…calendars.solarHijriNative` | `SolarHijriNativeCalendarMonth`, dependency-free Borkowski engine (`-61..3177` AP), immutable `SolarHijriDate`, injectable `Clock`. |
-| `:calendar-chinese-native` | `…calendars.chineseNative` | Self-written Kotlin Multiplatform lunisolar engine: immutable `ChineseMonth`/`ChineseDate`, leap months, `ChineseCalendarEngine`, formatting. JVM and `linuxX64` targets; no Android, Compose or third-party calendar dependency. |
-| `:calendar-chinese-compose` | `…calendars.chineseCompose` | `ChineseCalendarMonth`, Gregorian grid with Chinese labels, week data, saveable `ChineseMonthState`, year/month heatmaps. Depends only on the Chinese engine and `:library`. |
+| `:calendar-gregorian` | `…calendars.gregorian` | `GregorianCalendarMonth`, backed by the KMP `GregorianYearMonth` value type and platform formatters. |
+| `:calendar-hijri` | `…calendars.hijri` | `HijriCalendarMonth`, backed by the KMP `HijriDate` value type; the Umm al-Qura chronology comes from the platform. |
+| `:calendar-solarHijri` | `…calendars.solarHijri` | `SolarHijriCalendarMonth`, a facade over the dependency-free `:calendar-solarHijri-native` engine; no `ir.huri:jalalicalendar` dependency. |
+| `:calendar-solarHijri-native` | `…calendars.solarHijriNative` | `SolarHijriNativeCalendarMonth`, dependency-free Borkowski engine (`-61..3177` AP), immutable `SolarHijriDate` with epoch-day APIs; Android, JVM and iOS targets. |
+| `:calendar-chinese-native` | `…calendars.chineseNative` | Self-written Kotlin Multiplatform lunisolar engine: immutable `ChineseMonth`/`ChineseDate`, leap months, `ChineseCalendarEngine`, formatting. JVM, `linuxX64`, Android and iOS targets; no Compose or third-party calendar dependency. |
+| `:calendar-chinese-compose` | `…calendars.chineseCompose` | `ChineseCalendarMonth`, Gregorian grid with Chinese labels, week data, saveable `ChineseMonthState`, year/month heatmaps. Depends only on the Chinese engine, `:calendar-gregorian` and `:library`. |
 | `:calendar-bom` | – | Version constraints for the seven published library artifacts. No runtime code. |
 | `:calendarviewsample` | `com.develotter.calendarviewsample` | Interactive demo app (month views, containers, agenda, adaptive columns, markers, week numbers, styles, range policy, month header and Hijri method offset, heatmaps). |
 
@@ -206,9 +206,9 @@ fun HijriScreen() {
     val state = rememberCalendarSelectionState(TypeSelectDay.Single)
 
     HijriCalendarMonth(
-        month = HijrahDate.now(),
+        month = UmmAlQuraHijriDateProvider.dateForEpochDay(LocalDate.now().toEpochDay()),
         selection = state.selection,
-        onDateClick = { date -> state.onDayClick(date.toEpochDay()) },
+        onDateClick = { epochDay -> state.onDayClick(epochDay) },
     )
 }
 ```

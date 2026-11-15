@@ -4,6 +4,28 @@ Last updated: 2026-11-14
 Version: `2.4.0` (released 2026-11-14; latest previous release: `2.3.0`)
 Branch: `master` (2.4.0 released and merged from `update` on 2026-11-14)
 
+## Kotlin Multiplatform migration (branch `kmp`, unreleased)
+
+Status: implemented and locally verified on branch `kmp`; not released and not verified on
+macOS/iOS. The calendar modules no longer use `java.time` or `ir.huri:jalalicalendar` in shared
+code.
+
+- `:library`, `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` (facade),
+  `:calendar-solarHijri-native` and `:calendar-chinese-compose` moved their shared sources to
+  `commonMain` and use immutable value types plus internal platform formatter hooks.
+- Public callbacks and predicates use epoch days (`Long`), ISO weekday numbers (`Int`) and
+  injected `currentEpochDay` providers instead of `LocalDate`, `DayOfWeek`, `Clock` and
+  `Locale`; see ADR 0006 for the breaking changes.
+- `:calendar-solarHijri` is now a facade over the dependency-free `:calendar-solarHijri-native`
+  engine; the `ir.huri:jalalicalendar` dependency was removed.
+- Verification on Linux: 156 `jvmTest` cases in the seven library modules, 62 sample unit
+  tests, `:calendarviewsample:assembleDebug`, `publishToMavenLocal` for all seven modules plus
+  the BOM, and `scripts/api-check.sh` against the regenerated dumps.
+- Blocked / not run: iOS simulator tests and the `iosApp` sample (need macOS with Xcode);
+  `lintDebug`, `assembleRelease` and `compileDebugAndroidTestKotlin` are not provided by the
+  AGP Kotlin Multiplatform library plugin and were replaced by the metadata/Android compile
+  checks and `publishToMavenLocal`.
+
 ## Current release: 2.4.0 Chinese calendar (2026-11-14)
 
 Status: implemented, committed, locally verified and remotely CI-green on branch `update` at
