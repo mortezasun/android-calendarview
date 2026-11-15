@@ -34,25 +34,16 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.selection.CalendarSelection
-import java.text.NumberFormat
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
-import java.time.format.TextStyle
-import java.time.temporal.ChronoUnit
-import java.util.Locale
 
 /** Heatmap cell snapshot with intensity normalized into 0..1. */
 @Immutable
-data class HeatmapDay(val date: LocalDate, val intensity: Float)
+data class HeatmapDay(val epochDay: Long, val intensity: Float)
 
 /** Weeks are chronological columns; null entries are padding outside the quarter. */
 @Immutable
 data class HeatmapQuarterData(
-    val start: LocalDate,
-    val end: LocalDate,
+    val startEpochDay: Long,
+    val endEpochDay: Long,
     val weeks: List<List<HeatmapDay?>>,
 )
 
@@ -135,57 +126,54 @@ data class HeatmapStyle(
 fun normalizeHeatmapIntensity(value: Float): Float = if (value.isFinite()) value.coerceIn(0f, 1f) else 0f
 
 /**
- * Gregorian quarter data independent of composition and Android views.
+ * Gregorian quarter data independent of composition and platform date APIs.
  * Missing intensities become zero; out-of-quarter keys are ignored. Inputs are not mutated.
- * Date arithmetic errors at the extreme LocalDate bounds propagate to the caller.
+ * [firstDayOfWeek] uses ISO-8601 numbering (1 = Monday .. 7 = Sunday).
  */
 fun heatmapQuarterData(
     year: Int,
     quarter: Int,
-    intensities: Map<LocalDate, Float> = emptyMap(),
-    firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
+    intensities: Map<Long, Float> = emptyMap(),
+    firstDayOfWeek: Int = 1,
 ): HeatmapQuarterData {
     require(quarter in 1..4) { "quarter must be in 1..4" }
-    val start = LocalDate.of(year, (quarter - 1) * 3 + 1, 1)
-    val end = YearMonth.from(start).plusMonths(2).atEndOfMonth()
-    val offset = Math.floorMod(start.dayOfWeek.value - firstDayOfWeek.value, 7)
-    val gridStart = start.minusDays(offset.toLong())
-    val count = (offset + ChronoUnit.DAYS.between(start, end).toInt() + 1 + 6) / 7
+    require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7" }
+    val startMonth = (quarter - 1) * 3 + 1
+    val endMonth = startMonth + 2
+    val start = gregorianToEpochDay(year, startMonth, 1)
+    val end = gregorianToEpochDay(year, endMonth, gregorianDaysInMonth(year, endMonth))
+    val startIsoWeekday = isoWeekdayFromEpochDay(start)
+    val offset = ((startIsoWeekday - firstDayOfWeek) % 7 + 7) % 7
+    val gridStart = start - offset
+    val count = (offset + (end - start).toInt() + 1 + 6) / 7
     return HeatmapQuarterData(start, end, List(count) { week ->
         List(7) { row ->
-            val date = gridStart.plusDays((week * 7 + row).toLong())
-            if (date < start || date > end) null
-            else HeatmapDay(date, normalizeHeatmapIntensity(intensities[date] ?: 0f))
+            val epochDay = gridStart + (week * 7 + row).toLong()
+            if (epochDay < start || epochDay > end) null
+            else HeatmapDay(epochDay, normalizeHeatmapIntensity(intensities[epochDay] ?: 0f))
         }
     })
 }
 
 /**
  * Native Gregorian quarter heatmap with 48dp click targets and horizontal scrolling.
- * The ambient layout direction controls column placement. Labels follow [locale].
- * The default red-to-green scale preserves the legacy view's actual color direction;
- * callers can replace the color function and the composable cell content.
- *
- * Layout, cell geometry, header/weekday slots, today border, disabled dates and selection
- * highlight behave like [CalendarMonthGrid]: [selection] only renders state, the caller
- * still owns it and updates it from [onDayClick]. A selected cell shows
- * [selectedBorderColor] instead of the today border because the fill is the intensity color.
+ * The ambient layout direction controls column placement.
+ * [firstDayOfWeek] uses ISO-8601 numbering (1 = Monday .. 7 = Sunday).
  */
 @Composable
 fun CalendarQuarterHeatmap(
     year: Int,
     quarter: Int,
-    intensities: Map<LocalDate, Float>,
-    onDayClick: (LocalDate) -> Unit,
+    intensities: Map<Long, Float>,
+    onDayClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
+    firstDayOfWeek: Int = 1,
     showWeekdayLabels: Boolean = true,
     showHeader: Boolean = true,
     orientation: HeatmapOrientation = HeatmapOrientation.WeeksAsColumns,
     style: HeatmapStyle = HeatmapStyle(),
-    today: LocalDate? = LocalDate.now(),
-    isDateEnabled: (LocalDate) -> Boolean = { true },
+    todayEpochDay: Long? = HeatmapPlatformFormatter.currentEpochDay(),
+    isDateEnabled: (Long) -> Boolean = { true },
     selection: CalendarSelection? = null,
     todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
     selectedBorderColor: Color = MaterialTheme.colorScheme.primary,
@@ -195,9 +183,6 @@ fun CalendarQuarterHeatmap(
     dayContent: @Composable (HeatmapDay) -> Unit = {},
 ) {
     val data = heatmapQuarterData(year, quarter, intensities, firstDayOfWeek)
-    val monthFormat = DateTimeFormatter.ofPattern("LLLL uuuu", locale)
-    val dateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale)
-    val percent = NumberFormat.getPercentInstance(locale)
     val config = HeatmapRenderConfig(
         showHeader = showHeader,
         showWeekdayLabels = showWeekdayLabels,
@@ -211,21 +196,24 @@ fun CalendarQuarterHeatmap(
         colorForIntensity = colorForIntensity,
     )
     HeatmapBlock(
-        title = "${data.start.format(monthFormat)} - ${data.end.format(monthFormat)}",
-        weekdayLabels = List(7) { firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale) },
+        title = "${HeatmapPlatformFormatter.formatMonthYear(data.startEpochDay)} - ${HeatmapPlatformFormatter.formatMonthYear(data.endEpochDay)}",
+        weekdayLabels = List(7) {
+            val isoDay = ((firstDayOfWeek - 1 + it) % 7) + 1
+            HeatmapPlatformFormatter.weekdayShortLabel(isoDay)
+        },
         weeks = data.weeks,
         config = config,
         modifier = modifier,
         cellInfo = { day ->
             HeatmapCellInfo(
-                epochDay = day.date.toEpochDay(),
+                epochDay = day.epochDay,
                 intensity = day.intensity,
-                description = "${day.date.format(dateFormat)}: ${percent.format(day.intensity)}",
-                isToday = day.date == today,
-                enabled = isDateEnabled(day.date),
+                description = "${HeatmapPlatformFormatter.formatFullDate(day.epochDay)}: ${HeatmapPlatformFormatter.formatPercent(day.intensity)}",
+                isToday = day.epochDay == todayEpochDay,
+                enabled = isDateEnabled(day.epochDay),
             )
         },
-        onClick = { onDayClick(it.date) },
+        onClick = { onDayClick(it.epochDay) },
         dayContent = dayContent,
     )
 }
@@ -233,23 +221,21 @@ fun CalendarQuarterHeatmap(
 /**
  * Four native Compose quarters. The caller supplies vertical scrolling or a bounded host.
  * Data changes recompose the existing tree instead of appending duplicate quarter views.
- * This heatmap deliberately uses Gregorian LocalDate, matching the old heatmap API.
  * All configuration parameters are forwarded to every [CalendarQuarterHeatmap].
  */
 @Composable
 fun CalendarYearHeatmap(
     year: Int,
-    intensities: Map<LocalDate, Float>,
-    onDayClick: (LocalDate) -> Unit,
+    intensities: Map<Long, Float>,
+    onDayClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = DayOfWeek.MONDAY,
+    firstDayOfWeek: Int = 1,
     showWeekdayLabels: Boolean = true,
     showHeader: Boolean = true,
     orientation: HeatmapOrientation = HeatmapOrientation.WeeksAsColumns,
     style: HeatmapStyle = HeatmapStyle(),
-    today: LocalDate? = LocalDate.now(),
-    isDateEnabled: (LocalDate) -> Boolean = { true },
+    todayEpochDay: Long? = HeatmapPlatformFormatter.currentEpochDay(),
+    isDateEnabled: (Long) -> Boolean = { true },
     selection: CalendarSelection? = null,
     todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
     selectedBorderColor: Color = MaterialTheme.colorScheme.primary,
@@ -261,13 +247,24 @@ fun CalendarYearHeatmap(
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         for (quarter in 1..4) {
             CalendarQuarterHeatmap(
-                year, quarter, intensities, onDayClick, locale = locale,
-                firstDayOfWeek = firstDayOfWeek, showWeekdayLabels = showWeekdayLabels,
-                showHeader = showHeader, orientation = orientation, style = style,
-                today = today, isDateEnabled = isDateEnabled, selection = selection,
-                todayBorderColor = todayBorderColor, selectedBorderColor = selectedBorderColor,
-                header = header, weekdayContent = weekdayContent,
-                colorForIntensity = colorForIntensity, dayContent = dayContent,
+                year = year,
+                quarter = quarter,
+                intensities = intensities,
+                onDayClick = onDayClick,
+                firstDayOfWeek = firstDayOfWeek,
+                showWeekdayLabels = showWeekdayLabels,
+                showHeader = showHeader,
+                orientation = orientation,
+                style = style,
+                todayEpochDay = todayEpochDay,
+                isDateEnabled = isDateEnabled,
+                selection = selection,
+                todayBorderColor = todayBorderColor,
+                selectedBorderColor = selectedBorderColor,
+                header = header,
+                weekdayContent = weekdayContent,
+                colorForIntensity = colorForIntensity,
+                dayContent = dayContent,
             )
         }
     }
@@ -288,7 +285,6 @@ fun CalendarYearHeatmap(
     months: List<HeatmapMonthData>,
     onDayClick: (HeatmapDayData) -> Unit,
     modifier: Modifier = Modifier,
-    locale: Locale = Locale.getDefault(),
     showWeekdayLabels: Boolean = true,
     showHeader: Boolean = true,
     orientation: HeatmapOrientation = HeatmapOrientation.WeeksAsColumns,
@@ -305,7 +301,6 @@ fun CalendarYearHeatmap(
     require(months.all { month ->
         month.weekdayLabels.size == 7 && month.weeks.all { week -> week.size == 7 }
     }) { "Heatmap months require seven weekday labels and seven cells per week" }
-    val percent = NumberFormat.getPercentInstance(locale)
     val config = HeatmapRenderConfig(
         showHeader = showHeader,
         showWeekdayLabels = showWeekdayLabels,
@@ -331,7 +326,7 @@ fun CalendarYearHeatmap(
                     HeatmapCellInfo(
                         epochDay = day.epochDay,
                         intensity = intensity,
-                        description = "${day.label}: ${percent.format(intensity)}",
+                        description = "${day.label}: ${HeatmapPlatformFormatter.formatPercent(intensity)}",
                         isToday = day.isToday,
                         enabled = day.enabled,
                     )
@@ -495,4 +490,26 @@ private fun <T : Any> HeatmapCell(
             contentAlignment = Alignment.Center,
         ) { dayContent(day) }
     }
+}
+
+private fun gregorianDaysInMonth(year: Int, month: Int): Int = when (month) {
+    1, 3, 5, 7, 8, 10, 12 -> 31
+    4, 6, 9, 11 -> 30
+    2 -> if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) 29 else 28
+    else -> throw IllegalArgumentException("Invalid month: $month")
+}
+
+private fun gregorianToEpochDay(year: Int, month: Int, day: Int): Long {
+    val y = year.toLong() - if (month <= 2) 1L else 0L
+    val era = if (y >= 0) y / 400 else (y - 399) / 400
+    val yoe = y - era * 400
+    val m = month.toLong()
+    val doy = (153 * (m + if (m > 2) -3 else 9) + 2) / 5 + day - 1
+    val doe = yoe * 365 + yoe / 4 - yoe / 100 + doy
+    return era * 146097 + doe - 719468
+}
+
+private fun isoWeekdayFromEpochDay(epochDay: Long): Int {
+    // 1970-01-01 was Thursday (ISO 4).
+    return (((epochDay + 3) % 7 + 7) % 7).toInt() + 1
 }

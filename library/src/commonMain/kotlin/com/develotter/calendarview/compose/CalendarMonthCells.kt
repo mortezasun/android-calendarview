@@ -46,7 +46,7 @@ fun buildCalendarMonthCells(
                 val provider = requireNotNull(adjacentDayProvider) {
                     "An adjacentDayProvider is required for visible adjacent dates"
                 }
-                val epochDay = Math.addExact(days.first().epochDay, relative.toLong())
+                val epochDay = addExact(days.first().epochDay, relative.toLong())
                 val cell = provider(epochDay)
                 require(cell.epochDay == epochDay) { "Adjacent provider returned a different day identity" }
                 cell.copy(isCurrentMonth = false)
@@ -70,3 +70,11 @@ fun buildCalendarMonthCells(
     fixedSixRows = false,
     adjacentDayProvider = adjacentDayProvider,
 )
+
+private fun addExact(x: Long, y: Long): Long {
+    val r = x + y
+    if (((x xor r) and (y xor r)) < 0) {
+        throw ArithmeticException("long overflow")
+    }
+    return r
+}
