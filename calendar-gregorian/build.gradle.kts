@@ -1,60 +1,37 @@
-import com.android.build.api.dsl.LibraryExtension
-import org.gradle.api.publish.maven.MavenPublication
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
+    alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.kotlin.compose)
     `maven-publish`
 }
 
-extensions.configure<LibraryExtension> {
-    namespace = "com.develotter.calendarview.calendars.gregorian"
-    compileSdk = 37
-    defaultConfig {
-        minSdk = 27
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-    buildFeatures {
-        compose = true
-    }
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-        }
-    }
-}
 kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    }
-}
-publishing {
-    publications {
-        create<MavenPublication>("release") {
-            afterEvaluate { from(components["release"]) }
+    androidLibrary {
+        namespace = "com.develotter.calendarview.calendars.gregorian"
+        compileSdk = 37
+        minSdk = 27
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
-}
-dependencies {
-    // Public entry points expose shared selection and Compose types to consumers.
-    api(project(":library"))
-    // Default todayBorderColor reads MaterialTheme; :library keeps Material 3 implementation-only.
-    implementation(libs.androidx.compose.material3)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            api(project(":library"))
+            implementation(compose.material3)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+    }
 }
