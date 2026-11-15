@@ -8,15 +8,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.develotter.calendarview.calendars.hijri.HijriDate
 import com.develotter.calendarview.calendars.hijri.HijriDateProvider
+import com.develotter.calendarview.calendars.hijri.HijriPlatform
 import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
-import java.time.LocalDate
-import java.time.chrono.HijrahDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoField
-import java.time.temporal.ChronoUnit
-import java.util.Locale
 
 /**
  * Observable Hijri visible-month state with optional inclusive bounds.
@@ -31,24 +27,24 @@ import java.util.Locale
  */
 @Stable
 class HijriMonthState(
-    initialMonth: HijrahDate,
-    minMonth: HijrahDate? = null,
-    maxMonth: HijrahDate? = null,
+    initialMonth: HijriDate,
+    minMonth: HijriDate? = null,
+    maxMonth: HijriDate? = null,
 ) : CalendarMonthNavigationState {
     private var dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider
 
     /** Creates a state whose today action uses [dateProvider] for the absolute-day mapping. */
     constructor(
-        initialMonth: HijrahDate,
-        minMonth: HijrahDate? = null,
-        maxMonth: HijrahDate? = null,
+        initialMonth: HijriDate,
+        minMonth: HijriDate? = null,
+        maxMonth: HijriDate? = null,
         dateProvider: HijriDateProvider,
     ) : this(initialMonth, minMonth, maxMonth) {
         this.dateProvider = dateProvider
     }
 
-    val minMonth: HijrahDate? = minMonth?.let(::firstDayOfMonth)
-    val maxMonth: HijrahDate? = maxMonth?.let(::firstDayOfMonth)
+    val minMonth: HijriDate? = minMonth?.let(::firstDayOfMonth)
+    val maxMonth: HijriDate? = maxMonth?.let(::firstDayOfMonth)
 
     /** Currently visible month, normalized to the first day. */
     var month by mutableStateOf(firstDayOfMonth(initialMonth))
@@ -57,27 +53,27 @@ class HijriMonthState(
     init {
         val min = this.minMonth
         val max = this.maxMonth
-        require(min == null || max == null || min.toEpochDay() <= max.toEpochDay()) {
+        require(min == null || max == null || min <= max) {
             "minMonth must not be after maxMonth"
         }
         require(inRange(month)) { "initialMonth must be within minMonth..maxMonth" }
     }
 
     override val canGoPrevious: Boolean
-        get() = minMonth == null || month.toEpochDay() > minMonth.toEpochDay()
+        get() = minMonth == null || month > minMonth
 
     override val canGoNext: Boolean
-        get() = maxMonth == null || month.toEpochDay() < maxMonth.toEpochDay()
+        get() = maxMonth == null || month < maxMonth
 
     override val canGoToday: Boolean
         get() = inRange(todayMonth())
 
     override fun previous() {
-        if (canGoPrevious) month = firstDayOfMonth(month.minus(1, ChronoUnit.MONTHS))
+        if (canGoPrevious) month = month.previousMonth()
     }
 
     override fun next() {
-        if (canGoNext) month = firstDayOfMonth(month.plus(1, ChronoUnit.MONTHS))
+        if (canGoNext) month = month.nextMonth()
     }
 
     override fun goToToday() {
@@ -86,29 +82,32 @@ class HijriMonthState(
     }
 
     /** Moves to an exact in-range month; the target is normalized to its first day. */
-    fun goTo(target: HijrahDate) {
+    fun goTo(target: HijriDate) {
         val normalized = firstDayOfMonth(target)
         require(inRange(normalized)) { "target must be within minMonth..maxMonth" }
         month = normalized
     }
 
     /** Localized month caption matching [hijriMonthData]. */
-    fun title(locale: Locale = Locale.getDefault()): String =
-        month.format(DateTimeFormatter.ofPattern("MMMM y G", locale).withChronology(month.chronology))
+    fun title(): String = HijriPlatform.formatMonthYear(month.year, month.month)
 
-    private fun todayMonth(): HijrahDate =
-        firstDayOfMonth(dateProvider.dateForEpochDay(LocalDate.now().toEpochDay()))
+    private fun todayMonth(): HijriDate =
+        firstDayOfMonth(dateProvider.dateForEpochDay(HijriPlatform.currentEpochDay()))
 
-    private fun inRange(value: HijrahDate): Boolean {
+    private fun inRange(value: HijriDate): Boolean {
         val min = minMonth
         val max = maxMonth
-        return (min == null || value.toEpochDay() >= min.toEpochDay()) &&
-            (max == null || value.toEpochDay() <= max.toEpochDay())
+        return (min == null || value >= min) && (max == null || value <= max)
     }
 }
 
-private fun firstDayOfMonth(date: HijrahDate): HijrahDate =
-    date.with(ChronoField.DAY_OF_MONTH, 1)
+private fun firstDayOfMonth(date: HijriDate): HijriDate = date.copy(dayOfMonth = 1)
+
+private fun HijriDate.previousMonth(): HijriDate =
+    if (month == 1) copy(year = year - 1, month = 12) else copy(month = month - 1)
+
+private fun HijriDate.nextMonth(): HijriDate =
+    if (month == 12) copy(year = year + 1, month = 1) else copy(month = month + 1)
 
 /**
  * Remembers a saveable [HijriMonthState]. The initial month and bounds are initializers, not
@@ -117,21 +116,16 @@ private fun firstDayOfMonth(date: HijrahDate): HijrahDate =
  */
 @Composable
 fun rememberHijriMonthState(
-    initialMonth: HijrahDate = HijrahDate.now(),
-    minMonth: HijrahDate? = null,
-    maxMonth: HijrahDate? = null,
+    initialMonth: HijriDate = UmmAlQuraHijriDateProvider.dateForEpochDay(
+        HijriPlatform.currentEpochDay(),
+    ),
+    minMonth: HijriDate? = null,
+    maxMonth: HijriDate? = null,
 ): HijriMonthState {
     val saver = remember(minMonth, maxMonth) {
         listSaver<HijriMonthState, Int>(
-            save = {
-                listOf(
-                    it.month.get(ChronoField.YEAR),
-                    it.month.get(ChronoField.MONTH_OF_YEAR),
-                )
-            },
-            restore = {
-                HijriMonthState(HijrahDate.of(it[0], it[1], 1), minMonth, maxMonth)
-            },
+            save = { listOf(it.month.year, it.month.month) },
+            restore = { HijriMonthState(HijriDate(it[0], it[1], 1), minMonth, maxMonth) },
         )
     }
     return rememberSaveable(initialMonth, minMonth, maxMonth, saver = saver) {
@@ -145,21 +139,16 @@ fun rememberHijriMonthState(
  */
 @Composable
 fun rememberHijriMonthState(
-    initialMonth: HijrahDate,
-    minMonth: HijrahDate? = null,
-    maxMonth: HijrahDate? = null,
+    initialMonth: HijriDate,
+    minMonth: HijriDate? = null,
+    maxMonth: HijriDate? = null,
     dateProvider: HijriDateProvider,
 ): HijriMonthState {
     val saver = remember(minMonth, maxMonth, dateProvider) {
         listSaver<HijriMonthState, Int>(
-            save = {
-                listOf(
-                    it.month.get(ChronoField.YEAR),
-                    it.month.get(ChronoField.MONTH_OF_YEAR),
-                )
-            },
+            save = { listOf(it.month.year, it.month.month) },
             restore = {
-                HijriMonthState(HijrahDate.of(it[0], it[1], 1), minMonth, maxMonth, dateProvider)
+                HijriMonthState(HijriDate(it[0], it[1], 1), minMonth, maxMonth, dateProvider)
             },
         )
     }

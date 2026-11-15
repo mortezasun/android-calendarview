@@ -16,6 +16,8 @@ import platform.Foundation.NSNumberFormatter
 import platform.Foundation.currentLocale
 import platform.Foundation.dateWithTimeIntervalSince1970
 import platform.Foundation.timeIntervalSince1970
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
 import kotlin.math.floor
 
 internal actual object HijriPlatform {
@@ -54,6 +56,7 @@ internal actual object HijriPlatform {
         return floor(nsDate.timeIntervalSince1970 / SECONDS_PER_DAY).toLong()
     }
 
+    @OptIn(ExperimentalForeignApi::class)
     actual fun lengthOfMonth(year: Int, month: Int): Int {
         val comps = NSDateComponents().apply {
             this.year = year.toLong()
@@ -63,7 +66,8 @@ internal actual object HijriPlatform {
         }
         val cal = ummAlQuraCalendar()
         val nsDate = cal.dateFromComponents(comps) ?: error("Invalid Hijri year/month: $year-$month")
-        return cal.rangeOfUnit(NSCalendarUnitDay, inUnit = NSCalendarUnitMonth, forDate = nsDate).length.toInt()
+        return cal.rangeOfUnit(NSCalendarUnitDay, inUnit = NSCalendarUnitMonth, forDate = nsDate)
+            .useContents { length.toInt() }
     }
 
     actual fun formatMonthYear(year: Int, month: Int): String {
@@ -82,6 +86,15 @@ internal actual object HijriPlatform {
             locale = NSLocale.currentLocale
             dateStyle = NSDateFormatterFullStyle
             timeStyle = NSDateFormatterNoStyle
+        }
+        return formatter.stringFromDate(NSDate.dateWithTimeIntervalSince1970(epochDay * SECONDS_PER_DAY))
+    }
+
+    actual fun formatShortDayMonthYear(epochDay: Long): String {
+        val formatter = NSDateFormatter().apply {
+            calendar = ummAlQuraCalendar()
+            locale = NSLocale.currentLocale
+            dateFormat = "d MMM y G"
         }
         return formatter.stringFromDate(NSDate.dateWithTimeIntervalSince1970(epochDay * SECONDS_PER_DAY))
     }

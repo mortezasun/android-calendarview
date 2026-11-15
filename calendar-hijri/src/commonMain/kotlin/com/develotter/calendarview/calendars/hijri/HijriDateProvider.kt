@@ -1,35 +1,31 @@
 package com.develotter.calendarview.calendars.hijri
 
-import java.time.chrono.HijrahChronology
-import java.time.chrono.HijrahDate
-
 /**
  * Maps absolute epoch days to Hijri dates and back.
  *
  * Implement this to model a local moon-sighting convention or another Hijri method. The
  * provider must round-trip its own dates: [dateForEpochDay] and [epochDayFor] must agree.
- * Calendar arithmetic stays on [HijrahDate], so month lengths and year boundaries follow the
- * supplied chronology.
+ * Month lengths and year boundaries come from the platform Umm al-Qura chronology through
+ * [HijriPlatform]; a uniform shift keeps those boundaries intact.
  */
 interface HijriDateProvider {
     /** Returns the Hijri date displayed for [epochDay]. */
-    fun dateForEpochDay(epochDay: Long): HijrahDate
+    fun dateForEpochDay(epochDay: Long): HijriDate
 
     /** Returns the absolute epoch day on which [date] starts. */
-    fun epochDayFor(date: HijrahDate): Long
+    fun epochDayFor(date: HijriDate): Long
 }
 
 /**
- * The platform `HijrahDate` chronology (Umm al-Qura on Android).
+ * The platform Umm al-Qura chronology (Umm al-Qura on Android and iOS).
  *
  * This is a tabular calendar, not local moon sighting. Use [OffsetHijriDateProvider] or a
  * custom provider when the host community follows a different method.
  */
 object UmmAlQuraHijriDateProvider : HijriDateProvider {
-    override fun dateForEpochDay(epochDay: Long): HijrahDate =
-        HijrahDate.from(HijrahChronology.INSTANCE.dateEpochDay(epochDay))
+    override fun dateForEpochDay(epochDay: Long): HijriDate = HijriPlatform.fromEpochDay(epochDay)
 
-    override fun epochDayFor(date: HijrahDate): Long = date.toEpochDay()
+    override fun epochDayFor(date: HijriDate): Long = HijriPlatform.toEpochDay(date)
 }
 
 /**
@@ -40,8 +36,9 @@ object UmmAlQuraHijriDateProvider : HijriDateProvider {
  * is uniform, so it models a declared monthly adjustment, not astronomical moon sighting.
  */
 class OffsetHijriDateProvider(val offsetDays: Int = 0) : HijriDateProvider {
-    override fun dateForEpochDay(epochDay: Long): HijrahDate =
+    override fun dateForEpochDay(epochDay: Long): HijriDate =
         UmmAlQuraHijriDateProvider.dateForEpochDay(epochDay + offsetDays)
 
-    override fun epochDayFor(date: HijrahDate): Long = date.toEpochDay() - offsetDays
+    override fun epochDayFor(date: HijriDate): Long =
+        UmmAlQuraHijriDateProvider.epochDayFor(date) - offsetDays
 }

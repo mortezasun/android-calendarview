@@ -44,6 +44,11 @@ internal actual object HijriPlatform {
         return HijrahChronology.INSTANCE.dateEpochDay(epochDay).format(formatter)
     }
 
+    actual fun formatShortDayMonthYear(epochDay: Long): String {
+        val formatter = DateTimeFormatter.ofPattern("d MMM y G", Locale.getDefault())
+        return HijrahChronology.INSTANCE.dateEpochDay(epochDay).format(formatter)
+    }
+
     actual fun formatDayNumber(day: Int): String {
         val nf = NumberFormat.getIntegerInstance(Locale.getDefault()).apply { isGroupingUsed = false }
         return nf.format(day)

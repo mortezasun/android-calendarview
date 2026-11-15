@@ -1,28 +1,10 @@
 package com.develotter.calendarview.calendars.hijri
 
-import java.time.LocalDate
-import java.time.chrono.HijrahChronology
-import java.time.chrono.HijrahDate
+/** Compatibility accessor for the previous `HijrahDate.day()` extension. */
+fun HijriDate.day(): Int = this.dayOfMonth
 
-fun HijrahDate.day(): Int {
+/** Compatibility accessor for the previous `HijrahDate.year()` extension. */
+fun HijriDate.year(): Int = this.year
 
-    return this.get(java.time.temporal.ChronoField.DAY_OF_MONTH)
-}
-fun HijrahDate. year(): Int {
-    return this.get(java.time.temporal.ChronoField.YEAR)
-
-}
-fun HijrahDate.month(): Int {
-    return this.get(java.time.temporal.ChronoField.MONTH_OF_YEAR)
-
-}
-fun LocalDate.toHijri(): HijrahDate {
-
-    return  HijrahChronology.INSTANCE.date(this)
-
-}
-fun HijrahDate.toLocalDate(): LocalDate {
-
-    return  LocalDate.from(this)
-
-}
+/** Compatibility accessor for the previous `HijrahDate.month()` extension. */
+fun HijriDate.month(): Int = this.month

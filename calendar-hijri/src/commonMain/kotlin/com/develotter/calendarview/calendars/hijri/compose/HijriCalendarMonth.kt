@@ -5,21 +5,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.develotter.calendarview.calendars.hijri.HijriDate
+import com.develotter.calendarview.calendars.hijri.HijriDateProvider
+import com.develotter.calendarview.calendars.hijri.HijriPlatform
+import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarDayMarker
 import com.develotter.calendarview.compose.CalendarMonthData
 import com.develotter.calendarview.compose.CalendarMonthGrid
-import com.develotter.calendarview.calendars.hijri.HijriDateProvider
-import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.selection.CalendarSelection
-import java.text.NumberFormat
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.chrono.HijrahDate
-import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.time.temporal.ChronoField
-import java.util.Locale
 
 /** Localized month snapshot; treat lists as read-only. */
 @Immutable
@@ -32,82 +26,54 @@ data class HijriMonthData(
 
 /** Formats a Hijri day with its own chronology, including dates in adjacent months. */
 fun hijriDayCell(
-    date: HijrahDate,
-    locale: Locale = Locale.getDefault(),
-    today: HijrahDate = HijrahDate.now(),
-    isDateEnabled: (HijrahDate) -> Boolean = { true },
+    epochDay: Long,
+    dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+    todayEpochDay: Long = HijriPlatform.currentEpochDay(),
+    isDateEnabled: (Long) -> Boolean = { true },
 ): CalendarDayCell = hijriDayCellForEpoch(
-    date = date,
-    epochDay = date.toEpochDay(),
-    locale = locale,
-    todayEpochDay = today.toEpochDay(),
+    date = dateProvider.dateForEpochDay(epochDay),
+    epochDay = epochDay,
+    todayEpochDay = todayEpochDay,
     isDateEnabled = isDateEnabled,
 )
 
 /** Variant for providers whose displayed date differs from the canonical epoch day. */
 internal fun hijriDayCellForEpoch(
-    date: HijrahDate,
+    date: HijriDate,
     epochDay: Long,
-    locale: Locale,
     todayEpochDay: Long,
-    isDateEnabled: (HijrahDate) -> Boolean,
-): CalendarDayCell {
-    val numbers = NumberFormat.getIntegerInstance(locale).apply { isGroupingUsed = false }
-    val format = DateTimeFormatter.ofPattern("EEEE d MMMM y G", locale).withChronology(date.chronology)
-    return CalendarDayCell(
-        epochDay = epochDay, label = numbers.format(date.get(ChronoField.DAY_OF_MONTH)),
-        accessibilityLabel = date.format(format), enabled = isDateEnabled(date),
-        isToday = epochDay == todayEpochDay,
-    )
-}
-
-/**
- * Builds a Hijri month with the platform Umm al-Qura chronology and Saturday-first by
- * default. Use the provider overload for a local date method.
- */
-fun hijriMonthData(
-    month: HijrahDate,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
-    today: HijrahDate = HijrahDate.now(),
-    isDateEnabled: (HijrahDate) -> Boolean = { true },
-): HijriMonthData = hijriMonthData(
-    month = month,
-    locale = locale,
-    firstDayOfWeek = firstDayOfWeek,
-    today = today,
-    dateProvider = UmmAlQuraHijriDateProvider,
-    isDateEnabled = isDateEnabled,
+    isDateEnabled: (Long) -> Boolean,
+): CalendarDayCell = CalendarDayCell(
+    epochDay = epochDay,
+    label = HijriPlatform.formatDayNumber(date.dayOfMonth),
+    accessibilityLabel = HijriPlatform.formatFullDate(HijriPlatform.toEpochDay(date)),
+    enabled = isDateEnabled(epochDay),
+    isToday = epochDay == todayEpochDay,
 )
 
 /**
- * Builds a Hijri month using [dateProvider]. Pass [today] from the same provider when using
- * a local offset. Saturday-first is configurable.
+ * Builds a Hijri month with the platform Umm al-Qura chronology and Saturday-first by
+ * default. Pass another [dateProvider] for a local date method; the month length and the
+ * displayed day labels follow that provider's uniform shift.
  */
 fun hijriMonthData(
-    month: HijrahDate,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
-    today: HijrahDate = HijrahDate.now(),
-    dateProvider: HijriDateProvider,
-    isDateEnabled: (HijrahDate) -> Boolean = { true },
+    month: HijriDate,
+    firstDayOfWeek: Int = HijriDefaultFirstDayOfWeek,
+    todayEpochDay: Long = HijriPlatform.currentEpochDay(),
+    dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+    isDateEnabled: (Long) -> Boolean = { true },
 ): HijriMonthData {
-    val first = month.with(ChronoField.DAY_OF_MONTH, 1)
+    val first = month.copy(dayOfMonth = 1)
     val firstEpochDay = dateProvider.epochDayFor(first)
-    val todayEpochDay = dateProvider.epochDayFor(today)
     return HijriMonthData(
-        title = first.format(DateTimeFormatter.ofPattern("MMMM y G", locale).withChronology(first.chronology)),
-        weekdayLabels = List(7) { firstDayOfWeek.plus(it.toLong()).getDisplayName(TextStyle.SHORT_STANDALONE, locale) },
+        title = HijriPlatform.formatMonthYear(first.year, first.month),
+        weekdayLabels = hijriWeekdayLabels(firstDayOfWeek),
         // The displayed Hijri date may be offset from its absolute timeline weekday.
-        firstDayOffset = Math.floorMod(
-            LocalDate.ofEpochDay(firstEpochDay).dayOfWeek.value - firstDayOfWeek.value,
-            7,
-        ),
-        days = (0 until first.lengthOfMonth()).map { offset ->
+        firstDayOffset = hijriDayOfWeekOffset(firstEpochDay, firstDayOfWeek),
+        days = List(HijriPlatform.lengthOfMonth(first.year, first.month)) { offset ->
             hijriDayCellForEpoch(
                 date = dateProvider.dateForEpochDay(firstEpochDay + offset),
                 epochDay = firstEpochDay + offset,
-                locale = locale,
                 todayEpochDay = todayEpochDay,
                 isDateEnabled = isDateEnabled,
             )
@@ -116,64 +82,21 @@ fun hijriMonthData(
 }
 
 /**
- * Controlled Hijri month UI with the platform Umm al-Qura chronology. Adjacent cells retain
- * input chronology and use the same enabled predicate and click callback. Use the provider
- * overload for a local date method.
+ * Controlled Hijri month UI using [dateProvider]. Adjacent cells retain the provider's
+ * chronology and use the same enabled predicate and click callback. [onDateClick] receives the
+ * absolute epoch day of the clicked cell. Visibility is independent and defaults to blank
+ * padding. Engine date-range errors propagate. Locale does not set layout direction.
  */
-/** Binary-compatible overload for callers compiled against 2.0.1. */
-@Deprecated(
-    message = "Binary compatibility overload for callers compiled against 2.0.1.",
-    level = DeprecationLevel.HIDDEN,
-)
 @Composable
 fun HijriCalendarMonth(
-    month: HijrahDate,
+    month: HijriDate,
     selection: CalendarSelection,
-    onDateClick: (HijrahDate) -> Unit,
+    onDateClick: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
+    firstDayOfWeek: Int = HijriDefaultFirstDayOfWeek,
     showPreviousMonthDays: Boolean = false,
     showNextMonthDays: Boolean = false,
-    today: HijrahDate = HijrahDate.now(),
-    showHeader: Boolean = true,
-    showWeekdayLabels: Boolean = true,
-    fixedSixRows: Boolean = false,
-    todayBorderColor: Color = MaterialTheme.colorScheme.tertiary,
-    isDateEnabled: (HijrahDate) -> Boolean = { true },
-) {
-    HijriCalendarMonth(
-        month = month,
-        selection = selection,
-        onDateClick = onDateClick,
-        modifier = modifier,
-        locale = locale,
-        firstDayOfWeek = firstDayOfWeek,
-        showPreviousMonthDays = showPreviousMonthDays,
-        showNextMonthDays = showNextMonthDays,
-        today = today,
-        showHeader = showHeader,
-        showWeekdayLabels = showWeekdayLabels,
-        fixedSixRows = fixedSixRows,
-        todayBorderColor = todayBorderColor,
-        todayDescription = null,
-        markers = emptyMap(),
-        weekNumber = null,
-        isDateEnabled = isDateEnabled,
-    )
-}
-
-@Composable
-fun HijriCalendarMonth(
-    month: HijrahDate,
-    selection: CalendarSelection,
-    onDateClick: (HijrahDate) -> Unit,
-    modifier: Modifier = Modifier,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
-    showPreviousMonthDays: Boolean = false,
-    showNextMonthDays: Boolean = false,
-    today: HijrahDate = HijrahDate.now(),
+    todayEpochDay: Long = HijriPlatform.currentEpochDay(),
     showHeader: Boolean = true,
     showWeekdayLabels: Boolean = true,
     fixedSixRows: Boolean = false,
@@ -181,77 +104,32 @@ fun HijriCalendarMonth(
     todayDescription: String? = null,
     markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
     weekNumber: ((Long) -> String?)? = null,
-    isDateEnabled: (HijrahDate) -> Boolean = { true },
-) {
-    HijriCalendarMonth(
-        month = month,
-        selection = selection,
-        onDateClick = onDateClick,
-        modifier = modifier,
-        locale = locale,
-        firstDayOfWeek = firstDayOfWeek,
-        showPreviousMonthDays = showPreviousMonthDays,
-        showNextMonthDays = showNextMonthDays,
-        today = today,
-        showHeader = showHeader,
-        showWeekdayLabels = showWeekdayLabels,
-        fixedSixRows = fixedSixRows,
-        todayBorderColor = todayBorderColor,
-        todayDescription = todayDescription,
-        markers = markers,
-        weekNumber = weekNumber,
-        dateProvider = UmmAlQuraHijriDateProvider,
-        isDateEnabled = isDateEnabled,
-    )
-}
-
-/**
- * Controlled Hijri month UI using [dateProvider]. Adjacent cells retain input chronology and
- * use the same enabled predicate and click callback. [onDateClick] receives the provider's
- * displayed date; map it back with [HijriDateProvider.epochDayFor] when storing absolute-day
- * selection. Visibility is independent and defaults to blank padding. Engine date-range errors
- * propagate. Locale does not set layout direction.
- */
-@Composable
-fun HijriCalendarMonth(
-    month: HijrahDate,
-    selection: CalendarSelection,
-    onDateClick: (HijrahDate) -> Unit,
-    modifier: Modifier = Modifier,
-    locale: Locale = Locale.getDefault(),
-    firstDayOfWeek: DayOfWeek = DayOfWeek.SATURDAY,
-    showPreviousMonthDays: Boolean = false,
-    showNextMonthDays: Boolean = false,
-    today: HijrahDate = HijrahDate.now(),
-    showHeader: Boolean = true,
-    showWeekdayLabels: Boolean = true,
-    fixedSixRows: Boolean = false,
-    todayBorderColor: Color? = null,
-    todayDescription: String? = null,
-    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
-    weekNumber: ((Long) -> String?)? = null,
-    dateProvider: HijriDateProvider,
-    isDateEnabled: (HijrahDate) -> Boolean = { true },
+    dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+    isDateEnabled: (Long) -> Boolean = { true },
 ) {
     val data = hijriMonthData(
-        month = month, locale = locale, firstDayOfWeek = firstDayOfWeek, today = today,
-        dateProvider = dateProvider, isDateEnabled = isDateEnabled,
+        month = month,
+        firstDayOfWeek = firstDayOfWeek,
+        todayEpochDay = todayEpochDay,
+        dateProvider = dateProvider,
+        isDateEnabled = isDateEnabled,
     )
-    val todayEpochDay = dateProvider.epochDayFor(today)
     CalendarMonthGrid(
         title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
         days = data.days, selection = selection, modifier = modifier,
-        onDayClick = { onDateClick(dateProvider.dateForEpochDay(it)) },
+        onDayClick = onDateClick,
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
         showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
         todayBorderColor = todayBorderColor,
         todayDescription = todayDescription,
         markers = markers,
         weekNumber = weekNumber,
-        adjacentDayProvider = {
+        adjacentDayProvider = { adjacentEpochDay ->
             hijriDayCellForEpoch(
-                date = dateProvider.dateForEpochDay(it), epochDay = it, locale = locale,
-                todayEpochDay = todayEpochDay, isDateEnabled = isDateEnabled,
+                date = dateProvider.dateForEpochDay(adjacentEpochDay),
+                epochDay = adjacentEpochDay,
+                todayEpochDay = todayEpochDay,
+                isDateEnabled = isDateEnabled,
             )
         },
     )
