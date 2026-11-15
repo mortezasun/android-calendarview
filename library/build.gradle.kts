@@ -1,10 +1,53 @@
 import com.android.build.api.dsl.LibraryExtension
-import org.gradle.api.publish.maven.MavenPublication
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.library)
+    alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.kotlin.compose)
     `maven-publish`
+}
+
+kotlin {
+    androidTarget {
+        publishLibraryVariants("release")
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            api(compose.runtime)
+            api(compose.runtimeSaveable)
+            api(compose.ui)
+            api(compose.foundation)
+            implementation(compose.material3)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+        androidMain.dependencies {
+            implementation(libs.androidx.core.ktx)
+        }
+        val androidInstrumentedTest by getting {
+            dependencies {
+                implementation(libs.androidx.junit)
+                implementation(libs.androidx.espresso.core)
+                implementation(platform(libs.androidx.compose.bom))
+                implementation(libs.androidx.compose.ui.test.junit4)
+            }
+        }
+    }
 }
 
 extensions.configure<LibraryExtension> {
@@ -30,40 +73,8 @@ extensions.configure<LibraryExtension> {
     buildFeatures {
         compose = true
     }
-    publishing {
-        singleVariant("release") {
-            withSourcesJar()
-        }
-    }
 }
-kotlin {
-    compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-    }
-}
-publishing {
-    publications {
-        create<MavenPublication>("release") {
-            afterEvaluate { from(components["release"]) }
-        }
-    }
-}
+
 dependencies {
-    implementation(libs.androidx.core.ktx)
-
-    // Public Compose APIs must also be available to consumers of this library.
-    api(platform(libs.androidx.compose.bom))
-    api(libs.androidx.compose.runtime)
-    api(libs.androidx.compose.runtime.saveable)
-    api(libs.androidx.compose.ui)
-    // LazyListState and PagerState are exposed by the public month containers.
-    api(libs.androidx.compose.foundation)
-    implementation(libs.androidx.compose.material3)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
