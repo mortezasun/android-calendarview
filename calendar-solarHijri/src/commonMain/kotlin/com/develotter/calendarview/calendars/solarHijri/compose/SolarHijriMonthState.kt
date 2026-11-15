@@ -2,163 +2,99 @@ package com.develotter.calendarview.calendars.solarHijri.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
+import com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthState
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
-import ir.huri.jcal.JalaliCalendar
-import java.time.LocalDate
-import java.util.Locale
 
 /**
  * Observable Solar Hijri visible-month state with optional inclusive bounds.
  *
- * Internally stores the year and month only, because [JalaliCalendar] is mutable and has no
- * value equality. [month] returns a fresh first-day snapshot, so callers cannot mutate the
- * state through it. Navigation stops at the bounds instead of throwing; [goTo] rejects
- * out-of-range targets. Mutate on the UI thread.
+ * The immutable [SolarHijriDate] is the visible month, so bounds and the current month cannot
+ * be mutated from outside. Bounds are normalized to the first day of their month. Navigation
+ * stays inside the engine's supported years, stops at the bounds instead of throwing, and
+ * [goTo] rejects out-of-range targets. [currentEpochDay] is the source of "today" and can be
+ * fixed in tests. Mutate on the UI thread.
  */
 @Stable
 class SolarHijriMonthState(
-    initialMonth: JalaliCalendar,
-    minMonth: JalaliCalendar? = null,
-    maxMonth: JalaliCalendar? = null,
+    initialMonth: SolarHijriDate,
+    minMonth: SolarHijriDate? = null,
+    maxMonth: SolarHijriDate? = null,
+    currentEpochDay: () -> Long = { SolarHijriDate.now().toEpochDay() },
 ) : CalendarMonthNavigationState {
-    private val minBound: JalaliCalendar? = minMonth?.let { JalaliCalendar(it.year, it.month, 1) }
-    private val maxBound: JalaliCalendar? = maxMonth?.let { JalaliCalendar(it.year, it.month, 1) }
+    private val delegate = SolarHijriNativeMonthState(initialMonth, minMonth, maxMonth, currentEpochDay)
 
-    /** Lower bound as a fresh snapshot; mutating it does not change this state. */
-    val minMonth: JalaliCalendar?
-        get() = minBound?.let { JalaliCalendar(it.year, it.month, 1) }
+    /** Lower bound normalized to day 1, or null when unbounded. */
+    val minMonth: SolarHijriDate?
+        get() = delegate.minMonth
 
-    /** Upper bound as a fresh snapshot; mutating it does not change this state. */
-    val maxMonth: JalaliCalendar?
-        get() = maxBound?.let { JalaliCalendar(it.year, it.month, 1) }
-
-    private var currentYear by mutableIntStateOf(initialMonth.year)
-    private var currentMonth by mutableIntStateOf(initialMonth.month)
-
-    init {
-        val min = minBound
-        val max = maxBound
-        require(min == null || max == null || compareMonths(min.year, min.month, max.year, max.month) <= 0) {
-            "minMonth must not be after maxMonth"
-        }
-        require(inRange(currentYear, currentMonth)) { "initialMonth must be within minMonth..maxMonth" }
-    }
+    /** Upper bound normalized to day 1, or null when unbounded. */
+    val maxMonth: SolarHijriDate?
+        get() = delegate.maxMonth
 
     /** Visible Solar Hijri year. */
     val year: Int
-        get() = currentYear
+        get() = delegate.year
 
     /** Visible Solar Hijri month, in `1..12`. */
     val monthNumber: Int
-        get() = currentMonth
+        get() = delegate.monthNumber
 
-    /** Visible month as a fresh first-day snapshot. */
-    val month: JalaliCalendar
-        get() = JalaliCalendar(currentYear, currentMonth, 1)
+    /** Visible month as its first day. */
+    val month: SolarHijriDate
+        get() = delegate.month
 
     override val canGoPrevious: Boolean
-        get() = minBound?.let { compareMonths(currentYear, currentMonth, it.year, it.month) > 0 } ?: true
+        get() = delegate.canGoPrevious
 
     override val canGoNext: Boolean
-        get() = maxBound?.let { compareMonths(currentYear, currentMonth, it.year, it.month) < 0 } ?: true
+        get() = delegate.canGoNext
 
     override val canGoToday: Boolean
-        get() = LocalDate.now().let { today ->
-            val jalali = JalaliCalendar(today)
-            inRange(jalali.year, jalali.month)
-        }
+        get() = delegate.canGoToday
 
-    override fun previous() {
-        if (!canGoPrevious) return
-        val target = shifted(-1)
-        currentYear = target.first
-        currentMonth = target.second
-    }
+    override fun previous() = delegate.previous()
 
-    override fun next() {
-        if (!canGoNext) return
-        val target = shifted(1)
-        currentYear = target.first
-        currentMonth = target.second
-    }
+    override fun next() = delegate.next()
 
-    override fun goToToday() {
-        val jalali = JalaliCalendar(LocalDate.now())
-        if (inRange(jalali.year, jalali.month)) {
-            currentYear = jalali.year
-            currentMonth = jalali.month
-        }
-    }
+    override fun goToToday() = delegate.goToToday()
 
     /** Moves to an exact in-range month; the target is normalized to its first day. */
-    fun goTo(target: JalaliCalendar) {
-        require(inRange(target.year, target.month)) { "target must be within minMonth..maxMonth" }
-        currentYear = target.year
-        currentMonth = target.month
-    }
+    fun goTo(target: SolarHijriDate) = delegate.goTo(target)
 
     /** Localized month caption matching [solarHijriMonthData]. */
-    fun title(locale: Locale = Locale.getDefault()): String =
-        solarHijriMonthTitle(JalaliCalendar(currentYear, currentMonth, 1), locale)
-
-    private fun inRange(year: Int, month: Int): Boolean {
-        val min = minBound
-        val max = maxBound
-        return (min == null || compareMonths(year, month, min.year, min.month) >= 0) &&
-            (max == null || compareMonths(year, month, max.year, max.month) <= 0)
-    }
-
-    private fun shifted(offset: Int): Pair<Int, Int> {
-        val index = currentYear.toLong() * 12 + (currentMonth - 1) + offset
-        val year = Math.toIntExact(Math.floorDiv(index, 12L))
-        val month = Math.floorMod(index, 12L).toInt() + 1
-        return year to month
-    }
-
-    private fun compareMonths(year: Int, month: Int, otherYear: Int, otherMonth: Int): Int =
-        if (year != otherYear) year.compareTo(otherYear) else month.compareTo(otherMonth)
+    fun title(): String = delegate.title()
 }
 
 /**
  * Remembers a saveable [SolarHijriMonthState]. The initial month and bounds are initializers,
  * not controlled inputs: changing their year or month during composition resets the state.
- * The saved value is the visible year and month, not the mutable [JalaliCalendar] object.
+ * The saved value is the visible year and month.
  */
 @Composable
 fun rememberSolarHijriMonthState(
-    initialMonth: JalaliCalendar = JalaliCalendar(LocalDate.now()),
-    minMonth: JalaliCalendar? = null,
-    maxMonth: JalaliCalendar? = null,
+    initialMonth: SolarHijriDate = SolarHijriDate.now(),
+    minMonth: SolarHijriDate? = null,
+    maxMonth: SolarHijriDate? = null,
+    currentEpochDay: () -> Long = { SolarHijriDate.now().toEpochDay() },
 ): SolarHijriMonthState {
-    val initialYear = initialMonth.year
-    val initialMonthNumber = initialMonth.month
-    val minYear = minMonth?.year
-    val minMonthNumber = minMonth?.month
-    val maxYear = maxMonth?.year
-    val maxMonthNumber = maxMonth?.month
-    val saver = remember(initialYear, initialMonthNumber, minYear, minMonthNumber, maxYear, maxMonthNumber) {
+    val saver = remember(initialMonth.year, initialMonth.month, minMonth, maxMonth) {
         listSaver<SolarHijriMonthState, Int>(
             save = { listOf(it.year, it.monthNumber) },
             restore = {
-                SolarHijriMonthState(JalaliCalendar(it[0], it[1], 1), minMonth, maxMonth)
+                SolarHijriMonthState(
+                    SolarHijriDate(it[0], it[1], 1),
+                    minMonth,
+                    maxMonth,
+                    currentEpochDay,
+                )
             },
         )
     }
-    return rememberSaveable(
-        initialYear,
-        initialMonthNumber,
-        minYear,
-        minMonthNumber,
-        maxYear,
-        maxMonthNumber,
-        saver = saver,
-    ) {
-        SolarHijriMonthState(initialMonth, minMonth, maxMonth)
+    return rememberSaveable(initialMonth.year, initialMonth.month, minMonth, maxMonth, saver = saver) {
+        SolarHijriMonthState(initialMonth, minMonth, maxMonth, currentEpochDay)
     }
 }

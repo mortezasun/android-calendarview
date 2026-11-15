@@ -28,7 +28,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":library"))
-            implementation(project(":calendar-solarHijri-native"))
+            api(project(":calendar-solarHijri-native"))
             implementation(compose.material3)
         }
         commonTest.dependencies {
