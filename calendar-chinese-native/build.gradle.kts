@@ -15,6 +15,9 @@ kotlin {
         }
     }
     linuxX64()
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     sourceSets {
         commonTest.dependencies {
@@ -36,4 +39,13 @@ tasks.named<JvmJar>("sourcesJar") {
 }
 tasks.named<Zip>("linuxX64Klib") {
     archiveBaseName.set("${project.name}-linuxx64")
+}
+tasks.named<Zip>("iosX64Klib") {
+    archiveBaseName.set("${project.name}-iosx64")
+}
+tasks.named<Zip>("iosArm64Klib") {
+    archiveBaseName.set("${project.name}-iosarm64")
+}
+tasks.named<Zip>("iosSimulatorArm64Klib") {
+    archiveBaseName.set("${project.name}-iossimulatorarm64")
 }
