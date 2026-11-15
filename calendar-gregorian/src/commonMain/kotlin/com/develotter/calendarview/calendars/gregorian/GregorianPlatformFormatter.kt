@@ -6,6 +6,7 @@ internal expect object GregorianPlatformFormatter {
     fun formatMonthYear(year: Int, month: Int): String
     fun formatFullDate(epochDay: Long): String
     fun formatShortDayMonth(epochDay: Long): String
+    fun formatShortDayMonthYear(epochDay: Long): String
     fun formatDayNumber(day: Int): String
     fun weekdayShortLabel(isoWeekday: Int): String
 }

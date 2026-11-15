@@ -8,10 +8,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import com.develotter.calendarview.calendars.gregorian.GregorianPlatformFormatter
+import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 /**
  * Observable Gregorian visible-month state with optional inclusive bounds.
@@ -22,9 +21,9 @@ import java.util.Locale
  */
 @Stable
 class GregorianMonthState(
-    initialMonth: YearMonth,
-    val minMonth: YearMonth? = null,
-    val maxMonth: YearMonth? = null,
+    initialMonth: GregorianYearMonth,
+    val minMonth: GregorianYearMonth? = null,
+    val maxMonth: GregorianYearMonth? = null,
 ) : CalendarMonthNavigationState {
     init {
         require(minMonth == null || maxMonth == null || minMonth <= maxMonth) {
@@ -44,7 +43,7 @@ class GregorianMonthState(
         get() = maxMonth == null || month < maxMonth
 
     override val canGoToday: Boolean
-        get() = inRange(YearMonth.now())
+        get() = inRange(GregorianYearMonth.now())
 
     override fun previous() {
         if (canGoPrevious) month = month.minusMonths(1)
@@ -55,21 +54,20 @@ class GregorianMonthState(
     }
 
     override fun goToToday() {
-        val today = YearMonth.now()
+        val today = GregorianYearMonth.now()
         if (inRange(today)) month = today
     }
 
     /** Moves to an exact in-range month; out-of-range targets fail instead of clamping. */
-    fun goTo(target: YearMonth) {
+    fun goTo(target: GregorianYearMonth) {
         require(inRange(target)) { "target must be within minMonth..maxMonth" }
         month = target
     }
 
     /** Localized month caption matching [gregorianMonthData]. */
-    fun title(locale: Locale = Locale.getDefault()): String =
-        month.format(DateTimeFormatter.ofPattern("LLLL uuuu", locale))
+    fun title(): String = GregorianPlatformFormatter.formatMonthYear(month.year, month.month)
 
-    private fun inRange(value: YearMonth): Boolean =
+    private fun inRange(value: GregorianYearMonth): Boolean =
         (minMonth == null || value >= minMonth) && (maxMonth == null || value <= maxMonth)
 }
 
@@ -80,14 +78,14 @@ class GregorianMonthState(
  */
 @Composable
 fun rememberGregorianMonthState(
-    initialMonth: YearMonth = YearMonth.now(),
-    minMonth: YearMonth? = null,
-    maxMonth: YearMonth? = null,
+    initialMonth: GregorianYearMonth = GregorianYearMonth.now(),
+    minMonth: GregorianYearMonth? = null,
+    maxMonth: GregorianYearMonth? = null,
 ): GregorianMonthState {
     val saver = remember(minMonth, maxMonth) {
         listSaver<GregorianMonthState, Int>(
-            save = { listOf(it.month.year, it.month.monthValue) },
-            restore = { GregorianMonthState(YearMonth.of(it[0], it[1]), minMonth, maxMonth) },
+            save = { listOf(it.month.year, it.month.month) },
+            restore = { GregorianMonthState(GregorianYearMonth(it[0], it[1]), minMonth, maxMonth) },
         )
     }
     return rememberSaveable(initialMonth, minMonth, maxMonth, saver = saver) {

@@ -30,6 +30,11 @@ internal actual object GregorianPlatformFormatter {
         return LocalDate.ofEpochDay(epochDay).format(formatter)
     }
 
+    actual fun formatShortDayMonthYear(epochDay: Long): String {
+        val formatter = DateTimeFormatter.ofPattern("d MMM y", Locale.getDefault())
+        return LocalDate.ofEpochDay(epochDay).format(formatter)
+    }
+
     actual fun formatDayNumber(day: Int): String {
         val nf = NumberFormat.getIntegerInstance(Locale.getDefault()).apply { isGroupingUsed = false }
         return nf.format(day)

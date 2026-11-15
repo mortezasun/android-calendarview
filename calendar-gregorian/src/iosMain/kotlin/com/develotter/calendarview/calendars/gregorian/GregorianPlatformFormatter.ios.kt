@@ -54,6 +54,14 @@ internal actual object GregorianPlatformFormatter {
         return formatter.stringFromDate(NSDate.dateWithTimeIntervalSince1970(epochDay * SECONDS_PER_DAY))
     }
 
+    actual fun formatShortDayMonthYear(epochDay: Long): String {
+        val formatter = NSDateFormatter().apply {
+            locale = NSLocale.currentLocale
+            dateFormat = "d MMM y"
+        }
+        return formatter.stringFromDate(NSDate.dateWithTimeIntervalSince1970(epochDay * SECONDS_PER_DAY))
+    }
+
     actual fun formatDayNumber(day: Int): String {
         val formatter = NSNumberFormatter().apply {
             locale = NSLocale.currentLocale
