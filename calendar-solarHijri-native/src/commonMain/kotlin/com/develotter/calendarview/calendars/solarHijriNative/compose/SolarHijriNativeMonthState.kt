@@ -11,10 +11,10 @@ import androidx.compose.runtime.setValue
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriEngine
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLocale
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriPlatform
+import com.develotter.calendarview.calendars.solarHijriNative.floorDiv
+import com.develotter.calendarview.calendars.solarHijriNative.floorMod
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
-import java.time.Clock
-import java.time.LocalDate
-import java.util.Locale
 
 /**
  * Observable Solar Hijri visible-month state with optional inclusive bounds.
@@ -22,15 +22,15 @@ import java.util.Locale
  * [SolarHijriDate] is immutable, so bounds and the visible month are exposed directly. Bounds
  * are normalized to the first day of their month. Navigation always stays inside the supported
  * years of [SolarHijriEngine] as well, so it never reaches an unrepresentable month; it stops
- * at the bounds instead of throwing, and [goTo] rejects out-of-range targets. [clock] is the
- * source of "today" and can be fixed in tests. Mutate on the UI thread.
+ * at the bounds instead of throwing, and [goTo] rejects out-of-range targets.
+ * [currentEpochDay] is the source of "today" and can be fixed in tests. Mutate on the UI thread.
  */
 @Stable
 class SolarHijriNativeMonthState(
     initialMonth: SolarHijriDate,
     minMonth: SolarHijriDate? = null,
     maxMonth: SolarHijriDate? = null,
-    private val clock: Clock = Clock.systemDefaultZone(),
+    private val currentEpochDay: () -> Long = { SolarHijriPlatform.currentEpochDay() },
 ) : CalendarMonthNavigationState {
     /** Lower bound normalized to day 1, or null when unbounded. */
     val minMonth: SolarHijriDate? = minMonth?.withDayOfMonth(1)
@@ -38,8 +38,14 @@ class SolarHijriNativeMonthState(
     /** Upper bound normalized to day 1, or null when unbounded. */
     val maxMonth: SolarHijriDate? = maxMonth?.withDayOfMonth(1)
 
-    private val minIndex: Int = maxOf(this.minMonth?.let { monthIndex(it) } ?: Int.MIN_VALUE, monthIndex(SolarHijriEngine.MIN_YEAR, 1))
-    private val maxIndex: Int = minOf(this.maxMonth?.let { monthIndex(it) } ?: Int.MAX_VALUE, monthIndex(SolarHijriEngine.MAX_YEAR, 12))
+    private val minIndex: Int = maxOf(
+        this.minMonth?.let { monthIndex(it) } ?: Int.MIN_VALUE,
+        monthIndex(SolarHijriEngine.MIN_YEAR, 1),
+    )
+    private val maxIndex: Int = minOf(
+        this.maxMonth?.let { monthIndex(it) } ?: Int.MAX_VALUE,
+        monthIndex(SolarHijriEngine.MAX_YEAR, 12),
+    )
 
     private var currentIndex by mutableIntStateOf(monthIndex(initialMonth))
 
@@ -52,11 +58,11 @@ class SolarHijriNativeMonthState(
 
     /** Visible Solar Hijri year. */
     val year: Int
-        get() = Math.floorDiv(currentIndex, 12)
+        get() = floorDiv(currentIndex, 12)
 
     /** Visible Solar Hijri month, in `1..12`. */
     val monthNumber: Int
-        get() = Math.floorMod(currentIndex, 12) + 1
+        get() = floorMod(currentIndex, 12) + 1
 
     /** Visible month as its first day. */
     val month: SolarHijriDate
@@ -92,12 +98,11 @@ class SolarHijriNativeMonthState(
     }
 
     /** Localized month caption matching [solarHijriNativeMonthData]. */
-    fun title(locale: Locale = Locale.getDefault()): String =
-        SolarHijriLocale.formatMonthYear(year, monthNumber, locale)
+    fun title(): String = SolarHijriLocale.formatMonthYear(year, monthNumber)
 
-    /** Month index of today, or null when the clock is outside the supported years. */
+    /** Month index of today, or null when the platform clock is outside the supported years. */
     private fun todayIndex(): Int? =
-        LocalDate.now(clock).toEpochDay()
+        currentEpochDay()
             .takeIf { it in SolarHijriEngine.MIN_EPOCH_DAY..SolarHijriEngine.MAX_EPOCH_DAY }
             ?.let { monthIndex(SolarHijriDate.fromEpochDay(it)) }
 
@@ -118,15 +123,22 @@ fun rememberSolarHijriNativeMonthState(
     initialMonth: SolarHijriDate = SolarHijriDate.now(),
     minMonth: SolarHijriDate? = null,
     maxMonth: SolarHijriDate? = null,
-    clock: Clock = Clock.systemDefaultZone(),
+    currentEpochDay: () -> Long = { SolarHijriPlatform.currentEpochDay() },
 ): SolarHijriNativeMonthState {
-    val saver = remember(initialMonth.year, initialMonth.month, minMonth, maxMonth, clock) {
+    val saver = remember(initialMonth.year, initialMonth.month, minMonth, maxMonth) {
         listSaver<SolarHijriNativeMonthState, Int>(
             save = { listOf(it.year, it.monthNumber) },
-            restore = { SolarHijriNativeMonthState(SolarHijriDate(it[0], it[1], 1), minMonth, maxMonth, clock) },
+            restore = {
+                SolarHijriNativeMonthState(
+                    SolarHijriDate(it[0], it[1], 1),
+                    minMonth,
+                    maxMonth,
+                    currentEpochDay,
+                )
+            },
         )
     }
     return rememberSaveable(initialMonth.year, initialMonth.month, minMonth, maxMonth, saver = saver) {
-        SolarHijriNativeMonthState(initialMonth, minMonth, maxMonth, clock)
+        SolarHijriNativeMonthState(initialMonth, minMonth, maxMonth, currentEpochDay)
     }
 }

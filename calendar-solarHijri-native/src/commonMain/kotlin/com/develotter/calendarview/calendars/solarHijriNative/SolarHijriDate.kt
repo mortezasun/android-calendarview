@@ -1,9 +1,6 @@
 package com.develotter.calendarview.calendars.solarHijriNative
 
 import androidx.compose.runtime.Immutable
-import java.time.Clock
-import java.time.DayOfWeek
-import java.time.LocalDate
 
 /**
  * Immutable Solar Hijri (Jalali) date with value equality, validated by [SolarHijriEngine].
@@ -12,8 +9,8 @@ import java.time.LocalDate
  * [SolarHijriEngine.MIN_YEAR]..[SolarHijriEngine.MAX_YEAR], a month outside `1..12` or a day
  * that does not exist. Month and year arithmetic clamps the day to the target month length;
  * results outside the supported years throw [IllegalArgumentException]. The epoch-day identity
- * is the same as [LocalDate.toEpochDay], so selections and markers are interchangeable with
- * other calendars.
+ * is the absolute day number used by every calendar in this library, so selections and markers
+ * are interchangeable with other calendars.
  */
 @Immutable
 data class SolarHijriDate(val year: Int, val month: Int, val day: Int) : Comparable<SolarHijriDate> {
@@ -26,14 +23,11 @@ data class SolarHijriDate(val year: Int, val month: Int, val day: Int) : Compara
         require(day in 1..length) { "day must be in 1..$length for $year-$month but was $day" }
     }
 
-    /** Epoch day, identical to [LocalDate.toEpochDay] of the same calendar day. */
+    /** Absolute epoch day of this date. */
     fun toEpochDay(): Long = SolarHijriEngine.toEpochDay(year, month, day)
 
-    /** The same calendar day as a [LocalDate]. */
-    fun toLocalDate(): LocalDate = LocalDate.ofEpochDay(toEpochDay())
-
-    /** Day of the week of this date. */
-    fun dayOfWeek(): DayOfWeek = toLocalDate().dayOfWeek
+    /** ISO weekday of this date: `1` = Monday .. `7` = Sunday. */
+    fun isoWeekday(): Int = isoWeekdayOfEpochDay(toEpochDay())
 
     /** Number of days in this date's month. */
     fun lengthOfMonth(): Int = SolarHijriEngine.daysInMonth(year, month)
@@ -48,11 +42,11 @@ data class SolarHijriDate(val year: Int, val month: Int, val day: Int) : Compara
     /** Adds whole months, clamping the day to the target month (31 Farvardin + 6 = 30 Mehr). */
     fun plusMonths(months: Long): SolarHijriDate {
         val index = year.toLong() * 12 + (month - 1) + months
-        val targetYear = Math.floorDiv(index, 12L)
+        val targetYear = floorDiv(index, 12L)
         require(targetYear in SolarHijriEngine.MIN_YEAR.toLong()..SolarHijriEngine.MAX_YEAR.toLong()) {
             "Target year $targetYear is outside ${SolarHijriEngine.MIN_YEAR}..${SolarHijriEngine.MAX_YEAR}"
         }
-        return clamped(targetYear.toInt(), Math.floorMod(index, 12L).toInt() + 1)
+        return clamped(targetYear.toInt(), floorMod(index, 12L).toInt() + 1)
     }
 
     fun minusMonths(months: Long): SolarHijriDate = plusMonths(-months)
@@ -88,10 +82,10 @@ data class SolarHijriDate(val year: Int, val month: Int, val day: Int) : Compara
         /** Date of [epochDay]; see [SolarHijriEngine.fromEpochDay] for the supported range. */
         fun fromEpochDay(epochDay: Long): SolarHijriDate = SolarHijriEngine.fromEpochDay(epochDay)
 
-        /** Solar Hijri date of the same calendar day as [date]. */
-        fun fromLocalDate(date: LocalDate): SolarHijriDate = fromEpochDay(date.toEpochDay())
-
-        /** Today according to [clock]; inject a fixed clock for deterministic tests. */
-        fun now(clock: Clock = Clock.systemDefaultZone()): SolarHijriDate = fromLocalDate(LocalDate.now(clock))
+        /** Today on the platform clock; inject a fixed epoch day for deterministic tests. */
+        fun now(): SolarHijriDate = fromEpochDay(SolarHijriPlatform.currentEpochDay())
     }
 }
+
+/** ISO weekday (`1` = Monday .. `7` = Sunday) of an absolute epoch day. */
+internal fun isoWeekdayOfEpochDay(epochDay: Long): Int = (((epochDay + 3) % 7 + 7) % 7).toInt() + 1
