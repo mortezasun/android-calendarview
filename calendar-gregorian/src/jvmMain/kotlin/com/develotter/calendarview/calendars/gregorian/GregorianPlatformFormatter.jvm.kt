@@ -1,0 +1,41 @@
+package com.develotter.calendarview.calendars.gregorian
+
+import java.text.NumberFormat
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.time.format.TextStyle
+import java.time.temporal.WeekFields
+import java.util.Locale
+
+internal actual object GregorianPlatformFormatter {
+    actual fun currentEpochDay(): Long = LocalDate.now().toEpochDay()
+
+    actual fun defaultFirstDayOfWeek(): Int = WeekFields.of(Locale.getDefault()).firstDayOfWeek.value
+
+    actual fun formatMonthYear(year: Int, month: Int): String {
+        val formatter = DateTimeFormatter.ofPattern("LLLL uuuu", Locale.getDefault())
+        return YearMonth.of(year, month).format(formatter)
+    }
+
+    actual fun formatFullDate(epochDay: Long): String {
+        val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.getDefault())
+        return LocalDate.ofEpochDay(epochDay).format(formatter)
+    }
+
+    actual fun formatShortDayMonth(epochDay: Long): String {
+        val formatter = DateTimeFormatter.ofPattern("d MMM", Locale.getDefault())
+        return LocalDate.ofEpochDay(epochDay).format(formatter)
+    }
+
+    actual fun formatDayNumber(day: Int): String {
+        val nf = NumberFormat.getIntegerInstance(Locale.getDefault()).apply { isGroupingUsed = false }
+        return nf.format(day)
+    }
+
+    actual fun weekdayShortLabel(isoWeekday: Int): String {
+        return DayOfWeek.of(isoWeekday).getDisplayName(TextStyle.SHORT_STANDALONE, Locale.getDefault())
+    }
+}
