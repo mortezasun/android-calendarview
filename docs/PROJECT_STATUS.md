@@ -22,6 +22,12 @@ this tooling change.
   `1.37`. `./gradlew :benchmarks:mainBenchmark` runs Gregorian and Hijri month calculations plus
   both shared heatmap adapters. It is not wired into `check`, `build` or CI. Results are in
   [BENCHMARKS.md](BENCHMARKS.md).
+- **JVM engine console example:** the tracked `tools/consumer-check/jvm-consumer` uses only the
+  published BOM and `calendar-chinese-native` JVM artifact, with no Compose, Android UI or added
+  dependency. It prints the dataset range, epoch-day mapping, 2023 month/year lengths, leap-month
+  title, start epoch day, weekday offset and day labels. `./gradlew -p tools/consumer-check
+  :jvm-consumer:run` completed with exit 0 and `JVM engine OK`; `:calendar-chinese-native:jvmTest`
+  was also green. This is a JVM engine example only, not a UI or Compose Desktop example.
 - **Gradle:** wrapper raised from `9.8.2` to `9.9.1`. The local gate stack (tests, lint, sample
   release, device-test compilation, JVM API, KLIB ABI, `commonMain` purity) is green.
 - **Deprecations:** Gradle 9.9.1 reports upstream warnings from Kotlin Gradle Plugin 2.4.x

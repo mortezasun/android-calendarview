@@ -87,10 +87,17 @@ Every Compose calendar module depends on `:library` via `api`, so adding an engi
 
 ## 🧪 Examples
 
-The repository has two checked-in example paths:
+The repository has three checked-in example paths:
 
-- **Android demo:** [`calendarviewsample`](calendarviewsample/README.md) is the full, runnable Android demo. It covers all five calendars (Gregorian, Hijri, both Solar Hijri entries and Chinese), month/week/agenda views, heatmaps, adaptive panes, markers, week numbers, range policy, styles and saved state. It is an **Android application only**; this repository has no JVM or iOS demo app.
-- **Minimal consumers:** [`tools/consumer-check`](tools/consumer-check) contains a JVM console consumer and a minimal Android Compose consumer. They resolve the BOM coordinates from an isolated Maven repository and exercise **only the Chinese engine path**; they are integration checks, not a complete gallery.
+- **Android demo:** [`calendarviewsample`](calendarviewsample/README.md) is the full, runnable Android demo. It covers all five calendars (Gregorian, Hijri, both Solar Hijri entries and Chinese), month/week/agenda views, heatmaps, adaptive panes, markers, week numbers, range policy, styles and saved state. It is an **Android application only**; this repository has no iOS demo app.
+- **JVM engine console:** [`tools/consumer-check/jvm-consumer`](tools/consumer-check/jvm-consumer/src/main/kotlin/consumer/Main.kt) is a dependency-free console example that uses only the published `calendar-bom` and Chinese engine JVM artifact. It prints the dataset range, epoch-day mapping, month/year lengths, leap-month title, weekday offset and day labels. It demonstrates **the JVM engine only**; it has no Compose or Android UI and is not a Compose Desktop app.
+
+```bash
+./gradlew :calendar-chinese-native:publishToMavenLocal :calendar-bom:publishToMavenLocal
+./gradlew -p tools/consumer-check :jvm-consumer:run
+```
+
+- **Minimal Android consumer:** [`tools/consumer-check/android-consumer`](tools/consumer-check/android-consumer) compiles the public Compose facade against the published BOM. It and the JVM consumer exercise **only the Chinese engine path**; they are integration checks, not a complete gallery.
 
 ```bash
 ./gradlew :calendarviewsample:assembleDebug
