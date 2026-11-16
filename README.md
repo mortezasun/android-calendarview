@@ -788,7 +788,7 @@ Requirements: JDK 17+ (verified with JDK 21), Android SDK Platform 37, Build-Too
 Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.9.1, Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 27.
 
 ```bash
-git clone --branch kmp https://github.com/mortezasun/android-calendarview.git
+git clone https://github.com/mortezasun/android-calendarview.git
 cd android-calendarview
 ./gradlew :calendarviewsample:assembleDebug   # build the demo app
 ./gradlew :calendarviewsample:assembleRelease # unsigned release APK

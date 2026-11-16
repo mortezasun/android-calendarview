@@ -2,7 +2,7 @@
 
 Last updated: 2026-11-16
 Version: `3.0.0` (Kotlin Multiplatform release, 2026-11-16; previous: `2.4.0`)
-Branch: `kmp` (3.0.0 release plus post-release tooling); `master` contains the Android-only `2.4.0`
+Branches: `kmp` is the working branch; `master` was fast-forwarded to the same 3.0.0 plus post-release tooling tree
 
 ## Post-3.0.0 tooling (branch `kmp`, unreleased)
 
