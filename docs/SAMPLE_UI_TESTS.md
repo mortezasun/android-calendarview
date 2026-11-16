@@ -38,10 +38,13 @@ bash ./gradlew :calendarviewsample:assembleDebugAndroidTest
 bash ./gradlew :calendarviewsample:connectedDebugAndroidTest
 ```
 
-Status: the sample contributes 26 of the 42 instrumentation tests on the KMP branch. The current
-tree is compiled but not executed since the migration; the historical 2.1.0 results are recorded
-in [PROJECT_STATUS.md](PROJECT_STATUS.md). If a test fails, inspect its assertion/report rather
-than weakening the intended behavior.
+Status: the sample contributes 26 of the 42 instrumentation tests on the KMP branch. The first
+post-migration execution was tablet run
+[#47](https://github.com/mortezasun/android-calendarview/actions/runs/43824943413): 12 of the 26
+sample tests failed, while all 16 library tests passed. The failing names require the signed-in
+job log or the retained artifact; no passing result is claimed. Historical 2.1.0 results are
+recorded in [PROJECT_STATUS.md](PROJECT_STATUS.md). If a test fails, inspect its
+assertion/report rather than weakening the intended behavior.
 
 ## Remaining broader migration work
 

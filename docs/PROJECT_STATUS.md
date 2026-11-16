@@ -21,9 +21,10 @@ code.
 - Verification on Linux (2026-11-16): 156 `jvmTest` cases in the seven library modules, 141 of
   them again through `testAndroidHostTest`, 62 sample unit tests, `lint` for the six KMP modules
   and the sample (0 errors), `:library:compileAndroidDeviceTest` and
-  `:calendarviewsample:compileDebugAndroidTestKotlin` (instrumentation tests compile only),
-  `:calendarviewsample:assembleDebug`/`assembleRelease`, `assembleAndroidMain`,
-  `publishToMavenLocal` for all seven modules plus the BOM, and `scripts/api-check.sh`.
+  `:calendarviewsample:compileDebugAndroidTestKotlin`, `:calendarviewsample:assembleDebug`/
+  `assembleRelease`, `assembleAndroidMain`, `publishToMavenLocal` for all seven modules plus the
+  BOM, and `scripts/api-check.sh`. The first emulator execution after the migration is the CI
+  tablet run recorded below.
 - Build setup: the KMP modules apply `com.android.lint` because
   `com.android.kotlin.multiplatform.library` creates no lint tasks, and opt in to
   `withHostTest`/`withDeviceTest`; `src/androidTest/java` is mapped into `androidDeviceTest`.
@@ -38,8 +39,25 @@ code.
   and the isolated JVM/Android consumers resolve the published coordinates. Remaining advisory
   findings: the Gradle 9.9.1 availability hint; the Compose test rules are still the 1.x variants
   (the v2 migration needs a device run).
-- Not run: iOS simulator tests and the `iosApp` sample (need macOS with Xcode); instrumentation
-  tests were compiled but not executed (no device or emulator in the Linux VM).
+- Not run locally: iOS simulator tests and the `iosApp` sample (need macOS with Xcode);
+  instrumentation tests only compile in the Linux VM. The CI emulator runs are recorded below.
+
+### CI results for `64b521a` (checked 2026-11-16 08:04 UTC)
+
+| Workflow | Run | Result |
+|---|---|---|
+| Android verification | [#155](https://github.com/mortezasun/android-calendarview/actions/runs/43824943463) | success: `assemble`, `unit-tests`, `native-engine` and `lint` jobs passed |
+| Android publishing verification | [#101](https://github.com/mortezasun/android-calendarview/actions/runs/43824943474) | success: isolated KMP publication, verifier and JVM/Android consumers passed |
+| Android tablet verification | [#47](https://github.com/mortezasun/android-calendarview/actions/runs/43824943413) | **failed** in the connected-test step: library 16/16 passed, sample 12/26 failed (42 tests, 12 failures, 0 errors, 0 skipped) |
+| Android instrumentation | [#152](https://github.com/mortezasun/android-calendarview/actions/runs/43824943399) | still in progress at 08:04 UTC; no conclusion yet |
+
+The tablet failure is a test result, not a build failure: the preceding build, host-test and
+lint steps succeeded, and the emulator step exited with status 1 after running both modules. The
+tablet workflow does not run `scripts/report-instrumented-failures.py` (only the instrumentation
+workflow does), so the public annotations expose only counts; the failing sample test names and
+messages require signed-in access to the job log or the retained artifact. The phone
+instrumentation run was still running when this note was written, so it is neither reported as
+passed nor failed.
 
 ## Current release: 2.4.0 Chinese calendar (2026-11-14)
 
