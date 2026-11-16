@@ -9,6 +9,7 @@
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
+/benchmarks/build/
 /tools/consumer-check/.gradle/
 /tools/consumer-check/**/build/
 /captures

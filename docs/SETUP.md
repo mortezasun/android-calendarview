@@ -1,15 +1,16 @@
 # Setup
 
-Verified on 2026-11-16 against the `3.0.0` release tree on branch `kmp` (JDK 21.0,
-Android SDK Platform 37.0, Build-Tools 37.0.0). The GitHub workflows configure JDK 17; their
-`3.0.0` runs are recorded in [PROJECT_STATUS.md](PROJECT_STATUS.md).
+Verified on 2026-11-16 against the `3.0.0` tree plus post-release tooling on branch `kmp` (JDK
+21.0, Android SDK Platform 37.0, Build-Tools 37.0.0). The GitHub workflows configure JDK 17;
+their `3.0.0` runs and the post-release tooling checks are recorded in
+[PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ## Required tools
 
 | Tool | Version | Notes |
 |------|---------|-------|
 | JDK | 17 | Minimum and default for AGP 9.5. Temurin 17.0.21+9 was used for verification. |
-| Gradle | 9.8.2 | Provided by the wrapper; do not install a separate Gradle. |
+| Gradle | 9.9.1 | Provided by the wrapper; do not install a separate Gradle. |
 | Android Gradle Plugin | 9.5.1 | Resolved from `google()` via `gradle/libs.versions.toml`. |
 | Android SDK Platform | API 37 | SDK Manager package `platforms;android-37.0`. Required by `compileSdk = 37`. |
 | Android SDK Build-Tools | 36.0.0 | Default/minimum for AGP 9.5; 37.0.0 was also used successfully for the local 3.0.0 verification. |
@@ -84,10 +85,20 @@ Building only the core library:
 
 `commonTest` holds the shared tests: selection engine and saved-state snapshots, month-cell
 building, heatmap data and style validation, the Hijri date-provider mapping and one month-data
-suite per calendar engine (156 tests). The sample keeps 62 JVM tests in `src/test`.
-`testAndroidHostTest` runs 141 of the shared tests on Android; the Chinese JVM benchmark is
+suite per calendar engine (165 tests). The sample keeps 62 JVM tests in `src/test`.
+`testAndroidHostTest` runs 148 of the shared tests on Android; the Chinese JVM benchmark is
 `jvmTest`-only. The Chinese engine fixtures also run on Kotlin/Native through
-`:calendar-chinese-native:linuxX64Test`.
+`:calendar-chinese-native:linuxX64Test` (16 tests).
+
+Dokka and performance checks are available without joining the normal test gate:
+
+```bash
+./gradlew :dokkaGenerate            # HTML API reference in build/dokka/html
+./gradlew :benchmarks:mainBenchmark # JVM performance smoke run; not part of check/build
+```
+
+Dokka `2.3.0` documents all seven published modules. The `:benchmarks` module uses
+kotlinx-benchmark `0.5.0`; see [BENCHMARKS.md](BENCHMARKS.md).
 
 `src/androidTest` holds the Compose UI tests (`CalendarSelectionComposeTest`,
 `CalendarHeatmapComposeTest`, `CalendarMonthHeaderComposeTest`,

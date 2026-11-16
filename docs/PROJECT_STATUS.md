@@ -2,7 +2,32 @@
 
 Last updated: 2026-11-16
 Version: `3.0.0` (Kotlin Multiplatform release, 2026-11-16; previous: `2.4.0`)
-Branch: `kmp` (3.0.0 release); `master` contains the Android-only `2.4.0`
+Branch: `kmp` (3.0.0 release plus post-release tooling); `master` contains the Android-only `2.4.0`
+
+## Post-3.0.0 tooling (branch `kmp`, unreleased)
+
+Status: implemented and locally verified on Gradle 9.9.1. No new tag or GitHub Release is part of
+this tooling change.
+
+- **Dokka:** Dokka `2.3.0` is applied to all seven published KMP modules and aggregates them with
+  the root `:dokkaGenerate` task. HTML is written to `build/dokka/html`; the `API documentation`
+  workflow uploads `dokka-html` and deploys to GitHub Pages when Pages uses workflow builds.
+  Dokka reports no unresolved KDoc links.
+- **Benchmarks:** the standalone `:benchmarks` module uses kotlinx-benchmark `0.5.0` with JMH
+  `1.37`. `./gradlew :benchmarks:mainBenchmark` runs Gregorian and Hijri month calculations plus
+  both shared heatmap adapters. It is not wired into `check`, `build` or CI. Results are in
+  [BENCHMARKS.md](BENCHMARKS.md).
+- **Gradle:** wrapper raised from `9.8.2` to `9.9.1`. The local gate stack (tests, lint, sample
+  release, device-test compilation, JVM API, KLIB ABI, `commonMain` purity) is green.
+- **Deprecations:** Gradle 9.9.1 reports upstream warnings from Kotlin Gradle Plugin 2.4.x
+  (`KotlinNativeBundleArtifactsTypes` attribute) and Compose (`HotReloadUsageType`); clearing them
+  requires a KGP 2.5+/Compose upgrade, not a repository change. `Configuration.setVisible` is
+  reported by the current plugin stack. Configuration-cache storage works for `help`.
+
+Open blockers: iOS runtime/simulator tests and an `iosApp` sample require macOS/Xcode; Maven
+Central signing, namespace verification and credentials are not configured; real process-death
+and physical-device/fold/TalkBack acceptance still need dedicated hardware or a stable emulator
+harness.
 
 ## Kotlin Multiplatform release 3.0.0
 
@@ -22,7 +47,7 @@ calendar modules no longer use `java.time` or `ir.huri:jalalicalendar` in shared
   engine; the `ir.huri:jalalicalendar` dependency was removed.
 - Verification on Linux (2026-11-16): 165 `jvmTest` cases in the seven library modules, 148 of
   them again through `testAndroidHostTest` (`calendar-chinese-native` is native-only; one
-  Chinese-Compose test is JVM-only), 62 sample unit tests, 14 Kotlin/Native tests, `lint`
+  Chinese-Compose test is JVM-only), 62 sample unit tests, 16 Kotlin/Native tests, `lint`
   for the six KMP modules and the sample (0 errors), `:library:compileAndroidDeviceTest` and
   `:calendarviewsample:compileDebugAndroidTestKotlin`, `:calendarviewsample:assembleDebug`/
   `assembleRelease`, `assembleAndroidMain`, `publishToMavenLocal` for all seven modules plus the
@@ -39,8 +64,8 @@ calendar modules no longer use `java.time` or `ir.huri:jalalicalendar` in shared
   four workflows plus `scripts/run-connected-tests.sh` were ported to the KMP tasks and the
   `kmp` branch. `scripts/verify-publication.sh` now follows the KMP layout (root metadata,
   `<module>-android` AARs, iOS klibs), checks all root module metadata plus the iOS klib archives,
-  and the isolated JVM/Android consumers resolve the published coordinates. Remaining advisory
-  finding: the Gradle 9.9.1 availability hint.
+  and the isolated JVM/Android consumers resolve the published coordinates. The former Gradle
+  9.9.1 availability hint is resolved by the post-release wrapper update above.
 - Not run locally: iOS simulator tests and the `iosApp` sample (need macOS with Xcode);
   instrumentation tests only compile in the Linux VM. The CI emulator runs are recorded below.
 

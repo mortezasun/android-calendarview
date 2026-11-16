@@ -17,6 +17,11 @@ The Kotlin Multiplatform APIs described here are released as `3.0.0`. See [ADR 0
 
 **Current release:** [`3.0.0`](https://github.com/mortezasun/android-calendarview/releases/tag/3.0.0) is the Kotlin Multiplatform release for Android, the JVM and iOS. The previous Android release is [`2.4.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.4.0). See the [3.0.0 release notes](docs/releases/3.0.0.md) and [short changelog](docs/releases/3.0.0-changelog.md). Verify the JitPack build for the new tag before pinning production dependencies.
 
+Remaining real gates: iOS runtime/simulator tests need macOS/Xcode, Maven Central signing and
+credentials are not configured, and real process-death plus physical-device/fold/TalkBack coverage
+needs dedicated hardware. Dokka docs, benchmarks and the Gradle 9.9.1 gate are covered on this
+branch; no new tag is associated with that tooling.
+
 ---
 
 ## Contents
@@ -636,11 +641,36 @@ Version 2.0.0 removes all View-based components (`MultiMonthView`, `MonthView`, 
 
 ---
 
+## 📖 API documentation and benchmarks
+
+Dokka `2.3.0` generates the API reference for all seven published KMP modules:
+
+```bash
+./gradlew :dokkaGenerate
+# HTML output: build/dokka/html/index.html
+```
+
+The `API documentation` GitHub workflow uploads this directory as the `dokka-html` artifact and
+deploys it to GitHub Pages when the repository's Pages source is set to workflow builds. If Pages
+is not enabled for workflow builds, the artifact remains available from the workflow run.
+
+Performance smoke benchmarks live in the separate `:benchmarks` module. They are not part of
+`check`, `build` or CI:
+
+```bash
+./gradlew :benchmarks:mainBenchmark
+```
+
+See [docs/BENCHMARKS.md](docs/BENCHMARKS.md) for the covered Gregorian/Hijri paths and the recorded
+baseline.
+
+---
+
 ## 🔨 Building from source
 
 Requirements: JDK 17+ (verified with JDK 21), Android SDK Platform 37, Build-Tools 36.0.0 or
 37.0.0, and a Kotlin/Native-capable host for `linuxX64Test`.
-Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 27.
+Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.9.1, Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 27.
 
 ```bash
 git clone --branch kmp https://github.com/mortezasun/android-calendarview.git
@@ -654,6 +684,8 @@ cd android-calendarview
 ./gradlew lint                                # Android Lint for every module
 ./gradlew :library:compileAndroidDeviceTest \
   :calendarviewsample:compileDebugAndroidTestKotlin # instrumentation tests (compile only)
+./gradlew :dokkaGenerate                       # Dokka HTML for all published modules
+./gradlew :benchmarks:mainBenchmark            # JVM performance smoke baseline
 
 # Public JVM API guard (after the AARs are built)
 ./gradlew assembleAndroidMain :calendar-chinese-native:jvmJar
@@ -678,6 +710,7 @@ CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Compose architecture, rendering and state model |
 | [V2_MIGRATION_MAPPING.md](docs/V2_MIGRATION_MAPPING.md) | 1.x → 2.0.0 migration matrix |
 | [PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | Verified status, test coverage, release notes |
+| [BENCHMARKS.md](docs/BENCHMARKS.md) | Benchmark module, command and measured JVM baseline |
 | [releases/3.0.0.md](docs/releases/3.0.0.md) | 3.0.0 Kotlin Multiplatform release notes and open gates |
 | [releases/2.4.0.md](docs/releases/2.4.0.md) | Previous Android release notes and verification evidence |
 | [CHINESE_CALENDAR_SPEC.md](docs/CHINESE_CALENDAR_SPEC.md) | Chinese engine API, data contract and range |

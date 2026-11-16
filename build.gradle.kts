@@ -8,9 +8,12 @@ plugins {
     alias(libs.plugins.android.lint) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.allopen) apply false
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.compose.multiplatform) apply false
+    alias(libs.plugins.dokka)
     `maven-publish`
 }
 
@@ -20,6 +23,29 @@ plugins {
 subprojects {
     tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
         .configureEach { enabled = false }
+}
+
+// Dokka is applied to the published KMP modules only. The root task aggregates their
+// documentation into build/dokka/html; the sample, BOM and benchmarks are not API docs.
+val documentedModules = setOf(
+    "library",
+    "calendar-gregorian",
+    "calendar-hijri",
+    "calendar-solarHijri",
+    "calendar-solarHijri-native",
+    "calendar-chinese-native",
+    "calendar-chinese-compose",
+)
+subprojects {
+    if (name in documentedModules) {
+        pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+            apply(plugin = "org.jetbrains.dokka")
+        }
+    }
+}
+
+dependencies {
+    documentedModules.forEach { module -> add("dokka", project(":$module")) }
 }
 
 // Single source of truth for the published coordinates. JitPack resolves multi-module

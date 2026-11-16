@@ -3,13 +3,15 @@
 Binding working rules for coding agents in this repository. Read this file and the linked
 documents before changing any code.
 
-## Current work: Kotlin Multiplatform 3.0.0 (branch `kmp`)
+## Current work: Kotlin Multiplatform 3.0.0 + post-release tooling (branch `kmp`)
 
 `:library` and the calendar modules are released as Kotlin Multiplatform `3.0.0` (Android, JVM,
-iOS) on branch `kmp`; `2.4.0` on `master` remains the previous Android-only release. Read
-[ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md) for the API changes and
-[docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for the verified state. iOS runtime verification
-is still open; do not report it as done.
+iOS) on branch `kmp`; `2.4.0` on `master` remains the previous Android-only release. The same
+branch also carries the post-release Dokka, benchmark and Gradle tooling; these are not part of
+the published `3.0.0` tag. Read [ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md)
+for the API changes and [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for the verified state.
+iOS runtime verification, Maven Central credentials and real process-death/hardware acceptance are
+still open; do not report them as done.
 
 The engine must stay self-written pure Kotlin and usable without Compose, Android or other
 calendar engines; the separate Compose facade may reuse `:library`. Do not copy/port external
@@ -35,12 +37,13 @@ is not part of your task and never reset, stash or overwrite it without explicit
 - `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` and the KMP engine
   `:calendar-chinese-native` together with its Compose facade `:calendar-chinese-compose` are the
   calendar modules. `:calendar-solarHijri-native` is the other dependency-free engine.
-  `:calendar-bom` constrains all published modules; `:calendarviewsample` depends on all modules.
+  `:calendar-bom` constrains all published modules; `:calendarviewsample` depends on all modules;
+  `:benchmarks` is a standalone JVM performance module outside the published set.
 - Shared code lives in `commonMain`; `jvmMain`/`androidMain` hold platform hooks and conversions,
   `iosMain` the Apple actuals.
 - Public API lives in `com.develotter.calendarview.*`; calendar-specific types live in
   `com.develotter.calendarview.calendars.*`.
-- Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk` 37,
+- Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.9.1, Compose BOM 2026.09.00, `compileSdk` 37,
   `minSdk` 27, Java 17.
 - UI is **100% Jetpack Compose**. There are no XML layouts, no ViewBinding, no custom view
   measurement, no ViewModel/Flow, no DI framework, no network and no persistence layer.
@@ -85,7 +88,7 @@ is not part of your task and never reset, stash or overwrite it without explicit
 ## Verified commands
 
 These commands were executed successfully on branch `kmp` with JDK 21, Android SDK Platform 37
-and Gradle 9.8.2 on Linux (2026-11-16):
+and Gradle 9.9.1 on Linux (2026-11-16):
 
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
@@ -101,7 +104,9 @@ chmod +x gradlew                                  # if the checkout lost the exe
 bash scripts/api-check.sh          # public JVM API diff against api/*.api
 bash scripts/api-check.sh --update # intentional API change: regenerate the dumps
 
-./gradlew :calendar-chinese-native:linuxX64Test    # 14 Kotlin/Native tests
+./gradlew :calendar-chinese-native:linuxX64Test    # 16 Kotlin/Native tests
+./gradlew :dokkaGenerate                         # HTML docs in build/dokka/html
+./gradlew :benchmarks:mainBenchmark              # JVM benchmark; not in check/CI
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
   :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal \
   :calendar-solarHijri-native:publishToMavenLocal :calendar-chinese-native:publishToMavenLocal \

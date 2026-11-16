@@ -21,7 +21,7 @@ data class SolarHijriWeekData(
 /**
  * Builds a Solar Hijri week around [dateEpochDay], aligned to [firstDayOfWeek] (ISO 1..7,
  * Monday first). Conversion goes through the checked absolute-day bridge; no Solar Hijri
- * week-number convention is assumed, so [weekNumber] is null.
+ * week-number convention is assumed, so `weekNumber` is null.
  */
 fun solarHijriWeekData(
     dateEpochDay: Long,

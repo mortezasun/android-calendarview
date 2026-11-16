@@ -1,8 +1,9 @@
 # CI workflows
 
 Workflows live in `.github/workflows/`. They run on pushes and pull requests for `master`,
-`update` and `kmp` (the tablet workflow only pushes on `update` and `kmp`). Nothing is
-published, signed or deployed; every job has read-only repository permissions.
+`update` and `kmp` (the tablet workflow only pushes on `update` and `kmp`). Library artifacts are
+not published, signed or deployed; the documentation workflow can deploy HTML to GitHub Pages.
+Verification and publishing jobs use read-only repository permissions.
 
 ## Android verification
 
@@ -21,6 +22,16 @@ published, signed or deployed; every job has read-only repository permissions.
 The KMP library plugin creates no Android test or lint tasks, so the modules apply
 `com.android.lint` and opt in to `withHostTest`/`withDeviceTest`; see
 [ADR 0006](decisions/0006-kotlin-multiplatform-calendar-modules.md).
+
+`.github/workflows/docs.yml` runs on pushes to `kmp` and via `workflow_dispatch`. It executes
+`:dokkaGenerate`, always uploads the `dokka-html` artifact, and deploys it with
+`actions/deploy-pages` only when the repository Pages source reports `build_type: workflow`.
+With any other Pages state the artifact is the documented fallback. The job needs `pages: write`
+and `id-token: write`, but no library publication credentials.
+
+The `:benchmarks` module is intentionally not part of any CI workflow. Run
+`:benchmarks:mainBenchmark` locally for the JVM baseline; its configuration and measured result
+are in [BENCHMARKS.md](BENCHMARKS.md).
 
 ## Android instrumentation and tablet
 

@@ -1,0 +1,88 @@
+name: API documentation
+
+on:
+  push:
+    branches: [kmp]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: api-documentation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      pages: ${{ steps.pages.outputs.enabled }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android command-line tools
+        uses: android-actions/setup-android@v4
+        with:
+          packages: ''
+
+      - name: Install documented Android SDK packages
+        run: sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;36.0.0"
+
+      - name: Generate Dokka HTML
+        run: bash ./gradlew :dokkaGenerate --no-daemon --stacktrace --console=plain
+
+      - name: Inspect GitHub Pages configuration
+        id: pages
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          build_type="$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.build_type' 2>/dev/null)"
+          if [[ "$build_type" == "workflow" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "GitHub Pages is configured to deploy from workflow builds."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "GitHub Pages is not configured for workflow builds; keeping the Dokka artifact."
+          fi
+
+      - name: Upload Dokka HTML artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: dokka-html
+          path: build/dokka/html
+          retention-days: 30
+
+      - name: Upload GitHub Pages artifact
+        if: steps.pages.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/dokka/html
+
+  deploy:
+    needs: build
+    if: needs.build.outputs.pages == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

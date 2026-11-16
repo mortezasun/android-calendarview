@@ -24,7 +24,7 @@ data class HijriWeekData(
  * Builds a Hijri week around [dateEpochDay], aligned to [firstDayOfWeek] (ISO 1..7, Monday
  * first) on the absolute timeline before mapping the days back to displayed dates. Local
  * moon-sighting adjustments come from [dateProvider]. No Hijri week-number convention is
- * assumed, so [weekNumber] is null.
+ * assumed, so `weekNumber` is null.
  */
 fun hijriWeekData(
     dateEpochDay: Long,

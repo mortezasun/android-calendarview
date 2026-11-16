@@ -147,6 +147,31 @@ bash scripts/klib-api-check.sh --update # regenerates api/klib/*.abi after an in
 
 CI runs both guards in the `assemble` and `klib-api` jobs.
 
+## Documentation and benchmarks
+
+Public KDoc is rendered by Dokka `2.3.0` for all seven published modules:
+
+```bash
+./gradlew :dokkaGenerate
+# build/dokka/html/index.html
+```
+
+Run it after changing public KDoc or adding a published module. Unresolved KDoc links are
+warnings, not build failures; keep the output free of them when touching those declarations. The
+`API documentation` workflow publishes the HTML to Pages when Pages uses workflow builds and
+always uploads the `dokka-html` artifact.
+
+The separate `:benchmarks` module uses kotlinx-benchmark `0.5.0` and is intentionally outside
+`check`, `build` and CI. Run `./gradlew :benchmarks:mainBenchmark` for the JVM baseline; see
+[BENCHMARKS.md](BENCHMARKS.md).
+
+## Toolchain upgrades
+
+The wrapper is on Gradle `9.9.1`. After a wrapper or plugin upgrade, rerun the local gate stack:
+tests, `lint`, sample release, `api-check.sh`, `klib-api-check.sh` and
+`check-commonmain-purity.sh`. Gradle 9.9.1 still reports upstream deprecations from KGP 2.4.x and
+Compose; record any new warning and the plugin that owns it instead of suppressing it.
+
 ## Release and versioning notes
 
 - The published version lives once in the root `build.gradle.kts` (`allprojects` group and version)

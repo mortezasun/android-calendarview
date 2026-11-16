@@ -27,6 +27,7 @@ The architecture follows standard Compose state and rendering patterns:
 | `:calendar-chinese-native` | Self-written Kotlin Multiplatform Chinese lunisolar engine (`ChineseCalendarEngine`, immutable `ChineseMonth`/`ChineseDate`, `ChineseFormat`, versioned month table). Targets `jvm()`, `linuxX64()`, Android and iOS; no Compose, Java date or third-party calendar dependency. |
 | `:calendar-chinese-compose` | Compose facade (`ChineseCalendarMonth`, `GregorianChineseCalendarMonth`, `ChineseMonthData`, `ChineseWeekData`, `ChineseMonthState`, `chineseYearHeatmap`) depending on `:calendar-chinese-native`, `:calendar-gregorian` and `:library`. |
 | `:calendar-bom` | `java-platform` constraints for the seven published library artifacts; no runtime classes. |
+| `:benchmarks` | Standalone Kotlin/JVM kotlinx-benchmark module for Gregorian/Hijri month calculations and the shared heatmap adapters. Not published and not part of `check`/`build`. |
 | `:calendarviewsample` | Interactive Compose demo app illustrating configuration, selection modes, navigation, dialogs, and heatmaps. |
 
 ### Dependency Rules
@@ -36,6 +37,7 @@ The architecture follows standard Compose state and rendering patterns:
 - `:calendar-chinese-native` depends only on the Kotlin standard library; no existing module depends on either Chinese module.
 - `calendar-solarHijri` reuses the dependency-free `:calendar-solarHijri-native` engine through `api`, so it declares no third-party calendar dependency.
 - `:calendar-bom` constrains published versions but is not a dependency of the modules.
+- `:benchmarks` depends on `:library`, `:calendar-gregorian` and `:calendar-hijri`; it is not published and no library module depends on it.
 - Root POM metadata is shared by all `maven-publish` publications; module publication blocks only choose the component and artifact.
 
 ---

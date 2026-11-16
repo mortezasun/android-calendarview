@@ -12,8 +12,8 @@ package com.develotter.calendarview.calendars.solarHijriNative
  * Supported years are [MIN_YEAR]..[MAX_YEAR]; everything outside throws
  * [IllegalArgumentException]. The leap-year rule exists exactly once, in the private
  * `jalCal`; [isLeapYear], [daysInMonth], [toEpochDay] and [fromEpochDay] all derive from it,
- * so conversion and month lengths cannot disagree. Day numbers use the same epoch as
- * [java.time.LocalDate.toEpochDay] (1970-01-01 is day 0).
+ * so conversion and month lengths cannot disagree. Day numbers use the same epoch as the JVM
+ * `LocalDate.toEpochDay` (1970-01-01 is day 0).
  */
 object SolarHijriEngine {
     // Declared first: the epoch-day bounds below run jalCal during object initialization.
@@ -57,7 +57,7 @@ object SolarHijriEngine {
         }
     }
 
-    /** Epoch day (see [java.time.LocalDate.toEpochDay]) of a valid Solar Hijri date. */
+    /** Epoch day (see the JVM `LocalDate.toEpochDay`) of a valid Solar Hijri date. */
     fun toEpochDay(year: Int, month: Int, day: Int): Long {
         require(day in 1..daysInMonth(year, month)) {
             "day must be in 1..${if (month in 1..12 && year in MIN_YEAR..MAX_YEAR) daysInMonth(year, month) else 0} " +
