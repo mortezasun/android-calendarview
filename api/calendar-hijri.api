@@ -27,19 +27,6 @@ public final class com.develotter.calendarview.calendars.hijri.HijriJvmConversio
   public static final java.time.LocalDate toLocalDate(com.develotter.calendarview.calendars.hijri.HijriDate);
 }
 
-public final class com.develotter.calendarview.calendars.hijri.HijriPlatform {
-  public static final com.develotter.calendarview.calendars.hijri.HijriPlatform INSTANCE;
-  public final long currentEpochDay();
-  public final com.develotter.calendarview.calendars.hijri.HijriDate fromEpochDay(long);
-  public final long toEpochDay(com.develotter.calendarview.calendars.hijri.HijriDate);
-  public final int lengthOfMonth(int, int);
-  public final java.lang.String formatMonthYear(int, int);
-  public final java.lang.String formatFullDate(long);
-  public final java.lang.String formatShortDayMonthYear(long);
-  public final java.lang.String formatDayNumber(int);
-  public final java.lang.String weekdayShortLabel(int);
-}
-
 public final class com.develotter.calendarview.calendars.hijri.HijriUtilKt {
   public static final int day(com.develotter.calendarview.calendars.hijri.HijriDate);
   public static final int year(com.develotter.calendarview.calendars.hijri.HijriDate);

@@ -60,16 +60,6 @@ public final class com.develotter.calendarview.calendars.chineseCompose.ChineseM
   public static final com.develotter.calendarview.calendars.chineseCompose.ChineseMonthState rememberChineseMonthState(com.develotter.calendarview.calendars.chineseNative.ChineseMonth, com.develotter.calendarview.calendars.chineseNative.ChineseMonth, com.develotter.calendarview.calendars.chineseNative.ChineseMonth, kotlin.jvm.functions.Function0<java.lang.Long>, androidx.compose.runtime.Composer, int, int);
 }
 
-public final class com.develotter.calendarview.calendars.chineseCompose.ChinesePlatform {
-  public static final com.develotter.calendarview.calendars.chineseCompose.ChinesePlatform INSTANCE;
-  public final long currentEpochDay();
-  public final int defaultFirstDayOfWeek();
-  public final java.lang.String formatMonthYear(int, int);
-  public final java.lang.String formatFullDate(long);
-  public final java.lang.String formatDayNumber(int);
-  public final java.lang.String weekdayShortLabel(int);
-}
-
 public final class com.develotter.calendarview.calendars.chineseCompose.ChineseWeekData implements com.develotter.calendarview.compose.CalendarWeekData {
   public com.develotter.calendarview.calendars.chineseCompose.ChineseWeekData(java.lang.String, java.util.List<java.lang.String>, java.util.List<com.develotter.calendarview.compose.CalendarDayCell>);
   public java.lang.String getTitle();

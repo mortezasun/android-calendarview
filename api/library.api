@@ -213,15 +213,6 @@ public final class com.develotter.calendarview.compose.HeatmapOrientation extend
   public static kotlin.enums.EnumEntries<com.develotter.calendarview.compose.HeatmapOrientation> getEntries();
 }
 
-public final class com.develotter.calendarview.compose.HeatmapPlatformFormatter {
-  public static final com.develotter.calendarview.compose.HeatmapPlatformFormatter INSTANCE;
-  public final long currentEpochDay();
-  public final java.lang.String formatMonthYear(long);
-  public final java.lang.String formatFullDate(long);
-  public final java.lang.String weekdayShortLabel(int);
-  public final java.lang.String formatPercent(float);
-}
-
 public final class com.develotter.calendarview.compose.HeatmapQuarterData {
   public com.develotter.calendarview.compose.HeatmapQuarterData(long, long, java.util.List<? extends java.util.List<com.develotter.calendarview.compose.HeatmapDay>>);
   public final long getStartEpochDay();

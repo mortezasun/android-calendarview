@@ -833,6 +833,7 @@ CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Compose architecture, rendering and state model |
 | [V2_MIGRATION_MAPPING.md](docs/V2_MIGRATION_MAPPING.md) | 1.x → 2.0.0 migration matrix |
 | [PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | Verified status, test coverage, release notes |
+| [KOTLIN_2_5_UPGRADE.md](docs/KOTLIN_2_5_UPGRADE.md) | Kotlin 2.5.0 upgrade plan, compatibility questions and checklist |
 | [BENCHMARKS.md](docs/BENCHMARKS.md) | Benchmark module, command and measured JVM baseline |
 | [releases/3.0.0.md](docs/releases/3.0.0.md) | 3.0.0 Kotlin Multiplatform release notes and open gates |
 | [releases/2.4.0.md](docs/releases/2.4.0.md) | Previous Android release notes and verification evidence |

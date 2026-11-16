@@ -70,16 +70,6 @@ public final class com.develotter.calendarview.calendars.solarHijriNative.SolarH
   public static final long floorMod(long, long);
 }
 
-public final class com.develotter.calendarview.calendars.solarHijriNative.SolarHijriPlatform {
-  public static final com.develotter.calendarview.calendars.solarHijriNative.SolarHijriPlatform INSTANCE;
-  public final long currentEpochDay();
-  public final java.lang.String localeLanguage();
-  public final java.lang.String localeCountry();
-  public final java.lang.String formatDayNumber(int);
-  public final java.lang.String weekdayShortLabel(int);
-  public final java.lang.String weekdayFullLabel(int);
-}
-
 public final class com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeCalendarMonthKt {
   public static final com.develotter.calendarview.compose.CalendarDayCell solarHijriNativeDayCell(long, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
   public static final com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthData solarHijriNativeMonthData(com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate, int, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);

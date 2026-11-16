@@ -4,6 +4,10 @@
 #
 # Usage: bash scripts/klib-api-check.sh [--update]
 # The klibs are produced by e.g. ./gradlew iosArm64MainKlibrary.
+#
+# The platform adapter objects are Kotlin `internal` implementation details. `klib dump-abi`
+# already omits them, but this guard rejects them explicitly so a future ABI-tool change cannot
+# silently publish them as public surface.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -35,6 +39,7 @@ MODULES=(
     calendar-chinese-native
     calendar-chinese-compose
 )
+INTERNAL_PLATFORM_CLASSES='HeatmapPlatformFormatter|GregorianPlatformFormatter|HijriPlatform|SolarHijriPlatform|ChinesePlatform'
 
 status=0
 for module in "${MODULES[@]}"; do
@@ -48,6 +53,13 @@ for module in "${MODULES[@]}"; do
     snapshot="$ROOT/api/klib/${module}.abi"
     actual="$(mktemp)"
     "$KLIB" dump-abi "$klib" > "$actual"
+
+    if grep -qE "(${INTERNAL_PLATFORM_CLASSES})" "$actual"; then
+        echo "Internal platform adapter leaked into $module's KLIB API dump." >&2
+        status=1
+        rm -f "$actual"
+        continue
+    fi
 
     if [[ "$UPDATE" -eq 1 ]]; then
         mkdir -p "$ROOT/api/klib"

@@ -10,6 +10,12 @@
 # surface; iOS-only public declarations would need a separate guard. It does not encode Kotlin
 # default values, annotations, inline-only API or source compatibility, so review the dump diff
 # together with the KDoc when updating it.
+#
+# The five platform adapter objects are Kotlin `internal` but appear as public classes in JVM
+# bytecode. No binary-compatibility-validator plugin is applied (it creates no tasks with AGP 9's
+# built-in Kotlin support), so this script filters those exact implementation classes and then
+# rejects them if they ever leak back into a generated dump. The KLIB guard applies the same
+# rejection rule.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -40,6 +46,7 @@ fi
 MODULES=(library calendar-gregorian calendar-hijri calendar-solarHijri calendar-solarHijri-native calendar-chinese-compose)
 # The Kotlin Multiplatform engine publishes a JVM jar instead of an Android AAR.
 ENGINE_MODULE=calendar-chinese-native
+INTERNAL_PLATFORM_CLASSES='HeatmapPlatformFormatter|GregorianPlatformFormatter|HijriPlatform|SolarHijriPlatform|ChinesePlatform'
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -134,12 +141,18 @@ for module in "${MODULES[@]}" "$ENGINE_MODULE"; do
             | grep -vE '\.R(\$.*)?$' \
             | grep -vE 'ChineseCalendar(Data|Table)' \
             | grep -vE '\.BuildConfig$' \
+            | grep -vE "\.(${INTERNAL_PLATFORM_CLASSES})(\$.*)?$" \
             | sort
     )
 
     # Keep exactly one trailing newline instead of a blank line after the last class.
     content="$(<"$dump")"
     printf '%s\n' "$content" > "$dump"
+
+    if grep -qE "^public (final )?class .*\.(${INTERNAL_PLATFORM_CLASSES})( |$)" "$dump"; then
+        echo "Internal platform adapter leaked into $dump." >&2
+        exit 1
+    fi
 done
 
 if [[ "$UPDATE" -eq 1 ]]; then

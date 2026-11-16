@@ -28,6 +28,11 @@ this tooling change.
   title, start epoch day, weekday offset and day labels. `./gradlew -p tools/consumer-check
   :jvm-consumer:run` completed with exit 0 and `JVM engine OK`; `:calendar-chinese-native:jvmTest`
   was also green. This is a JVM engine example only, not a UI or Compose Desktop example.
+- **API guard scope:** the five platform adapter objects are internal implementation details. The
+  JVM dump filters their exact JVM bytecode names because Kotlin `internal` is public bytecode and
+  the binary-compatibility-validator plugin creates no tasks with AGP 9's built-in Kotlin support;
+  the KLIB guard rejects any leak. The regenerated `api/*.api` dumps contain none of the five
+  objects, and the KLIB snapshots already contained none. See [DEVELOPMENT.md](DEVELOPMENT.md#public-api-guard).
 - **Gradle:** wrapper raised from `9.8.2` to `9.9.1`. The local gate stack (tests, lint, sample
   release, device-test compilation, JVM API, KLIB ABI, `commonMain` purity) is green.
 - **Deprecations:** Gradle 9.9.1 reports upstream warnings from Kotlin Gradle Plugin 2.4.x
@@ -39,6 +44,14 @@ Open blockers: iOS runtime/simulator tests and an `iosApp` sample require macOS/
 Central signing, namespace verification and credentials are not configured; real process-death
 and physical-device/fold/TalkBack acceptance still need dedicated hardware or a stable emulator
 harness.
+
+## Kotlin 2.5.0 upgrade planning
+
+No Kotlin 2.5 upgrade is applied. The current tree uses Kotlin `2.4.21`, Compose Multiplatform
+`1.12.2`, Gradle `9.9.1` and AGP `9.5.1`. Kotlin `2.5.0` is officially listed as planned for
+December 2026, and the `2.5.0-RC` notes describe an experimental multiplatform publication format.
+The concrete checklist, open compatibility questions and official references are in
+[KOTLIN_2_5_UPGRADE.md](KOTLIN_2_5_UPGRADE.md).
 
 ## Kotlin Multiplatform release 3.0.0
 

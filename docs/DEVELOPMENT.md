@@ -130,6 +130,13 @@ CI runs the same check in the `assemble` job. The dump is generated with `javap`
 AARs: it covers public JVM classes, constructors, methods and fields, but not Kotlin default
 values, annotations or source compatibility. Review `git diff api/` together with the public KDoc.
 
+The five platform adapter objects (`HeatmapPlatformFormatter`, `GregorianPlatformFormatter`,
+`HijriPlatform`, `SolarHijriPlatform` and `ChinesePlatform`) are `internal` implementation
+details. Kotlin `internal` is still public JVM bytecode, and the repository does not apply the
+binary-compatibility-validator plugin because it creates no tasks with AGP 9's built-in Kotlin
+support. `scripts/api-check.sh` therefore filters those exact classes and rejects a leak; the KLIB
+dump already omits them, and `scripts/klib-api-check.sh` rejects a leak as well.
+
 ## Kotlin Multiplatform guards
 
 `commonMain` must stay free of JVM, Android and removed `ir.huri` imports. The iOS klib surface
