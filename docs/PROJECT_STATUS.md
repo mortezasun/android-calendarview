@@ -6,9 +6,11 @@ Branch: `kmp` (3.0.0 release); `master` contains the Android-only `2.4.0`
 
 ## Kotlin Multiplatform release 3.0.0
 
-Status: implemented, locally verified and released from branch `kmp`; iOS runtime/simulator
-verification is still not possible on Linux and is not claimed. The calendar modules no longer
-use `java.time` or `ir.huri:jalalicalendar` in shared code.
+Status: implemented, locally verified and released from branch `kmp` at `a0c686e7da9e5ea6950477b088c11e66486c172b`.
+Tag `3.0.0` and the GitHub Release were published on 2026-11-16 by release workflow
+[43854431009](https://github.com/mortezasun/android-calendarview/actions/runs/43854431009).
+iOS runtime/simulator verification is still not possible on Linux and is not claimed. The
+calendar modules no longer use `java.time` or `ir.huri:jalalicalendar` in shared code.
 
 - `:library`, `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` (facade),
   `:calendar-solarHijri-native` and `:calendar-chinese-compose` moved their shared sources to
@@ -64,6 +66,19 @@ test-rule migration. The earlier tablet failure
 ([43824943413](https://github.com/mortezasun/android-calendarview/actions/runs/43824943413)) was
 diagnosed from its published annotations; the phone run for `64b521a` was superseded before it
 completed and is not part of the final result.
+
+### 3.0.0 release commit `a0c686e` (2026-11-16)
+
+| Workflow | Run | Result |
+|---|---|---|
+| Android verification (including `klib-api`) | [43854430900](https://github.com/mortezasun/android-calendarview/actions/runs/43854430900) | success |
+| Android publishing verification | [43854430869](https://github.com/mortezasun/android-calendarview/actions/runs/43854430869) | success: isolated publication, minified Android consumer |
+| Android tablet verification | [43854430879](https://github.com/mortezasun/android-calendarview/actions/runs/43854430879) | success: 44-test release gate (18 library, 26 sample) |
+| Android instrumentation | [43854430766](https://github.com/mortezasun/android-calendarview/actions/runs/43854430766) | success: 44-test release gate (18 library, 26 sample) |
+| Publish approved 3.0.0 release | [43854431009](https://github.com/mortezasun/android-calendarview/actions/runs/43854431009) | success: tag `3.0.0` and GitHub Release created |
+
+The release workflow only creates the tag after every listed check succeeds on the release commit.
+The JitPack build for `3.0.0` and a JitPack-only BOM consumer still need verification.
 
 ## Previous release: 2.4.0 Chinese calendar (2026-11-14)
 

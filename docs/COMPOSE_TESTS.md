@@ -1,7 +1,10 @@
 # Compose instrumentation checks
 
-Last verified: 2026-11-16 (post-migration execution for `1a24725`: 42/42 tests passed in both
-the tablet and phone workflows with the `junit4.v2` rules)
+Last verified: 2026-11-16 (3.0.0 release commit `a0c686e`: 44/44 tests passed in both emulator
+workflows; the earlier `1a24725` run passed 42/42 before the accessibility tests were added).
+
+Historical post-migration execution for `1a24725`: 42/42 tests passed in both the tablet and
+phone workflows with the `junit4.v2` rules.
 
 Historical: the 2.1.0 release-tree runs passed the then 26 tests on API 29 on 2026-11-11; see
 [PROJECT_STATUS.md](PROJECT_STATUS.md) for the run IDs.
@@ -120,10 +123,12 @@ test-count summary step; the checked-in inventory is now 18 library plus 26 samp
 
 After the KMP migration the source inventory is **44 tests (18 library, 26 sample)**. The new
 accessibility test (RTL, 200% font scale, selection semantics) is part of the 3.0.0 release gate.
-For `1a24725` both emulator workflows passed the then-42 tests with 0 failures, 0 errors and 0
-skips:
-[tablet](https://github.com/mortezasun/android-calendarview/actions/runs/43836063797) and
-[phone](https://github.com/mortezasun/android-calendarview/actions/runs/43836063805). The
+For `a0c686e` both emulator workflows passed all 44 tests:
+[tablet](https://github.com/mortezasun/android-calendarview/actions/runs/43854430879) and
+[phone](https://github.com/mortezasun/android-calendarview/actions/runs/43854430766).
+The earlier `1a24725` runs passed the then-42 tests
+([tablet](https://github.com/mortezasun/android-calendarview/actions/runs/43836063797),
+[phone](https://github.com/mortezasun/android-calendarview/actions/runs/43836063805)); the
 preceding `3bb7fdd` runs also passed 42/42. An earlier tablet run
 ([43824943413](https://github.com/mortezasun/android-calendarview/actions/runs/43824943413))
 exposed 12 sample failures caused by a missing `ComponentActivity` declaration; `ui-test-manifest`
