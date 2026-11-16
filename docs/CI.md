@@ -31,6 +31,10 @@ preserves each exit status.
 `.github/workflows/android-tablet.yml` runs the same tests on a 1600×2560 240 dpi tablet
 emulator after building the sample, both instrumentation APKs, the JVM/host tests and lint.
 
+Both emulator workflows publish failed test cases as public check-run annotations through
+`scripts/report-instrumented-failures.py`; the raw logs and uploaded artifacts still require a
+signed-in GitHub account.
+
 Instrumentation runs require KVM on the runner and are not executed on every machine; compiling
 the device-test sources (`compileAndroidDeviceTest`) works without an emulator.
 

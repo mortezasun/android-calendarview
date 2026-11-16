@@ -52,12 +52,12 @@ code.
 | Android instrumentation | [#152](https://github.com/mortezasun/android-calendarview/actions/runs/43824943399) | still in progress at 08:04 UTC; no conclusion yet |
 
 The tablet failure is a test result, not a build failure: the preceding build, host-test and
-lint steps succeeded, and the emulator step exited with status 1 after running both modules. The
-tablet workflow does not run `scripts/report-instrumented-failures.py` (only the instrumentation
-workflow does), so the public annotations expose only counts; the failing sample test names and
-messages require signed-in access to the job log or the retained artifact. The phone
-instrumentation run was still running when this note was written, so it is neither reported as
-passed nor failed.
+lint steps succeeded, and the emulator step exited with status 1 after running both modules. Run
+#47 predates the addition of `scripts/report-instrumented-failures.py` to the tablet workflow
+(both emulator workflows now publish failed cases), so its public annotations expose only
+counts; the failing sample test names and messages require signed-in access to the job log or
+the retained artifact. The phone instrumentation run was still running when this note was
+written, so it is neither reported as passed nor failed.
 
 ## Current release: 2.4.0 Chinese calendar (2026-11-14)
 

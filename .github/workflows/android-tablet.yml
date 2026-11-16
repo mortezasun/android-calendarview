@@ -51,6 +51,7 @@ jobs:
         run: bash scripts/prepare-kvm.sh
 
       - name: Run complete core and sample suites in a tablet window
+        id: tablet_instrumentation
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
@@ -71,6 +72,10 @@ jobs:
       - name: Summarize available instrumented test reports
         if: always()
         run: python3 scripts/summarize-instrumented-tests.py
+
+      - name: Report failed instrumented tests
+        if: ${{ failure() && steps.tablet_instrumentation.outcome == 'failure' }}
+        run: python3 scripts/report-instrumented-failures.py
 
       - name: Upload tablet reports and diagnostics
         if: always()
