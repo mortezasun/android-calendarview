@@ -27,7 +27,10 @@ The KMP library plugin creates no Android test or lint tasks, so the modules app
 `:dokkaGenerate`, always uploads the `dokka-html` artifact, and deploys it with
 `actions/deploy-pages` only when the repository Pages source reports `build_type: workflow`.
 With any other Pages state the artifact is the documented fallback. The job needs `pages: write`
-and `id-token: write`, but no library publication credentials.
+and `id-token: write`, but no library publication credentials. For the post-release tooling run
+`43863485535` the build job succeeded and uploaded `dokka-html`; the Pages deploy job was skipped
+because the repository Pages source was not `build_type: workflow` and the Pages site returned
+HTTP 404. The artifact is therefore the current documentation delivery.
 
 The `:benchmarks` module is intentionally not part of any CI workflow. Run
 `:benchmarks:mainBenchmark` locally for the JVM baseline; its configuration and measured result

@@ -12,7 +12,12 @@ this tooling change.
 - **Dokka:** Dokka `2.3.0` is applied to all seven published KMP modules and aggregates them with
   the root `:dokkaGenerate` task. HTML is written to `build/dokka/html`; the `API documentation`
   workflow uploads `dokka-html` and deploys to GitHub Pages when Pages uses workflow builds.
-  Dokka reports no unresolved KDoc links.
+  Dokka reports no unresolved KDoc links. Run
+  [43863485535](https://github.com/mortezasun/android-calendarview/actions/runs/43863485535)
+  completed successfully and uploaded the `dokka-html` artifact. Its Pages steps were skipped
+  because the repository's Pages source is not configured as `build_type: workflow` (the Pages
+  site currently returns HTTP 404), so the artifact is the documented fallback. Enabling Pages
+  with GitHub Actions as the source remains a maintainer repository setting.
 - **Benchmarks:** the standalone `:benchmarks` module uses kotlinx-benchmark `0.5.0` with JMH
   `1.37`. `./gradlew :benchmarks:mainBenchmark` runs Gregorian and Hijri month calculations plus
   both shared heatmap adapters. It is not wired into `check`, `build` or CI. Results are in
