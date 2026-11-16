@@ -1,7 +1,7 @@
 # Compose instrumentation checks
 
-Last verified: 2026-11-16 (first post-migration execution in the tablet workflow: 16/16 library
-tests passed, 12 of 26 sample tests failed; the phone run was still pending)
+Last verified: 2026-11-16 (post-migration execution for `3bb7fdd`: 42/42 tests passed in both
+the tablet and phone workflows)
 
 Historical: the 2.1.0 release-tree runs passed the then 26 tests on API 29 on 2026-11-11; see
 [PROJECT_STATUS.md](PROJECT_STATUS.md) for the run IDs.
@@ -114,13 +114,13 @@ emulator step succeeded, and the two main-viewport tests, the dialog restoration
 the caption tests were part of the executed suite. That run predates the KMP migration and the
 test-count summary step; the checked-in inventory is now 16 library plus 26 sample tests.
 
-After the KMP migration the source inventory is **42 tests (16 library, 26 sample)**. The first
-emulator execution was tablet run
-[#47](https://github.com/mortezasun/android-calendarview/actions/runs/43824943413): all 16 library
-tests passed, while 12 of the 26 sample tests failed (0 errors, 0 skipped). The public
-annotations expose only counts; the failing test names need the signed-in job log or the
-retained artifact. No passing result is claimed for the sample tests, and the phone run was
-still pending when this was recorded.
+After the KMP migration the source inventory is **42 tests (16 library, 26 sample)**. For
+`3bb7fdd` both emulator workflows passed all 42 tests with 0 failures, 0 errors and 0 skips:
+[tablet](https://github.com/mortezasun/android-calendarview/actions/runs/43834271322) and
+[phone](https://github.com/mortezasun/android-calendarview/actions/runs/43834271312). An earlier
+tablet run ([43824943413](https://github.com/mortezasun/android-calendarview/actions/runs/43824943413))
+exposed 12 sample failures caused by a missing `ComponentActivity` declaration; `ui-test-manifest`
+now attaches to the sample debug variant and failed cases are published for both workflows.
 
 Remaining limits:
 

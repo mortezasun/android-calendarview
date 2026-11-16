@@ -42,22 +42,27 @@ code.
 - Not run locally: iOS simulator tests and the `iosApp` sample (need macOS with Xcode);
   instrumentation tests only compile in the Linux VM. The CI emulator runs are recorded below.
 
-### CI results for `64b521a` (checked 2026-11-16 08:04 UTC)
+### CI results (2026-11-16)
+
+The first run for `64b521a` passed Android verification and publishing, but the tablet workflow
+failed in the connected-test step: all 16 library tests passed and 12 of 26 sample tests failed
+with `Unable to resolve activity ... androidx.activity.ComponentActivity`. The sample's debug
+variant now attaches `ui-test-manifest`, and both emulator workflows publish the complete failed
+case list (the summary is emitted before GitHub's ten-annotation limit).
+
+Rerun for `3bb7fdd`:
 
 | Workflow | Run | Result |
 |---|---|---|
-| Android verification | [#155](https://github.com/mortezasun/android-calendarview/actions/runs/43824943463) | success: `assemble`, `unit-tests`, `native-engine` and `lint` jobs passed |
-| Android publishing verification | [#101](https://github.com/mortezasun/android-calendarview/actions/runs/43824943474) | success: isolated KMP publication, verifier and JVM/Android consumers passed |
-| Android tablet verification | [#47](https://github.com/mortezasun/android-calendarview/actions/runs/43824943413) | **failed** in the connected-test step: library 16/16 passed, sample 12/26 failed (42 tests, 12 failures, 0 errors, 0 skipped) |
-| Android instrumentation | [#152](https://github.com/mortezasun/android-calendarview/actions/runs/43824943399) | still in progress at 08:04 UTC; no conclusion yet |
+| Android verification | [43834271132](https://github.com/mortezasun/android-calendarview/actions/runs/43834271132) | success (3m 33s) |
+| Android publishing verification | [43834271349](https://github.com/mortezasun/android-calendarview/actions/runs/43834271349) | success (4m 27s) |
+| Android tablet verification | [43834271322](https://github.com/mortezasun/android-calendarview/actions/runs/43834271322) | success: 42/42 tests (16 library, 26 sample), 0 failures (6m 48s) |
+| Android instrumentation | [43834271312](https://github.com/mortezasun/android-calendarview/actions/runs/43834271312) | success: 42/42 tests (16 library, 26 sample), 0 failures (6m 11s) |
 
-The tablet failure is a test result, not a build failure: the preceding build, host-test and
-lint steps succeeded, and the emulator step exited with status 1 after running both modules. Run
-#47 predates the addition of `scripts/report-instrumented-failures.py` to the tablet workflow
-(both emulator workflows now publish failed cases), so its public annotations expose only
-counts; the failing sample test names and messages require signed-in access to the job log or
-the retained artifact. The phone instrumentation run was still running when this note was
-written, so it is neither reported as passed nor failed.
+All four workflows are green for the current head. The earlier tablet failure
+([43824943413](https://github.com/mortezasun/android-calendarview/actions/runs/43824943413)) was
+diagnosed from its published annotations; the phone run for `64b521a` was superseded before it
+completed and is not part of the final result.
 
 ## Current release: 2.4.0 Chinese calendar (2026-11-14)
 
