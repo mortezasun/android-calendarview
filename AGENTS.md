@@ -3,16 +3,13 @@
 Binding working rules for coding agents in this repository. Read this file and the linked
 documents before changing any code.
 
-## Current work: 2.4.0 Chinese calendar (released)
+## Current work: Kotlin Multiplatform migration (branch `kmp`, unreleased)
 
-The 2.4.0 Chinese calendar was released on 2026-11-14 with tag `2.4.0` and is merged into
-`master`. Read [docs/releases/2.4.0.md](docs/releases/2.4.0.md),
-[RELEASE_PLAN_2.4.0.md](RELEASE_PLAN_2.4.0.md),
-[ADR 0005](docs/decisions/0005-independent-native-chinese-calendar.md),
-[the specification](docs/CHINESE_CALENDAR_SPEC.md),
-[quality and security gates](docs/CHINESE_CALENDAR_QUALITY.md), and
-[the release notes](docs/releases/2.4.0.md). Open gates are listed there; do not report them as
-done.
+`:library` and the calendar modules are being migrated to Kotlin Multiplatform (Android, JVM,
+iOS) on branch `kmp`; `2.4.0` on `master` remains the latest published Android release. Read
+[ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md) for the API changes and
+[docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for the verified state. iOS runtime verification
+and the version/tag decision are open; do not report either as done.
 
 The engine must stay self-written pure Kotlin and usable without Compose, Android or other
 calendar engines; the separate Compose facade may reuse `:library`. Do not copy/port external
@@ -117,6 +114,9 @@ run on Linux. Report any command that could not be run and why.
 
 ### Build conventions
 
+- KMP modules use the `android {}` target block and the explicit `org.jetbrains.compose.*`
+  dependency coordinates from the catalog; the plugin's deprecated `androidLibrary`/`compose.*`
+  accessors must not come back.
 - Android KMP modules apply `com.android.lint`: `com.android.kotlin.multiplatform.library`
   provides no lint tasks of its own.
 - They opt in to `withHostTest {}` and `withDeviceTest {}`; `src/androidTest/java` is mapped into

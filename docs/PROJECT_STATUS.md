@@ -29,6 +29,15 @@ code.
   `withHostTest`/`withDeviceTest`; `src/androidTest/java` is mapped into `androidDeviceTest`.
   Compose Multiplatform 1.12.2 leaves the device-test resource copy task unconfigured, so the
   root build disables it.
+- Build and CI hardening (2026-11-16): the deprecated `androidLibrary` block and `compose.*`
+  dependency accessors were replaced by `android` and explicit `org.jetbrains.compose.*`
+  coordinates, unused sample resources were removed (sample lint now reports no issues), and the
+  four workflows plus `scripts/run-connected-tests.sh` were ported to the KMP tasks and the
+  `kmp` branch. `scripts/verify-publication.sh` now follows the KMP layout (root metadata,
+  `<module>-android` AARs, iOS klibs), checks all root module metadata plus the iOS klib archives,
+  and the isolated JVM/Android consumers resolve the published coordinates. Remaining advisory
+  findings: the Gradle 9.9.1 availability hint; the Compose test rules are still the 1.x variants
+  (the v2 migration needs a device run).
 - Not run: iOS simulator tests and the `iosApp` sample (need macOS with Xcode); instrumentation
   tests were compiled but not executed (no device or emulator in the Linux VM).
 

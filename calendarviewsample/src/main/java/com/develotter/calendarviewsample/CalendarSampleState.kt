@@ -6,6 +6,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -165,7 +166,7 @@ internal fun rememberCalendarSampleState(): CalendarSampleState {
     val useHeaderApi = rememberSaveable { mutableStateOf(false) }
     val limitRange = rememberSaveable { mutableStateOf(false) }
     val hijriOffset = rememberSaveable { mutableIntStateOf(0) }
-    val anchor = rememberSaveable { mutableStateOf(LocalDate.now().toEpochDay()) }
+    val anchor = rememberSaveable { mutableLongStateOf(LocalDate.now().toEpochDay()) }
     val showDialog = rememberSaveable { mutableStateOf(false) }
     val error = rememberSaveable { mutableStateOf<String?>(null) }
     val chineseStyleName = rememberSaveable { mutableStateOf(ChineseTextStyle.English.name) }

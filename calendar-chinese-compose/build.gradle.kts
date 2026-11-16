@@ -10,7 +10,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "com.develotter.calendarview.calendars.chinese.compose"
         compileSdk = 37
         minSdk = 27
@@ -32,7 +32,7 @@ kotlin {
             api(project(":library"))
             api(project(":calendar-chinese-native"))
             api(project(":calendar-gregorian"))
-            implementation(compose.material3)
+            implementation(libs.compose.material3)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

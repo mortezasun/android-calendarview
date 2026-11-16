@@ -54,7 +54,7 @@ class CalendarSampleAdaptiveLayoutTest {
         var hingeStart = 0f
         var hingeEnd = 0f
 
-        private fun probe(name: String) = Modifier.onGloballyPositioned {
+        private fun Modifier.probe(name: String) = onGloballyPositioned {
             val position = it.positionInWindow()
             bounds[name] = Rect(
                 position.x, position.y,
@@ -89,12 +89,12 @@ class CalendarSampleAdaptiveLayoutTest {
                                 header = {
                                     Text(
                                         "Header ${LocalLayoutDirection.current}",
-                                        Modifier.fillMaxWidth().height(32.dp).then(probe("header")),
+                                        Modifier.fillMaxWidth().height(32.dp).probe("header"),
                                     )
                                 },
                                 content = {
                                     var count by rememberSaveable { mutableStateOf(0) }
-                                    Column(Modifier.fillMaxWidth().then(probe("content"))) {
+                                    Column(Modifier.fillMaxWidth().probe("content")) {
                                         Text("Content ${LocalLayoutDirection.current}")
                                         Button(onClick = { count++ }) { Text("Count $count") }
                                     }

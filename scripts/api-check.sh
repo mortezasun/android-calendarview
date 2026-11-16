@@ -5,9 +5,11 @@
 # `./scripts/api-check.sh` fails when the checked-in dumps in api/ differ.
 # `./scripts/api-check.sh --update` regenerates them after an intentional API change.
 #
-# This guard covers public JVM signatures (classes, constructors, methods and fields).
-# It does not encode Kotlin default values, annotations, inline-only API or source
-# compatibility, so review the dump diff together with the KDoc when updating it.
+# This guard covers public JVM signatures (classes, constructors, methods and fields). Because the
+# shared public API lives in commonMain, these signatures also cover the Kotlin Multiplatform
+# surface; iOS-only public declarations would need a separate guard. It does not encode Kotlin
+# default values, annotations, inline-only API or source compatibility, so review the dump diff
+# together with the KDoc when updating it.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

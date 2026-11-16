@@ -443,6 +443,9 @@ private fun <T : Any> HeatmapBlock(
     }
 }
 
+// The slot and the drawn cell carry separate modifiers by design, so the single-`modifier`
+// convention does not apply here.
+@Suppress("ModifierParameter")
 @Composable
 private fun <T : Any> HeatmapCell(
     day: T?,

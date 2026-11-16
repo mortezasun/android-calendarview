@@ -62,6 +62,16 @@ Building only the core library:
 ./gradlew :library:assembleDebug
 ```
 
+## Build setup
+
+- The KMP modules use `kotlin { android { ... } }`, apply `com.android.lint` and opt in to
+  `withHostTest {}`/`withDeviceTest {}`; `src/androidTest/java` is mapped into
+  `androidDeviceTest`.
+- Compose dependencies use the explicit `org.jetbrains.compose.*` coordinates from
+  `gradle/libs.versions.toml`; the deprecated plugin dependency accessors are not used.
+- `kotlin.native.ignoreDisabledTargets=true` in `gradle.properties` keeps configuration quiet on
+  hosts that cannot build the iOS targets.
+
 ## Tests and lint
 
 ```bash
@@ -146,6 +156,9 @@ the isolated JVM and Android consumers (pass the same Maven repository used abov
 
 ```bash
 bash scripts/verify-publication.sh /tmp/m2-review 2.4.0
+# KMP layout: the root <module> artifact is metadata, AARs are <module>-android, and iOS
+# klibs are <module>-iosarm64 / <module>-iossimulatorarm64. The verifier checks those files
+# (iOS is cross-compiled only) plus every Gradle Module Metadata reference.
 ./gradlew -p tools/consumer-check :jvm-consumer:run :android-consumer:compileDebugKotlin \
   -PconsumerRepo=/tmp/m2-review
 ```

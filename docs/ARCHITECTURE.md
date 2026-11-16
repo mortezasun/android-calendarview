@@ -1,8 +1,8 @@
-# Architecture (2.4.0 development)
+# Architecture
 
 ## Overview
 
-`android-calendarview` is a **native Jetpack Compose calendar library** with decoupled calendar engines and an interactive demo app. `2.3.0` is the latest published release; `2.4.0` on branch `update` adds the self-written Chinese lunisolar engine and its Compose facade. Version 2.0.0 eliminated all legacy XML layouts, ViewBinding, custom view measurement, and reflection.
+`android-calendarview` is a **Kotlin Multiplatform Compose calendar library** for Android, the JVM and iOS, with decoupled calendar engines and an interactive Android demo app. `2.4.0` is the latest published Android release; the KMP migration on branch `kmp` is unreleased and documented in [ADR 0006](decisions/0006-kotlin-multiplatform-calendar-modules.md). Version 2.0.0 eliminated all legacy XML layouts, ViewBinding, custom view measurement, and reflection.
 
 The architecture follows standard Compose state and rendering patterns:
 - **Stateless rendering:** `CalendarMonthGrid` and `CalendarDayCell` render month layouts declaratively.

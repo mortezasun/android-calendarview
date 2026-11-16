@@ -2,9 +2,9 @@ name: Android tablet verification
 
 on:
   push:
-    branches: [update]
+    branches: [update, kmp]
   pull_request:
-    branches: [master, update]
+    branches: [master, update, kmp]
   workflow_dispatch:
 
 permissions:
@@ -45,7 +45,7 @@ jobs:
         run: sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;36.0.0"
 
       - name: Build sample and instrumentation APKs and run JVM tests and lint
-        run: bash ./gradlew :calendarviewsample:assembleDebug :library:assembleDebugAndroidTest :calendarviewsample:assembleDebugAndroidTest test :library:lintDebug :calendarviewsample:lintDebug --no-daemon --stacktrace --console=plain
+        run: bash ./gradlew :calendarviewsample:assembleDebug :library:assembleAndroidDeviceTest :calendarviewsample:assembleDebugAndroidTest jvmTest testAndroidHostTest lint --no-daemon --stacktrace --console=plain
 
       - name: Prepare and verify KVM access
         run: bash scripts/prepare-kvm.sh

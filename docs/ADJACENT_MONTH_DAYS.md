@@ -41,7 +41,7 @@ bab4922d1b9f29392d0e379d207bd2d18a95f8aa remains historical.
 
 ```bash
 bash ./gradlew test :calendarviewsample:assembleDebug
-bash ./gradlew :library:connectedDebugAndroidTest
+bash ./gradlew :library:connectedAndroidDeviceTest
 ```
 
 Manual checks: each flag independently and together, all calendars/locales/modes, selection

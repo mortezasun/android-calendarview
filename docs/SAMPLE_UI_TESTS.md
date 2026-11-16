@@ -38,15 +38,16 @@ bash ./gradlew :calendarviewsample:assembleDebugAndroidTest
 bash ./gradlew :calendarviewsample:connectedDebugAndroidTest
 ```
 
-Status: these sample tests are included in the 26-test API 29 instrumentation suite. The two
-2.1.0 release-tree runs passed on 2026-11-11; exact run IDs are in
-[PROJECT_STATUS.md](PROJECT_STATUS.md). If a test fails, inspect its assertion/report rather
+Status: the sample contributes 26 of the 42 instrumentation tests on the KMP branch. The current
+tree is compiled but not executed since the migration; the historical 2.1.0 results are recorded
+in [PROJECT_STATUS.md](PROJECT_STATUS.md). If a test fails, inspect its assertion/report rather
 than weakening the intended behavior.
 
 ## Remaining broader migration work
 
-Release and independent-consumer checks, a fresh CI run for the current commit and the final
-module build/test/lint matrix remain open. The legacy feature inventory, obsolete view/XML
+The CI workflows now target the KMP tasks, and the module build/test/lint matrix passes locally.
+Executing the instrumentation suite on an emulator, the iOS runtime verification and the
+version/tag decision remain open. The legacy feature inventory, obsolete view/XML
 removal, dependency isolation, catalog consolidation, sample localization and the main
 documentation/agent-rule migration are complete as of
 [docs/PROJECT_STATUS.md](PROJECT_STATUS.md).

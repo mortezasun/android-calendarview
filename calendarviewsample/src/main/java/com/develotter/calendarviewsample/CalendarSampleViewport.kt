@@ -17,8 +17,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -57,7 +59,7 @@ internal fun CalendarSampleViewport(
     monthContent: @Composable (Long) -> Unit,
 ) {
     var modeName by rememberSaveable { mutableStateOf(SampleDisplayMode.Single.name) }
-    var center by rememberSaveable(calendar.name, monthCalendar.name) { mutableStateOf(anchor) }
+    var center by rememberSaveable(calendar.name, monthCalendar.name) { mutableLongStateOf(anchor) }
     val mode = forcedMode ?: SampleDisplayMode.valueOf(modeName)
     val request = remember(monthCalendar, anchor) { runCatching { moveSampleMonth(monthCalendar, anchor, 0) } }
     val window = remember(monthCalendar, center) { runCatching { sampleMonthWindow(monthCalendar, center) } }
@@ -121,6 +123,8 @@ private fun SynchronizedMonthViewport(
     val isAdaptive = mode == SampleDisplayMode.AdaptiveColumns
     var ready by remember { mutableStateOf(false) }
     var appliedRequest by remember { mutableStateOf<Long?>(null) }
+    // Null until the first valid window exists, so this state cannot use mutableLongStateOf.
+    @Suppress("AutoboxingStateCreation")
     var publishedMonth by remember { mutableStateOf(desired) }
     val currentRequest by rememberUpdatedState(desired)
     val callback by rememberUpdatedState(onVisibleMonthChanged)
@@ -168,11 +172,16 @@ private fun SynchronizedMonthViewport(
         }
     }
 
-    val active = when {
-        mode == SampleDisplayMode.Single -> target
-        isList -> listState.firstVisibleItemIndex
-        isAdaptive -> gridState.firstVisibleItemIndex
-        else -> pagerState.settledPage
+    // Reading these scroll positions directly in composition would recompose on every scroll frame.
+    val active by remember(mode, target) {
+        derivedStateOf {
+            when {
+                mode == SampleDisplayMode.Single -> target
+                isList -> listState.firstVisibleItemIndex
+                isAdaptive -> gridState.firstVisibleItemIndex
+                else -> pagerState.settledPage
+            }
+        }
     }
     if (showWindowLabel) {
         Text("Window month ${active + 1} / ${months.size}")

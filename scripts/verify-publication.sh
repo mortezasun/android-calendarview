@@ -2,6 +2,11 @@
 # Verify an isolated Maven publication, including the real JVM/Native binaries and every
 # file referenced by Gradle Module Metadata. A stale or missing target binary must fail here;
 # resolving "any jar below the module" is not sufficient for a release gate.
+#
+# Kotlin Multiplatform layout: the root `<module>` artifact is the metadata publication, the
+# Android AAR is `<module>-android`, and iOS klibs are `<module>-iosarm64` /
+# `<module>-iossimulatorarm64`. The iOS binaries are cross-compiled metadata only; this gate
+# verifies their files, not runtime behavior on a device.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -37,10 +42,21 @@ ANDROID_MODULES=(
     calendar-solarHijri-native
     calendar-chinese-compose
 )
+IOS_TARGETS=(iosarm64 iossimulatorarm64)
 for module in "${ANDROID_MODULES[@]}"; do
     dir="$BASE/$module/$VERSION"
-    for suffix in .aar .pom .module -sources.jar; do
+    android_dir="$BASE/${module}-android/$VERSION"
+    for suffix in .pom .module -sources.jar; do
         require_file "$dir/${module}-${VERSION}${suffix}"
+    done
+    for suffix in .aar .pom .module -sources.jar; do
+        require_file "$android_dir/${module}-android-${VERSION}${suffix}"
+    done
+    for target in "${IOS_TARGETS[@]}"; do
+        ios_dir="$BASE/${module}-${target}/$VERSION"
+        for suffix in .klib .pom .module -sources.jar; do
+            require_file "$ios_dir/${module}-${target}-${VERSION}${suffix}"
+        done
     done
 done
 
@@ -60,7 +76,10 @@ for file in \
     "$NATIVE_BASE/calendar-chinese-native-linuxx64-${VERSION}.klib" \
     "$NATIVE_BASE/calendar-chinese-native-linuxx64-${VERSION}.pom" \
     "$NATIVE_BASE/calendar-chinese-native-linuxx64-${VERSION}.module" \
-    "$NATIVE_BASE/calendar-chinese-native-linuxx64-${VERSION}-sources.jar"; do
+    "$NATIVE_BASE/calendar-chinese-native-linuxx64-${VERSION}-sources.jar" \
+    "$BASE/calendar-chinese-native-iosx64/$VERSION/calendar-chinese-native-iosx64-${VERSION}.klib" \
+    "$BASE/calendar-chinese-native-iosx64/$VERSION/calendar-chinese-native-iosx64-${VERSION}.pom" \
+    "$BASE/calendar-chinese-native-iosx64/$VERSION/calendar-chinese-native-iosx64-${VERSION}.module"; do
     require_file "$file"
 done
 
@@ -111,6 +130,17 @@ for module_file in (
     engine_dir / f"calendar-chinese-native-{version}.module",
     jvm_dir / f"calendar-chinese-native-jvm-{version}.module",
     native_dir / f"calendar-chinese-native-linuxx64-{version}.module",
+    *(
+        base / module / version / f"{module}-{version}.module"
+        for module in (
+            "library",
+            "calendar-gregorian",
+            "calendar-hijri",
+            "calendar-solarHijri",
+            "calendar-solarHijri-native",
+            "calendar-chinese-compose",
+        )
+    ),
 ):
     failures.extend(check_module(module_file))
 
@@ -130,21 +160,25 @@ check_zip(
     "engine Linux klib",
 )
 
-for module in [
+android_modules = [
     "library",
     "calendar-gregorian",
     "calendar-hijri",
     "calendar-solarHijri",
     "calendar-solarHijri-native",
     "calendar-chinese-compose",
-]:
-    aar = base / module / version / f"{module}-{version}.aar"
+]
+for module in android_modules:
+    aar = base / f"{module}-android" / version / f"{module}-android-{version}.aar"
     check_zip(aar, ["classes.jar"], f"{module} AAR")
     if aar.is_file():
         with zipfile.ZipFile(aar) as archive:
             classes = archive.read("classes.jar")
         if len(classes) < 100:
             fail(f"{module} AAR contains an empty classes.jar")
+    for target in ("iosarm64", "iossimulatorarm64"):
+        klib = base / f"{module}-{target}" / version / f"{module}-{target}-{version}.klib"
+        check_zip(klib, ["default/manifest", "default/linkdata/"], f"{module} {target} klib")
 
 
 def pom_dependencies(path):

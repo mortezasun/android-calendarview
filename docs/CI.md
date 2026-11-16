@@ -1,94 +1,52 @@
-# Android verification workflow
+# CI workflows
 
-Workflow: .github/workflows/android-verification.yml
-Branch: update
-Status: active; the `2.4.0` workflow changes passed on `1ab841e` (2026-11-13):
-verification Run `43401491446`, publishing Run `43401491433`, instrumentation Run
-`43401491452` and tablet Run `43401491675`, all success. The local checks remain listed
-separately in [PROJECT_STATUS.md](PROJECT_STATUS.md).
+Workflows live in `.github/workflows/`. They run on pushes and pull requests for `master`,
+`update` and `kmp` (the tablet workflow only pushes on `update` and `kmp`). Nothing is
+published, signed or deployed; every job has read-only repository permissions.
 
-## Triggers and cost
+## Android verification
 
-Pushes to update, pull requests targeting update and manual workflow_dispatch start four
-independent GitHub-hosted Ubuntu jobs. Each has a 30-minute timeout. New runs on the same
-ref cancel older runs. Jobs can consume Actions minutes and store artifacts for seven days,
-subject to repository/account policy. No publishing, release signing, deployment, write token
-permissions or repository secrets are configured. Fork pull requests do not use privileged
-pull_request_target execution. GitHub repository Actions settings may still require approval.
+`.github/workflows/android-verification.yml` runs four independent jobs:
 
-## Jobs
+- **assemble**: `:calendarviewsample:assembleDebug assembleAndroidMain
+  :calendar-chinese-native:jvmJar :calendar-bom:generatePomFileForCalendarBomPublication`
+  followed by `bash scripts/api-check.sh`.
+- **unit-tests**: `jvmTest testAndroidHostTest :calendarviewsample:testDebugUnitTest` plus the
+  Python suites in `scripts/` and `tools/chinese-calendar/`.
+- **native-engine**: `:calendar-chinese-native:linuxX64Test` on the shared `commonTest` fixtures.
+- **lint**: `lint` for the six KMP modules and the sample.
 
-- assemble: builds the sample, all release AARs, the Chinese engine JVM jar and the BOM POM.
-- unit-tests: runs Gradle `test` across the project plus `:calendar-chinese-native:jvmTest`.
-- native-engine: runs `:calendar-chinese-native:linuxX64Test` on the same commonTest fixtures.
-- lint: runs debug lint for core, all calendar modules, the Chinese Compose facade and sample.
+The KMP library plugin creates no Android test or lint tasks, so the modules apply
+`com.android.lint` and opt in to `withHostTest`/`withDeviceTest`; see
+[ADR 0006](decisions/0006-kotlin-multiplatform-calendar-modules.md).
 
-The matrix uses fail-fast: false, so failure of one job does not cancel the other checks.
-The native-engine job downloads the Kotlin/Native toolchain on first use and can take longer than
-the JVM jobs; the 30-minute job timeout still applies.
-No continue-on-error, test exclusion or lint suppression is introduced. These are debug
-checks, not proof that release variants or published consumer artifacts work.
+## Android instrumentation and tablet
 
-## Environment
+`.github/workflows/android-instrumentation.yml` compiles
+`:library:assembleAndroidDeviceTest` and `:calendarviewsample:assembleDebugAndroidTest`, starts an
+API 29 `google_apis` x86_64 emulator and runs `scripts/run-connected-tests.sh`. The script runs
+`:library:connectedAndroidDeviceTest` and `:calendarviewsample:connectedDebugAndroidTest` and
+preserves each exit status.
 
-JDK 17 (Temurin), repository Gradle wrapper and documented SDK packages:
-platform-tools, platforms;android-37.0 and build-tools;36.0.0. SDK tools are set up by
-android-actions/setup-android. Toolchain diagnostics record Java, Gradle and installed SDK
-packages. Version/plugin resolution errors remain failures; the workflow does not silently
-substitute older plugins, disable Compose, downgrade SDK or skip failing tests.
+`.github/workflows/android-tablet.yml` runs the same tests on a 1600×2560 240 dpi tablet
+emulator after building the sample, both instrumentation APKs, the JVM/host tests and lint.
 
-The SDK package names follow existing SETUP.md; availability on hosted runners has not
-been independently established by this commit. Existing Kotlin/AGP/Compose compiler
-compatibility is also unverified until compilation succeeds. Action major-version refs
-are used; pinning reviewed commit SHAs is a separate supply-chain hardening task.
-
-## Inspect results
-
-In the GitHub repository open Actions, then Android verification, and select the run for
-the exact commit under review. Check all three job conclusions, not just artifact presence.
-Downloaded artifacts contain available Gradle HTML/XML reports, test results, toolchain
-diagnostics and the debug APK when assembly produced it. Upload runs even after failures,
-but missing files produce a warning, not a passing check. Artifacts alone prove no success.
-
-The 2.1.0 release runs were inspected through the public GitHub check pages. A workflow
-commit alone is not evidence of execution or success; the final status and exact run IDs are
-recorded in [PROJECT_STATUS.md](PROJECT_STATUS.md). Automatic push runs remain the primary
-trigger for this branch-only setup.
+Instrumentation runs require KVM on the runner and are not executed on every machine; compiling
+the device-test sources (`compileAndroidDeviceTest`) works without an emulator.
 
 ## Publishing verification
 
-Workflow: .github/workflows/android-publishing.yml. It publishes every Android AAR, the KMP
-engine root/JVM/linuxX64 publications and the BOM to `$RUNNER_TEMP/calendar-maven`, then runs
-`scripts/verify-publication.sh`. That script checks exact versioned paths (not `find`-selected
-files), archive contents, engine POM isolation and BOM constraints. For every Gradle Module
-Metadata `files[]` entry it requires a nonempty `url`, resolves the URL against the `.module`
-file and checks the target; the display `name` is validated separately and never used as the
-path. `available-at.url` is resolved the same way. It fails on a missing target binary or a
-missing/broken metadata URL.
+`.github/workflows/android-publishing.yml` publishes the seven modules and the BOM to an isolated
+local Maven repository, runs `scripts/verify-publication.sh`, then builds
+`tools/consumer-check` (JVM and Android consumers) against that repository. The verifier checks
+the KMP layout (root metadata, `<module>-android` AARs, `<module>-iosarm64` /
+`<module>-iossimulatorarm64` klibs), the Chinese engine JVM/linuxX64/iosX64 artifacts and the
+BOM constraints. The iOS klibs are cross-compiled files only; they are not linked or run on a
+device here.
 
-The same job then builds `tools/consumer-check`, a standalone Gradle build that has no
-`project(...)` or `includeBuild(...)` link to this repository. Its JVM module runs the public
-`ChineseDate.of` example against the published engine/BOM, and its Android module compiles the
-public Compose facade against the published AARs. The JVM consumer resolves the engine's root
-metadata and `jvm` variant; the Android consumer resolves the Compose AARs. The `linuxX64` klib
-is checked at file/archive/metadata level but is not consumed by a Kotlin/Native consumer here.
-The consumer receives the isolated repository through `-PconsumerRepo=...`; it does not use
-`mavenLocal()` by default. This is local-candidate verification, not a JitPack consumer test. The
-exact-binary and consumer checks were validated locally on 2026-11-13 and passed remotely in run
-`43447073475` for commit `09e3a73`; the URL-based verifier passed in run `43459739473` for commit
-`9fd3b50`.
+## Environment
 
-## Remaining priority-0 checks
-
-This workflow does not start an emulator, install/run the APK, test Android saved-state
-restoration, execute Compose UI tests or assess gestures, accessibility, RTL and screenshots.
-Add those separately after the compile/unit/lint baseline is working. The 2.1.0 release
-runs and the JitPack-only consumer are recorded in [PROJECT_STATUS.md](PROJECT_STATUS.md);
-this workflow still does not execute the sample's full gesture/accessibility matrix.
-
-Official action documentation consulted:
-
-- https://github.com/actions/setup-java
-- https://github.com/android-actions/setup-android
-- https://github.com/actions/upload-artifact
-- https://docs.github.com/en/actions/tutorials/store-and-share-data
+JDK 17 (Temurin), the repository Gradle wrapper and the documented SDK packages
+(`platform-tools`, `platforms;android-37.0`, `build-tools;36.0.0`). Diagnostics and reports are
+uploaded for seven days. A workflow commit is not evidence of a successful run; check the run
+for the exact commit in the Actions tab.

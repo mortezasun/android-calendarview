@@ -179,6 +179,25 @@ HijriCalendarMonth(
 )
 ```
 
+### Migrating to the Kotlin Multiplatform branch
+
+The `kmp` branch replaces JVM date and locale types in public signatures:
+
+- Every callback and predicate takes an epoch day (`Long`); `firstDayOfWeek` is an ISO number
+  (1..7) and `todayEpochDay` replaces `today`.
+- `YearMonth` becomes `GregorianYearMonth`, `HijrahDate` becomes `HijriDate` and
+  `JalaliCalendar` becomes `SolarHijriDate`. `Locale` parameters are gone; labels come from the
+  platform formatter.
+- `ir.huri:jalalicalendar` is no longer used: `:calendar-solarHijri` is a facade over
+  `:calendar-solarHijri-native`.
+- The `@Deprecated(HIDDEN)` `java.time` overloads were removed. Android/JVM hosts can convert at
+  the boundary with `SolarHijriDate.toLocalDate()` and the `HijriDateProvider` mappings.
+
+Shared code compiles for Android, the JVM and the iOS targets; iOS runtime verification is
+pending (see [ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md)). Published
+coordinates stay `...:library` and Gradle resolves the Android AAR (`library-android`) through
+Gradle Module Metadata.
+
 ---
 
 ## 🚀 Quick start
@@ -621,8 +640,8 @@ Version 2.0.0 removes all View-based components (`MultiMonthView`, `MonthView`, 
 
 ## 🔨 Building from source
 
-Requirements: JDK 17+, Android SDK Platform 37, Build-Tools 36.0.0 or 37.0.0, and a
-Kotlin/Native-capable host for `linuxX64Test`.
+Requirements: JDK 17+ (verified with JDK 21), Android SDK Platform 37, Build-Tools 36.0.0 or
+37.0.0, and a Kotlin/Native-capable host for `linuxX64Test`.
 Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 27.
 
 ```bash

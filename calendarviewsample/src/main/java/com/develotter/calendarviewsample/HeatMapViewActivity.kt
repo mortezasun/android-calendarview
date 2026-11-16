@@ -81,7 +81,7 @@ private fun HeatmapSample() {
     var hijriOffset by rememberSaveable { mutableIntStateOf(0) }
     val hijriProvider = remember(hijriOffset) { OffsetHijriDateProvider(hijriOffset) }
     var year by rememberSaveable(calendarName, hijriOffset) {
-        mutableStateOf(sampleHeatmapCurrentYear(calendar, hijriDateProvider = hijriProvider))
+        mutableIntStateOf(sampleHeatmapCurrentYear(calendar, hijriDateProvider = hijriProvider))
     }
     var labels by rememberSaveable { mutableStateOf(true) }
     var header by rememberSaveable { mutableStateOf(true) }

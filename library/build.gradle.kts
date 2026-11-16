@@ -12,7 +12,7 @@ plugins {
 val composeTestBom = dependencies.platform(libs.androidx.compose.bom)
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "com.develotter.calendarview"
         compileSdk = 37
         minSdk = 27
@@ -34,11 +34,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(compose.runtime)
-            api(compose.runtimeSaveable)
-            api(compose.ui)
-            api(compose.foundation)
-            implementation(compose.material3)
+            api(libs.compose.runtime)
+            api(libs.compose.runtime.saveable)
+            api(libs.compose.ui)
+            api(libs.compose.foundation)
+            implementation(libs.compose.material3)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

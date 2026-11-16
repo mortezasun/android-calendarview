@@ -46,7 +46,7 @@ all four new instrumented tests were unobserved are superseded by the supplied r
 for this particular execution; post-fix results remain pending.
 
 ```bash
-bash ./gradlew :library:connectedDebugAndroidTest --no-daemon --stacktrace
+bash ./gradlew :library:connectedAndroidDeviceTest --no-daemon --stacktrace
 ```
 
 No application logic, Compose assertions, emulator settings or release metadata changed.

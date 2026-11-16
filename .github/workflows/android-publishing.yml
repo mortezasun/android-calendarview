@@ -2,9 +2,9 @@ name: Android publishing verification
 
 on:
   push:
-    branches: [master, update]
+    branches: [master, update, kmp]
   pull_request:
-    branches: [master, update]
+    branches: [master, update, kmp]
   workflow_dispatch:
 
 permissions:

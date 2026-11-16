@@ -2,9 +2,9 @@ name: Android verification
 
 on:
   push:
-    branches: [master, update]
+    branches: [master, update, kmp]
   pull_request:
-    branches: [master, update]
+    branches: [master, update, kmp]
   workflow_dispatch:
 
 permissions:
@@ -24,13 +24,13 @@ jobs:
       matrix:
         include:
           - check: assemble
-            tasks: ':calendarviewsample:assembleDebug :library:assembleRelease :calendar-gregorian:assembleRelease :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease :calendar-solarHijri-native:assembleRelease :calendar-chinese-compose:assembleRelease :calendar-chinese-native:jvmJar :calendar-bom:generatePomFileForCalendarBomPublication'
+            tasks: ':calendarviewsample:assembleDebug assembleAndroidMain :calendar-chinese-native:jvmJar :calendar-bom:generatePomFileForCalendarBomPublication'
           - check: unit-tests
-            tasks: 'test :calendar-chinese-native:jvmTest'
+            tasks: 'jvmTest testAndroidHostTest :calendarviewsample:testDebugUnitTest'
           - check: native-engine
             tasks: ':calendar-chinese-native:linuxX64Test'
           - check: lint
-            tasks: ':library:lintDebug :calendar-gregorian:lintDebug :calendar-hijri:lintDebug :calendar-solarHijri:lintDebug :calendar-solarHijri-native:lintDebug :calendar-chinese-compose:lintDebug :calendarviewsample:lintDebug'
+            tasks: 'lint'
     steps:
       - name: Check out source
         uses: actions/checkout@v7

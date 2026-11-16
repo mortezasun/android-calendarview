@@ -10,7 +10,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "com.develotter.calendarview.calendars.solarHijri"
         compileSdk = 37
         minSdk = 27
@@ -34,7 +34,7 @@ kotlin {
         commonMain.dependencies {
             api(project(":library"))
             api(project(":calendar-solarHijri-native"))
-            implementation(compose.material3)
+            implementation(libs.compose.material3)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

@@ -2,9 +2,9 @@ name: Android instrumentation
 
 on:
   push:
-    branches: [master, update]
+    branches: [master, update, kmp]
   pull_request:
-    branches: [master, update]
+    branches: [master, update, kmp]
   workflow_dispatch:
 
 permissions:
@@ -40,7 +40,7 @@ jobs:
         run: sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;36.0.0"
 
       - name: Compile core and sample instrumentation APKs
-        run: bash ./gradlew :library:assembleDebugAndroidTest :calendarviewsample:assembleDebugAndroidTest --no-daemon --stacktrace --console=plain
+        run: bash ./gradlew :library:assembleAndroidDeviceTest :calendarviewsample:assembleDebugAndroidTest --no-daemon --stacktrace --console=plain
 
       - name: Prepare and verify KVM access
         run: bash scripts/prepare-kvm.sh
@@ -65,9 +65,12 @@ jobs:
           if-no-files-found: warn
           path: |
             .ci-diagnostics/*.txt
-            library/build/reports/androidTests/**
+            library/build/reports/**
+            library/build/test-results/**
             library/build/outputs/androidTest-results/**
-            library/build/outputs/apk/androidTest/debug/*.apk
+            library/build/outputs/apk/**
+            calendarviewsample/build/reports/**
+            calendarviewsample/build/test-results/**
             calendarviewsample/build/reports/androidTests/**
             calendarviewsample/build/outputs/androidTest-results/**
             calendarviewsample/build/outputs/apk/androidTest/debug/*.apk

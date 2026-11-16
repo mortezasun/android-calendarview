@@ -1,14 +1,15 @@
 # Compose instrumentation checks
 
-Last verified: 2026-11-11
+Last verified: 2026-11-16 (sources compile on the KMP branch; the suite has not been executed
+since the migration)
 
-The 2.1.0 release-tree runs passed all 26 tests on API 29 on 2026-11-11; see
+Historical: the 2.1.0 release-tree runs passed the then 26 tests on API 29 on 2026-11-11; see
 [PROJECT_STATUS.md](PROJECT_STATUS.md) for the run IDs.
 
 ## Test inventory
 
-The checked-in Android instrumentation suite contains **26 test methods**:
-**16 in `:library`** and **10 in `:calendarviewsample`**. The source inventory is:
+The checked-in Android instrumentation suite contains **42 test methods**:
+**16 in `:library`** and **26 in `:calendarviewsample`**. The source inventory is:
 
 ### `:library`
 
@@ -28,6 +29,11 @@ The checked-in Android instrumentation suite contains **26 test methods**:
 - `CalendarSampleUiTest` (9 tests): list/pager navigation, dialog selection, dialog
   pager swipe, caption content, caption visibility, activity restoration and the two
   main-viewport selection tests described below.
+- `ChineseComposeRegressionTest` (8 tests): Chinese month-state restoration, boundary
+  windows in Single/Pager mode, invalid-anchor recovery, Gregorian overlay navigation and
+  agenda label rebuilding.
+- `CalendarSampleAdaptiveLayoutTest` (4 tests) and `CalendarSampleStateRestorationTest`
+  (4 tests): adaptive geometry/fold probes and saved-state restoration.
 - `ExampleInstrumentedTest` (1 test): generated package check.
 
 ## Main-viewport selection regression
@@ -84,13 +90,13 @@ uses `assertIsDisplayed()`; that is the separate visibility contract.
 
 ## Emulator workflow
 
-`.github/workflows/android-instrumentation.yml` runs on `update` pushes, PRs targeting
-`update` and manual dispatch. It uses `ubuntu-24.04`, installs the documented compile SDK
-and build tools, compiles both instrumentation APKs, then starts API 29
+`.github/workflows/android-instrumentation.yml` runs on `master`/`update`/`kmp` pushes, pull
+requests targeting those branches and manual dispatch. It uses `ubuntu-24.04`, installs the
+documented compile SDK and build tools, compiles both instrumentation APKs, then starts API 29
 `google_apis` x86_64 with animations disabled. API 29 is a runtime baseline, not a full
 Android matrix.
 
-`scripts/run-connected-tests.sh` runs both `:library:connectedDebugAndroidTest` and
+`scripts/run-connected-tests.sh` runs both `:library:connectedAndroidDeviceTest` and
 `:calendarviewsample:connectedDebugAndroidTest`, preserves failure status with
 `pipefail`, and dumps Logcat in an EXIT trap. It is the command used by the emulator step.
 The workflow has a 45-minute timeout; reports and test APKs are retained for seven days.
@@ -105,13 +111,13 @@ upload or another later step is not mislabelled as a connected-test failure.
 The full core and sample instrumentation run **43065898948** for commit
 `f7010a58fa59ea6a56836a207f9a27ac92e73efa` completed successfully on API 29. Its
 emulator step succeeded, and the two main-viewport tests, the dialog restoration test and
-the caption tests were part of the executed suite. That run predates the test-count
-summary step; the checked-in inventory is 16 library plus 10 sample tests.
+the caption tests were part of the executed suite. That run predates the KMP migration and the
+test-count summary step; the checked-in inventory is now 16 library plus 26 sample tests.
 
-Final instrumentation run **43070445246** for commit
-`d8524da600f680c946ee14c8831eea7c6f6e15f6` published the exact XML summary:
-**26 tests (16 library, 10 sample), 0 failures, 0 errors, 0 skipped, 7 classes**.
-Both module reports were present.
+After the KMP migration the source inventory is **42 tests (16 library, 26 sample)**. The
+device-test sources compile (`:library:assembleAndroidDeviceTest`,
+`:calendarviewsample:assembleDebugAndroidTest`) but the suite has not been executed on an
+emulator since the migration; no passing result is claimed for the current tree.
 
 Remaining limits:
 
