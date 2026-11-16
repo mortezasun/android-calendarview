@@ -37,8 +37,7 @@ code.
   `kmp` branch. `scripts/verify-publication.sh` now follows the KMP layout (root metadata,
   `<module>-android` AARs, iOS klibs), checks all root module metadata plus the iOS klib archives,
   and the isolated JVM/Android consumers resolve the published coordinates. Remaining advisory
-  findings: the Gradle 9.9.1 availability hint; the Compose test rules are still the 1.x variants
-  (the v2 migration needs a device run).
+  finding: the Gradle 9.9.1 availability hint.
 - Not run locally: iOS simulator tests and the `iosApp` sample (need macOS with Xcode);
   instrumentation tests only compile in the Linux VM. The CI emulator runs are recorded below.
 
@@ -50,16 +49,17 @@ with `Unable to resolve activity ... androidx.activity.ComponentActivity`. The s
 variant now attaches `ui-test-manifest`, and both emulator workflows publish the complete failed
 case list (the summary is emitted before GitHub's ten-annotation limit).
 
-Rerun for `3bb7fdd`:
+Rerun for `1a24725` (current head, with the Compose test rules on `junit4.v2`):
 
 | Workflow | Run | Result |
 |---|---|---|
-| Android verification | [43834271132](https://github.com/mortezasun/android-calendarview/actions/runs/43834271132) | success (3m 33s) |
-| Android publishing verification | [43834271349](https://github.com/mortezasun/android-calendarview/actions/runs/43834271349) | success (4m 27s) |
-| Android tablet verification | [43834271322](https://github.com/mortezasun/android-calendarview/actions/runs/43834271322) | success: 42/42 tests (16 library, 26 sample), 0 failures (6m 48s) |
-| Android instrumentation | [43834271312](https://github.com/mortezasun/android-calendarview/actions/runs/43834271312) | success: 42/42 tests (16 library, 26 sample), 0 failures (6m 11s) |
+| Android verification | [43836063861](https://github.com/mortezasun/android-calendarview/actions/runs/43836063861) | success |
+| Android publishing verification | [43836063794](https://github.com/mortezasun/android-calendarview/actions/runs/43836063794) | success |
+| Android tablet verification | [43836063797](https://github.com/mortezasun/android-calendarview/actions/runs/43836063797) | success: 42/42 tests (16 library, 26 sample), 0 failures |
+| Android instrumentation | [43836063805](https://github.com/mortezasun/android-calendarview/actions/runs/43836063805) | success: 42/42 tests (16 library, 26 sample), 0 failures |
 
-All four workflows are green for the current head. The earlier tablet failure
+The preceding `3bb7fdd` runs also passed 42/42 and verified the `ui-test-manifest` fix before the
+test-rule migration. The earlier tablet failure
 ([43824943413](https://github.com/mortezasun/android-calendarview/actions/runs/43824943413)) was
 diagnosed from its published annotations; the phone run for `64b521a` was superseded before it
 completed and is not part of the final result.
