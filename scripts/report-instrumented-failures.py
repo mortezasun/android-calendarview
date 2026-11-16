@@ -69,18 +69,19 @@ def main() -> int:
                 seen.add((identity, message))
                 failures.append((report, identity, message))
 
-    for report, identity, message in failures:
-        print(
-            f"::error file={report.relative_to(root)}::"
-            f"{escape_workflow_command(identity)} failed: {escape_workflow_command(message)}"
-        )
-
     if failures:
+        # Print the complete list first: GitHub keeps at most ten error annotations per step, so a
+        # summary emitted last would be dropped exactly when many tests fail.
         summary = "; ".join(f"{identity}: {message}" for _, identity, message in failures)
         print(
             "::error title=Instrumented test failures::"
             f"{len(failures)} failed case(s): {escape_workflow_command(summary[:6000])}"
         )
+        for report, identity, message in failures:
+            print(
+                f"::error file={report.relative_to(root)}::"
+                f"{escape_workflow_command(identity)} failed: {escape_workflow_command(message)}"
+            )
     elif report_count == 0:
         print(
             "::error title=Instrumented tests::"
