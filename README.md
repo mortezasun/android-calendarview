@@ -114,8 +114,8 @@ dependencies {
 }
 ```
 
-The current release is `3.0.0`. JitPack builds the release tag automatically; verify the
-`3.0.0` build and a consumer without local substitutions before pinning production dependencies.
+The current release is `3.0.0`. JitPack built the tag with all seven modules; verify the
+coordinates in your own build before pinning production dependencies.
 
 ### Bill of Materials (3.0.0)
 
@@ -134,9 +134,8 @@ dependencies {
 ```
 
 The BOM is part of the same publication set and is included by `jitpack.yml` and the
-publishing workflow. JitPack built `2.3.0` with all five then-published modules and its BOM, and
-a JitPack-only BOM consumer passed on 2026-11-13. The `3.0.0` tag triggers the same seven-artifact
-publication; verify its JitPack build and BOM consumer before claiming distribution. The POM
+publishing workflow. JitPack built `3.0.0` with all seven modules and its BOM, and JVM plus
+minified Android BOM consumers resolved the release only from JitPack on 2026-11-16. The POM
 contains the metadata Maven Central requires, but signing, namespace verification and upload are
 not configured; JitPack remains the only configured remote repository.
 

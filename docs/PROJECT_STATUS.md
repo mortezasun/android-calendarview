@@ -52,7 +52,7 @@ with `Unable to resolve activity ... androidx.activity.ComponentActivity`. The s
 variant now attaches `ui-test-manifest`, and both emulator workflows publish the complete failed
 case list (the summary is emitted before GitHub's ten-annotation limit).
 
-Rerun for `1a24725` (current head, with the Compose test rules on `junit4.v2`):
+Rerun for `1a24725` (pre-3.0.0 head, with the Compose test rules on `junit4.v2`):
 
 | Workflow | Run | Result |
 |---|---|---|
@@ -78,7 +78,10 @@ completed and is not part of the final result.
 | Publish approved 3.0.0 release | [43854431009](https://github.com/mortezasun/android-calendarview/actions/runs/43854431009) | success: tag `3.0.0` and GitHub Release created |
 
 The release workflow only creates the tag after every listed check succeeds on the release commit.
-The JitPack build for `3.0.0` and a JitPack-only BOM consumer still need verification.
+JitPack built `3.0.0` with all seven modules and the BOM (`BUILD SUCCESSFUL`, exit 0, 4m 9s;
+[build log](https://jitpack.io/com/github/mortezasun/android-calendarview/3.0.0/build.log)), and
+JVM plus minified Android consumers resolved the BOM and artifacts only from JitPack on
+2026-11-16. The BOM and library POMs return HTTP 200.
 
 ## Previous release: 2.4.0 Chinese calendar (2026-11-14)
 

@@ -11,7 +11,7 @@ Status: `3.0.0` is the current Kotlin Multiplatform release; `2.4.0` was the pre
 - [x] Release notes and short changelog for `3.0.0` prepared.
 - [x] Remote CI green for `a0c686e` (verification including `klib-api`, publishing, phone and tablet instrumentation).
 - [x] Release workflow `publish-3-0-0.yml` (run `43854431009`) created tag `3.0.0` at `a0c686e` and the GitHub Release.
-- [ ] JitPack `3.0.0` build and JitPack-only BOM consumer verified without `mavenLocal`/`includeBuild`.
+- [x] JitPack `3.0.0` build passed with all seven modules and the BOM; JitPack-only JVM and minified Android BOM consumers passed without `mavenLocal`/`includeBuild` on 2026-11-16.
 - [ ] iOS runtime/simulator tests and an `iosApp` sample (macOS/Xcode required).
 
 ## 1. Previous release: 2.4.0 (released, 2026-11-14)
