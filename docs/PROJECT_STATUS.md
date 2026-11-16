@@ -50,14 +50,16 @@ calendar modules no longer use `java.time` or `ir.huri:jalalicalendar` in shared
   `Locale`; see ADR 0006 for the breaking changes.
 - `:calendar-solarHijri` is now a facade over the dependency-free `:calendar-solarHijri-native`
   engine; the `ir.huri:jalalicalendar` dependency was removed.
-- Verification on Linux (2026-11-16): 165 `jvmTest` cases in the seven library modules, 148 of
+- Verification at the 3.0.0 release: 165 `jvmTest` cases in the seven library modules, 148 of
   them again through `testAndroidHostTest` (`calendar-chinese-native` is native-only; one
-  Chinese-Compose test is JVM-only), 62 sample unit tests, 16 Kotlin/Native tests, `lint`
+  Chinese-Compose test is JVM-only), 62 sample unit tests and 14 Kotlin/Native tests, `lint`
   for the six KMP modules and the sample (0 errors), `:library:compileAndroidDeviceTest` and
   `:calendarviewsample:compileDebugAndroidTestKotlin`, `:calendarviewsample:assembleDebug`/
   `assembleRelease`, `assembleAndroidMain`, `publishToMavenLocal` for all seven modules plus the
   BOM, `scripts/api-check.sh`, `scripts/klib-api-check.sh` and
   `scripts/check-commonmain-purity.sh`. The emulator executions are recorded below.
+- The post-release tooling adds two Kotlin/Native tests; the current branch has 16, while the
+  tagged `3.0.0` release had 14. See [Post-3.0.0 tooling](#post-300-tooling-branch-kmp-unreleased).
 - Build setup: the KMP modules apply `com.android.lint` because
   `com.android.kotlin.multiplatform.library` creates no lint tasks, and opt in to
   `withHostTest`/`withDeviceTest`; `src/androidTest/java` is mapped into `androidDeviceTest`.
@@ -251,7 +253,7 @@ is made for real-device, foldable or TalkBack coverage.
   acceptance remain open. See [CHINESE_CALENDAR_QUALITY.md](CHINESE_CALENDAR_QUALITY.md).
 - No merge, tag, GitHub Release or publication was performed and none is authorized by this status.
 
-## Current release status: 2.3.0 (published, branch `update`, 2026-11-12)
+## Historical release status: 2.3.0 (published, branch `update`, 2026-11-12)
 
 - Added dependency-free `:calendar-solarHijri-native` module (`com.develotter.calendarview.calendars.solarHijriNative`) per [ADR 0004](decisions/0004-native-solar-hijri-module.md), keeping `:calendar-solarHijri` and `api/calendar-solarHijri.api` completely unchanged.
 - Implemented `SolarHijriEngine` (Borkowski 1996 break-table port from `jalaali-js`, MIT, attributed in `NOTICE`, years `-61..3177` AP), immutable `SolarHijriDate`, `SolarHijriLocale` (`fa`, `fa-AF`/`prs`, `en`), and Compose parity (`SolarHijriNativeCalendarMonth`, `SolarHijriNativeMonthData`, `SolarHijriNativeWeekData`, `SolarHijriNativeMonthState` / `rememberSolarHijriNativeMonthState` with injectable `Clock` and boundary guards).
@@ -300,7 +302,7 @@ remaining edge cases in adaptive geometry, viewport heights, month width touch t
   - `Android instrumentation`: Run 43223950664 (success on API 29 across all 34 instrumented tests)
   - `Android tablet verification`: Run 43223950572 (success on 1600x2560 240 dpi tablet across all 34 instrumented tests)
 
-## Current release status: 2.2.1 (published)
+## Historical release status: 2.2.1 (published)
 
 - Release commit `dd20e49` is tagged `2.2.1` and the GitHub Release `2.2.1` is published via `publish-2-2-1.yml` (run 43268408129).
 - Includes full Arbeitspakete A–I adaptive hardening suite, 48 dp touch target enforcement, fold geometry, adaptive pane heights, continuous transition tests, genuine state restoration tests, and tablet CI.
@@ -311,7 +313,7 @@ remaining edge cases in adaptive geometry, viewport heights, month width touch t
   - `Android tablet verification`: Run 43268408198 (success on 1600x2560 240 dpi tablet across all 34 instrumented tests)
 - 100% binary compatible with `2.2.0`, `2.1.0` and `2.0.1`.
 
-## Previous release status: 2.2.0 (published)
+## Historical release status: 2.2.0 (published)
 
 - Release commit `f5dd967` is tagged `2.2.0` and the GitHub Release `2.2.0` is published.
 - All release verification jobs passed on the release tree:
@@ -384,7 +386,7 @@ remaining edge cases in adaptive geometry, viewport heights, month width touch t
 - No code, API, dependency or build changes; nothing was built or tested locally.
 - Open: phases 2–7, window-size/fold dependency approval, optional `maxColumns`/48 dp preset.
 
-## Current release status: 2.1.0 (published)
+## Historical release status: 2.1.0 (published)
 
 - Release commit `bd046a188d9a661e657affe580c7a7fa1a3e98ba` is tagged `2.1.0` and the
   GitHub Release `2.1.0` is published.
@@ -399,7 +401,7 @@ remaining edge cases in adaptive geometry, viewport heights, month width touch t
   constraints match `2.1.0`, and `mavenLocal()` is absent from the consumer build.
 - The `2.0.1` tag remains at `068c57ff90bd8a7e503788a7d951dca65f8f3953` and was not moved.
 
-## Previous release: 2.0.1 (2026-11-11)
+## Historical release: 2.0.1 (2026-11-11)
 
 - Release commit `068c57ff90bd8a7e503788a7d951dca65f8f3953` is tagged `2.0.1` and the
   GitHub Release `2.0.1` is published.
@@ -490,12 +492,15 @@ were unexecuted or a tag was missing describe those sessions, not the current ov
 The old full candidate SHA was corrected to the actual `d552dec` commit in the final historical
 section; the mapping of the older run IDs to that SHA still needs direct API confirmation.
 
-## Verified state
+## Historical verified state (2026-11-09)
+
+This table is the historical 2026-11-09 CI row set, not the current branch state. The current
+wrapper is Gradle `9.9.1` and the current test counts are in the post-3.0.0 tooling section above.
 
 | Item | Value |
 |------|-------|
 | AGP | 9.5.1 |
-| Gradle wrapper | 9.8.2 |
+| Gradle wrapper | 9.8.2 (historical; current branch `9.9.1`) |
 | Kotlin (catalog) | 2.4.21; compilation via AGP 9 built-in Kotlin |
 | Compose BOM | 2026.09.00 |
 | `compileSdk` / `targetSdk` | 37 / 37 |
@@ -503,9 +508,8 @@ section; the mapping of the older run IDs to that SHA still needs direct API con
 | JDK used for verification | Temurin 17.0.21+9 |
 | Android SDK used | Platform `android-37.0`, Build-Tools 36.0.0 |
 
-Executed and verified on 2026-11-09 via GitHub Actions CI. This block is the historical CI row set;
-the `test` count below belongs to that run. The current local count is 70 - see the sessions at
-the end of this file:
+Executed and verified on 2026-11-09 via GitHub Actions CI. The `test` count below belongs to that
+historical run; it is not the current local count:
 
 | Check | Scope / Command | Result |
 |-------|-----------------|--------|

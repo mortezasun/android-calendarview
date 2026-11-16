@@ -49,8 +49,9 @@ Kotlin Multiplatform release for Android, the JVM and iOS.
 
 ### Verification
 
-- 165 JVM, 148 Android-host, 62 sample and 16 Kotlin/Native tests passed; 44 instrumented tests
-  on phone and tablet API 29 emulators gate the release.
+- 165 JVM, 148 Android-host, 62 sample and 14 Kotlin/Native tests passed; 44 instrumented tests
+  on phone and tablet API 29 emulators gate the release. The post-release tooling adds two
+  Kotlin/Native tests; the branch total is 16 (see Unreleased).
 - Lint, JVM API guard, KLIB ABI guard, isolated publication verification and JVM/minified
   Android consumers passed. See [3.0.0 release notes](docs/releases/3.0.0.md).
 

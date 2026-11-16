@@ -2,12 +2,15 @@
 
 Status: `3.0.0` is the current Kotlin Multiplatform release; `2.4.0` was the previous Android-only release. The documented external gates remain open.
 
+> Historical sections below the current 3.0.0 block are retained for audit. Unchecked boxes in
+them describe past release work and are not current 3.0.0 blockers.
+
 ## 0. Current release: 3.0.0 (Kotlin Multiplatform, 2026-11-16)
 
 - [x] Root version `3.0.0`; sample `versionCode 30000` (monotonic after `20400`) and `versionName "3.0.0"`.
 - [x] KMP sources, iOS platform actuals, iOS klib publication and the seven-module BOM are in place.
 - [x] JVM API dumps unchanged; seven iOS klib ABI snapshots added under `api/klib/`; `commonMain` purity guard added.
-- [x] 165 JVM, 148 Android-host, 62 sample and 14 Kotlin/Native tests passed locally; lint, sample release, device-test compilation, isolated publication verification, and JVM plus minified Android consumers passed.
+- [x] 165 JVM, 148 Android-host, 62 sample and 14 Kotlin/Native tests passed locally for the release; lint, sample release, device-test compilation, isolated publication verification, and JVM plus minified Android consumers passed. The post-release tooling adds two Kotlin/Native tests; the current branch has 16.
 - [x] Release notes and short changelog for `3.0.0` prepared.
 - [x] Remote CI green for `a0c686e` (verification including `klib-api`, publishing, phone and tablet instrumentation).
 - [x] Release workflow `publish-3-0-0.yml` (run `43854431009`) created tag `3.0.0` at `a0c686e` and the GitHub Release.
@@ -16,7 +19,7 @@ Status: `3.0.0` is the current Kotlin Multiplatform release; `2.4.0` was the pre
 - [ ] Maven Central signing, namespace verification and credentials.
 - [ ] Real process-death and physical-device/fold/TalkBack acceptance.
 
-## 1. Previous release: 2.4.0 (released, 2026-11-14)
+## 1. Historical release: 2.4.0 (released, 2026-11-14)
 
 - [x] `:calendar-chinese-native` and `:calendar-chinese-compose` implemented, integrated and documented.
 - [x] Root version `2.4.0`; sample `versionCode 20400` (monotonic after `20300`) and `versionName "2.4.0"`.
@@ -30,14 +33,14 @@ Status: `3.0.0` is the current Kotlin Multiplatform release; `2.4.0` was the pre
   - `Android publishing verification`: Run 43401491433 (success)
   - `Android instrumentation`: Run 43401491452 (success)
   - `Android tablet verification`: Run 43401491675 (success).
-- [ ] Remote JitPack `2.4.0` build and JitPack-only consumer without `mavenLocal`/`includeBuild`. Verified: `2.3.0` build + Android BOM consumer; commit `7a51e24` build + direct engine JVM consumer. The `2.4.0` tag exists; the JitPack build endpoint still returned `HTTP 404 Tag or commit not found` immediately after publication, so the build/consumer verification remains pending.
+- [ ] Historical open item (not a 3.0.0 blocker): Remote JitPack `2.4.0` build and JitPack-only consumer without `mavenLocal`/`includeBuild`. Verified: `2.3.0` build + Android BOM consumer; commit `7a51e24` build + direct engine JVM consumer. The `2.4.0` tag exists; the JitPack build endpoint still returned `HTTP 404 Tag or commit not found` immediately after publication, so the build/consumer verification remains pending.
 - [ ] Instrumentation and device/fold/TalkBack checks listed as open in `CHINESE_CALENDAR_QUALITY.md`. JVM benchmarks and the OSV runtime scan were executed; physical-device benchmark acceptance and buildscript advisory acceptance remain open.
 - [x] Separate explicit approval for merge, tag `2.4.0` and GitHub Release was given on 2026-11-14; the open external gates are documented rather than marked complete.
 - [x] Automated tag/GitHub Release workflow completed: run `43537597202`; tag `291275b9e01da11a9b009f9ad77f05a5ef89a05e`; GitHub Release published with the short changelog.
 - [x] `update` fast-forwarded into `master` on 2026-11-14 (`a9642f1..d655959`).
-- [ ] `2.4.0` tag/BOM JitPack consumer verified without `mavenLocal`/`includeBuild`.
+- [ ] Historical open item (not a 3.0.0 blocker): `2.4.0` tag/BOM JitPack consumer verified without `mavenLocal`/`includeBuild`.
 
-## 1. Previous release: 2.3.0 (2026-11-12)
+## 1. Historical release: 2.3.0 (2026-11-12)
 
 - [x] Root version set to `2.3.0` in root `build.gradle.kts`, sample `versionCode` `20300` / `versionName` `"2.3.0"`.
 - [x] New `:calendar-solarHijri-native` module implemented (`SolarHijriEngine`, `SolarHijriDate`, `SolarHijriLocale`, Compose parity, boundary guards, `Clock` injection).
@@ -51,7 +54,7 @@ Status: `3.0.0` is the current Kotlin Multiplatform release; `2.4.0` was the pre
 - [x] Release commit `8b7bea4` (`release: 2.3.0`) is tagged `2.3.0`; GitHub Release `2.3.0` is published via `publish-2-3-0.yml` (Run 43375002033).
 - [x] JitPack `2.3.0` build verified (all 5 modules + BOM): buildlog HTTP 200; JitPack-only Android BOM consumer compiled successfully without `mavenLocal`/`includeBuild` or `ir.huri:jalalicalendar`.
 
-## 1. Current release: 2.2.1 (2026-11-12)
+## 1. Historical release: 2.2.1 (2026-11-12)
 
 - [x] Root version set to `2.2.1` in root `build.gradle.kts`.
 - [x] Sample `versionCode` set to `20201` and `versionName` set to `2.2.1`.
@@ -70,7 +73,7 @@ Status: `3.0.0` is the current Kotlin Multiplatform release; `2.4.0` was the pre
 - [x] Documentation, CHANGELOG, ARCHITECTURE, README and release notes (`docs/releases/2.2.1.md`) updated.
 - [x] 100% binary compatible with `2.2.0`, `2.1.0` and `2.0.1`.
 
-## 2. Previous release: 2.2.0 (2026-11-12)
+## 2. Historical release: 2.2.0 (2026-11-12)
 
 - [x] Root version set to `2.2.0` in root `build.gradle.kts`.
 - [x] Sample `versionCode` set to `20200` and `versionName` set to `2.2.0`.
@@ -87,7 +90,7 @@ Status: `3.0.0` is the current Kotlin Multiplatform release; `2.4.0` was the pre
 - [x] Documentation, CHANGELOG, ARCHITECTURE, README and release notes (`docs/releases/2.2.0.md`) updated.
 - [x] 100% binary compatible with `2.1.0`.
 
-## 2. Previous release: 2.1.0 (2026-11-11)
+## 2. Historical release: 2.1.0 (2026-11-11)
 
 - [x] Root version and sample version set to `2.1.0`.
 - [x] Release commit `bd046a188d9a661e657affe580c7a7fa1a3e98ba` is tagged `2.1.0`;
@@ -111,7 +114,7 @@ Status: `3.0.0` is the current Kotlin Multiplatform release; `2.4.0` was the pre
 - [x] GitHub Release body updated from the source release notes by the release-notes
   workflow (run `43086799069`).
 
-## 2. Previous release: 2.0.1 (2026-11-11)
+## 2. Historical release: 2.0.1 (2026-11-11)
 
 - [x] Release commit `068c57ff90bd8a7e503788a7d951dca65f8f3953` is tagged `2.0.1`.
   The published tag was not moved.
