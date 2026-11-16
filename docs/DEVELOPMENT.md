@@ -178,10 +178,11 @@ Compose; record any new warning and the plugin that owns it instead of suppressi
   and is shared by every module. The artifact id is the module name: `library`,
   `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native`,
   `calendar-chinese-native`, `calendar-chinese-compose`.
-- Five Android library modules publish their `release` variant with a sources jar;
-  `:calendar-chinese-native` publishes Kotlin Multiplatform metadata plus `-jvm` and `-linuxx64`
-  variants and their sources. All share `com.github.mortezasun.android-calendarview`.
-  `:calendarviewsample` is not published.
+- Six Android library modules publish their `androidMain` variant as `<module>-android` AARs
+  with a sources jar; `:calendar-chinese-native` publishes Kotlin Multiplatform metadata plus
+  `-jvm`, `-linuxx64`, `-iosx64`, `-iosarm64` and `-iossimulatorarm64` variants and their sources.
+  Android consumers use its JVM variant. All share
+  `com.github.mortezasun.android-calendarview`. `:calendarviewsample` is not published.
 - `:calendar-bom` is a `java-platform` publication whose constraints use the same root version.
   Publish it together with the modules and update `jitpack.yml`/CI if the module set changes.
 - The shared POM block in the root build supplies name, description, URL, Apache-2.0 license,

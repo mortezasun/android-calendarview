@@ -61,13 +61,13 @@ Consequences of the shared identity:
 ## Verification
 
 - `commonTest` suites run on the JVM for all seven library modules and the sample
-  (156 library tests, 62 sample tests); 141 of the shared tests also pass through
+  (165 library tests, 62 sample tests); 148 of the shared tests also pass through
   `testAndroidHostTest`.
 - `compileCommonMainKotlinMetadata`, `compileKotlinJvm`, `compileAndroidMain` and
   `compileIosMainKotlinMetadata` pass for the library and every calendar module.
 - `lint` runs for the six KMP modules and the sample (0 errors),
   `compileAndroidDeviceTest` and `compileDebugAndroidTestKotlin` compile the instrumentation
   tests, and `:calendarviewsample:assembleRelease` builds the unsigned release APK.
-- `publishToMavenLocal` succeeds for the seven modules and the BOM, and
-  `scripts/api-check.sh` matches the regenerated dumps.
+- `publishToMavenLocal` succeeds for the seven modules and the BOM; `scripts/api-check.sh`,
+  `scripts/klib-api-check.sh` and `scripts/check-commonmain-purity.sh` pass.
 - iOS simulator tests and an `iosApp` sample were not executed: they require macOS/Xcode.

@@ -52,8 +52,8 @@ weakening the intended behavior.
 ## Remaining broader migration work
 
 The CI workflows now target the KMP tasks, and the module build/test/lint matrix passes locally.
-Executing the instrumentation suite on an emulator, the iOS runtime verification and the
-version/tag decision remain open. The legacy feature inventory, obsolete view/XML
+The instrumentation suite has run on API 29 phone and tablet emulators for the 3.0.0 release
+(44/44). iOS runtime verification and the decision on a future patch release remain open. The legacy feature inventory, obsolete view/XML
 removal, dependency isolation, catalog consolidation, sample localization and the main
 documentation/agent-rule migration are complete as of
 [docs/PROJECT_STATUS.md](PROJECT_STATUS.md).

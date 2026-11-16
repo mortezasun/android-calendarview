@@ -24,7 +24,7 @@ The architecture follows standard Compose state and rendering patterns:
 | `:calendar-hijri` | Islamic Hijri calendar engine backed by the immutable `HijriDate` value type and the platform Umm al-Qura chronology. Provides `HijriCalendarMonth`, month/week data builders and day cells. |
 | `:calendar-solarHijri` | Solar Hijri / Jalali facade over `:calendar-solarHijri-native`. Provides `SolarHijriCalendarMonth`, month/week data builders and day cells; no `ir.huri:jalalicalendar` dependency. |
 | `:calendar-solarHijri-native` | Dependency-free Solar Hijri engine (`SolarHijriEngine`, immutable `SolarHijriDate`, `SolarHijriLocale`, `SolarHijriNativeCalendarMonth`) using the Borkowski (1996) break-table algorithm (`-61..3177` AP); Android, JVM and iOS targets. |
-| `:calendar-chinese-native` | Self-written Kotlin Multiplatform Chinese lunisolar engine (`ChineseCalendarEngine`, immutable `ChineseMonth`/`ChineseDate`, `ChineseFormat`, versioned month table). Targets `jvm()`, `linuxX64()`, Android and iOS; no Compose, Java date or third-party calendar dependency. |
+| `:calendar-chinese-native` | Self-written Kotlin Multiplatform Chinese lunisolar engine (`ChineseCalendarEngine`, immutable `ChineseMonth`/`ChineseDate`, `ChineseFormat`, versioned month table). Targets `jvm()`, `linuxX64()` and the three iOS targets; no Android target, Compose, Java date or third-party calendar dependency. |
 | `:calendar-chinese-compose` | Compose facade (`ChineseCalendarMonth`, `GregorianChineseCalendarMonth`, `ChineseMonthData`, `ChineseWeekData`, `ChineseMonthState`, `chineseYearHeatmap`) depending on `:calendar-chinese-native`, `:calendar-gregorian` and `:library`. |
 | `:calendar-bom` | `java-platform` constraints for the seven published library artifacts; no runtime classes. |
 | `:benchmarks` | Standalone Kotlin/JVM kotlinx-benchmark module for Gregorian/Hijri month calculations and the shared heatmap adapters. Not published and not part of `check`/`build`. |
@@ -61,7 +61,7 @@ The architecture follows standard Compose state and rendering patterns:
 
 State is managed declaratively and cleanly separated from UI rendering:
 
-- **Epoch-Day Identities:** Dates across all five calendar systems are mapped to standard epoch-day integers (`Long`), enabling seamless cross-calendar selections and comparisons.
+- **Epoch-Day Identities:** Dates across the four calendar systems (five engine entries, because Solar Hijri has facade and native engines) are mapped to standard epoch-day integers (`Long`), enabling seamless cross-calendar selections and comparisons.
 - **Selection Modes (`TypeSelectDay`):**
   - `None`: Read-only calendar.
   - `Single`: Exactly zero or one selected day.
@@ -86,8 +86,8 @@ State is managed declaratively and cleanly separated from UI rendering:
 
 - `:calendar-bom` is a `java-platform` publication. Its POM has `dependencyManagement` constraints for `library`, `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native`, `calendar-chinese-native` and `calendar-chinese-compose` at the root version.
 - Root `build.gradle.kts` owns group, version and the shared POM block (name, description, URL, Apache-2.0 license, developer, SCM). Module POMs inherit it.
-- JitPack and the publishing CI publish the BOM together with five Android AAR modules and the Kotlin Multiplatform engine (root metadata plus `-jvm` and `-linuxx64` variants). Maven Central signing, namespace verification and upload are not configured; the metadata is a prerequisite only.
-- Release `2.1.0` published the four-module BOM on JitPack and a JitPack-only consumer resolved it on 2026-11-11. The `2.4.0` remote tag build and consumer check are still open; see [PROJECT_STATUS.md](PROJECT_STATUS.md).
+- JitPack and the publishing CI publish the BOM together with six Android AAR modules and the Kotlin Multiplatform engine (root metadata plus `-jvm`, `-linuxx64`, `-iosx64`, `-iosarm64` and `-iossimulatorarm64` variants). Maven Central signing, namespace verification and upload are not configured; the metadata is a prerequisite only.
+- Release `2.1.0` published the four-module BOM on JitPack and a JitPack-only consumer resolved it on 2026-11-11. The `2.4.0` tag build is published and CI-green; only the JitPack-only `2.4.0` tag/BOM consumer remains unverified. See [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ## Product views, markers and styling
 

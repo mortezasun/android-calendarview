@@ -30,7 +30,7 @@ branch; no new tag is associated with that tooling.
 - [Modules](#-modules)
 - [Examples](#-examples)
 - [Installation](#-installation)
-- [Bill of Materials](#-bill-of-materials)
+- [Bill of Materials](#bill-of-materials-300)
 - [Quick start](#-quick-start)
 - [Selection modes](#-selection-modes)
 - [Month navigation](#-month-navigation)
@@ -41,6 +41,7 @@ branch; no new tag is associated with that tooling.
 - [Scrolling containers](#-scrolling-containers)
 - [Heatmaps](#-heatmaps)
 - [Custom calendars (low-level grid)](#-custom-calendars-low-level-grid)
+- [Upgrading to 3.0.0](#upgrading-to-the-current-release-300)
 - [Migrating from 1.x](#-migrating-from-1x)
 - [Building from source](#-building-from-source)
 - [Documentation](#-documentation)
@@ -76,12 +77,12 @@ branch; no new tag is associated with that tooling.
 | `:calendar-hijri` | `…calendars.hijri` | `HijriCalendarMonth`, backed by the KMP `HijriDate` value type; the Umm al-Qura chronology comes from the platform. |
 | `:calendar-solarHijri` | `…calendars.solarHijri` | `SolarHijriCalendarMonth`, a facade over the dependency-free `:calendar-solarHijri-native` engine; no `ir.huri:jalalicalendar` dependency. |
 | `:calendar-solarHijri-native` | `…calendars.solarHijriNative` | `SolarHijriNativeCalendarMonth`, dependency-free Borkowski engine (`-61..3177` AP), immutable `SolarHijriDate` with epoch-day APIs; Android, JVM and iOS targets. |
-| `:calendar-chinese-native` | `…calendars.chineseNative` | Self-written Kotlin Multiplatform lunisolar engine: immutable `ChineseMonth`/`ChineseDate`, leap months, `ChineseCalendarEngine`, formatting. JVM, `linuxX64`, Android and iOS targets; no Compose or third-party calendar dependency. |
+| `:calendar-chinese-native` | `…calendars.chineseNative` | Self-written Kotlin Multiplatform lunisolar engine: immutable `ChineseMonth`/`ChineseDate`, leap months, `ChineseCalendarEngine`, formatting. JVM, `linuxX64` and iOS targets; no Android target, Compose or third-party calendar dependency. Android consumers use the JVM variant. |
 | `:calendar-chinese-compose` | `…calendars.chineseCompose` | `ChineseCalendarMonth`, Gregorian grid with Chinese labels, week data, saveable `ChineseMonthState`, year/month heatmaps. Depends only on the Chinese engine, `:calendar-gregorian` and `:library`. |
 | `:calendar-bom` | – | Version constraints for the seven published library artifacts. No runtime code. |
-| `:calendarviewsample` | `com.develotter.calendarviewsample` | Android-only interactive demo app (all five calendars, month/week/agenda views, containers, adaptive columns, markers, week numbers, styles, range policy, month header and Hijri method offset, heatmaps). |
+| `:calendarviewsample` | `com.develotter.calendarviewsample` | Android-only interactive demo app (all five calendar modes, month/week/agenda views, containers, adaptive columns, markers, week numbers, styles, range policy, month header and Hijri method offset, heatmaps). |
 
-Every Compose calendar module depends on `:library` via `api`, so adding an engine is enough to get the core. The Chinese engine is usable on its own without `:library`, Compose or Android. `:calendar-bom` aligns the published versions but is not a runtime dependency.
+Every Compose calendar module depends on `:library` via `api`, so adding an engine is enough to get the core. The Chinese engine is usable on its own without `:library` or Compose; it has no Android target, and Android consumers use its JVM variant. `:calendar-bom` aligns the published versions but is not a runtime dependency.
 
 ---
 
@@ -89,7 +90,7 @@ Every Compose calendar module depends on `:library` via `api`, so adding an engi
 
 The repository has three checked-in example paths:
 
-- **Android demo:** [`calendarviewsample`](calendarviewsample/README.md) is the full, runnable Android demo. It covers all five calendars (Gregorian, Hijri, both Solar Hijri entries and Chinese), month/week/agenda views, heatmaps, adaptive panes, markers, week numbers, range policy, styles and saved state. It is an **Android application only**; this repository has no iOS demo app.
+- **Android demo:** [`calendarviewsample`](calendarviewsample/README.md) is the full, runnable Android demo. It covers all five calendar modes (Gregorian, Hijri, both Solar Hijri entries and Chinese), month/week/agenda views, heatmaps, adaptive panes, markers, week numbers, range policy, styles and saved state. It is an **Android application only**; this repository has no iOS demo app.
 - **JVM engine console:** [`tools/consumer-check/jvm-consumer`](tools/consumer-check/jvm-consumer/src/main/kotlin/consumer/Main.kt) is a dependency-free console example that uses only the published `calendar-bom` and Chinese engine JVM artifact. It prints the dataset range, epoch-day mapping, month/year lengths, leap-month title, weekday offset and day labels. It demonstrates **the JVM engine only**; it has no Compose or Android UI and is not a Compose Desktop app.
 
 ```bash
@@ -843,7 +844,8 @@ CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
 | [COMPOSE_MONTH_CONTAINERS.md](docs/COMPOSE_MONTH_CONTAINERS.md) | List and pager containers |
 | [SETUP.md](docs/SETUP.md) · [DEVELOPMENT.md](docs/DEVELOPMENT.md) | Local setup and development workflow |
 | [calendarviewsample/README.md](calendarviewsample/README.md) | Android demo app: start, feature map and test commands |
-| [CI.md](docs/CI.md) · [COMPOSE_TESTS.md](docs/COMPOSE_TESTS.md) · [SAMPLE_UI_TESTS.md](docs/SAMPLE_UI_TESTS.md) | CI pipelines, Compose tests and the sample UI test inventory |
+| [CI.md](docs/CI.md) · [COMPOSE_TESTS.md](docs/COMPOSE_TESTS.md) · [SAMPLE_UI_TESTS.md](docs/SAMPLE_UI_TESTS.md) · [INSTRUMENTATION_RESULTS.md](docs/INSTRUMENTATION_RESULTS.md) | CI pipelines, Compose tests, the sample UI test inventory and emulator results |
+| [RELEASE_CHECKLIST.md](docs/RELEASE_CHECKLIST.md) | Current 3.0.0 release gates and historical release records |
 | [decisions/0003-phase-3-distribution-and-hijri-method.md](docs/decisions/0003-phase-3-distribution-and-hijri-method.md) | BOM, POM metadata, Hijri provider and deferred Phase 3 decisions |
 | [docs/decisions/](docs/decisions) | Architecture decision records |
 | [AGENTS.md](AGENTS.md) | Working rules for coding agents |

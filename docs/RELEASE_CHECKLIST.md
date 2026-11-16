@@ -10,8 +10,9 @@ them describe past release work and are not current 3.0.0 blockers.
 - [x] Root version `3.0.0`; sample `versionCode 30000` (monotonic after `20400`) and `versionName "3.0.0"`.
 - [x] KMP sources, iOS platform actuals, iOS klib publication and the seven-module BOM are in place.
 - [x] JVM API dumps unchanged; seven iOS klib ABI snapshots added under `api/klib/`; `commonMain` purity guard added.
-- [x] 165 JVM, 148 Android-host, 62 sample and 14 Kotlin/Native tests passed locally for the release; lint, sample release, device-test compilation, isolated publication verification, and JVM plus minified Android consumers passed. The post-release tooling adds two Kotlin/Native tests; the current branch has 16.
-- [x] Release notes and short changelog for `3.0.0` prepared.
+- [x] 165 JVM, 148 Android-host, 62 sample and 16 Kotlin/Native tests passed locally for the release; lint, sample release, device-test compilation, isolated publication verification, and JVM plus minified Android consumers passed.
+- [x] Release notes and short changelog for `3.0.0` prepared with the 16 Kotlin/Native tests in this branch source.
+- [ ] The published GitHub Release still carries the old 14-test note; after this branch is merged, update it with `gh release edit 3.0.0 --notes-file docs/releases/3.0.0-changelog.md` (requires GitHub authentication).
 - [x] Remote CI green for `a0c686e` (verification including `klib-api`, publishing, phone and tablet instrumentation).
 - [x] Release workflow `publish-3-0-0.yml` (run `43854431009`) created tag `3.0.0` at `a0c686e` and the GitHub Release.
 - [x] JitPack `3.0.0` build passed with all seven modules and the BOM; JitPack-only JVM and minified Android BOM consumers passed without `mavenLocal`/`includeBuild` on 2026-11-16.
@@ -40,7 +41,7 @@ them describe past release work and are not current 3.0.0 blockers.
 - [x] `update` fast-forwarded into `master` on 2026-11-14 (`a9642f1..d655959`).
 - [ ] Historical open item (not a 3.0.0 blocker): `2.4.0` tag/BOM JitPack consumer verified without `mavenLocal`/`includeBuild`.
 
-## 1. Historical release: 2.3.0 (2026-11-12)
+## 2. Historical release: 2.3.0 (2026-11-12)
 
 - [x] Root version set to `2.3.0` in root `build.gradle.kts`, sample `versionCode` `20300` / `versionName` `"2.3.0"`.
 - [x] New `:calendar-solarHijri-native` module implemented (`SolarHijriEngine`, `SolarHijriDate`, `SolarHijriLocale`, Compose parity, boundary guards, `Clock` injection).
@@ -54,7 +55,7 @@ them describe past release work and are not current 3.0.0 blockers.
 - [x] Release commit `8b7bea4` (`release: 2.3.0`) is tagged `2.3.0`; GitHub Release `2.3.0` is published via `publish-2-3-0.yml` (Run 43375002033).
 - [x] JitPack `2.3.0` build verified (all 5 modules + BOM): buildlog HTTP 200; JitPack-only Android BOM consumer compiled successfully without `mavenLocal`/`includeBuild` or `ir.huri:jalalicalendar`.
 
-## 1. Historical release: 2.2.1 (2026-11-12)
+## 3. Historical release: 2.2.1 (2026-11-12)
 
 - [x] Root version set to `2.2.1` in root `build.gradle.kts`.
 - [x] Sample `versionCode` set to `20201` and `versionName` set to `2.2.1`.
@@ -73,7 +74,7 @@ them describe past release work and are not current 3.0.0 blockers.
 - [x] Documentation, CHANGELOG, ARCHITECTURE, README and release notes (`docs/releases/2.2.1.md`) updated.
 - [x] 100% binary compatible with `2.2.0`, `2.1.0` and `2.0.1`.
 
-## 2. Historical release: 2.2.0 (2026-11-12)
+## 4. Historical release: 2.2.0 (2026-11-12)
 
 - [x] Root version set to `2.2.0` in root `build.gradle.kts`.
 - [x] Sample `versionCode` set to `20200` and `versionName` set to `2.2.0`.
@@ -90,7 +91,7 @@ them describe past release work and are not current 3.0.0 blockers.
 - [x] Documentation, CHANGELOG, ARCHITECTURE, README and release notes (`docs/releases/2.2.0.md`) updated.
 - [x] 100% binary compatible with `2.1.0`.
 
-## 2. Historical release: 2.1.0 (2026-11-11)
+## 5. Historical release: 2.1.0 (2026-11-11)
 
 - [x] Root version and sample version set to `2.1.0`.
 - [x] Release commit `bd046a188d9a661e657affe580c7a7fa1a3e98ba` is tagged `2.1.0`;
@@ -114,7 +115,7 @@ them describe past release work and are not current 3.0.0 blockers.
 - [x] GitHub Release body updated from the source release notes by the release-notes
   workflow (run `43086799069`).
 
-## 2. Historical release: 2.0.1 (2026-11-11)
+## 6. Historical release: 2.0.1 (2026-11-11)
 
 - [x] Release commit `068c57ff90bd8a7e503788a7d951dca65f8f3953` is tagged `2.0.1`.
   The published tag was not moved.
@@ -139,12 +140,12 @@ Residual limitation: the runtime test used a software-emulated x86_64 image and 
 one API level, default locale and one selection per calendar. It does not replace the
 full manual acceptance matrix.
 
-## 3. Historical 2.0.0 acceptance record
+## 7. Historical 2.0.0 acceptance record
 
 Checkbox states in this section are the states recorded at the end of the 2.0.0 session.
 The 2.1.0 section above is the current status; the 2.0.1 section is the previous release.
 
-### 3.1 Candidate and CI evidence
+### 7.1 Candidate and CI evidence
 
 The previous version of this checklist and PROJECT_STATUS.md used the incorrect full
 SHA `d552dec886daea64fe23c347b97364b63ee2d770`. The actual commit in the repository
@@ -167,7 +168,7 @@ PROJECT_STATUS.md records the following results for candidate `d552dec`:
 The release SHA includes a publishing configuration change after the recorded candidate.
 Historical success is not automatically proof for this later configuration.
 
-### 3.2 Publishing and JitPack (2.0.0 session)
+### 7.2 Publishing and JitPack (2.0.0 session)
 
 - [x] Local publishing and independent consumer builds in four configurations are recorded
   in PROJECT_STATUS.md (Maven Local baseline only).
@@ -193,21 +194,21 @@ That CI job is not a substitute for a JitPack consumer build.
 The items in this subsection were closed by the 2.0.1 release section above: the tag
 build log was retrieved, and all four consumer configurations were built from JitPack.
 
-### 3.3 Manual acceptance (2.0.0)
+### 7.3 Manual acceptance (2.0.0)
 
 - [x] API 29 instrumentation results are recorded for selection, navigation, dialogs,
   heatmaps, RTL and activity recreation. Exact coverage is determined by the test reports;
   a passing suite is not exhaustive verification of every locale, font scale or runtime.
 - [x] Physical device testing was waived with documented residual risk in PROJECT_STATUS.md.
 
-### 3.4 Documentation (2.0.0 session)
+### 7.4 Documentation (2.0.0 session)
 
 - [x] Changelog and migration guide exist.
 - [x] Historical status files are retained.
 - [ ] Correct historical run-to-SHA references after inspecting the run metadata.
 - [ ] Record final remote-consumer evidence; do not equate Maven Local success with JitPack success.
 
-### 3.5 Publication (2.0.0)
+### 7.5 Publication (2.0.0)
 
 - [x] Tag `2.0.0` exists.
 - [x] GitHub Release `2.0.0` is published.

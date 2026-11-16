@@ -9,7 +9,7 @@ their `3.0.0` runs and the post-release tooling checks are recorded in
 
 | Tool | Version | Notes |
 |------|---------|-------|
-| JDK | 17 | Minimum and default for AGP 9.5. Temurin 17.0.21+9 was used for verification. |
+| JDK | 17 | Minimum and default for AGP 9.5; CI configures JDK 17. The local 3.0.0 verification used JDK 21.0. |
 | Gradle | 9.9.1 | Provided by the wrapper; do not install a separate Gradle. |
 | Android Gradle Plugin | 9.5.1 | Resolved from `google()` via `gradle/libs.versions.toml`. |
 | Android SDK Platform | API 37 | SDK Manager package `platforms;android-37.0`. Required by `compileSdk = 37`. |
@@ -60,7 +60,7 @@ synchronized calendar inside an `AlertDialog`) and `HeatMapViewActivity` (heatma
 Building only the core library:
 
 ```bash
-./gradlew :library:assembleDebug
+./gradlew :library:assembleAndroidMain
 ```
 
 ## Build setup
@@ -136,14 +136,21 @@ bash scripts/api-check.sh
 `bash scripts/api-check.sh --update` regenerates the dumps after an intentional API change. The
 script needs a JDK (`javap`, `jar`) and `unzip`; CI runs it in the assemble job. It compares public
 JVM signatures only, not Kotlin default values, annotations or source compatibility.
+Kotlin/Native ABI is guarded separately by `bash scripts/klib-api-check.sh` against
+`api/klib/*.abi`; `bash scripts/check-commonmain-purity.sh` verifies that `commonMain` stays free
+of platform APIs.
 
 ## Publishing
 
-Five Android library modules apply `maven-publish` and publish their `release` variant with a
-sources jar as `com.github.mortezasun.android-calendarview:<module>:<version>`.
-`:calendar-chinese-native` publishes Kotlin Multiplatform metadata plus `jvm` and `linuxx64`
-variants under the same group; its artifacts are a metadata jar, per-target jars/module metadata
-and sources, not an AAR. The group and version are
+Six Android library modules apply `maven-publish` and publish their `androidMain` variant as
+`<module>-android` AARs plus a sources jar under
+`com.github.mortezasun.android-calendarview:<module>:<version>`: `library`,
+`calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native` and
+`calendar-chinese-compose`.
+`:calendar-chinese-native` publishes Kotlin Multiplatform metadata plus `jvm`, `linuxx64`,
+`iosx64`, `iosarm64` and `iossimulatorarm64` variants under the same group; its artifacts are
+metadata and per-target jars/klibs plus sources, not an AAR. Android consumers use its JVM
+variant. The group and version are
 defined once in the root `build.gradle.kts`; the artifact id is the module name.
 `:calendar-bom` publishes a `java-platform` POM with constraints for all seven modules.
 `calendarviewsample` is not published. `jitpack.yml` pins JDK 17 for the JitPack build and

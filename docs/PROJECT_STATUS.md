@@ -46,7 +46,12 @@ Status: implemented, locally verified and released from branch `kmp` at `a0c686e
 Tag `3.0.0` and the GitHub Release were published on 2026-11-16 by release workflow
 [43854431009](https://github.com/mortezasun/android-calendarview/actions/runs/43854431009).
 iOS runtime/simulator verification is still not possible on Linux and is not claimed. The
-calendar modules no longer use `java.time` or `ir.huri:jalalicalendar` in shared code.
+calendar modules no longer use `java.time` or `ir.huri:jalalicalendar` in shared code. Known iOS
+implementation gaps before claiming runtime support: `currentEpochDay` derives the day from UTC
+instead of the local civil day; the formatters do not set an explicit local time zone and the
+Gregorian formatters do not force the Gregorian calendar; `HijriPlatform.fromEpochDay` and
+`toEpochDay` use different noon anchoring; and the platform formatter objects still appear in
+`api/*.api`. These require a macOS/Xcode fix-and-test pass.
 
 - `:library`, `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` (facade),
   `:calendar-solarHijri-native` and `:calendar-chinese-compose` moved their shared sources to
@@ -58,14 +63,14 @@ calendar modules no longer use `java.time` or `ir.huri:jalalicalendar` in shared
   engine; the `ir.huri:jalalicalendar` dependency was removed.
 - Verification at the 3.0.0 release: 165 `jvmTest` cases in the seven library modules, 148 of
   them again through `testAndroidHostTest` (`calendar-chinese-native` is native-only; one
-  Chinese-Compose test is JVM-only), 62 sample unit tests and 14 Kotlin/Native tests, `lint`
+  Chinese-Compose test is JVM-only), 62 sample unit tests and 16 Kotlin/Native tests, `lint`
   for the six KMP modules and the sample (0 errors), `:library:compileAndroidDeviceTest` and
   `:calendarviewsample:compileDebugAndroidTestKotlin`, `:calendarviewsample:assembleDebug`/
   `assembleRelease`, `assembleAndroidMain`, `publishToMavenLocal` for all seven modules plus the
   BOM, `scripts/api-check.sh`, `scripts/klib-api-check.sh` and
   `scripts/check-commonmain-purity.sh`. The emulator executions are recorded below.
-- The post-release tooling adds two Kotlin/Native tests; the current branch has 16, while the
-  tagged `3.0.0` release had 14. See [Post-3.0.0 tooling](#post-300-tooling-branch-kmp-unreleased).
+- The tagged `3.0.0` release and the current branch both contain the same 16 Kotlin/Native
+  tests. See [Post-3.0.0 tooling](#post-300-tooling-branch-kmp-unreleased).
 - Build setup: the KMP modules apply `com.android.lint` because
   `com.android.kotlin.multiplatform.library` creates no lint tasks, and opt in to
   `withHostTest`/`withDeviceTest`; `src/androidTest/java` is mapped into `androidDeviceTest`.
@@ -220,14 +225,14 @@ is made for real-device, foldable or TalkBack coverage.
 | `python3 -m unittest discover -s scripts -p 'test_*.py'` | 12 tests, 0 failed; 4 new tests cover URL resolution and missing-name handling |
 | independent Android consumer (separate `/tmp` project, BOM + file Maven repo, `assembleDebug`) | BUILD SUCCESSFUL; APK produced, not installed or run |
 
-### Release-Gate-Nachtrag 2026-11-13
+### Release-gate addendum (2026-11-13)
 
-- JitPack `2.3.0` ist nachgewiesen: Buildlog HTTP 200 mit fuenf Modulen und BOM; ein temporaerer Android-BOM-Consumer (`library`) kompilierte JitPack-only ohne `mavenLocal`/`includeBuild` (`BUILD SUCCESSFUL`, Exit 0).
-- JitPack-Commit `7a51e24` ist nachgewiesen: Buildlog success mit BOM, Engine (Metadata/JVM/linuxX64), Compose und fuenf bestehenden Modulen; der direkte Engine-JVM-Consumer lief (`JVM consumer OK`, Epoch 19763, 13 Monate, Exit 0). Der echte `2.4.0`-Tag/BOM-Consumer bleibt blockiert: Tag existiert nicht (HTTP 404), und das Commit-BOM constrainiert Module weiterhin auf `2.4.0`. Kein Tag/Release ohne separate Freigabe.
-- Benchmark-Baseline (Freebuff-VM, JDK 21.0.13, 8 vCPU): Konvertierung 58,77 ns/Op; Monatsaufbau 16.074,47 ns/Monat; 13-Monats-Heatmap 355.526 ns/Jahr; Navigation 53,79 ns/Schritt. Allokationen 56,01 B / 15.630,53 B / 248.328 B / 48,01 B pro Operation. Fokustest gruen; physische Zielhardware und finale Budgets offen.
-- Advisory-Scan: 101 Laufzeitkoordinaten ohne OSV-Treffer; 334 Laufzeit-/Buildscript-Koordinaten mit Treffern ausschliesslich im AGP-9.5.1-Buildscript (Guava, commons-lang3, jose4j, Bouncy Castle, JDOM2). Diese Pakete sind nicht in den ausgelieferten AAR/JARs; Maintainer-Akzeptanz oder AGP-Upgrade bleibt offen.
-- Lokaler API-29-Emulator installiert, Boot scheitert an fehlender KVM-Gruppenberechtigung (`/dev/kvm`); die Remote-API-29-Suite ist gruen, aber keine chinesische Geraete-/Fold-/TalkBack-Matrix.
-- `./gradlew test :calendar-chinese-native:linuxX64Test`, der Benchmark-Fokustest, `scripts/api-check.sh` und die Python-Suites waren erfolgreich. Der Gate-Evidenzcommit `4ce4d3f` ist auf `origin/update`; Remote-CI: verification `43479911419`, publishing `43479911387`, instrumentation `43479911196`, tablet `43479911275` - alle success. Kein Merge, Tag oder Release wurde erstellt.
+- JitPack `2.3.0` is confirmed: the build log returned HTTP 200 with five modules and the BOM, and a temporary Android BOM consumer (`library`) compiled JitPack-only without `mavenLocal`/`includeBuild` (`BUILD SUCCESSFUL`, exit 0).
+- JitPack commit `7a51e24` is confirmed: the build log succeeded with the BOM, engine (metadata/JVM/linuxX64), Compose and five existing modules, and the direct engine JVM consumer ran (`JVM consumer OK`, epoch 19763, 13 months, exit 0). The `2.4.0` tag exists, but the JitPack-only tag/BOM consumer remains unverified because the build endpoint returned HTTP 404 at that time; the commit BOM still constrains modules to `2.4.0`.
+- Benchmark baseline (Freebuff VM, JDK 21.0.13, 8 vCPU): conversion 58.77 ns/op; month construction 16,074.47 ns/month; 13-month heatmap 355,526 ns/year; navigation 53.79 ns/step. Allocations were 56.01 B / 15,630.53 B / 248,328 B / 48.01 B per operation. The focused test was green; physical target hardware and final budgets remain open.
+- Advisory scan: 101 runtime coordinates had no OSV findings; 334 runtime/buildscript coordinates had findings only in the AGP 9.5.1 buildscript (Guava, commons-lang3, jose4j, Bouncy Castle, JDOM2). These packages are not in the shipped AAR/JAR files; maintainer acceptance or an AGP upgrade remains open.
+- A local API-29 emulator was installed, but boot failed because the KVM group permission for `/dev/kvm` was unavailable. The remote API-29 suite is green, but there is no Chinese device, fold or TalkBack matrix.
+- `./gradlew test :calendar-chinese-native:linuxX64Test`, the focused benchmark, `scripts/api-check.sh` and the Python suites succeeded. The gate-evidence commit `4ce4d3f` is on `origin/update`; remote CI was verification `43479911419`, publishing `43479911387`, instrumentation `43479911196` and tablet `43479911275`, all successful. No merge, tag or release was created.
 
 ### Open items
 
@@ -278,30 +283,30 @@ is made for real-device, foldable or TalkBack coverage.
   - `Android tablet verification`: Run `43375002074` (success)
 - JitPack status (2026-11-13): `2.3.0` build and JitPack-only BOM consumer passed; commit `7a51e24` also builds and its direct engine consumer passed. The `2.4.0` tag/BOM consumer remains open until a separately approved tag exists.
 
-## Post-2.2.0 Adaptive Review and Hardening (branch `update`, Arbeitspakete A–I)
+## Post-2.2.0 Adaptive Review and Hardening (branch `update`, work packages A–I)
 
 Following the published `2.2.0` release, a comprehensive independent code review identified and resolved
 remaining edge cases in adaptive geometry, viewport heights, month width touch targets, and test coverage:
 
-- **Arbeitspaket A (Build & CI Stabilization):** Dedicated workflows, test sync, and CI stabilization.
-- **Arbeitspaket B (Month Widths & Touch Targets):** Implemented `sampleTargetMonthWidth(showWeekNumbers)`
+- **Work package A (Build & CI Stabilization):** Dedicated workflows, test sync, and CI stabilization.
+- **Work package B (Month Widths & Touch Targets):** Implemented `sampleTargetMonthWidth(showWeekNumbers)`
   (336 dp without week numbers, 376 dp with week numbers) to guarantee 48 dp day cells in the sample,
   preserving the library default (320 dp). Tested via `CalendarSampleMonthWidthTest`.
-- **Arbeitspaket C (Continuous Calendar State Continuity):** Added `CalendarSampleAdaptiveLayoutTest`
+- **Work package C (Continuous Calendar State Continuity):** Added `CalendarSampleAdaptiveLayoutTest`
   exercising real calendar selection, navigation, multi-column switches, and fold changes continuously
   without activity restart or state loss.
-- **Arbeitspaket D (Genuine State Restoration):** Added `CalendarSampleStateRestorationTest` testing
+- **Work package D (Genuine State Restoration):** Added `CalendarSampleStateRestorationTest` testing
   `rememberCalendarSampleState` (all 17 properties), `CalendarSelectionState` (range endpoints and interior),
   display modes, and heatmap settings using Compose's `StateRestorationTester`.
-- **Arbeitspaket E (Adaptive Viewport Heights):** Implemented `sampleBoundedViewportHeight` and
+- **Work package E (Adaptive Viewport Heights):** Implemented `sampleBoundedViewportHeight` and
   `sampleDialogViewportHeight` in `CalendarSamplePaneHeight.kt`, removing artificial minimums and capping
   heights to 75% of available pane. Tested via 14 JVM unit tests.
-- **Arbeitspaket F (Fold Geometry & Insets):** Implemented `sampleLocalFold` in `CalendarSampleFoldGeometry.kt`,
+- **Work package F (Fold Geometry & Insets):** Implemented `sampleLocalFold` in `CalendarSampleFoldGeometry.kt`,
   properly handling safe-drawing insets, local coordinates, offscreen folds, and physical LTR placement for RTL.
-- **Arbeitspaket G (Heatmap & Accessibility):** Preserved touch targets, TalkBack semantics, and adaptive
+- **Work package G (Heatmap & Accessibility):** Preserved touch targets, TalkBack semantics, and adaptive
   two-pane layouts for the heatmap demo.
-- **Arbeitspaket H (Documentation Consolidation):** Synchronized all status, architecture, and review docs.
-- **Arbeitspaket I (Independent Review & CI Verification):** Full diff verification, API-guard check,
+- **Work package H (Documentation Consolidation):** Synchronized all status, architecture, and review docs.
+- **Work package I (Independent Review & CI Verification):** Full diff verification, API-guard check,
   and green CI across all four workflows on commit `90ad35b`:
   - `Android verification`: Run 43223950693 (success across assemble, unit-tests, lint)
   - `Android publishing verification`: Run 43223950670 (success)
@@ -311,7 +316,7 @@ remaining edge cases in adaptive geometry, viewport heights, month width touch t
 ## Historical release status: 2.2.1 (published)
 
 - Release commit `dd20e49` is tagged `2.2.1` and the GitHub Release `2.2.1` is published via `publish-2-2-1.yml` (run 43268408129).
-- Includes full Arbeitspakete A–I adaptive hardening suite, 48 dp touch target enforcement, fold geometry, adaptive pane heights, continuous transition tests, genuine state restoration tests, and tablet CI.
+- Includes the full work packages A–I adaptive hardening suite, 48 dp touch target enforcement, fold geometry, adaptive pane heights, continuous transition tests, genuine state restoration tests, and tablet CI.
 - All four CI workflows verified on release tree `dd20e49`:
   - `Android verification`: Run 43268408115 (success across assemble, unit-tests, lint)
   - `Android publishing verification`: Run 43268408103 (success)
