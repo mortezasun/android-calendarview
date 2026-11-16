@@ -1,6 +1,6 @@
 # Project status
 
-Last updated: 2026-11-14
+Last updated: 2026-11-16
 Version: `2.4.0` (released 2026-11-14; latest previous release: `2.3.0`)
 Branch: `master` (2.4.0 released and merged from `update` on 2026-11-14)
 
@@ -18,13 +18,19 @@ code.
   `Locale`; see ADR 0006 for the breaking changes.
 - `:calendar-solarHijri` is now a facade over the dependency-free `:calendar-solarHijri-native`
   engine; the `ir.huri:jalalicalendar` dependency was removed.
-- Verification on Linux: 156 `jvmTest` cases in the seven library modules, 62 sample unit
-  tests, `:calendarviewsample:assembleDebug`, `publishToMavenLocal` for all seven modules plus
-  the BOM, and `scripts/api-check.sh` against the regenerated dumps.
-- Blocked / not run: iOS simulator tests and the `iosApp` sample (need macOS with Xcode);
-  `lintDebug`, `assembleRelease` and `compileDebugAndroidTestKotlin` are not provided by the
-  AGP Kotlin Multiplatform library plugin and were replaced by the metadata/Android compile
-  checks and `publishToMavenLocal`.
+- Verification on Linux (2026-11-16): 156 `jvmTest` cases in the seven library modules, 141 of
+  them again through `testAndroidHostTest`, 62 sample unit tests, `lint` for the six KMP modules
+  and the sample (0 errors), `:library:compileAndroidDeviceTest` and
+  `:calendarviewsample:compileDebugAndroidTestKotlin` (instrumentation tests compile only),
+  `:calendarviewsample:assembleDebug`/`assembleRelease`, `assembleAndroidMain`,
+  `publishToMavenLocal` for all seven modules plus the BOM, and `scripts/api-check.sh`.
+- Build setup: the KMP modules apply `com.android.lint` because
+  `com.android.kotlin.multiplatform.library` creates no lint tasks, and opt in to
+  `withHostTest`/`withDeviceTest`; `src/androidTest/java` is mapped into `androidDeviceTest`.
+  Compose Multiplatform 1.12.2 leaves the device-test resource copy task unconfigured, so the
+  root build disables it.
+- Not run: iOS simulator tests and the `iosApp` sample (need macOS with Xcode); instrumentation
+  tests were compiled but not executed (no device or emulator in the Linux VM).
 
 ## Current release: 2.4.0 Chinese calendar (2026-11-14)
 

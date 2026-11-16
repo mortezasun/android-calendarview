@@ -24,22 +24,19 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeLeft
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthData
+import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.calendars.hijri.compose.hijriMonthData
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthData
 import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseCompose.chineseMonthData
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
-import ir.huri.jcal.JalaliCalendar
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
-import java.time.YearMonth
-import java.time.chrono.HijrahDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Locale
 
 /** Exercises the real launcher and its production callbacks, not a replacement fixture. */
@@ -64,14 +61,17 @@ class CalendarSampleUiTest {
         compose.waitForIdle()
     }
 
-    private fun caption(month: YearMonth): String = month.format(DateTimeFormatter.ofPattern("LLLL uuuu", Locale.ENGLISH))
+    private fun monthOf(date: LocalDate): GregorianYearMonth =
+        GregorianYearMonth(date.year, date.monthValue)
+
+    private fun caption(month: GregorianYearMonth): String = gregorianMonthData(month).title
 
     private fun showViewport() {
         compose.onNode(hasText("Window month ", substring = true)).performScrollTo()
         compose.waitForIdle()
     }
 
-    private fun assertMonth(month: YearMonth) {
+    private fun assertMonth(month: GregorianYearMonth) {
         showViewport()
         compose.onNodeWithText(caption(month)).assertIsDisplayed()
     }
@@ -130,11 +130,11 @@ class CalendarSampleUiTest {
     }
 
     private fun englishDescription(date: LocalDate): String =
-        date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.ENGLISH))
+        gregorianMonthData(monthOf(date)).days.first { it.epochDay == date.toEpochDay() }.accessibilityLabel
 
     @Test
     fun swipeThenNextDialogAndModeSwitchUseTheReachedMonth() {
-        val initial = YearMonth.now()
+        val initial = monthOf(LocalDate.now())
         click("HorizontalPager")
         assertMonth(initial)
         compose.onNodeWithText(caption(initial)).performTouchInput { swipeLeft() }
@@ -153,7 +153,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun everyListAndPagerModeAcceptsProgrammaticNavigation() {
-        val initial = YearMonth.now()
+        val initial = monthOf(LocalDate.now())
         assertMonth(initial)
         for (mode in listOf("VerticalList", "HorizontalList", "HorizontalPager", "VerticalPager")) {
             click(mode)
@@ -167,7 +167,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun selectingVisibleDayInMainViewportUpdatesSelection() {
-        val selected = YearMonth.now().atDay(1)
+        val selected = LocalDate.ofEpochDay(monthOf(LocalDate.now()).atDay(1))
         val description = englishDescription(selected)
         selectSingleGregorian()
         showViewport()
@@ -180,7 +180,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun touchingVisibleDayInMainViewportUpdatesSelection() {
-        val selected = YearMonth.now().atDay(1)
+        val selected = LocalDate.ofEpochDay(monthOf(LocalDate.now()).atDay(1))
         val description = englishDescription(selected)
         selectSingleGregorian()
         showViewport()
@@ -193,8 +193,8 @@ class CalendarSampleUiTest {
 
     @Test
     fun selectedDateAndVisibleMonthSurviveActualActivityRecreation() {
-        val initial = YearMonth.now()
-        val selected = initial.atDay(1)
+        val initial = monthOf(LocalDate.now())
+        val selected = LocalDate.ofEpochDay(initial.atDay(1))
         val description = englishDescription(selected)
         showViewport()
         // This checks dialog selection and restoration; main-viewport selection is
@@ -219,8 +219,8 @@ class CalendarSampleUiTest {
 
     @Test
     fun selectingInDialogUpdatesTheMainSelectionSummary() {
-        val selected = YearMonth.now().atDay(1)
-        val description = selected.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.ENGLISH))
+        val selected = LocalDate.ofEpochDay(monthOf(LocalDate.now()).atDay(1))
+        val description = englishDescription(selected)
         click("Open dialog")
         compose.onNode(hasContentDescription(description, substring = true) and hasAnyAncestor(isDialog())).performClick()
         clickDialog("Close")
@@ -231,7 +231,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun dialogPagerSwipesToAdjacentMonth() {
-        val initial = YearMonth.now()
+        val initial = monthOf(LocalDate.now())
         click("Open dialog")
         compose.onNode(hasText(caption(initial)) and hasAnyAncestor(isDialog())).assertIsDisplayed()
         compose.onNode(hasText(caption(initial)) and hasAnyAncestor(isDialog()))
@@ -246,16 +246,20 @@ class CalendarSampleUiTest {
         val today = LocalDate.now()
         for (tag in listOf("en", "de", "fa", "ar")) {
             click(tag)
-            val locale = Locale.forLanguageTag(tag)
             for (calendar in SampleCalendar.entries) {
                 click(calendar.name)
                 showViewport()
                 val title = when (calendar) {
-                    SampleCalendar.Gregorian -> gregorianMonthData(YearMonth.from(today), locale).title
-                    SampleCalendar.Hijri -> hijriMonthData(HijrahDate.from(today), locale).title
-                    SampleCalendar.SolarHijri -> solarHijriMonthData(JalaliCalendar(today), locale).title
-                    SampleCalendar.SolarHijriNative -> solarHijriNativeMonthData(SolarHijriDate.fromLocalDate(today), locale).title
-                    SampleCalendar.Chinese -> chineseMonthData(ChineseMonth.fromEpochDay(today.toEpochDay()), locale = locale).title
+                    SampleCalendar.Gregorian -> gregorianMonthData(monthOf(today)).title
+                    SampleCalendar.Hijri -> hijriMonthData(
+                        UmmAlQuraHijriDateProvider.dateForEpochDay(today.toEpochDay()),
+                    ).title
+                    SampleCalendar.SolarHijri ->
+                        solarHijriMonthData(SolarHijriDate.fromEpochDay(today.toEpochDay())).title
+                    SampleCalendar.SolarHijriNative ->
+                        solarHijriNativeMonthData(SolarHijriDate.fromEpochDay(today.toEpochDay())).title
+                    SampleCalendar.Chinese ->
+                        chineseMonthData(ChineseMonth.fromEpochDay(today.toEpochDay())).title
                 }
                 compose.onNodeWithText(title).assertExists()
             }
@@ -269,7 +273,7 @@ class CalendarSampleUiTest {
         click("Gregorian")
         compose.onAllNodesWithText("Single")[1].performClick()
         compose.waitForIdle()
-        val title = gregorianMonthData(YearMonth.from(today), Locale.ENGLISH).title
+        val title = gregorianMonthData(monthOf(today)).title
         showViewport()
         assertDisplayedInMainViewport(compose.onNodeWithText(title))
     }

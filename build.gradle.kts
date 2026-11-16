@@ -5,12 +5,21 @@ import org.gradle.api.publish.maven.MavenPublication
 plugins {
     alias(libs.plugins.android.library) apply false
     alias(libs.plugins.android.kotlin.multiplatform.library) apply false
+    alias(libs.plugins.android.lint) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.multiplatform) apply false
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.compose.multiplatform) apply false
     `maven-publish`
+}
+
+// Compose Multiplatform 1.12.2 never configures `outputDirectory` for the resource copy task of
+// KMP device-test compilations. The instrumentation tests do not use Compose resources, so the
+// task is disabled instead of failing every `compileAndroidDeviceTest` run.
+subprojects {
+    tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
+        .configureEach { enabled = false }
 }
 
 // Single source of truth for the published coordinates. JitPack resolves multi-module

@@ -65,20 +65,25 @@ Building only the core library:
 ## Tests and lint
 
 ```bash
-./gradlew test               # JVM unit tests for all modules
-./gradlew :library:lintDebug # Android Lint for the core library
+./gradlew jvmTest             # KMP JVM tests for the seven library modules
+./gradlew testAndroidHostTest # the same commonTest suites on the Android host runtime
+./gradlew :calendarviewsample:testDebugUnitTest
+./gradlew lint                # Android Lint for the six KMP modules and the sample
+./gradlew :library:compileAndroidDeviceTest :calendarviewsample:compileDebugAndroidTestKotlin
 ```
 
-`src/test` holds the JVM tests: selection engine and saved-state snapshots, month-cell building,
-heatmap data and style validation, the sample helpers, the Hijri date-provider mapping and one
-month-data suite per calendar engine. The Chinese engine additionally has `commonTest` fixtures
-executed by both `:calendar-chinese-native:jvmTest` and `:calendar-chinese-native:linuxX64Test`.
-The local 2.4.0 run executed 185 Android JVM tests plus 13 engine tests on each target, all
-passing (0 failed, 0 skipped). `src/androidTest` holds the Compose UI tests (`CalendarSelectionComposeTest`,
+`commonTest` holds the shared tests: selection engine and saved-state snapshots, month-cell
+building, heatmap data and style validation, the Hijri date-provider mapping and one month-data
+suite per calendar engine (156 tests). The sample keeps 62 JVM tests in `src/test`.
+`testAndroidHostTest` runs 141 of the shared tests on Android; the Chinese JVM benchmark is
+`jvmTest`-only. The Chinese engine fixtures also run on Kotlin/Native through
+`:calendar-chinese-native:linuxX64Test`.
+
+`src/androidTest` holds the Compose UI tests (`CalendarSelectionComposeTest`,
 `CalendarHeatmapComposeTest`, `CalendarMonthHeaderComposeTest`,
-`CalendarProductViewsComposeTest`, plus the sample acceptance tests). Only the `ExampleUnitTest` /
-`ExampleInstrumentedTest` files are leftover templates. Instrumented tests require an emulator or
-device and were not part of the CLI verification.
+`CalendarProductViewsComposeTest`, plus the sample acceptance tests). The KMP modules map that
+directory into the `androidDeviceTest` compilation, so `compileAndroidDeviceTest` proves they
+compile without an emulator; running them requires a device or emulator.
 
 ## Dependencies and repositories
 
@@ -86,12 +91,11 @@ Repositories are defined centrally in `settings.gradle.kts` with
 `RepositoriesMode.FAIL_ON_PROJECT_REPOS`:
 
 - `google()` for AGP and AndroidX/Material,
-- `mavenCentral()` for Kotlin/JUnit and `ir.huri:jalalicalendar`,
+- `mavenCentral()` for Kotlin and JUnit,
 - `https://jitpack.io` for JitPack consumption.
 
-`:calendar-solarHijri` is the only module that declares `ir.huri:jalalicalendar` as a published dependency (`:calendar-solarHijri-native` uses it in `testImplementation` only), and `:calendar-solarHijri` exposes it
-with `api`, so consumers of that engine get the library transitively while `:library` stays free
-of it.
+No module declares a third-party calendar dependency: the Hijri chronology comes from the
+platform, and the Solar Hijri and Chinese engines are self-written.
 
 ## Secrets
 
@@ -104,10 +108,7 @@ keys.
 The release AARs have a checked-in public JVM API dump in `api/`. After assembling them, run:
 
 ```bash
-./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
-  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease \
-  :calendar-solarHijri-native:assembleRelease :calendar-chinese-compose:assembleRelease \
-  :calendar-chinese-native:jvmJar
+./gradlew assembleAndroidMain :calendar-chinese-native:jvmJar
 bash scripts/api-check.sh
 ```
 
@@ -153,8 +154,8 @@ The consumer build is standalone: it has no `project(...)` or `includeBuild(...)
 does not default to `mavenLocal()`. Check the generated POMs: each Compose `calendar-*` module
 must depend on `...:library` in compile scope
 (and `calendar-chinese-compose` additionally on `calendar-chinese-native`),
-`calendar-solarHijri` must additionally carry `ir.huri:jalalicalendar` (while
-`calendar-solarHijri-native` and `calendar-chinese-native` must not), and the BOM must list all
+no calendar module may carry a third-party calendar dependency (the Hijri chronology comes from
+the platform; the Solar Hijri and Chinese engines are self-written), and the BOM must list all
 seven modules in `dependencyManagement` with the root version. The Chinese engine POM must not
 reference AndroidX, Compose, Java date libraries or another calendar module. The shared POM fields (name,
 description, URL, license, developer, SCM) come from the root build. Maven Central signing and

@@ -35,9 +35,11 @@ Consequences of the shared identity:
   Jalali implementation serves both modules and `ir.huri:jalalicalendar` is no longer
   declared anywhere.
 - The modules use the AGP Kotlin Multiplatform library plugin
-  (`com.android.kotlin.multiplatform.library`), which does not provide the `lintDebug`,
-  `assembleRelease` or `compileDebugAndroidTestKotlin` tasks of `com.android.library`; AARs
-  are produced as `build/outputs/aar/<module>.aar`.
+  (`com.android.kotlin.multiplatform.library`), which has one Android variant: AARs are built by
+  `assembleAndroidMain` as `build/outputs/aar/<module>.aar` and there is no `assembleRelease`.
+  The plugin also creates no lint or test tasks, so every module applies `com.android.lint` and
+  opts in to `withHostTest`/`withDeviceTest`; `src/androidTest/java` is mapped into
+  `androidDeviceTest` and instrumentation tests compile without a device.
 - `:library` and the Compose calendar modules publish `iosArm64` and `iosSimulatorArm64`
   targets. `iosX64` is not published because Compose Multiplatform 1.12.2 does not provide
   it for these modules.
@@ -59,9 +61,13 @@ Consequences of the shared identity:
 ## Verification
 
 - `commonTest` suites run on the JVM for all seven library modules and the sample
-  (156 library tests, 62 sample tests).
+  (156 library tests, 62 sample tests); 141 of the shared tests also pass through
+  `testAndroidHostTest`.
 - `compileCommonMainKotlinMetadata`, `compileKotlinJvm`, `compileAndroidMain` and
   `compileIosMainKotlinMetadata` pass for the library and every calendar module.
+- `lint` runs for the six KMP modules and the sample (0 errors),
+  `compileAndroidDeviceTest` and `compileDebugAndroidTestKotlin` compile the instrumentation
+  tests, and `:calendarviewsample:assembleRelease` builds the unsigned release APK.
 - `publishToMavenLocal` succeeds for the seven modules and the BOM, and
   `scripts/api-check.sh` matches the regenerated dumps.
 - iOS simulator tests and an `iosApp` sample were not executed: they require macOS/Xcode.

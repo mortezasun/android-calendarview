@@ -85,7 +85,7 @@ The library is deliberately small:
 - Write KDoc for public types and for non-obvious private helpers.
 - Comments explain **why** (constraints, invariants, calendar quirks), not **what** the next line
   does. Example: the manual month arithmetic in `hijriMonthData` explains why it exists, because
-  `HijrahDate` has no `plusMonths`.
+  `HijriDate` has no `plusMonths`.
 - Existing KDoc is English; keep new comments in English for consistency.
 - Fix a stale comment only when the code proves it wrong; otherwise leave it and note the
   discrepancy.
@@ -96,18 +96,18 @@ The library is deliberately small:
 2. Make the smallest change; do not reformat untouched lines.
 3. Compile the affected module:
    ```bash
-   ./gradlew :library:compileDebugKotlin
+   ./gradlew :library:compileAndroidMain
    ```
    For changes that touch several modules or the sample, build the app:
    ```bash
    ./gradlew :calendarviewsample:assembleDebug
    ```
-4. Run `./gradlew test :calendar-chinese-native:jvmTest` (JVM tests for selection, month cells,
-   heatmap data and every engine). For the engine, also run
+4. Run `./gradlew jvmTest` (selection, month cells, heatmap data and every engine) and
+   `./gradlew testAndroidHostTest` for the Android host runtime. For the Chinese engine, also run
    `./gradlew :calendar-chinese-native:linuxX64Test`; common tests execute on both targets.
    The Compose UI and sample acceptance tests live in `src/androidTest` and need an emulator or
-   device; `./gradlew :library:compileDebugAndroidTestKotlin` only proves they compile.
-5. Run `./gradlew :library:lintDebug` when the change is non-trivial.
+   device; `./gradlew :library:compileAndroidDeviceTest` only proves they compile.
+5. Run `./gradlew lint` when the change is non-trivial.
 6. Inspect `git diff` and `git status`: only intended files, no build output, no unrelated mode
    changes.
 7. Update the documents listed in [AGENTS.md](../AGENTS.md#documentation-to-update).
@@ -121,10 +121,7 @@ The published AARs have a checked-in public JVM API dump in `api/*.api`. After c
 declaration, assemble the release AARs and run:
 
 ```bash
-./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
-  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease \
-  :calendar-solarHijri-native:assembleRelease :calendar-chinese-compose:assembleRelease \
-  :calendar-chinese-native:jvmJar
+./gradlew assembleAndroidMain :calendar-chinese-native:jvmJar
 bash scripts/api-check.sh          # fails on an unexpected API diff
 bash scripts/api-check.sh --update # regenerates api/*.api after an intentional change
 ```

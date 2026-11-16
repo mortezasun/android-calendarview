@@ -31,13 +31,15 @@ is not part of your task and never reset, stash or overwrite it without explicit
 
 ## Project at a glance
 
-- Multi-module Android **library** project, not an app-first project.
+- Multi-module **Kotlin Multiplatform library** project (Android, JVM, iOS), not an app-first project.
 - `:library` contains the Compose core: month grid, selection engine, scrolling containers and
   heatmaps.
 - `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` and the KMP engine
   `:calendar-chinese-native` together with its Compose facade `:calendar-chinese-compose` are the
   calendar modules. `:calendar-solarHijri-native` is the other dependency-free engine.
   `:calendar-bom` constrains all published modules; `:calendarviewsample` depends on all modules.
+- Shared code lives in `commonMain`; `jvmMain`/`androidMain` hold platform hooks and conversions,
+  `iosMain` the Apple actuals.
 - Public API lives in `com.develotter.calendarview.*`; calendar-specific types live in
   `com.develotter.calendarview.calendars.*`.
 - Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk` 37,
@@ -70,7 +72,7 @@ is not part of your task and never reset, stash or overwrite it without explicit
 - Marker, week, agenda and adaptive-month APIs are calendar-independent product views in
   `:library`. `CalendarWeekData` is implemented by each engine's `*WeekData`; range validation
   belongs in `CalendarRangePolicy`, while drag gestures and picker dialogs stay host concerns.
-- The Hijri method hook is engine-local: `HijriDateProvider` maps epoch days to `HijrahDate` and
+- The Hijri method hook is engine-local: `HijriDateProvider` maps epoch days to `HijriDate` and
   back. Keep the Umm-al-Qura default and forward a caller-supplied provider through month data,
   week data, `HijriCalendarMonth` and the provider-aware `HijriMonthState`/`rememberHijriMonthState`;
   never put mutable provider state in `:library`.
@@ -84,29 +86,42 @@ is not part of your task and never reset, stash or overwrite it without explicit
 
 ## Verified commands
 
-These commands were executed successfully with JDK 21.0 and Android SDK Platform 37
-(package `platforms;android-37.0`); the 2.4.0 API guard and tests were verified on 2026-11-13:
+These commands were executed successfully on branch `kmp` with JDK 21, Android SDK Platform 37
+and Gradle 9.8.2 on Linux (2026-11-16):
 
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew test :calendar-chinese-native:jvmTest    # 211 JVM tests (197 Android + 14 KMP)
+./gradlew jvmTest                                 # 156 KMP JVM tests in the seven modules
+./gradlew testAndroidHostTest                     # 141 of those tests on the Android host
+./gradlew :calendarviewsample:testDebugUnitTest   # 62 sample unit tests
+./gradlew lint                                    # Android Lint, all six KMP modules + sample
+./gradlew :library:compileAndroidDeviceTest       # Compose UI tests (compile only, no emulator)
+./gradlew :calendarviewsample:compileDebugAndroidTestKotlin
+./gradlew :calendarviewsample:assembleRelease     # unsigned release APK
+./gradlew assembleAndroidMain :calendar-chinese-native:jvmJar  # AARs + engine JVM jar
+bash scripts/api-check.sh          # public JVM API diff against api/*.api
+bash scripts/api-check.sh --update # intentional API change: regenerate the dumps
+
 ./gradlew :calendar-chinese-native:linuxX64Test    # 14 Kotlin/Native tests
-./gradlew :library:lintDebug                      # lint for the core library
-./gradlew :library:compileDebugAndroidTestKotlin  # Compose UI tests (compile only, no emulator)
 ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
   :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal \
   :calendar-solarHijri-native:publishToMavenLocal :calendar-chinese-native:publishToMavenLocal \
   :calendar-chinese-compose:publishToMavenLocal \
   :calendar-bom:publishToMavenLocal  # into ~/.m2
-
-# After the release AARs and the engine JVM jar are built:
-bash scripts/api-check.sh          # public JVM API diff against api/*.api
-bash scripts/api-check.sh --update # intentional API change: regenerate the dumps
 ```
 
-Single-module compile checks, for example `./gradlew :library:compileDebugKotlin`, are acceptable
-for smaller changes. Report any command that could not be run and why.
+Single-module compile checks, for example `./gradlew :library:compileAndroidMain`, are acceptable
+for smaller changes. iOS simulator tests and an `iosApp` sample need macOS with Xcode and are not
+run on Linux. Report any command that could not be run and why.
+
+### Build conventions
+
+- Android KMP modules apply `com.android.lint`: `com.android.kotlin.multiplatform.library`
+  provides no lint tasks of its own.
+- They opt in to `withHostTest {}` and `withDeviceTest {}`; `src/androidTest/java` is mapped into
+  `androidDeviceTest`. The Compose resource copy task for device tests is disabled centrally in
+  the root build because Compose Multiplatform 1.12.2 leaves its output unconfigured.
 
 ## Rules for changes
 
@@ -120,7 +135,7 @@ for smaller changes. Report any command that could not be run and why.
 - **No placeholder code.** Do not add `TODO: implement` stubs or leave code paths incomplete.
 - **Do not delete existing code** or public API without explicit permission.
 - Keep the existing style: 4-space indentation, KDoc in English, trailing commas where the file
-  already uses them, package layout under `src/main/java`.
+  already uses them, package layout under `src/commonMain/kotlin` or the platform source set.
 - Do not edit generated or build output (`build/`, `.gradle/`, `.kotlin/`, generated bindings).
 - Do not weaken tests, lint or build settings to make a check pass.
 - No secrets, API keys or machine-specific paths in tracked files. `local.properties` stays

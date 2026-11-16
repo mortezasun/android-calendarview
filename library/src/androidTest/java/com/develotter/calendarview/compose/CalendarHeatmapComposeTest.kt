@@ -22,12 +22,11 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
-import java.util.Locale
 
 /**
  * Device/emulator tests for the heatmap composables. They cover layout direction, the
  * selectable/disabled semantics and the minimum touch target; they are not JVM unit tests.
- * `locale = Locale.US` keeps the generated content descriptions independent of the device.
+ * Content descriptions come from the caller-provided [HeatmapDayData.label] plus intensity.
  */
 class CalendarHeatmapComposeTest {
     @get:Rule
@@ -42,7 +41,6 @@ class CalendarHeatmapComposeTest {
                     months = listOf(heatmapMonth(listOf(day(10L), day(11L)))),
                     onDayClick = { clicked = it.epochDay },
                     orientation = HeatmapOrientation.WeeksAsRows,
-                    locale = Locale.US,
                 )
             }
         }
@@ -62,7 +60,6 @@ class CalendarHeatmapComposeTest {
                     months = listOf(heatmapMonth(days)),
                     onDayClick = { clicked = it.epochDay },
                     style = HeatmapStyle(cellSize = 32.dp),
-                    locale = Locale.US,
                 )
             }
         }
@@ -80,8 +77,7 @@ class CalendarHeatmapComposeTest {
                         months = listOf(heatmapMonth(days)),
                         onDayClick = {},
                         orientation = HeatmapOrientation.WeeksAsRows,
-                        locale = Locale.US,
-                    )
+                        )
                 }
             }
         }
@@ -99,7 +95,6 @@ class CalendarHeatmapComposeTest {
                     months = listOf(heatmapMonth(listOf(day(10L), day(11L)))),
                     onDayClick = { state.onDayClick(it.epochDay) },
                     selection = state.selection,
-                    locale = Locale.US,
                 )
             }
         }
@@ -116,7 +111,6 @@ class CalendarHeatmapComposeTest {
                 CalendarYearHeatmap(
                     months = listOf(heatmapMonth(listOf(day(10L, enabled = false), day(11L)))),
                     onDayClick = { clicked = it.epochDay },
-                    locale = Locale.US,
                 )
             }
         }
@@ -132,7 +126,6 @@ class CalendarHeatmapComposeTest {
                     months = listOf(heatmapMonth(listOf(day(10L), day(11L)))),
                     onDayClick = {},
                     style = HeatmapStyle(cellSize = 24.dp),
-                    locale = Locale.US,
                 )
             }
         }
@@ -156,8 +149,7 @@ class CalendarHeatmapComposeTest {
                         onDayClick = { clicked = it.epochDay },
                         orientation = HeatmapOrientation.WeeksAsRows,
                         style = HeatmapStyle(cellSize = 24.dp),
-                        locale = Locale.US,
-                    )
+                        )
                 }
             }
         }

@@ -103,7 +103,7 @@ State is managed declaratively and cleanly separated from UI rendering:
 ## Heatmap Architecture
 
 The heatmap is decoupled from month grid calculations but shares its configuration model:
-- `CalendarQuarterHeatmap` (Gregorian, `Map<LocalDate, Float>`) renders one quarter;
+- `CalendarQuarterHeatmap` (Gregorian, `Map<Long, Float>` keyed by epoch day) renders one quarter;
   the Gregorian `CalendarYearHeatmap(year, ...)` stacks four quarters.
 - The calendar-agnostic `CalendarYearHeatmap(months: List<HeatmapMonthData>, ...)` renders
   month blocks built by the caller with any engine (`gregorianMonthData`, `hijriMonthData`,

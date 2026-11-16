@@ -13,6 +13,8 @@
 
 A Kotlin Multiplatform Jetpack Compose calendar library for Android, the JVM and iOS. It ships one shared, calendar-independent core (month grid, selection engine, containers, heatmaps) plus pluggable calendar engines for **Gregorian**, **Islamic Hijri**, **Solar Hijri (Jalali / Persian)** and the **Chinese lunisolar calendar** — with full RTL support.
 
+The Kotlin Multiplatform APIs described here live on branch `kmp` and are not released yet; see [ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md) for the breaking changes.
+
 **Current release:** [`2.4.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.4.0) adds the self-written Chinese lunisolar engine and Compose facade. See the [2.4.0 plan](RELEASE_PLAN_2.4.0.md), [short changelog](docs/releases/2.4.0-changelog.md) and [release notes](docs/releases/2.4.0.md). Verify the JitPack build for the new tag before pinning production dependencies.
 
 ---
@@ -159,9 +161,10 @@ The Hijri engine's provider parameter is optional; omit it to keep Umm al-Qura. 
 offset, pass the same provider to the month state, the month view and the click mapping:
 
 ```kotlin
+val todayEpochDay = 20_393L // from your platform clock
 val selectionState = rememberCalendarSelectionState(TypeSelectDay.Single)
 val hijriMethod = OffsetHijriDateProvider(offsetDays = 1)
-val hijriToday = hijriMethod.dateForEpochDay(LocalDate.now().toEpochDay())
+val hijriToday = hijriMethod.dateForEpochDay(todayEpochDay)
 val monthState = rememberHijriMonthState(
     initialMonth = hijriToday,
     dateProvider = hijriMethod,
@@ -170,8 +173,8 @@ val monthState = rememberHijriMonthState(
 HijriCalendarMonth(
     month = monthState.month,
     selection = selectionState.selection,
-    onDateClick = { date -> selectionState.onDayClick(hijriMethod.epochDayFor(date)) },
-    today = hijriToday,
+    onDateClick = { epochDay -> selectionState.onDayClick(epochDay) },
+    todayEpochDay = todayEpochDay,
     dateProvider = hijriMethod,
 )
 ```
@@ -188,9 +191,9 @@ fun GregorianScreen() {
     val state = rememberCalendarSelectionState(TypeSelectDay.Range)
 
     GregorianCalendarMonth(
-        month = YearMonth.now(),
+        month = GregorianYearMonth.now(),
         selection = state.selection,
-        onDateClick = { date -> state.onDayClick(date.toEpochDay()) },
+        onDateClick = { epochDay -> state.onDayClick(epochDay) },
         showPreviousMonthDays = true,
         showNextMonthDays = true,
         fixedSixRows = true,
@@ -206,7 +209,7 @@ fun HijriScreen() {
     val state = rememberCalendarSelectionState(TypeSelectDay.Single)
 
     HijriCalendarMonth(
-        month = UmmAlQuraHijriDateProvider.dateForEpochDay(LocalDate.now().toEpochDay()),
+        month = UmmAlQuraHijriDateProvider.dateForEpochDay(todayEpochDay),
         selection = state.selection,
         onDateClick = { epochDay -> state.onDayClick(epochDay) },
     )
@@ -217,26 +220,26 @@ Umm al-Qura is the default method. To model a local adjustment, use a provider a
 the same provider's today value:
 
 ```kotlin
+val todayEpochDay = 20_393L // from your platform clock
 val hijriMethod = OffsetHijriDateProvider(offsetDays = 1)
-val hijriToday = hijriMethod.dateForEpochDay(LocalDate.now().toEpochDay())
+val hijriToday = hijriMethod.dateForEpochDay(todayEpochDay)
 
 HijriCalendarMonth(
     month = hijriToday,
     selection = state.selection,
-    onDateClick = { date -> state.onDayClick(hijriMethod.epochDayFor(date)) },
-    today = hijriToday,
+    onDateClick = { epochDay -> state.onDayClick(epochDay) },
+    todayEpochDay = todayEpochDay,
     dateProvider = hijriMethod,
 )
 ```
 
-A provider maps epoch days to `HijrahDate` and back. `hijriMonthData` and `hijriWeekData`
+A provider maps epoch days to `HijriDate` and back. `hijriMonthData` and `hijriWeekData`
 accept the same `dateProvider`; the provider affects labels and the displayed today, while
-selection remains keyed by absolute epoch day. The click callback receives the displayed
-`HijrahDate`, so map it back through `epochDayFor` before storing a selected day.
+selection and every callback remain keyed by absolute epoch day.
 
 ### Solar Hijri / Jalali (Persian)
 
-For new projects that do not need `ir.huri.jcal.JalaliCalendar`, prefer `:calendar-solarHijri-native` (`SolarHijriNativeCalendarMonth` + immutable `SolarHijriDate`):
+Both Solar Hijri modules use the dependency-free engine and the immutable `SolarHijriDate`. `:calendar-solarHijri-native` exposes `SolarHijriNativeCalendarMonth`:
 
 ```kotlin
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
@@ -249,7 +252,7 @@ fun SolarHijriNativeScreen() {
     SolarHijriNativeCalendarMonth(
         month = SolarHijriDate.now(),
         selection = state.selection,
-        onDateClick = { date -> state.onDayClick(date.toEpochDay()) },
+        onDateClick = { epochDay -> state.onDayClick(epochDay) },
     )
 }
 ```
@@ -288,7 +291,7 @@ import com.develotter.calendarview.compose.rememberCalendarSelectionState
 fun ChineseScreen() {
     val selection = rememberCalendarSelectionState()
     val monthState = rememberChineseMonthState(
-        initialMonth = ChineseMonth.fromEpochDay(java.time.LocalDate.now().toEpochDay()),
+        initialMonth = ChineseMonth.of(2024, 3),
     )
 
     ChineseCalendarMonth(
@@ -303,8 +306,7 @@ fun ChineseScreen() {
 Use `GregorianChineseCalendarMonth` for a Gregorian grid with Chinese month/day labels, and
 `chineseYearHeatmap` / `chineseMonthHeatmap` for 12- or 13-month year blocks.
 
-Legacy `:calendar-solarHijri` (`JalaliCalendar`):
-
+The `:calendar-solarHijri` facade exposes the same engine as `SolarHijriCalendarMonth`:
 
 ```kotlin
 @Composable
@@ -312,10 +314,10 @@ fun SolarHijriScreen() {
     val state = rememberCalendarSelectionState(TypeSelectDay.Multiple)
 
     SolarHijriCalendarMonth(
-        month = JalaliCalendar(),
+        month = SolarHijriDate.now(),
         selection = state.selection,
-        onDateClick = { date -> state.onDayClick(solarHijriEpochDay(date)) },
-        locale = Locale.forLanguageTag("fa-IR"),
+        onDateClick = { epochDay -> state.onDayClick(epochDay) },
+        firstDayOfWeek = 6, // Saturday
     )
 }
 ```
@@ -337,12 +339,12 @@ fun SolarHijriScreen() {
 ```kotlin
 val state = rememberCalendarSelectionState(
     mode = TypeSelectDay.Multiple,
-    initialEpochDays = listOf(LocalDate.now().toEpochDay()),
+    initialEpochDays = listOf(todayEpochDay),
 )
 
 state.selection.selectedDays      // List<Long> (epoch days, sorted)
 state.selection.isRangeComplete   // Range mode only
-LocalDate.now().toEpochDay() in state.selection
+todayEpochDay in state.selection
 state.clear()
 ```
 
@@ -352,13 +354,13 @@ state.clear()
 
 ## 🧭 Month navigation
 
-Engine month states own the visible month, the inclusive bounds and month arithmetic; the shared header only renders and dispatches. All five engine states are saveable and expose `month`, `title(locale)`, `canGoPrevious`, `canGoNext`, `canGoToday`, `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`.
+Engine month states own the visible month, the inclusive bounds and month arithmetic; the shared header only renders and dispatches. All five engine states are saveable and expose `month`, `title()`, `canGoPrevious`, `canGoNext`, `canGoToday`, `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`.
 
 ```kotlin
 val monthState = rememberGregorianMonthState(
-    initialMonth = YearMonth.now(),
-    minMonth = YearMonth.of(2026, 1),
-    maxMonth = YearMonth.of(2026, 12),
+    initialMonth = GregorianYearMonth.now(),
+    minMonth = GregorianYearMonth(2026, 1),
+    maxMonth = GregorianYearMonth(2026, 12),
 )
 
 CalendarMonthHeader(
@@ -369,11 +371,11 @@ CalendarMonthHeader(
     todayLabel = "Today", // omit for no today button
 )
 
-GregorianCalendarMonth(
-    month = monthState.month,
-    selection = state.selection,
-    onDateClick = { state.onDayClick(it.toEpochDay()) },
-)
+    GregorianCalendarMonth(
+        month = monthState.month,
+        selection = state.selection,
+        onDateClick = { state.onDayClick(it) },
+    )
 ```
 
 The content descriptions and the today label are caller-supplied because the library ships no localized UI strings. Tapping previous/next at a bound does nothing; `goTo` rejects out-of-range targets instead of clamping.
@@ -385,7 +387,7 @@ The content descriptions and the today label are caller-supplied because the lib
 `CalendarWeekGrid` is a seven-day view built on the shared grid. Engine `*WeekData` builders align the week to the configured first day and supply consecutive cells; the week number is optional because Hijri and Solar Hijri do not share one week-number convention.
 
 ```kotlin
-val week = gregorianWeekData(LocalDate.now(), firstDayOfWeek = DayOfWeek.MONDAY)
+val week = gregorianWeekData(todayEpochDay, firstDayOfWeek = 1)
 
 CalendarWeekGrid(
     title = week.title,
@@ -397,11 +399,12 @@ CalendarWeekGrid(
 )
 ```
 
-Use `hijriWeekData(HijrahDate.now())`, `solarHijriNativeWeekData(SolarHijriDate.now())`, or `solarHijriWeekData(JalaliCalendar())` for the other engines. `CalendarAgenda` is a bounded, vertically scrolling day list; it shares markers, selection, today styling and accessibility descriptions with the grids:
+Use `hijriWeekData(todayEpochDay)`, `solarHijriNativeWeekData(todayEpochDay)`, or
+`solarHijriWeekData(todayEpochDay)` for the other engines. `CalendarAgenda` is a bounded, vertically scrolling day list; it shares markers, selection, today styling and accessibility descriptions with the grids:
 
 ```kotlin
 CalendarAgenda(
-    days = gregorianMonthData(YearMonth.now()).days,
+    days = gregorianMonthData(GregorianYearMonth.now()).days,
     selection = state.selection,
     onDayClick = { state.onDayClick(it) },
     markers = markers,
@@ -417,22 +420,18 @@ Markers are keyed by absolute epoch day, so one map works across all engines. Th
 
 ```kotlin
 val markers = mapOf(
-    LocalDate.of(2026, 11, 11).toEpochDay() to listOf(
+    GregorianYearMonth(2026, 11).atDay(11) to listOf(
         CalendarDayMarker(Color(0xFFD32F2F), "Holiday"),
         CalendarDayMarker(Color(0xFF1565C0), "Team event"),
     ),
 )
 
 GregorianCalendarMonth(
-    month = YearMonth.now(),
+    month = GregorianYearMonth.now(),
     selection = state.selection,
-    onDateClick = { state.onDayClick(it.toEpochDay()) },
+    onDateClick = { state.onDayClick(it) },
     markers = markers,
-    weekNumber = { epochDay ->
-        LocalDate.ofEpochDay(epochDay)
-            .get(WeekFields.of(DayOfWeek.MONDAY, 1).weekOfWeekBasedYear())
-            .toString()
-    },
+    weekNumber = { epochDay -> weekLabel(epochDay) }, // host-formatted; null hides the label
 )
 ```
 
@@ -454,7 +453,7 @@ CalendarMonthColumns(
     GregorianCalendarMonth(
         month = months[index],
         selection = state.selection,
-        onDateClick = { state.onDayClick(it.toEpochDay()) },
+        onDateClick = { state.onDayClick(it) },
     )
 }
 ```
@@ -463,31 +462,30 @@ CalendarMonthColumns(
 
 ## 🎨 Customization
 
-All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHijriCalendarMonth`, `SolarHijriNativeCalendarMonth`, `ChineseCalendarMonth`) share the common optional parameters below; the Chinese facade uses `style`/`locale` and `todayEpochDay`:
+All engine composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHijriCalendarMonth`, `SolarHijriNativeCalendarMonth`, `ChineseCalendarMonth`) share the common optional parameters below; the Chinese facade additionally uses `style`:
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `locale` | `Locale.getDefault()` | Month names, weekday labels and digits. |
-| `firstDayOfWeek` | locale-based (Gregorian) / `SATURDAY` (Hijri, Jalali) | First column of the grid. |
+| `firstDayOfWeek` | platform default (Gregorian, Chinese) / `6` (Hijri, Solar Hijri) | First column of the grid, ISO 1..7. |
 | `showPreviousMonthDays` / `showNextMonthDays` | `false` | Show adjacent-month days in the leading/trailing cells. |
 | `fixedSixRows` | `false` | Always render 42 cells to avoid height jumps between months. |
 | `showHeader` / `showWeekdayLabels` | `true` | Toggle the month title and weekday row. |
-| `today` | now | Date highlighted as *today*. |
+| `todayEpochDay` | platform clock | Epoch day highlighted as *today*. |
 | `todayBorderColor` | `null` → `LocalCalendarStyle`, then `MaterialTheme.colorScheme.tertiary` | Optional border color of the *today* indicator. |
 | `isDateEnabled` | `{ true }` | Disable dates (e.g. past days or weekends). |
 | `todayDescription` | `null` | Localized text appended to today's accessibility label (for example `"Today"` / `"Heute"`). |
-| `dateProvider` | `UmmAlQuraHijriDateProvider` | Hijri only: maps epoch days to the displayed method. Pass a matching `today` when using an offset. |
+| `dateProvider` | `UmmAlQuraHijriDateProvider` | Hijri only: maps epoch days to the displayed method. Pass a matching `todayEpochDay` when using an offset. |
 | `markers` | `emptyMap()` | Epoch-day → `CalendarDayMarker` list; descriptions join the accessible label. |
 | `weekNumber` | `null` | Optional caller-formatted week-number column; the callback receives the week's first epoch day. |
 
 ```kotlin
 GregorianCalendarMonth(
-    month = YearMonth.now(),
+    month = GregorianYearMonth.now(),
     selection = state.selection,
-    onDateClick = { state.onDayClick(it.toEpochDay()) },
-    firstDayOfWeek = DayOfWeek.MONDAY,
+    onDateClick = { state.onDayClick(it) },
+    firstDayOfWeek = 1,
     todayBorderColor = Color(0xFF00897B),
-    isDateEnabled = { it >= LocalDate.now() },
+    isDateEnabled = { it >= todayEpochDay },
 )
 ```
 
@@ -522,7 +520,7 @@ state.selectRange(startEpochDay, endEpochDay) // for a caller-owned drag layer
 `CalendarMonthList` and `CalendarMonthPager` are calendar-independent: you supply a month count and render any month composable per index.
 
 ```kotlin
-val months = remember { (-12..12).map { YearMonth.now().plusMonths(it.toLong()) } }
+val months = remember { (-12..12).map { GregorianYearMonth.now().plusMonths(it) } }
 val pagerState = rememberPagerState(initialPage = 12, pageCount = { months.size })
 
 CalendarMonthPager(
@@ -548,19 +546,19 @@ CalendarMonthPager(
 
 ## 🔥 Heatmaps
 
-Heatmaps support the same options as the month views (locale, RTL, header/weekday slots, today border, disabled dates, selection) plus heatmap-specific orientation, cell style and color scale.
+Heatmaps support the same options as the month views (RTL, header/weekday slots, today border, disabled dates, selection) plus heatmap-specific orientation, cell style and color scale.
 
 ### Gregorian year / quarter
 
 ```kotlin
 CalendarYearHeatmap(
     year = 2026,
-    intensities = mapOf(LocalDate.of(2026, 1, 5) to 0.8f), // values are clamped to 0..1
-    onDayClick = { date -> println("Clicked $date") },
+    intensities = mapOf(GregorianYearMonth(2026, 1).atDay(5) to 0.8f), // clamped to 0..1
+    onDayClick = { epochDay -> println("Clicked $epochDay") },
 )
 ```
 
-`CalendarQuarterHeatmap(year, quarter, intensities, onDayClick)` renders a single quarter and accepts the same options. The Gregorian heatmaps additionally take `firstDayOfWeek`, `today` (`null` = no today border) and `isDateEnabled`.
+`CalendarQuarterHeatmap(year, quarter, intensities, onDayClick)` renders a single quarter and accepts the same options. The Gregorian heatmaps additionally take `firstDayOfWeek`, `todayEpochDay` (`null` = no today border) and `isDateEnabled`.
 
 ### Any calendar (Hijri, Jalali, …)
 
@@ -568,7 +566,7 @@ The calendar-agnostic overload takes pre-built `HeatmapMonthData` blocks, so `:l
 
 ```kotlin
 val months = (1..12).map { month ->
-    solarHijriMonthData(JalaliCalendar(1405, month, 1)).toHeatmap { 0.5f }
+    solarHijriMonthData(SolarHijriDate(1405, month, 1)).toHeatmap { 0.5f }
 }
 
 CalendarYearHeatmap(
@@ -628,19 +626,20 @@ Kotlin/Native-capable host for `linuxX64Test`.
 Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.8.2, Compose BOM 2026.09.00, `compileSdk`/`targetSdk` 37, `minSdk` 27.
 
 ```bash
-git clone --branch update https://github.com/mortezasun/android-calendarview.git
+git clone --branch kmp https://github.com/mortezasun/android-calendarview.git
 cd android-calendarview
 ./gradlew :calendarviewsample:assembleDebug   # build the demo app
-./gradlew test :calendar-chinese-native:jvmTest # JVM unit tests (all modules + KMP JVM target)
+./gradlew :calendarviewsample:assembleRelease # unsigned release APK
+./gradlew jvmTest                             # KMP JVM tests (seven modules)
+./gradlew testAndroidHostTest                 # the same suites on the Android host
+./gradlew :calendarviewsample:testDebugUnitTest
 ./gradlew :calendar-chinese-native:linuxX64Test # same engine fixtures on Kotlin/Native
-./gradlew lintDebug                           # Android Lint
-./gradlew connectedDebugAndroidTest           # instrumentation tests (device/emulator)
+./gradlew lint                                # Android Lint for every module
+./gradlew :library:compileAndroidDeviceTest \
+  :calendarviewsample:compileDebugAndroidTestKotlin # instrumentation tests (compile only)
 
-# Public JVM API guard (after the release AARs are built)
-./gradlew :library:assembleRelease :calendar-gregorian:assembleRelease \
-  :calendar-hijri:assembleRelease :calendar-solarHijri:assembleRelease \
-  :calendar-solarHijri-native:assembleRelease :calendar-chinese-compose:assembleRelease \
-  :calendar-chinese-native:jvmJar
+# Public JVM API guard (after the AARs are built)
+./gradlew assembleAndroidMain :calendar-chinese-native:jvmJar
 bash scripts/api-check.sh
 
 # Publish all artifacts, including the BOM, into the local Maven repository
