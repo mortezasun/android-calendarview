@@ -1,6 +1,6 @@
 # ADR 0005: Self-written native Chinese calendar
 
-Date: 2026-11-13. Status: implemented on branch `update` (2.4.0 release candidate); tag/release open.
+Date: 2026-11-13. Status: implemented and released as part of `2.4.0` on 2026-11-14; carried into `3.0.0`.
 
 ## Context
 

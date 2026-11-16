@@ -1,8 +1,8 @@
 # Setup
 
-Verified on 2026-11-13 against the `2.4.0` development tree on branch `update` (JDK 21.0,
-Android SDK Platform 37.0, Build-Tools 37.0.0). The GitHub workflows still configure JDK 17;
-their `2.4.0` runs are not part of this local evidence.
+Verified on 2026-11-16 against the `3.0.0` release tree on branch `kmp` (JDK 21.0,
+Android SDK Platform 37.0, Build-Tools 37.0.0). The GitHub workflows configure JDK 17; their
+`3.0.0` runs are recorded in [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ## Required tools
 
@@ -12,7 +12,7 @@ their `2.4.0` runs are not part of this local evidence.
 | Gradle | 9.8.2 | Provided by the wrapper; do not install a separate Gradle. |
 | Android Gradle Plugin | 9.5.1 | Resolved from `google()` via `gradle/libs.versions.toml`. |
 | Android SDK Platform | API 37 | SDK Manager package `platforms;android-37.0`. Required by `compileSdk = 37`. |
-| Android SDK Build-Tools | 36.0.0 | Default/minimum for AGP 9.5; 37.0.0 was also used successfully for the local 2.4.0 verification. |
+| Android SDK Build-Tools | 36.0.0 | Default/minimum for AGP 9.5; 37.0.0 was also used successfully for the local 3.0.0 verification. |
 | Android SDK Platform-Tools | current | Only needed to install/run the APK on a device. |
 
 `targetSdk` is 37 and `minSdk` is 27. Java/Kotlin target is JVM 17. Kotlin compilation goes through
@@ -155,7 +155,7 @@ exact versioned files, archive contents and every Gradle Module Metadata referen
 the isolated JVM and Android consumers (pass the same Maven repository used above):
 
 ```bash
-bash scripts/verify-publication.sh /tmp/m2-review 2.4.0
+bash scripts/verify-publication.sh /tmp/m2-review 3.0.0
 # KMP layout: the root <module> artifact is metadata, AARs are <module>-android, and iOS
 # klibs are <module>-iosarm64 / <module>-iossimulatorarm64. The verifier checks those files
 # (iOS is cross-compiled only) plus every Gradle Module Metadata reference.
@@ -186,7 +186,7 @@ BOM plus all four modules on 2026-11-11; see [PROJECT_STATUS.md](PROJECT_STATUS.
    Run `chmod +x gradlew` (do not commit the mode change unless the task asks for it).
 3. **Missing SDK location.** Without `ANDROID_HOME` or `local.properties`, Gradle stops during
    configuration with "SDK location not found".
-4. **No JDK installed.** AGP 9.5 requires JDK 17; JDK 21.0 was used for the local 2.4.0 verification.
+4. **No JDK installed.** AGP 9.5 requires JDK 17; JDK 21.0 was used for the local 3.0.0 verification.
 5. **Kotlin/Native toolchain download.** `:calendar-chinese-native:linuxX64Test` downloads the
    Kotlin/Native compiler and dependencies on first use. This needs network access and disk space;
    an offline run fails before the tests start.

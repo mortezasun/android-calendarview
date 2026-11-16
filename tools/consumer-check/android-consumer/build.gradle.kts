@@ -23,6 +23,13 @@ android {
     buildFeatures {
         compose = true
     }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"))
+        }
+    }
 }
 
 kotlin {
@@ -32,7 +39,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.4.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:3.0.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-chinese-compose")
     implementation(platform("androidx.compose:compose-bom:2026.09.00"))
     implementation("androidx.compose.material3:material3")

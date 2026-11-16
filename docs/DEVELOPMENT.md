@@ -130,6 +130,23 @@ CI runs the same check in the `assemble` job. The dump is generated with `javap`
 AARs: it covers public JVM classes, constructors, methods and fields, but not Kotlin default
 values, annotations or source compatibility. Review `git diff api/` together with the public KDoc.
 
+## Kotlin Multiplatform guards
+
+`commonMain` must stay free of JVM, Android and removed `ir.huri` imports. The iOS klib surface
+has separate ABI snapshots under `api/klib/*.abi`:
+
+```bash
+bash scripts/check-commonmain-purity.sh
+./gradlew :library:iosArm64MainKlibrary :calendar-gregorian:iosArm64MainKlibrary \
+  :calendar-hijri:iosArm64MainKlibrary :calendar-solarHijri:iosArm64MainKlibrary \
+  :calendar-solarHijri-native:iosArm64MainKlibrary :calendar-chinese-native:iosArm64MainKlibrary \
+  :calendar-chinese-compose:iosArm64MainKlibrary
+bash scripts/klib-api-check.sh          # fails on an unexpected KLIB ABI diff
+bash scripts/klib-api-check.sh --update # regenerates api/klib/*.abi after an intentional change
+```
+
+CI runs both guards in the `assemble` and `klib-api` jobs.
+
 ## Release and versioning notes
 
 - The published version lives once in the root `build.gradle.kts` (`allprojects` group and version)

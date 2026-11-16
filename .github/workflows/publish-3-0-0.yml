@@ -1,0 +1,56 @@
+name: Publish approved 3.0.0 release
+
+on:
+  push:
+    branches: [kmp]
+
+concurrency:
+  group: publish-approved-3-0-0
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  checks: read
+  actions: read
+
+jobs:
+  release:
+    if: >-
+      github.repository == 'mortezasun/android-calendarview' &&
+      contains(github.event.head_commit.message, 'release: 3.0.0')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: mortezasun/android-calendarview
+      REQUIRED_CHECKS: '["assemble","unit-tests","native-engine","lint","klib-api","publishing","Core and sample instrumentation","Core and sample tablet instrumentation"]'
+
+    steps:
+      - name: Check out release automation
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Refuse to overwrite an existing release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh api "repos/$GH_REPO/git/ref/tags/3.0.0" >/dev/null 2>&1; then
+            echo "Tag 3.0.0 already exists; refusing to move it." >&2
+            exit 1
+          fi
+
+      - name: Wait for all checks on the release commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          source scripts/wait-for-required-checks.sh
+          wait_for_checks "$GITHUB_SHA" "$REQUIRED_CHECKS"
+
+      - name: Create approved tag and public release
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create 3.0.0 --repo "$GH_REPO" --target "$GITHUB_SHA" \
+            --title "3.0.0 - Kotlin Multiplatform calendar" \
+            --notes-file docs/releases/3.0.0-changelog.md --latest

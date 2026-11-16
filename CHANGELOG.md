@@ -1,5 +1,39 @@
 # Changelog
 
+## 3.0.0 - 2026-11-16
+
+Kotlin Multiplatform release for Android, the JVM and iOS.
+
+### Breaking changes
+
+- Public callbacks and predicates use epoch days (`Long`), ISO weekday numbers (`Int`) and
+  injected `currentEpochDay` providers instead of `java.time` types and `Locale`.
+- `YearMonth`, `HijrahDate` and `JalaliCalendar` are replaced by `GregorianYearMonth`,
+  `HijriDate` and `SolarHijriDate`; the hidden `java.time` overloads are removed.
+- `:calendar-solarHijri` is a facade over `:calendar-solarHijri-native`;
+  `ir.huri:jalalicalendar` is no longer used or published.
+
+### Added
+
+- Kotlin Multiplatform source sets, iOS platform actuals, iOS klib publication and a KLIB ABI
+  snapshot guard.
+- Property tests for Gregorian, Hijri, Solar Hijri and Chinese date round-trips and boundaries.
+- Accessibility coverage for day descriptions, RTL and a 200% font scale.
+- `commonMain` purity guard and a minified Android published-artifact consumer.
+
+### Verification
+
+- 165 JVM, 148 Android-host, 62 sample and 14 Kotlin/Native tests passed; 44 instrumented tests
+  on phone and tablet API 29 emulators gate the release.
+- Lint, JVM API guard, KLIB ABI guard, isolated publication verification and JVM/minified
+  Android consumers passed. See [3.0.0 release notes](docs/releases/3.0.0.md).
+
+### Known open gates
+
+- iOS runtime/simulator tests and an `iosApp` sample need macOS/Xcode.
+- No physical-device, foldable, TalkBack or full locale/form-factor acceptance matrix.
+- JitPack is the only configured remote repository; Maven Central upload is not configured.
+
 ## 2.4.0 - 2026-11-14
 
 Self-written Chinese lunisolar calendar: a dependency-free Kotlin Multiplatform engine and an

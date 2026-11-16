@@ -6,15 +6,17 @@ published, signed or deployed; every job has read-only repository permissions.
 
 ## Android verification
 
-`.github/workflows/android-verification.yml` runs four independent jobs:
+`.github/workflows/android-verification.yml` runs five independent jobs:
 
 - **assemble**: `:calendarviewsample:assembleDebug assembleAndroidMain
   :calendar-chinese-native:jvmJar :calendar-bom:generatePomFileForCalendarBomPublication`
-  followed by `bash scripts/api-check.sh`.
+  followed by `bash scripts/check-commonmain-purity.sh` and `bash scripts/api-check.sh`.
 - **unit-tests**: `jvmTest testAndroidHostTest :calendarviewsample:testDebugUnitTest` plus the
   Python suites in `scripts/` and `tools/chinese-calendar/`.
 - **native-engine**: `:calendar-chinese-native:linuxX64Test` on the shared `commonTest` fixtures.
 - **lint**: `lint` for the six KMP modules and the sample.
+- **klib-api**: compiles every iOS arm64 klib and runs `bash scripts/klib-api-check.sh` against
+  the checked-in `api/klib/*.abi` snapshots.
 
 The KMP library plugin creates no Android test or lint tasks, so the modules apply
 `com.android.lint` and opt in to `withHostTest`/`withDeviceTest`; see
@@ -42,7 +44,7 @@ the device-test sources (`compileAndroidDeviceTest`) works without an emulator.
 
 `.github/workflows/android-publishing.yml` publishes the seven modules and the BOM to an isolated
 local Maven repository, runs `scripts/verify-publication.sh`, then builds
-`tools/consumer-check` (JVM and Android consumers) against that repository. The verifier checks
+`tools/consumer-check` (JVM and minified Android release consumers) against that repository. The verifier checks
 the KMP layout (root metadata, `<module>-android` AARs, `<module>-iosarm64` /
 `<module>-iossimulatorarm64` klibs), the Chinese engine JVM/linuxX64/iosX64 artifacts and the
 BOM constraints. The iOS klibs are cross-compiled files only; they are not linked or run on a
@@ -54,3 +56,11 @@ JDK 17 (Temurin), the repository Gradle wrapper and the documented SDK packages
 (`platform-tools`, `platforms;android-37.0`, `build-tools;36.0.0`). Diagnostics and reports are
 uploaded for seven days. A workflow commit is not evidence of a successful run; check the run
 for the exact commit in the Actions tab.
+
+## Approved release
+
+`.github/workflows/publish-3-0-0.yml` runs only for a push to `kmp` whose head commit message
+contains `release: 3.0.0`. It waits for the named verification, instrumentation, publishing and
+KLIB jobs on that exact commit, refuses to move an existing `3.0.0` tag, and creates the GitHub
+release and tag with `contents: write`. The workflow must already exist on the branch before the
+release commit is pushed.

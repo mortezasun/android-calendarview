@@ -1,8 +1,20 @@
 # Release acceptance
 
-Status: `2.4.0` was released on 2026-11-14; tag `2.4.0` and the GitHub Release are published. The documented external gates remain open. `2.3.0` is the latest previous release; `2.2.1` and `2.2.0` are earlier published releases.
+Status: `3.0.0` is the current Kotlin Multiplatform release; `2.4.0` was the previous Android-only release. The documented external gates remain open.
 
-## 0. Current release: 2.4.0 (released, 2026-11-14)
+## 0. Current release: 3.0.0 (Kotlin Multiplatform, 2026-11-16)
+
+- [x] Root version `3.0.0`; sample `versionCode 30000` (monotonic after `20400`) and `versionName "3.0.0"`.
+- [x] KMP sources, iOS platform actuals, iOS klib publication and the seven-module BOM are in place.
+- [x] JVM API dumps unchanged; seven iOS klib ABI snapshots added under `api/klib/`; `commonMain` purity guard added.
+- [x] 165 JVM, 148 Android-host, 62 sample and 14 Kotlin/Native tests passed locally; lint, sample release, device-test compilation, isolated publication verification, and JVM plus minified Android consumers passed.
+- [x] Release notes and short changelog for `3.0.0` prepared.
+- [ ] Remote CI green for the release commit (verification, KLIB ABI, publishing, phone and tablet instrumentation).
+- [ ] Release workflow `publish-3-0-0.yml` created tag `3.0.0` and the GitHub Release.
+- [ ] JitPack `3.0.0` build and JitPack-only BOM consumer verified without `mavenLocal`/`includeBuild`.
+- [ ] iOS runtime/simulator tests and an `iosApp` sample (macOS/Xcode required).
+
+## 1. Previous release: 2.4.0 (released, 2026-11-14)
 
 - [x] `:calendar-chinese-native` and `:calendar-chinese-compose` implemented, integrated and documented.
 - [x] Root version `2.4.0`; sample `versionCode 20400` (monotonic after `20300`) and `versionName "2.4.0"`.

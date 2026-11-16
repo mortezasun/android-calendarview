@@ -13,9 +13,9 @@
 
 A Kotlin Multiplatform Jetpack Compose calendar library for Android, the JVM and iOS. It ships one shared, calendar-independent core (month grid, selection engine, containers, heatmaps) plus pluggable calendar engines for **Gregorian**, **Islamic Hijri**, **Solar Hijri (Jalali / Persian)** and the **Chinese lunisolar calendar** — with full RTL support.
 
-The Kotlin Multiplatform APIs described here live on branch `kmp` and are not released yet; see [ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md) for the breaking changes.
+The Kotlin Multiplatform APIs described here are released as `3.0.0`. See [ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md) for the breaking changes from the Android-only release.
 
-**Current release:** [`2.4.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.4.0) adds the self-written Chinese lunisolar engine and Compose facade. See the [2.4.0 plan](RELEASE_PLAN_2.4.0.md), [short changelog](docs/releases/2.4.0-changelog.md) and [release notes](docs/releases/2.4.0.md). Verify the JitPack build for the new tag before pinning production dependencies.
+**Current release:** [`3.0.0`](https://github.com/mortezasun/android-calendarview/releases/tag/3.0.0) is the Kotlin Multiplatform release for Android, the JVM and iOS. The previous Android release is [`2.4.0`](https://github.com/mortezasun/android-calendarview/releases/tag/2.4.0). See the [3.0.0 release notes](docs/releases/3.0.0.md) and [short changelog](docs/releases/3.0.0-changelog.md). Verify the JitPack build for the new tag before pinning production dependencies.
 
 ---
 
@@ -99,31 +99,31 @@ Add the engines you need to your module's `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core only (needed if you build your own calendar on top of CalendarMonthGrid)
-    implementation("com.github.mortezasun.android-calendarview:library:2.4.0")
+    implementation("com.github.mortezasun.android-calendarview:library:3.0.0")
 
     // Calendar engines (each one already includes :library)
-    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:2.4.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:2.4.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:2.4.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-gregorian:3.0.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-hijri:3.0.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri:3.0.0")
     // Or dependency-free native Solar Hijri engine (immutable SolarHijriDate, no jalalicalendar):
-    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri-native:2.4.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri-native:3.0.0")
 
     // Chinese lunisolar engine and optional Compose facade:
-    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-native:2.4.0")
-    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-compose:2.4.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-native:3.0.0")
+    implementation("com.github.mortezasun.android-calendarview:calendar-chinese-compose:3.0.0")
 }
 ```
 
-The current release is `2.4.0`. JitPack builds the release tag automatically; verify the
-`2.4.0` build and a consumer without local substitutions before pinning production dependencies.
+The current release is `3.0.0`. JitPack builds the release tag automatically; verify the
+`3.0.0` build and a consumer without local substitutions before pinning production dependencies.
 
-### Bill of Materials (2.4.0)
+### Bill of Materials (3.0.0)
 
-The current BOM is `2.4.0` and constrains all seven published modules:
+The current BOM is `3.0.0` and constrains all seven published modules:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.4.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:3.0.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
     implementation("com.github.mortezasun.android-calendarview:calendar-solarHijri")
@@ -135,23 +135,21 @@ dependencies {
 
 The BOM is part of the same publication set and is included by `jitpack.yml` and the
 publishing workflow. JitPack built `2.3.0` with all five then-published modules and its BOM, and
-a JitPack-only BOM consumer passed on 2026-11-13. The `2.4.0` tag triggers the same seven-artifact
+a JitPack-only BOM consumer passed on 2026-11-13. The `3.0.0` tag triggers the same seven-artifact
 publication; verify its JitPack build and BOM consumer before claiming distribution. The POM
 contains the metadata Maven Central requires, but signing, namespace verification and upload are
 not configured; JitPack remains the only configured remote repository.
 
 If you only need one engine, keep its explicit version and omit the BOM.
 
-### Upgrading to the current release (2.4.0)
+### Upgrading to the current release (3.0.0)
 
-The `2.4.0` release is additive: the checked-in public API dumps of all existing
-modules are unchanged (`0` diff against `2.3.0`), and no existing engine depends on the new
-modules. If your build pinned module versions directly, move them to the BOM and bump the
-platform:
+`3.0.0` is a breaking Kotlin Multiplatform release. Update direct versions or the BOM platform,
+then migrate the public date/callback types as described below:
 
 ```kotlin
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.4.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:3.0.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-gregorian")
     implementation("com.github.mortezasun.android-calendarview:calendar-hijri")
 }
@@ -179,9 +177,9 @@ HijriCalendarMonth(
 )
 ```
 
-### Migrating to the Kotlin Multiplatform branch
+### Migrating from 2.4.0
 
-The `kmp` branch replaces JVM date and locale types in public signatures:
+`3.0.0` replaces JVM date and locale types in public signatures:
 
 - Every callback and predicate takes an epoch day (`Long`); `firstDayOfWeek` is an ISO number
   (1..7) and `todayEpochDay` replaces `today`.
@@ -193,10 +191,11 @@ The `kmp` branch replaces JVM date and locale types in public signatures:
 - The `@Deprecated(HIDDEN)` `java.time` overloads were removed. Android/JVM hosts can convert at
   the boundary with `SolarHijriDate.toLocalDate()` and the `HijriDateProvider` mappings.
 
-Shared code compiles for Android, the JVM and the iOS targets; iOS runtime verification is
-pending (see [ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md)). Published
-coordinates stay `...:library` and Gradle resolves the Android AAR (`library-android`) through
-Gradle Module Metadata.
+Shared code compiles for Android, the JVM and the iOS targets; the iOS klibs are published and
+ABI-checked, but iOS runtime verification is still pending (see
+[ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md)). Published coordinates
+stay `...:library` and Gradle resolves the Android AAR (`library-android`) through Gradle Module
+Metadata.
 
 ---
 
@@ -680,10 +679,11 @@ CI runs the same checks on GitHub Actions – see [docs/CI.md](docs/CI.md).
 | [ARCHITECTURE.md](docs/ARCHITECTURE.md) | Compose architecture, rendering and state model |
 | [V2_MIGRATION_MAPPING.md](docs/V2_MIGRATION_MAPPING.md) | 1.x → 2.0.0 migration matrix |
 | [PROJECT_STATUS.md](docs/PROJECT_STATUS.md) | Verified status, test coverage, release notes |
-| [releases/2.4.0.md](docs/releases/2.4.0.md) | 2.4.0 development notes, verification evidence and open gates |
+| [releases/3.0.0.md](docs/releases/3.0.0.md) | 3.0.0 Kotlin Multiplatform release notes and open gates |
+| [releases/2.4.0.md](docs/releases/2.4.0.md) | Previous Android release notes and verification evidence |
 | [CHINESE_CALENDAR_SPEC.md](docs/CHINESE_CALENDAR_SPEC.md) | Chinese engine API, data contract and range |
 | [CHINESE_CALENDAR_QUALITY.md](docs/CHINESE_CALENDAR_QUALITY.md) | Test matrix and executed results |
-| [releases/2.3.0.md](docs/releases/2.3.0.md) | Last published release notes |
+| [releases/2.3.0.md](docs/releases/2.3.0.md) | Older release notes |
 | [ADAPTIVE_LAYOUT.md](docs/ADAPTIVE_LAYOUT.md) | Adaptive layout, multi-window and state contract |
 | [ADJACENT_MONTH_DAYS.md](docs/ADJACENT_MONTH_DAYS.md) | Previous/next-month day behavior |
 | [COMPOSE_MONTH_CONTAINERS.md](docs/COMPOSE_MONTH_CONTAINERS.md) | List and pager containers |

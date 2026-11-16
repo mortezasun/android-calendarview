@@ -8,8 +8,8 @@ Historical: the 2.1.0 release-tree runs passed the then 26 tests on API 29 on 20
 
 ## Test inventory
 
-The checked-in Android instrumentation suite contains **42 test methods**:
-**16 in `:library`** and **26 in `:calendarviewsample`**. The rules come from
+The checked-in Android instrumentation suite contains **44 test methods**:
+**18 in `:library`** and **26 in `:calendarviewsample`**. The rules come from
 `androidx.compose.ui.test.junit4.v2` and therefore use the standard test dispatcher. The source
 inventory is:
 
@@ -24,6 +24,8 @@ inventory is:
   localized today suffix in a day description.
 - `CalendarProductViewsComposeTest` (2 tests): week grid and agenda rendering and click
   reporting.
+- `CalendarAccessibilityComposeTest` (2 tests): day descriptions plus selected semantics, and
+  RTL with a 200% font scale.
 - `ExampleInstrumentedTest` (1 test): generated package check.
 
 ### `:calendarviewsample`
@@ -114,10 +116,12 @@ The full core and sample instrumentation run **43065898948** for commit
 `f7010a58fa59ea6a56836a207f9a27ac92e73efa` completed successfully on API 29. Its
 emulator step succeeded, and the two main-viewport tests, the dialog restoration test and
 the caption tests were part of the executed suite. That run predates the KMP migration and the
-test-count summary step; the checked-in inventory is now 16 library plus 26 sample tests.
+test-count summary step; the checked-in inventory is now 18 library plus 26 sample tests.
 
-After the KMP migration the source inventory is **42 tests (16 library, 26 sample)**. For
-`1a24725` both emulator workflows passed all 42 tests with 0 failures, 0 errors and 0 skips:
+After the KMP migration the source inventory is **44 tests (18 library, 26 sample)**. The new
+accessibility test (RTL, 200% font scale, selection semantics) is part of the 3.0.0 release gate.
+For `1a24725` both emulator workflows passed the then-42 tests with 0 failures, 0 errors and 0
+skips:
 [tablet](https://github.com/mortezasun/android-calendarview/actions/runs/43836063797) and
 [phone](https://github.com/mortezasun/android-calendarview/actions/runs/43836063805). The
 preceding `3bb7fdd` runs also passed 42/42. An earlier tablet run

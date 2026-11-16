@@ -38,8 +38,8 @@ bash ./gradlew :calendarviewsample:assembleDebugAndroidTest
 bash ./gradlew :calendarviewsample:connectedDebugAndroidTest
 ```
 
-Status: the sample contributes 26 of the 42 instrumentation tests on the KMP branch. For
-`1a24725` all 26 sample tests passed in both emulator workflows, alongside the 16 library tests
+Status: the sample contributes 26 of the 44 instrumentation tests on the KMP branch. For
+`1a24725` all 26 sample tests passed in both emulator workflows, alongside the then-16 library tests
 ([tablet](https://github.com/mortezasun/android-calendarview/actions/runs/43836063797),
 [phone](https://github.com/mortezasun/android-calendarview/actions/runs/43836063805)). An earlier
 tablet run exposed a missing `ComponentActivity` declaration; the debug variant now attaches

@@ -1,6 +1,6 @@
 # 0006 – Kotlin Multiplatform calendar modules
 
-Status: accepted (branch `kmp`, unreleased)
+Status: accepted and released as `3.0.0` (2026-11-16); iOS runtime verification remains open.
 
 ## Context
 

@@ -1,14 +1,14 @@
 # Project status
 
 Last updated: 2026-11-16
-Version: `2.4.0` (released 2026-11-14; latest previous release: `2.3.0`)
-Branch: `master` (2.4.0 released and merged from `update` on 2026-11-14)
+Version: `3.0.0` (Kotlin Multiplatform release, 2026-11-16; previous: `2.4.0`)
+Branch: `kmp` (3.0.0 release); `master` contains the Android-only `2.4.0`
 
-## Kotlin Multiplatform migration (branch `kmp`, unreleased)
+## Kotlin Multiplatform release 3.0.0
 
-Status: implemented and locally verified on branch `kmp`; not released and not verified on
-macOS/iOS. The calendar modules no longer use `java.time` or `ir.huri:jalalicalendar` in shared
-code.
+Status: implemented, locally verified and released from branch `kmp`; iOS runtime/simulator
+verification is still not possible on Linux and is not claimed. The calendar modules no longer
+use `java.time` or `ir.huri:jalalicalendar` in shared code.
 
 - `:library`, `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` (facade),
   `:calendar-solarHijri-native` and `:calendar-chinese-compose` moved their shared sources to
@@ -18,13 +18,14 @@ code.
   `Locale`; see ADR 0006 for the breaking changes.
 - `:calendar-solarHijri` is now a facade over the dependency-free `:calendar-solarHijri-native`
   engine; the `ir.huri:jalalicalendar` dependency was removed.
-- Verification on Linux (2026-11-16): 156 `jvmTest` cases in the seven library modules, 141 of
-  them again through `testAndroidHostTest`, 62 sample unit tests, `lint` for the six KMP modules
-  and the sample (0 errors), `:library:compileAndroidDeviceTest` and
+- Verification on Linux (2026-11-16): 165 `jvmTest` cases in the seven library modules, 148 of
+  them again through `testAndroidHostTest` (`calendar-chinese-native` is native-only; one
+  Chinese-Compose test is JVM-only), 62 sample unit tests, 14 Kotlin/Native tests, `lint`
+  for the six KMP modules and the sample (0 errors), `:library:compileAndroidDeviceTest` and
   `:calendarviewsample:compileDebugAndroidTestKotlin`, `:calendarviewsample:assembleDebug`/
   `assembleRelease`, `assembleAndroidMain`, `publishToMavenLocal` for all seven modules plus the
-  BOM, and `scripts/api-check.sh`. The first emulator execution after the migration is the CI
-  tablet run recorded below.
+  BOM, `scripts/api-check.sh`, `scripts/klib-api-check.sh` and
+  `scripts/check-commonmain-purity.sh`. The emulator executions are recorded below.
 - Build setup: the KMP modules apply `com.android.lint` because
   `com.android.kotlin.multiplatform.library` creates no lint tasks, and opt in to
   `withHostTest`/`withDeviceTest`; `src/androidTest/java` is mapped into `androidDeviceTest`.
@@ -64,7 +65,7 @@ test-rule migration. The earlier tablet failure
 diagnosed from its published annotations; the phone run for `64b521a` was superseded before it
 completed and is not part of the final result.
 
-## Current release: 2.4.0 Chinese calendar (2026-11-14)
+## Previous release: 2.4.0 Chinese calendar (2026-11-14)
 
 Status: implemented, committed, locally verified and remotely CI-green on branch `update` at
 `4dc484ae8cff91bad0869cd8d24e0b71144ff8e9`. The review fixes on top of

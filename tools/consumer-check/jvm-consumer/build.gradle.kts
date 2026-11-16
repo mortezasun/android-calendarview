@@ -19,6 +19,6 @@ application {
 }
 
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:2.4.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:3.0.0"))
     implementation("com.github.mortezasun.android-calendarview:calendar-chinese-native")
 }

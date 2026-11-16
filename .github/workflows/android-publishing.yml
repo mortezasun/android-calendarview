@@ -73,7 +73,7 @@ jobs:
         run: |
           set -euo pipefail
           bash ./gradlew -p tools/consumer-check \
-            :jvm-consumer:run :android-consumer:compileDebugKotlin \
+            :jvm-consumer:run :android-consumer:assembleRelease \
             -PconsumerRepo="$RUNNER_TEMP/calendar-maven" \
             --no-daemon --stacktrace --console=plain \
             2>&1 | tee .ci-diagnostics/consumer-check.txt

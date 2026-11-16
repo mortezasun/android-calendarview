@@ -3,18 +3,19 @@
 Binding working rules for coding agents in this repository. Read this file and the linked
 documents before changing any code.
 
-## Current work: Kotlin Multiplatform migration (branch `kmp`, unreleased)
+## Current work: Kotlin Multiplatform 3.0.0 (branch `kmp`)
 
-`:library` and the calendar modules are being migrated to Kotlin Multiplatform (Android, JVM,
-iOS) on branch `kmp`; `2.4.0` on `master` remains the latest published Android release. Read
+`:library` and the calendar modules are released as Kotlin Multiplatform `3.0.0` (Android, JVM,
+iOS) on branch `kmp`; `2.4.0` on `master` remains the previous Android-only release. Read
 [ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md) for the API changes and
 [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for the verified state. iOS runtime verification
-and the version/tag decision are open; do not report either as done.
+is still open; do not report it as done.
 
 The engine must stay self-written pure Kotlin and usable without Compose, Android or other
 calendar engines; the separate Compose facade may reuse `:library`. Do not copy/port external
 calendar code or data tables, add an ICU runtime wrapper, or claim unverified platform support.
-Do not move the `2.4.0` tag or rewrite published history; future releases need separate approval.
+Do not move the `2.4.0` or `3.0.0` tags or rewrite published history; future releases need
+separate approval.
 
 ## Read first
 
@@ -89,8 +90,8 @@ and Gradle 9.8.2 on Linux (2026-11-16):
 ```bash
 chmod +x gradlew                                  # if the checkout lost the executable bit
 ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew jvmTest                                 # 156 KMP JVM tests in the seven modules
-./gradlew testAndroidHostTest                     # 141 of those tests on the Android host
+./gradlew jvmTest                                 # 165 KMP JVM tests in the seven modules
+./gradlew testAndroidHostTest                     # 148 of those tests on the Android host
 ./gradlew :calendarviewsample:testDebugUnitTest   # 62 sample unit tests
 ./gradlew lint                                    # Android Lint, all six KMP modules + sample
 ./gradlew :library:compileAndroidDeviceTest       # Compose UI tests (compile only, no emulator)
