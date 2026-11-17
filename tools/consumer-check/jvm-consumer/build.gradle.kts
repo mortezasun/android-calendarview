@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.4.21"
+    kotlin("jvm")
     application
 }
 
@@ -19,6 +19,6 @@ application {
 }
 
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:3.0.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:3.1.0-beta"))
     implementation("com.github.mortezasun.android-calendarview:calendar-chinese-native")
 }

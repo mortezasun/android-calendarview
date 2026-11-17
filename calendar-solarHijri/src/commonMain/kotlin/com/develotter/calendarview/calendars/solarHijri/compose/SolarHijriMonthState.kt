@@ -2,7 +2,9 @@ package com.develotter.calendarview.calendars.solarHijri.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
@@ -81,6 +83,7 @@ fun rememberSolarHijriMonthState(
     maxMonth: SolarHijriDate? = null,
     currentEpochDay: () -> Long = { SolarHijriDate.now().toEpochDay() },
 ): SolarHijriMonthState {
+    val latestCurrentEpochDay by rememberUpdatedState(currentEpochDay)
     val saver = remember(initialMonth.year, initialMonth.month, minMonth, maxMonth) {
         listSaver<SolarHijriMonthState, Int>(
             save = { listOf(it.year, it.monthNumber) },
@@ -89,12 +92,11 @@ fun rememberSolarHijriMonthState(
                     SolarHijriDate(it[0], it[1], 1),
                     minMonth,
                     maxMonth,
-                    currentEpochDay,
-                )
+                ) { latestCurrentEpochDay() }
             },
         )
     }
     return rememberSaveable(initialMonth.year, initialMonth.month, minMonth, maxMonth, saver = saver) {
-        SolarHijriMonthState(initialMonth, minMonth, maxMonth, currentEpochDay)
+        SolarHijriMonthState(initialMonth, minMonth, maxMonth) { latestCurrentEpochDay() }
     }
 }

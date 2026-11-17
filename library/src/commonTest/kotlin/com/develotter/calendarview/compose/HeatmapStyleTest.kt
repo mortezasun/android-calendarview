@@ -3,6 +3,7 @@ package com.develotter.calendarview.compose
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.Test
@@ -30,11 +31,8 @@ class HeatmapStyleTest {
             { HeatmapStyle(disabledAlpha = -0.1f) },
         )
         invalid.forEachIndexed { index, create ->
-            try {
+            assertFailsWith<IllegalArgumentException>("case $index must be rejected") {
                 create()
-                throw AssertionError("case $index must be rejected")
-            } catch (expected: IllegalArgumentException) {
-                // Expected: invalid geometry is rejected at construction.
             }
         }
     }

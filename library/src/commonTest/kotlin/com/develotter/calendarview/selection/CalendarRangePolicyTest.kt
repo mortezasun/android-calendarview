@@ -1,5 +1,6 @@
 package com.develotter.calendarview.selection
 
+import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.test.Test
@@ -28,13 +29,9 @@ class CalendarRangePolicyTest {
             { CalendarRangePolicy(minRangeLength = 0) },
             { CalendarRangePolicy(minRangeLength = 3, maxRangeLength = 2) },
         )) {
-            var rejected = false
-            try {
+            assertFailsWith<IllegalArgumentException> {
                 policy()
-            } catch (_: IllegalArgumentException) {
-                rejected = true
             }
-            assertTrue(rejected)
         }
     }
 }

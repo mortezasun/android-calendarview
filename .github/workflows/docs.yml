@@ -2,7 +2,7 @@ name: API documentation
 
 on:
   push:
-    branches: [kmp]
+    branches: [master, kmp]
   workflow_dispatch:
 
 permissions:
@@ -38,7 +38,7 @@ jobs:
           packages: ''
 
       - name: Install documented Android SDK packages
-        run: sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;36.0.0"
+        run: sdkmanager "platform-tools" "platforms;android-37.1" "build-tools;36.0.0"
 
       - name: Generate Dokka HTML
         run: bash ./gradlew :dokkaGenerate --no-daemon --stacktrace --console=plain

@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -12,7 +13,11 @@ plugins {
 kotlin {
     android {
         namespace = "com.develotter.calendarview.calendars.chinese.compose"
-        compileSdk = 37
+        compileSdk {
+            version = release(37) {
+                minorApiLevel = 1
+            }
+        }
         minSdk = 27
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -26,6 +31,29 @@ kotlin {
     }
     iosArm64()
     iosSimulatorArm64()
+    macosArm64()
+    js {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadlessNoSandbox()
+                }
+            }
+        }
+        nodejs()
+        binaries.executable()
+    }
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadlessNoSandbox()
+                }
+            }
+        }
+        binaries.executable()
+    }
 
     sourceSets {
         commonMain.dependencies {

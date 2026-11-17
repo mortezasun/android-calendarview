@@ -46,7 +46,7 @@ internal fun hijriDayCellForEpoch(
 ): CalendarDayCell = CalendarDayCell(
     epochDay = epochDay,
     label = HijriPlatform.formatDayNumber(date.dayOfMonth),
-    accessibilityLabel = HijriPlatform.formatFullDate(HijriPlatform.toEpochDay(date)),
+    accessibilityLabel = HijriPlatform.formatFullDate(date, epochDay),
     enabled = isDateEnabled(epochDay),
     isToday = epochDay == todayEpochDay,
 )

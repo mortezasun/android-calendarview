@@ -2,7 +2,7 @@ name: Android tablet verification
 
 on:
   push:
-    branches: [update, kmp]
+    branches: [master, update, kmp]
   pull_request:
     branches: [master, update, kmp]
   workflow_dispatch:
@@ -42,7 +42,7 @@ jobs:
           packages: ''
 
       - name: Install compile SDK and build tools
-        run: sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;36.0.0"
+        run: sdkmanager "platform-tools" "platforms;android-37.1" "build-tools;36.0.0"
 
       - name: Build sample and instrumentation APKs and run JVM tests and lint
         run: bash ./gradlew :calendarviewsample:assembleDebug :library:assembleAndroidDeviceTest :calendarviewsample:assembleDebugAndroidTest jvmTest testAndroidHostTest lint --no-daemon --stacktrace --console=plain

@@ -1,6 +1,7 @@
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.jvm.tasks.Jar as JvmJar
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -15,9 +16,33 @@ kotlin {
         }
     }
     linuxX64()
+    linuxArm64()
+    mingwX64()
     iosX64()
     iosArm64()
     iosSimulatorArm64()
+    macosArm64()
+    js {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadlessNoSandbox()
+                }
+            }
+        }
+        nodejs()
+    }
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadlessNoSandbox()
+                }
+            }
+        }
+        nodejs()
+    }
 
     sourceSets {
         commonTest.dependencies {
@@ -40,6 +65,12 @@ tasks.named<JvmJar>("sourcesJar") {
 tasks.named<Zip>("linuxX64Klib") {
     archiveBaseName.set("${project.name}-linuxx64")
 }
+tasks.named<Zip>("linuxArm64Klib") {
+    archiveBaseName.set("${project.name}-linuxarm64")
+}
+tasks.named<Zip>("mingwX64Klib") {
+    archiveBaseName.set("${project.name}-mingwx64")
+}
 tasks.named<Zip>("iosX64Klib") {
     archiveBaseName.set("${project.name}-iosx64")
 }
@@ -48,4 +79,7 @@ tasks.named<Zip>("iosArm64Klib") {
 }
 tasks.named<Zip>("iosSimulatorArm64Klib") {
     archiveBaseName.set("${project.name}-iossimulatorarm64")
+}
+tasks.named<Zip>("macosArm64Klib") {
+    archiveBaseName.set("${project.name}-macosarm64")
 }

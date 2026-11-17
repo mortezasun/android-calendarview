@@ -26,9 +26,9 @@ jobs:
           - check: assemble
             tasks: ':calendarviewsample:assembleDebug assembleAndroidMain :calendar-chinese-native:jvmJar :calendar-bom:generatePomFileForCalendarBomPublication'
           - check: unit-tests
-            tasks: 'jvmTest testAndroidHostTest :calendarviewsample:testDebugUnitTest'
+            tasks: 'jvmTest testAndroidHostTest :calendarviewsample:testDebugUnitTest jsNodeTest jsBrowserTest :calendar-chinese-native:wasmJsNodeTest wasmJsBrowserTest'
           - check: native-engine
-            tasks: ':calendar-chinese-native:linuxX64Test'
+            tasks: ':calendar-chinese-native:linuxX64Test :calendar-chinese-native:linuxArm64MainKlibrary :calendar-chinese-native:mingwX64MainKlibrary'
           - check: lint
             tasks: 'lint'
     steps:
@@ -49,7 +49,7 @@ jobs:
           packages: ''
 
       - name: Install documented Android SDK packages
-        run: sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;36.0.0"
+        run: sdkmanager "platform-tools" "platforms;android-37.1" "build-tools;36.0.0"
 
       - name: Record toolchain diagnostics
         shell: bash
@@ -114,10 +114,10 @@ jobs:
           packages: ''
 
       - name: Install documented Android SDK packages
-        run: sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;36.0.0"
+        run: sdkmanager "platform-tools" "platforms;android-37.1" "build-tools;36.0.0"
 
-      - name: Compile the iOS klibs
-        run: bash ./gradlew :library:iosArm64MainKlibrary :calendar-gregorian:iosArm64MainKlibrary :calendar-hijri:iosArm64MainKlibrary :calendar-solarHijri:iosArm64MainKlibrary :calendar-solarHijri-native:iosArm64MainKlibrary :calendar-chinese-native:iosArm64MainKlibrary :calendar-chinese-compose:iosArm64MainKlibrary --no-daemon --stacktrace --console=plain
+      - name: Compile the Apple klibs
+        run: bash ./gradlew iosArm64MainKlibrary iosSimulatorArm64MainKlibrary macosArm64MainKlibrary :calendar-chinese-native:iosX64MainKlibrary --no-daemon --stacktrace --console=plain
 
       - name: Check the KLIB ABI surface
         run: bash scripts/klib-api-check.sh

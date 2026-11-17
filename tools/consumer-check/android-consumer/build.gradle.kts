@@ -1,11 +1,15 @@
 plugins {
-    id("com.android.application") version "9.5.1"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.4.21"
+    id("com.android.application")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 android {
     namespace = "consumer.android"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 1
+        }
+    }
 
     defaultConfig {
         applicationId = "consumer.android"
@@ -39,7 +43,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:3.0.0"))
+    implementation(platform("com.github.mortezasun.android-calendarview:calendar-bom:3.1.0-beta"))
     implementation("com.github.mortezasun.android-calendarview:calendar-chinese-compose")
     implementation(platform("androidx.compose:compose-bom:2026.09.00"))
     implementation("androidx.compose.material3:material3")

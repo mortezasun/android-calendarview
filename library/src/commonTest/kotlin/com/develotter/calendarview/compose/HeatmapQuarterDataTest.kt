@@ -60,4 +60,13 @@ class HeatmapQuarterDataTest {
     fun invalidQuarterIsRejected() {
         assertFailsWith<IllegalArgumentException> { heatmapQuarterData(2026, 0) }
     }
+
+    @Test
+    fun platformFormattersProduceValidOutput() {
+        assertTrue(HeatmapPlatformFormatter.currentEpochDay() > 19_000L)
+        assertTrue(HeatmapPlatformFormatter.formatMonthYear(20_000L).isNotBlank())
+        assertTrue(HeatmapPlatformFormatter.formatFullDate(20_000L).isNotBlank())
+        assertTrue((1..7).all { HeatmapPlatformFormatter.weekdayShortLabel(it).isNotBlank() })
+        assertTrue(HeatmapPlatformFormatter.formatPercent(0.5f).isNotBlank())
+    }
 }

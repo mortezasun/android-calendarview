@@ -6,7 +6,7 @@ internal expect object HijriPlatform {
     fun toEpochDay(date: HijriDate): Long
     fun lengthOfMonth(year: Int, month: Int): Int
     fun formatMonthYear(year: Int, month: Int): String
-    fun formatFullDate(epochDay: Long): String
+    fun formatFullDate(date: HijriDate, weekdayEpochDay: Long): String
     fun formatShortDayMonthYear(epochDay: Long): String
     fun formatDayNumber(day: Int): String
     fun weekdayShortLabel(isoWeekday: Int): String

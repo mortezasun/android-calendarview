@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# Verify an isolated Maven publication, including the real JVM/Native binaries and every
+# Verify an isolated Maven publication, including the real JVM/Native/JS/Wasm binaries and every
 # file referenced by Gradle Module Metadata. A stale or missing target binary must fail here;
 # resolving "any jar below the module" is not sufficient for a release gate.
 #
-# Kotlin Multiplatform layout: the root `<module>` artifact is the metadata publication, the
-# Android AAR is `<module>-android`, and iOS klibs are `<module>-iosarm64` /
-# `<module>-iossimulatorarm64`. The iOS binaries are cross-compiled metadata only; this gate
-# verifies their files, not runtime behavior on a device.
+# Kotlin Multiplatform layout:
+# - Compose modules publish root metadata plus -android, -jvm, -iosarm64, -iossimulatorarm64,
+#   -macosarm64, -js, and -wasm-js variants.
+# - :calendar-chinese-native publishes root metadata plus -jvm, -linuxx64, -linuxarm64, -mingwx64,
+#   -iosx64, -iosarm64, -iossimulatorarm64, -macosarm64, -js, and -wasm-js variants.
+# Apple and Windows binaries are cross-compiled metadata/KLIBs; this gate verifies their files
+# and Gradle Module Metadata contracts, not runtime execution on Apple/Windows hardware.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -34,7 +37,7 @@ require_file() {
     echo "Verified $file"
 }
 
-ANDROID_MODULES=(
+COMPOSE_MODULES=(
     library
     calendar-gregorian
     calendar-hijri
@@ -42,45 +45,58 @@ ANDROID_MODULES=(
     calendar-solarHijri-native
     calendar-chinese-compose
 )
-IOS_TARGETS=(iosarm64 iossimulatorarm64)
-for module in "${ANDROID_MODULES[@]}"; do
+COMPOSE_KLIB_TARGETS=(iosarm64 iossimulatorarm64 macosarm64 js wasm-js)
+
+for module in "${COMPOSE_MODULES[@]}"; do
     dir="$BASE/$module/$VERSION"
-    android_dir="$BASE/${module}-android/$VERSION"
-    for suffix in .pom .module -sources.jar; do
+    for suffix in .jar .pom .module -sources.jar -kotlin-tooling-metadata.json; do
         require_file "$dir/${module}-${VERSION}${suffix}"
     done
+
+    android_dir="$BASE/${module}-android/$VERSION"
     for suffix in .aar .pom .module -sources.jar; do
         require_file "$android_dir/${module}-android-${VERSION}${suffix}"
     done
-    for target in "${IOS_TARGETS[@]}"; do
-        ios_dir="$BASE/${module}-${target}/$VERSION"
+
+    jvm_dir="$BASE/${module}-jvm/$VERSION"
+    for suffix in .jar .pom .module -sources.jar; do
+        require_file "$jvm_dir/${module}-jvm-${VERSION}${suffix}"
+    done
+
+    for target in "${COMPOSE_KLIB_TARGETS[@]}"; do
+        target_dir="$BASE/${module}-${target}/$VERSION"
         for suffix in .klib .pom .module -sources.jar; do
-            require_file "$ios_dir/${module}-${target}-${VERSION}${suffix}"
+            require_file "$target_dir/${module}-${target}-${VERSION}${suffix}"
         done
     done
 done
 
 ENGINE_BASE="$BASE/calendar-chinese-native/$VERSION"
-JVM_BASE="$BASE/calendar-chinese-native-jvm/$VERSION"
-NATIVE_BASE="$BASE/calendar-chinese-native-linuxx64/$VERSION"
-for file in \
-    "$ENGINE_BASE/calendar-chinese-native-${VERSION}.jar" \
-    "$ENGINE_BASE/calendar-chinese-native-${VERSION}.pom" \
-    "$ENGINE_BASE/calendar-chinese-native-${VERSION}.module" \
-    "$ENGINE_BASE/calendar-chinese-native-${VERSION}-sources.jar" \
-    "$ENGINE_BASE/calendar-chinese-native-${VERSION}-kotlin-tooling-metadata.json" \
-    "$JVM_BASE/calendar-chinese-native-jvm-${VERSION}.jar" \
-    "$JVM_BASE/calendar-chinese-native-jvm-${VERSION}.pom" \
-    "$JVM_BASE/calendar-chinese-native-jvm-${VERSION}.module" \
-    "$JVM_BASE/calendar-chinese-native-jvm-${VERSION}-sources.jar" \
-    "$NATIVE_BASE/calendar-chinese-native-linuxx64-${VERSION}.klib" \
-    "$NATIVE_BASE/calendar-chinese-native-linuxx64-${VERSION}.pom" \
-    "$NATIVE_BASE/calendar-chinese-native-linuxx64-${VERSION}.module" \
-    "$NATIVE_BASE/calendar-chinese-native-linuxx64-${VERSION}-sources.jar" \
-    "$BASE/calendar-chinese-native-iosx64/$VERSION/calendar-chinese-native-iosx64-${VERSION}.klib" \
-    "$BASE/calendar-chinese-native-iosx64/$VERSION/calendar-chinese-native-iosx64-${VERSION}.pom" \
-    "$BASE/calendar-chinese-native-iosx64/$VERSION/calendar-chinese-native-iosx64-${VERSION}.module"; do
-    require_file "$file"
+for suffix in .jar .pom .module -sources.jar -kotlin-tooling-metadata.json; do
+    require_file "$ENGINE_BASE/calendar-chinese-native-${VERSION}${suffix}"
+done
+
+ENGINE_JVM_BASE="$BASE/calendar-chinese-native-jvm/$VERSION"
+for suffix in .jar .pom .module -sources.jar; do
+    require_file "$ENGINE_JVM_BASE/calendar-chinese-native-jvm-${VERSION}${suffix}"
+done
+
+ENGINE_KLIB_TARGETS=(
+    linuxx64
+    linuxarm64
+    mingwx64
+    iosx64
+    iosarm64
+    iossimulatorarm64
+    macosarm64
+    js
+    wasm-js
+)
+for target in "${ENGINE_KLIB_TARGETS[@]}"; do
+    target_dir="$BASE/calendar-chinese-native-${target}/$VERSION"
+    for suffix in .klib .pom .module -sources.jar; do
+        require_file "$target_dir/calendar-chinese-native-${target}-${VERSION}${suffix}"
+    done
 done
 
 BOM_BASE="$BASE/calendar-bom/$VERSION"
@@ -123,27 +139,54 @@ def check_zip(path, required_prefixes, label):
             fail(f"{label} has no archive entry {prefix!r}: {path}")
 
 
-engine_dir = base / "calendar-chinese-native" / version
-jvm_dir = base / "calendar-chinese-native-jvm" / version
-native_dir = base / "calendar-chinese-native-linuxx64" / version
-for module_file in (
-    engine_dir / f"calendar-chinese-native-{version}.module",
-    jvm_dir / f"calendar-chinese-native-jvm-{version}.module",
-    native_dir / f"calendar-chinese-native-linuxx64-{version}.module",
+compose_modules = [
+    "library",
+    "calendar-gregorian",
+    "calendar-hijri",
+    "calendar-solarHijri",
+    "calendar-solarHijri-native",
+    "calendar-chinese-compose",
+]
+compose_klib_targets = [
+    "iosarm64",
+    "iossimulatorarm64",
+    "macosarm64",
+    "js",
+    "wasm-js",
+]
+engine_klib_targets = [
+    "linuxx64",
+    "linuxarm64",
+    "mingwx64",
+    "iosx64",
+    "iosarm64",
+    "iossimulatorarm64",
+    "macosarm64",
+    "js",
+    "wasm-js",
+]
+
+module_files = [
+    base / "calendar-chinese-native" / version / f"calendar-chinese-native-{version}.module",
+    base / "calendar-chinese-native-jvm" / version / f"calendar-chinese-native-jvm-{version}.module",
+    base / "calendar-bom" / version / f"calendar-bom-{version}.module",
     *(
-        base / module / version / f"{module}-{version}.module"
-        for module in (
-            "library",
-            "calendar-gregorian",
-            "calendar-hijri",
-            "calendar-solarHijri",
-            "calendar-solarHijri-native",
-            "calendar-chinese-compose",
-        )
+        base / f"calendar-chinese-native-{target}" / version / f"calendar-chinese-native-{target}-{version}.module"
+        for target in engine_klib_targets
     ),
-):
+]
+for module in compose_modules:
+    module_files.append(base / module / version / f"{module}-{version}.module")
+    module_files.append(base / f"{module}-android" / version / f"{module}-android-{version}.module")
+    module_files.append(base / f"{module}-jvm" / version / f"{module}-jvm-{version}.module")
+    for target in compose_klib_targets:
+        module_files.append(base / f"{module}-{target}" / version / f"{module}-{target}-{version}.module")
+
+for module_file in module_files:
     failures.extend(check_module(module_file))
 
+engine_dir = base / "calendar-chinese-native" / version
+jvm_dir = base / "calendar-chinese-native-jvm" / version
 check_zip(
     engine_dir / f"calendar-chinese-native-{version}.jar",
     ["META-INF/kotlin-project-structure-metadata.json"],
@@ -154,21 +197,16 @@ check_zip(
     ["com/develotter/calendarview/calendars/chineseNative/"],
     "engine JVM jar",
 )
-check_zip(
-    native_dir / f"calendar-chinese-native-linuxx64-{version}.klib",
-    ["default/manifest", "default/linkdata/"],
-    "engine Linux klib",
-)
+for target in engine_klib_targets:
+    klib = base / f"calendar-chinese-native-{target}" / version / f"calendar-chinese-native-{target}-{version}.klib"
+    check_zip(klib, ["default/manifest", "default/linkdata/"], f"engine {target} klib")
 
-android_modules = [
-    "library",
-    "calendar-gregorian",
-    "calendar-hijri",
-    "calendar-solarHijri",
-    "calendar-solarHijri-native",
-    "calendar-chinese-compose",
-]
-for module in android_modules:
+for module in compose_modules:
+    check_zip(
+        base / module / version / f"{module}-{version}.jar",
+        ["META-INF/kotlin-project-structure-metadata.json"],
+        f"{module} metadata jar",
+    )
     aar = base / f"{module}-android" / version / f"{module}-android-{version}.aar"
     check_zip(aar, ["classes.jar"], f"{module} AAR")
     if aar.is_file():
@@ -176,7 +214,9 @@ for module in android_modules:
             classes = archive.read("classes.jar")
         if len(classes) < 100:
             fail(f"{module} AAR contains an empty classes.jar")
-    for target in ("iosarm64", "iossimulatorarm64"):
+    jvm_jar = base / f"{module}-jvm" / version / f"{module}-jvm-{version}.jar"
+    check_zip(jvm_jar, ["com/develotter/calendarview/"], f"{module} JVM jar")
+    for target in compose_klib_targets:
         klib = base / f"{module}-{target}" / version / f"{module}-{target}-{version}.klib"
         check_zip(klib, ["default/manifest", "default/linkdata/"], f"{module} {target} klib")
 
@@ -193,21 +233,43 @@ def pom_dependencies(path):
     return dependencies
 
 
-for engine_pom in [
+engine_poms = [
     engine_dir / f"calendar-chinese-native-{version}.pom",
     jvm_dir / f"calendar-chinese-native-jvm-{version}.pom",
-    native_dir / f"calendar-chinese-native-linuxx64-{version}.pom",
-]:
+    *(
+        base / f"calendar-chinese-native-{target}" / version / f"calendar-chinese-native-{target}-{version}.pom"
+        for target in engine_klib_targets
+    ),
+]
+for engine_pom in engine_poms:
     if engine_pom.is_file():
         text = engine_pom.read_text()
         for forbidden in ("calendar-gregorian", "calendar-hijri", "calendar-solarHijri", "androidx", "compose"):
             if forbidden in text:
                 fail(f"{engine_pom} must not depend on {forbidden}")
 
+for module in (
+    "calendar-gregorian",
+    "calendar-hijri",
+    "calendar-solarHijri",
+    "calendar-solarHijri-native",
+    "calendar-chinese-compose",
+):
+    module_pom = base / module / version / f"{module}-{version}.pom"
+    if module_pom.is_file():
+        dependencies = pom_dependencies(module_pom)
+        if (group, "library") not in dependencies:
+            fail(f"{module_pom} is missing dependency library")
+
+solar_facade_pom = base / "calendar-solarHijri" / version / f"calendar-solarHijri-{version}.pom"
+if solar_facade_pom.is_file():
+    if (group, "calendar-solarHijri-native") not in pom_dependencies(solar_facade_pom):
+        fail(f"{solar_facade_pom} is missing dependency calendar-solarHijri-native")
+
 compose_pom = base / "calendar-chinese-compose" / version / f"calendar-chinese-compose-{version}.pom"
 if compose_pom.is_file():
     dependencies = pom_dependencies(compose_pom)
-    for required in ("library", "calendar-chinese-native"):
+    for required in ("library", "calendar-chinese-native", "calendar-gregorian"):
         if (group, required) not in dependencies:
             fail(f"{compose_pom} is missing dependency {required}")
 
@@ -231,7 +293,7 @@ if failures:
     for message in failures:
         print(f"ERROR: {message}", file=sys.stderr)
     sys.exit(1)
-print("Validated all publication binaries and Gradle Module Metadata references.")
+print(f"Validated {len(module_files)} publication modules, binaries, POMs and Gradle Module Metadata references.")
 PY
 
 echo "Publication verification passed for $BASE at $VERSION."

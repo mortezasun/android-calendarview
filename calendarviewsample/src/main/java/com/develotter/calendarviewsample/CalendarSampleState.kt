@@ -116,8 +116,8 @@ internal class CalendarSampleState(
         "Chinese calendar supports 1901-02-19..2100-02-08; showing ${LocalDate.ofEpochDay(epochDay)}"
 
     /**
-     * Opens a deterministic 2.4.0 showcase: a real leap month rendered by the native engine
-     * through [com.develotter.calendarview.calendars.chineseCompose.GregorianChineseCalendarMonth]
+     * Opens a deterministic Chinese leap-month showcase: a real leap month rendered by the native
+     * engine through [com.develotter.calendarview.calendars.chineseCompose.GregorianChineseCalendarMonth]
      * or its Chinese month facade, with the conversion details visible.
      */
     fun showChineseDemo() {

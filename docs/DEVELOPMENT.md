@@ -54,7 +54,7 @@ every month in the window, so it must be pure and must not depend on the day cur
 
 ### New composable option
 
-`CalendarMonthGrid`, the three engine month composables, the week/agenda views and the heatmaps
+`CalendarMonthGrid`, the engine month composables, the week/agenda views and the heatmaps
 are controlled and stateless. To add an option:
 
 1. Add it as a defaulted parameter on the public composable, before the trailing `dayContent`
@@ -102,11 +102,14 @@ The library is deliberately small:
    ```bash
    ./gradlew :calendarviewsample:assembleDebug
    ```
-4. Run `./gradlew jvmTest` (selection, month cells, heatmap data and every engine) and
-   `./gradlew testAndroidHostTest` for the Android host runtime. For the Chinese engine, also run
-   `./gradlew :calendar-chinese-native:linuxX64Test`; common tests execute on both targets.
-   The Compose UI and sample acceptance tests live in `src/androidTest` and need an emulator or
-   device; `./gradlew :library:compileAndroidDeviceTest` only proves they compile.
+4. Run `./gradlew jvmTest` (169 KMP JVM tests), `./gradlew testAndroidHostTest` (152 tests on the
+   Android host runtime), `./gradlew :calendarviewsample:testDebugUnitTest` (62 sample tests),
+   `./gradlew jsNodeTest jsBrowserTest :calendar-chinese-native:wasmJsNodeTest wasmJsBrowserTest`
+   (Kotlin/JS and Kotlin/Wasm suites in Node.js and headless Chrome), and
+   `./gradlew :calendar-chinese-native:linuxX64Test` (16 Kotlin/Native tests). The Compose UI and
+   sample acceptance tests live in `src/androidTest` and need an emulator or device;
+   `./gradlew :library:compileAndroidDeviceTest :calendarviewsample:compileDebugAndroidTestKotlin`
+   only proves all 46 instrumentation tests compile.
 5. Run `./gradlew lint` when the change is non-trivial.
 6. Inspect `git diff` and `git status`: only intended files, no build output, no unrelated mode
    changes.
@@ -139,20 +142,19 @@ dump already omits them, and `scripts/klib-api-check.sh` rejects a leak as well.
 
 ## Kotlin Multiplatform guards
 
-`commonMain` must stay free of JVM, Android and removed `ir.huri` imports. The iOS klib surface
-has separate ABI snapshots under `api/klib/*.abi`:
+`commonMain` must stay free of JVM, Android, Apple, Web (`kotlinx.browser`/`kotlin.js`), and
+removed `ir.huri` imports. The Apple KLIB surface has separate ABI snapshots under `api/klib/*.abi`:
 
 ```bash
 bash scripts/check-commonmain-purity.sh
-./gradlew :library:iosArm64MainKlibrary :calendar-gregorian:iosArm64MainKlibrary \
-  :calendar-hijri:iosArm64MainKlibrary :calendar-solarHijri:iosArm64MainKlibrary \
-  :calendar-solarHijri-native:iosArm64MainKlibrary :calendar-chinese-native:iosArm64MainKlibrary \
-  :calendar-chinese-compose:iosArm64MainKlibrary
+./gradlew iosArm64MainKlibrary iosSimulatorArm64MainKlibrary macosArm64MainKlibrary \
+  :calendar-chinese-native:linuxArm64MainKlibrary :calendar-chinese-native:mingwX64MainKlibrary \
+  :calendar-chinese-native:iosX64MainKlibrary
 bash scripts/klib-api-check.sh          # fails on an unexpected KLIB ABI diff
 bash scripts/klib-api-check.sh --update # regenerates api/klib/*.abi after an intentional change
 ```
 
-CI runs both guards in the `assemble` and `klib-api` jobs.
+CI runs both guards across the `assemble`, `native-engine`, and `klib-api` jobs.
 
 ## Documentation and benchmarks
 
@@ -174,10 +176,13 @@ The separate `:benchmarks` module uses kotlinx-benchmark `0.5.0` and is intentio
 
 ## Toolchain upgrades
 
-The wrapper is on Gradle `9.9.1`. After a wrapper or plugin upgrade, rerun the local gate stack:
-tests, `lint`, sample release, `api-check.sh`, `klib-api-check.sh` and
-`check-commonmain-purity.sh`. Gradle 9.9.1 still reports upstream deprecations from KGP 2.4.x and
-Compose; record any new warning and the plugin that owns it instead of suppressing it.
+The wrapper is on Gradle `9.9.1`, and the uncommitted working tree prepares Kotlin `2.5.0-RC` and
+Compose Multiplatform `1.13.0-beta02` against `platforms;android-37.1` (while tagged `3.0.0` used
+Kotlin `2.4.21` and Compose Multiplatform `1.12.2`). After any wrapper or plugin upgrade, rerun the
+full gate stack: JVM/Android-host/JS/Wasm/Linux tests, `lint`, sample release, instrumentation
+compile checks, `api-check.sh`, `klib-api-check.sh`, `check-commonmain-purity.sh`, and 60-module
+`verify-publication.sh`. Gradle 9.9.1 still reports upstream deprecation warnings from the active
+KMP/Compose plugins; record any new warning and the plugin that owns it rather than suppressing it.
 
 ## Release and versioning notes
 
@@ -185,18 +190,21 @@ Compose; record any new warning and the plugin that owns it instead of suppressi
   and is shared by every module. The artifact id is the module name: `library`,
   `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native`,
   `calendar-chinese-native`, `calendar-chinese-compose`.
-- Six Android library modules publish their `androidMain` variant as `<module>-android` AARs
-  with a sources jar; `:calendar-chinese-native` publishes Kotlin Multiplatform metadata plus
-  `-jvm`, `-linuxx64`, `-iosx64`, `-iosarm64` and `-iossimulatorarm64` variants and their sources.
-  Android consumers use its JVM variant. All share
-  `com.github.mortezasun.android-calendarview`. `:calendarviewsample` is not published.
+- All six Compose modules publish root metadata plus `-android` AAR, `-jvm` JAR, and `-iosarm64`,
+  `-iossimulatorarm64`, `-macosarm64`, `-js`, and `-wasm-js` KLIB variants (with sources);
+  `:calendar-chinese-native` publishes root metadata plus `-jvm`, `-linuxx64`, `-linuxarm64`,
+  `-mingwx64`, `-iosx64`, `-iosarm64`, `-iossimulatorarm64`, `-macosarm64`, `-js`, and `-wasm-js`
+  variants (60 directories total with `:calendar-bom`). Android consumers use `:calendar-chinese-native`'s
+  JVM variant. All share `com.github.mortezasun.android-calendarview`. `:calendarviewsample` is
+  not published.
 - `:calendar-bom` is a `java-platform` publication whose constraints use the same root version.
   Publish it together with the modules and update `jitpack.yml`/CI if the module set changes.
 - The shared POM block in the root build supplies name, description, URL, Apache-2.0 license,
   developer and SCM. Do not duplicate or diverge these fields per module. Maven Central signing
   and upload are separate release operations and are not configured.
-- JitPack builds from Git tags and commit hashes; `jitpack.yml` pins the JDK because AGP 9.5 needs
-  JDK 17. Verify with `./gradlew publishToMavenLocal` and inspect the generated POMs before tagging.
+- JitPack builds from Git tags and commit hashes; `jitpack.yml` pins the JDK because AGP 9.5 and
+  Kotlin `2.5.0-RC` need JDK 17. Verify with `./gradlew publishToMavenLocal` and
+  `bash scripts/verify-publication.sh` before tagging.
 - The sample declares its own `versionCode`/`versionName` in `calendarviewsample/build.gradle.kts`.
 - Do not bump versions or update dependencies as part of an unrelated change.
 

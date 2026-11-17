@@ -125,4 +125,13 @@ class ChineseComposeDataTest {
         assertNull(ChineseMonthSnapshot.decode(listOf(2023, 13, 0)))
     }
 
+    @Test
+    fun platformAdapterReturnsValidWeekdayAndFormattedValues() {
+        assertTrue(ChinesePlatform.currentEpochDay() > 19_000L)
+        assertTrue(ChinesePlatform.defaultFirstDayOfWeek() in 1..7)
+        assertTrue(ChinesePlatform.formatMonthYear(2024, 1).isNotBlank())
+        assertTrue(ChinesePlatform.formatFullDate(20_000L).isNotBlank())
+        assertTrue(ChinesePlatform.formatDayNumber(15).isNotBlank())
+        assertTrue((1..7).all { ChinesePlatform.weekdayShortLabel(it).isNotBlank() })
+    }
 }

@@ -17,12 +17,32 @@ plugins {
     `maven-publish`
 }
 
-// Compose Multiplatform 1.12.2 never configures `outputDirectory` for the resource copy task of
-// KMP device-test compilations. The instrumentation tests do not use Compose resources, so the
-// task is disabled instead of failing every `compileAndroidDeviceTest` run.
+// Compose Multiplatform 1.13.0-beta02 still leaves `outputDirectory` unconfigured for the resource
+// copy task of KMP device-test compilations. The instrumentation tests do not use Compose resources,
+// so the task is disabled instead of failing every `compileAndroidDeviceTest` run.
 subprojects {
     tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
         .configureEach { enabled = false }
+}
+
+// Clear plugin-level Ivy URL registration so Kotlin/JS and Kotlin/Wasm use the repositories
+// declared centrally in settings.gradle.kts without violating FAIL_ON_PROJECT_REPOS.
+allprojects {
+    plugins.withType<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsPlugin> {
+        the<org.jetbrains.kotlin.gradle.targets.js.nodejs.NodeJsEnvSpec>().downloadBaseUrl.set(null as String?)
+    }
+    plugins.withType<org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsPlugin> {
+        the<org.jetbrains.kotlin.gradle.targets.wasm.nodejs.WasmNodeJsEnvSpec>().downloadBaseUrl.set(null as String?)
+    }
+    plugins.withType<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnPlugin> {
+        the<org.jetbrains.kotlin.gradle.targets.js.yarn.YarnRootEnvSpec>().downloadBaseUrl.set(null as String?)
+    }
+    plugins.withType<org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnPlugin> {
+        the<org.jetbrains.kotlin.gradle.targets.wasm.yarn.WasmYarnRootEnvSpec>().downloadBaseUrl.set(null as String?)
+    }
+    plugins.withType<org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenPlugin> {
+        the<org.jetbrains.kotlin.gradle.targets.wasm.binaryen.BinaryenEnvSpec>().downloadBaseUrl.set(null as String?)
+    }
 }
 
 // Dokka is applied to the published KMP modules only. The root task aggregates their
@@ -52,7 +72,7 @@ dependencies {
 // projects as com.github.USER.REPO:MODULE:VERSION.
 allprojects {
     group = "com.github.mortezasun.android-calendarview"
-    version = "3.0.0"
+    version = "3.1.0-beta"
 
     // Required by Maven Central for every published artifact. Signing, credentials and
     // namespace verification remain release-operator responsibilities.

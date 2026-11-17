@@ -2,7 +2,7 @@
 
 ## Overview
 
-`android-calendarview` is a **Kotlin Multiplatform Compose calendar library** for Android, the JVM and iOS, with decoupled calendar engines and an interactive Android demo app. `3.0.0` is the first Kotlin Multiplatform release; the Android-only `2.4.0` remains the previous release. The migration is documented in [ADR 0006](decisions/0006-kotlin-multiplatform-calendar-modules.md). Version 2.0.0 eliminated all legacy XML layouts, ViewBinding, custom view measurement, and reflection.
+`android-calendarview` is a **Kotlin Multiplatform Compose calendar library** targeting Android, JVM, Apple (`iosArm64`, `iosSimulatorArm64`, `macosArm64`), and Web (`js`, `wasmJs`) — plus `linuxX64`, `linuxArm64`, `mingwX64`, and `iosX64` on the pure `:calendar-chinese-native` engine — with an interactive Android demo app. `3.0.0` (at commit `a0c686e`) is the first Kotlin Multiplatform release; `2.4.0` remains the previous Android-only release, and the uncommitted working tree expands the matrix on Kotlin `2.5.0-RC` / Compose Multiplatform `1.13.0-beta02`. The migration is documented in [ADR 0006](decisions/0006-kotlin-multiplatform-calendar-modules.md). Version 2.0.0 eliminated all legacy XML layouts, ViewBinding, custom view measurement, and reflection.
 
 The architecture follows standard Compose state and rendering patterns:
 - **Stateless rendering:** `CalendarMonthGrid` and `CalendarDayCell` render month layouts declaratively.
@@ -19,16 +19,16 @@ The architecture follows standard Compose state and rendering patterns:
 
 | Module | Responsibility |
 |--------|----------------|
-| `:library` | Core Compose views (`CalendarMonthGrid`, `CalendarWeekGrid`, `CalendarAgenda`, `CalendarQuarterHeatmap`, `CalendarYearHeatmap`), month containers (`CalendarMonthList`, `CalendarMonthPager`, `CalendarMonthColumns`), selection state machine (`CalendarSelection`, `CalendarSelectionState`, `CalendarRangePolicy`, `TypeSelectDay`), shared month/week data, markers, styling, month navigation, and cell data models. |
-| `:calendar-gregorian` | Gregorian calendar engine backed by the immutable `GregorianYearMonth` value type. Provides `GregorianCalendarMonth`, month/week data builders and day cells. |
-| `:calendar-hijri` | Islamic Hijri calendar engine backed by the immutable `HijriDate` value type and the platform Umm al-Qura chronology. Provides `HijriCalendarMonth`, month/week data builders and day cells. |
-| `:calendar-solarHijri` | Solar Hijri / Jalali facade over `:calendar-solarHijri-native`. Provides `SolarHijriCalendarMonth`, month/week data builders and day cells; no `ir.huri:jalalicalendar` dependency. |
-| `:calendar-solarHijri-native` | Dependency-free Solar Hijri engine (`SolarHijriEngine`, immutable `SolarHijriDate`, `SolarHijriLocale`, `SolarHijriNativeCalendarMonth`) using the Borkowski (1996) break-table algorithm (`-61..3177` AP); Android, JVM and iOS targets. |
-| `:calendar-chinese-native` | Self-written Kotlin Multiplatform Chinese lunisolar engine (`ChineseCalendarEngine`, immutable `ChineseMonth`/`ChineseDate`, `ChineseFormat`, versioned month table). Targets `jvm()`, `linuxX64()` and the three iOS targets; no Android target, Compose, Java date or third-party calendar dependency. |
-| `:calendar-chinese-compose` | Compose facade (`ChineseCalendarMonth`, `GregorianChineseCalendarMonth`, `ChineseMonthData`, `ChineseWeekData`, `ChineseMonthState`, `chineseYearHeatmap`) depending on `:calendar-chinese-native`, `:calendar-gregorian` and `:library`. |
+| `:library` | Core Compose views (`CalendarMonthGrid`, `CalendarWeekGrid`, `CalendarAgenda`, `CalendarQuarterHeatmap`, `CalendarYearHeatmap`), month containers (`CalendarMonthList`, `CalendarMonthPager`, `CalendarMonthColumns`), selection state machine (`CalendarSelection`, `CalendarSelectionState`, `CalendarRangePolicy`, `TypeSelectDay`), shared month/week data, markers, styling, month navigation, and cell data models (`android`, `jvm`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js`, `wasmJs`). |
+| `:calendar-gregorian` | Gregorian calendar engine backed by the immutable `GregorianYearMonth` value type. Provides `GregorianCalendarMonth`, month/week data builders and day cells (`android`, `jvm`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js`, `wasmJs`). |
+| `:calendar-hijri` | Islamic Hijri calendar engine backed by the immutable `HijriDate` value type and platform Umm al-Qura chronology (`java.time` on Android/JVM, Foundation `NSCalendar` in `appleMain`, `Intl.DateTimeFormat` in `webMain`). Provides `HijriCalendarMonth`, `HijriDateProvider`, month/week data builders and day cells (`android`, `jvm`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js`, `wasmJs`). |
+| `:calendar-solarHijri` | Solar Hijri / Jalali facade over `:calendar-solarHijri-native`. Provides `SolarHijriCalendarMonth`, month/week data builders and day cells (`android`, `jvm`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js`, `wasmJs`); no `ir.huri:jalalicalendar` dependency. |
+| `:calendar-solarHijri-native` | Dependency-free Solar Hijri engine (`SolarHijriEngine`, immutable `SolarHijriDate`, `SolarHijriLocale`, `SolarHijriNativeCalendarMonth`) using the Borkowski (1996) break-table algorithm (`-61..3177` AP); `android`, `jvm`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js`, `wasmJs`. |
+| `:calendar-chinese-native` | Self-written Kotlin Multiplatform Chinese lunisolar engine (`ChineseCalendarEngine`, immutable `ChineseMonth`/`ChineseDate`, `ChineseFormat`, versioned month table). Targets `jvm`, `linuxX64`, `linuxArm64`, `mingwX64`, `iosX64`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js` and `wasmJs`; no Android target, Compose, Java date or third-party calendar dependency. |
+| `:calendar-chinese-compose` | Compose facade (`ChineseCalendarMonth`, `GregorianChineseCalendarMonth`, `ChineseMonthData`, `ChineseWeekData`, `ChineseMonthState`, `chineseYearHeatmap`) depending on `:calendar-chinese-native`, `:calendar-gregorian` and `:library` (`android`, `jvm`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js`, `wasmJs`). |
 | `:calendar-bom` | `java-platform` constraints for the seven published library artifacts; no runtime classes. |
 | `:benchmarks` | Standalone Kotlin/JVM kotlinx-benchmark module for Gregorian/Hijri month calculations and the shared heatmap adapters. Not published and not part of `check`/`build`. |
-| `:calendarviewsample` | Interactive Compose demo app illustrating configuration, selection modes, navigation, dialogs, and heatmaps. |
+| `:calendarviewsample` | Interactive Compose Android demo app illustrating configuration, selection modes, navigation, dialogs, and heatmaps. |
 
 ### Dependency Rules
 
@@ -86,8 +86,8 @@ State is managed declaratively and cleanly separated from UI rendering:
 
 - `:calendar-bom` is a `java-platform` publication. Its POM has `dependencyManagement` constraints for `library`, `calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native`, `calendar-chinese-native` and `calendar-chinese-compose` at the root version.
 - Root `build.gradle.kts` owns group, version and the shared POM block (name, description, URL, Apache-2.0 license, developer, SCM). Module POMs inherit it.
-- JitPack and the publishing CI publish the BOM together with six Android AAR modules and the Kotlin Multiplatform engine (root metadata plus `-jvm`, `-linuxx64`, `-iosx64`, `-iosarm64` and `-iossimulatorarm64` variants). Maven Central signing, namespace verification and upload are not configured; the metadata is a prerequisite only.
-- Release `2.1.0` published the four-module BOM on JitPack and a JitPack-only consumer resolved it on 2026-11-11. The `2.4.0` tag build is published and CI-green; only the JitPack-only `2.4.0` tag/BOM consumer remains unverified. See [PROJECT_STATUS.md](PROJECT_STATUS.md).
+- JitPack and the publishing CI publish the BOM together with all six Compose KMP modules (root metadata plus `-android` AAR, `-jvm` JAR, and `-iosarm64`, `-iossimulatorarm64`, `-macosarm64`, `-js`, `-wasm-js` KLIBs) and the standalone `:calendar-chinese-native` engine (root metadata plus `-jvm` JAR and `-linuxx64`, `-linuxarm64`, `-mingwx64`, `-iosx64`, `-iosarm64`, `-iossimulatorarm64`, `-macosarm64`, `-js`, `-wasm-js` KLIBs) — 60 publication directories in total. Apple, Windows, and `linuxArm64` binaries are cross-compiled and metadata/archive-verified on Linux, not executed on native hardware. Maven Central signing, namespace verification and upload are not configured; the metadata is a prerequisite only.
+- Release `2.1.0` published the four-module BOM on JitPack and a JitPack-only consumer resolved it on 2026-11-11. Release `3.0.0` (`a0c686e`) built on JitPack with all seven modules and the BOM, and JVM plus minified Android consumers resolved it from JitPack on 2026-11-16. See [PROJECT_STATUS.md](PROJECT_STATUS.md).
 
 ## Product views, markers and styling
 

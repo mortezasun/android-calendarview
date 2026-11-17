@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -102,13 +103,21 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            "Compose Calendar Demo",
-                            style = MaterialTheme.typography.headlineSmall,
-                            modifier = Modifier.weight(1f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        Column(Modifier.weight(1f)) {
+                            Text(
+                                "Compose Calendar Demo",
+                                style = MaterialTheme.typography.headlineSmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                            Text(
+                                "KMP 3.1.0-beta · All calendar modules",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
                         Box(
                             Modifier
                                 .clip(MaterialTheme.shapes.small)
@@ -117,7 +126,7 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                         ) {
                             Text(
-                                "CN 2.4.0",
+                                "CN Leap",
                                 color = MaterialTheme.colorScheme.onPrimary,
                                 style = MaterialTheme.typography.labelMedium,
                             )

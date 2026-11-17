@@ -15,7 +15,7 @@ class CalendarSelectionSnapshotTest {
             assertEquals(listOf("1", mode.name), encoded)
             val decoded = CalendarSelectionSnapshot.decode(mode, encoded)
             assertNotNull(decoded)
-            assertTrue(decoded!!.selectedDays.isEmpty())
+            assertTrue(decoded.selectedDays.isEmpty())
         }
     }
 
@@ -30,7 +30,7 @@ class CalendarSelectionSnapshotTest {
         for ((mode, days) in cases) {
             val restored = CalendarSelectionSnapshot.decode(mode, CalendarSelectionSnapshot.encode(CalendarSelection.from(mode, days)))
             assertNotNull(restored)
-            assertEquals(mode, restored!!.mode)
+            assertEquals(mode, restored.mode)
             assertEquals(days, restored.selectedDays)
         }
     }
@@ -39,8 +39,8 @@ class CalendarSelectionSnapshotTest {
     fun longKeysRoundTripWithoutPrecisionLoss() {
         val days = listOf(Long.MIN_VALUE, Long.MAX_VALUE)
         val value = CalendarSelection.from(TypeSelectDay.Multiple, days)
-        val restored = CalendarSelectionSnapshot.decode(value.mode, CalendarSelectionSnapshot.encode(value))
-        assertEquals(days, restored!!.selectedDays)
+        val restored = assertNotNull(CalendarSelectionSnapshot.decode(value.mode, CalendarSelectionSnapshot.encode(value)))
+        assertEquals(days, restored.selectedDays)
     }
 
     @Test

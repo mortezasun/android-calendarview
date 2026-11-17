@@ -3,15 +3,18 @@
 Binding working rules for coding agents in this repository. Read this file and the linked
 documents before changing any code.
 
-## Current work: Kotlin Multiplatform 3.0.0 + post-release tooling (branch `kmp`)
+## Current work: Kotlin Multiplatform `3.1.0-beta` (`2.5.0-RC` multi-target expansion)
 
-`:library` and the calendar modules are released as Kotlin Multiplatform `3.0.0` (Android, JVM,
-iOS) on branch `kmp`; `2.4.0` on `master` remains the previous Android-only release. The same
-branch also carries the post-release Dokka, benchmark and Gradle tooling; these are not part of
-the published `3.0.0` tag. Read [ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md)
-for the API changes and [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for the verified state.
-iOS runtime verification, Maven Central credentials and real process-death/hardware acceptance are
-still open; do not report them as done.
+`:library` and the calendar modules were released as Kotlin Multiplatform `3.0.0` at commit
+`a0c686e`, with `kmp` and `master` both synced to `a116b81` (`3.0.0` plus Dokka/benchmark tooling).
+The active `3.1.0-beta` branch line prepares the full multiplatform target expansion (`Android`,
+`JVM`, `iOS`, `macOS`, `JS`, `Wasm`, plus `Linux`/`Windows` targets on `:calendar-chinese-native`)
+on **Kotlin `2.5.0-RC`** and **Compose Multiplatform `1.13.0-beta02`** against `compileSdk 37.1`.
+Read [ADR 0006](docs/decisions/0006-kotlin-multiplatform-calendar-modules.md) for the API design and
+[docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) for verified vs. open items. Apple/Windows/`linuxArm64`
+hardware runtime verification, live API-29 emulator execution of the updated 46-test suite, Maven
+Central credentials, and real process-death/hardware acceptance remain open; do not report them as
+done.
 
 The engine must stay self-written pure Kotlin and usable without Compose, Android or other
 calendar engines; the separate Compose facade may reuse `:library`. Do not copy/port external
@@ -21,7 +24,8 @@ separate approval.
 
 ## Read first
 
-1. [README.md](README.md) - public usage and build entry point.
+1. [README.md](README.md) - overview and links to [Getting Started](docs/GETTING_STARTED.md) and
+   [Usage Guide](docs/USAGE_GUIDE.md).
 2. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - modules, rendering pipeline and state handling.
 3. [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) - patterns for typical changes.
 4. [docs/PROJECT_STATUS.md](docs/PROJECT_STATUS.md) - last verified state, known issues, next steps.
@@ -31,20 +35,23 @@ is not part of your task and never reset, stash or overwrite it without explicit
 
 ## Project at a glance
 
-- Multi-module **Kotlin Multiplatform library** project (Android, JVM, iOS), not an app-first project.
-- `:library` contains the Compose core: month grid, selection engine, scrolling containers and
-  heatmaps.
-- `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri` and the KMP engine
-  `:calendar-chinese-native` together with its Compose facade `:calendar-chinese-compose` are the
-  calendar modules. `:calendar-solarHijri-native` is the other dependency-free engine.
-  `:calendar-bom` constrains all published modules; `:calendarviewsample` depends on all modules;
-  `:benchmarks` is a standalone JVM performance module outside the published set.
+- Multi-module **Kotlin Multiplatform library** project:
+  - Compose/UI modules (`:library`, `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri`,
+    `:calendar-solarHijri-native`, `:calendar-chinese-compose`) target `android`, `jvm`, `iosArm64`,
+    `iosSimulatorArm64`, `macosArm64`, `js` (`browser` + `nodejs`), and `wasmJs` (`browser`).
+  - Pure KMP engine (`:calendar-chinese-native`) targets `jvm`, `linuxX64`, `linuxArm64`, `mingwX64`,
+    `iosX64`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js` (`browser` + `nodejs`), and `wasmJs`
+    (`browser` + `nodejs`).
+  - `:calendar-bom` constrains all 7 published modules (60 published artifact directories total);
+    `:calendarviewsample` is the Android demo app; `:benchmarks` is a standalone JVM performance
+    module outside the published set.
 - Shared code lives in `commonMain`; `jvmMain`/`androidMain` hold platform hooks and conversions,
-  `iosMain` the Apple actuals.
+  `appleMain` holds shared Apple actuals (`iOS`/`macOS`), and `webMain`/`jsMain`/`wasmJsMain` hold
+  JS/Wasm browser/Node formatters.
 - Public API lives in `com.develotter.calendarview.*`; calendar-specific types live in
   `com.develotter.calendarview.calendars.*`.
-- Toolchain: Kotlin 2.4.21, AGP 9.5.1, Gradle 9.9.1, Compose BOM 2026.09.00, `compileSdk` 37,
-  `minSdk` 27, Java 17.
+- Toolchain: Kotlin `2.5.0-RC`, Compose Multiplatform `1.13.0-beta02`, AGP `9.5.1`, Gradle `9.9.1`,
+  Compose BOM `2026.09.00`, `compileSdk 37.1` (`platforms;android-37.1`), `minSdk` 27, Java 17.
 - UI is **100% Jetpack Compose**. There are no XML layouts, no ViewBinding, no custom view
   measurement, no ViewModel/Flow, no DI framework, no network and no persistence layer.
 
@@ -87,36 +94,45 @@ is not part of your task and never reset, stash or overwrite it without explicit
 
 ## Verified commands
 
-These commands were executed successfully on branch `kmp` with JDK 21, Android SDK Platform 37
-and Gradle 9.9.1 on Linux (2026-11-16):
+These commands pass on Linux with OpenJDK `17.0.21`, Android SDK Platform `37.1`
+(`platforms;android-37.1`), headless Chrome, Node.js/Yarn, and Gradle `9.9.1`:
 
 ```bash
-chmod +x gradlew                                  # if the checkout lost the executable bit
-./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
-./gradlew jvmTest                                 # 165 KMP JVM tests in the seven modules
-./gradlew testAndroidHostTest                     # 148 of those tests on the Android host
-./gradlew :calendarviewsample:testDebugUnitTest   # 62 sample unit tests
-./gradlew lint                                    # Android Lint, all six KMP modules + sample
-./gradlew :library:compileAndroidDeviceTest       # Compose UI tests (compile only, no emulator)
-./gradlew :calendarviewsample:compileDebugAndroidTestKotlin
-./gradlew :calendarviewsample:assembleRelease     # unsigned release APK
-./gradlew assembleAndroidMain :calendar-chinese-native:jvmJar  # AARs + engine JVM jar
-bash scripts/api-check.sh          # public JVM API diff against api/*.api
-bash scripts/api-check.sh --update # intentional API change: regenerate the dumps
-
-./gradlew :calendar-chinese-native:linuxX64Test    # 16 Kotlin/Native tests
-./gradlew :dokkaGenerate                         # HTML docs in build/dokka/html
-./gradlew :benchmarks:mainBenchmark              # JVM benchmark; not in check/CI
-./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
+bash ./gradlew :calendarviewsample:assembleDebug       # builds library + all calendar modules
+bash ./gradlew jvmTest                                 # 169 KMP JVM tests across all 7 modules
+bash ./gradlew testAndroidHostTest                     # 152 shared tests on the Android host
+bash ./gradlew :calendarviewsample:testDebugUnitTest   # 62 sample unit tests
+bash ./gradlew jsNodeTest jsBrowserTest                # 168 JS tests per runner across all 7 modules
+bash ./gradlew :calendar-chinese-native:wasmJsNodeTest # 16 Wasm tests on Node.js
+bash ./gradlew wasmJsBrowserTest                       # 168 Wasm tests in headless Chrome across all 7 modules
+bash ./gradlew :calendar-chinese-native:linuxX64Test   # 16 Kotlin/Native Linux x64 tests
+bash ./gradlew lint                                    # Android Lint, all six KMP modules + sample
+bash ./gradlew :library:compileAndroidDeviceTest       # 18 Compose UI tests (compile only, no emulator)
+bash ./gradlew :calendarviewsample:compileDebugAndroidTestKotlin # 28 sample instrumentation tests (compile only)
+bash ./gradlew :calendarviewsample:assembleRelease     # unsigned release APK
+bash ./gradlew assembleAndroidMain :calendar-chinese-native:jvmJar  # AARs + engine JVM jar
+bash scripts/check-commonmain-purity.sh                # commonMain purity check
+bash scripts/api-check.sh                              # public JVM API diff against api/*.api
+bash ./gradlew iosArm64MainKlibrary iosSimulatorArm64MainKlibrary macosArm64MainKlibrary \
+  :calendar-chinese-native:linuxArm64MainKlibrary :calendar-chinese-native:mingwX64MainKlibrary \
+  :calendar-chinese-native:iosX64MainKlibrary          # cross-compile all Apple/ARM/Windows KLIBs
+bash scripts/klib-api-check.sh                         # KLIB ABI diff against api/klib/*.abi
+bash ./gradlew :dokkaGenerate                          # HTML docs in build/dokka/html
+bash ./gradlew :benchmarks:mainBenchmark               # JVM benchmark; not in check/CI
+bash ./gradlew :library:publishToMavenLocal :calendar-gregorian:publishToMavenLocal \
   :calendar-hijri:publishToMavenLocal :calendar-solarHijri:publishToMavenLocal \
   :calendar-solarHijri-native:publishToMavenLocal :calendar-chinese-native:publishToMavenLocal \
   :calendar-chinese-compose:publishToMavenLocal \
-  :calendar-bom:publishToMavenLocal  # into ~/.m2
+  :calendar-bom:publishToMavenLocal -Dmaven.repo.local=/tmp/m2-verify
+bash scripts/verify-publication.sh /tmp/m2-verify 3.1.0-beta
+bash ./gradlew -p tools/consumer-check :jvm-consumer:run :android-consumer:assembleRelease \
+  -PconsumerRepo=/tmp/m2-verify
 ```
 
-Single-module compile checks, for example `./gradlew :library:compileAndroidMain`, are acceptable
-for smaller changes. iOS simulator tests and an `iosApp` sample need macOS with Xcode and are not
-run on Linux. Report any command that could not be run and why.
+Single-module compile checks, for example `bash ./gradlew :library:compileAndroidMain`, are
+acceptable for smaller changes. Native runtime tests on iOS/macOS (`ios*`, `macosArm64`),
+`linuxArm64`, and `mingwX64` cannot run on an x86_64 Linux VM. Report any command that could not be
+run and why.
 
 ### Build conventions
 
@@ -127,7 +143,11 @@ run on Linux. Report any command that could not be run and why.
   provides no lint tasks of its own.
 - They opt in to `withHostTest {}` and `withDeviceTest {}`; `src/androidTest/java` is mapped into
   `androidDeviceTest`. The Compose resource copy task for device tests is disabled centrally in
-  the root build because Compose Multiplatform 1.12.2 leaves its output unconfigured.
+  the root build because Compose Multiplatform `1.13.0-beta02` leaves its output unconfigured.
+- Compose modules declare `useChromeHeadlessNoSandbox()` and `binaries.executable()` for JS/Wasm
+  browser tests; `:calendar-chinese-native` declares `useChromeHeadlessNoSandbox()` for both JS and
+  Wasm browser tests. Root `build.gradle.kts` clears per-plugin Node/Yarn/Binaryen Ivy `downloadBaseUrl`
+  values so `settings.gradle.kts` central repositories respect `FAIL_ON_PROJECT_REPOS`.
 
 ## Rules for changes
 

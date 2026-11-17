@@ -1,7 +1,9 @@
 # Compose instrumentation checks
 
-Last verified: 2026-11-16 (3.0.0 release commit `a0c686e`: 44/44 tests passed in both emulator
-workflows; the earlier `1a24725` run passed 42/42 before the accessibility tests were added).
+Last CI emulator execution: 2026-11-16 (`3.0.0` release commit `a0c686e`: 44/44 tests passed in both
+emulator workflows; the earlier `1a24725` run passed 42/42 before the accessibility tests were
+added). Current uncommitted inventory: **46 test methods** (18 library, 28 sample, compile-verified
+on Linux with Kotlin `2.5.0-RC` / Platform `37.1`; not yet executed on an emulator).
 
 Historical post-migration execution for `1a24725`: 42/42 tests passed in both the tablet and
 phone workflows with the `junit4.v2` rules.
@@ -11,8 +13,8 @@ Historical: the 2.1.0 release-tree runs passed the then 26 tests on API 29 on 20
 
 ## Test inventory
 
-The checked-in Android instrumentation suite contains **44 test methods**:
-**18 in `:library`** and **26 in `:calendarviewsample`**. The rules come from
+The checked-in Android instrumentation suite contains **46 test methods**:
+**18 in `:library`** and **28 in `:calendarviewsample`**. The rules come from
 `androidx.compose.ui.test.junit4.v2` and therefore use the standard test dispatcher. The source
 inventory is:
 
@@ -39,6 +41,9 @@ inventory is:
 - `ChineseComposeRegressionTest` (8 tests): Chinese month-state restoration, boundary
   windows in Single/Pager mode, invalid-anchor recovery, Gregorian overlay navigation and
   agenda label rebuilding.
+- `SolarHijriComposeRegressionTest` (2 tests): `rememberSolarHijriNativeMonthState` and
+  `rememberSolarHijriMonthState` saved-instance restoration and updated `currentEpochDay` callback
+  wiring without resetting visible month navigation.
 - `CalendarSampleAdaptiveLayoutTest` (4 tests) and `CalendarSampleStateRestorationTest`
   (4 tests): adaptive geometry/fold probes and saved-state restoration.
 - `ExampleInstrumentedTest` (1 test): generated package check.
@@ -121,11 +126,12 @@ emulator step succeeded, and the two main-viewport tests, the dialog restoration
 the caption tests were part of the executed suite. That run predates the KMP migration and the
 test-count summary step; the checked-in inventory is now 18 library plus 26 sample tests.
 
-After the KMP migration the source inventory is **44 tests (18 library, 26 sample)**. The new
-accessibility test (RTL, 200% font scale, selection semantics) is part of the 3.0.0 release gate.
-For `a0c686e` both emulator workflows passed all 44 tests:
-[tablet](https://github.com/mortezasun/android-calendarview/actions/runs/43854430879) and
-[phone](https://github.com/mortezasun/android-calendarview/actions/runs/43854430766).
+For the `3.0.0` release commit `a0c686e` both emulator workflows passed all 44 tests then in the
+suite ([tablet](https://github.com/mortezasun/android-calendarview/actions/runs/43854430879),
+[phone](https://github.com/mortezasun/android-calendarview/actions/runs/43854430766)). The
+current uncommitted Kotlin `2.5.0-RC` / Platform `37.1` working tree adds the two
+`SolarHijriComposeRegressionTest` cases, bringing the source inventory to **46 tests (18 library,
+28 sample)**; those 46 tests compile locally on Linux but have not yet executed on an emulator.
 The earlier `1a24725` runs passed the then-42 tests
 ([tablet](https://github.com/mortezasun/android-calendarview/actions/runs/43836063797),
 [phone](https://github.com/mortezasun/android-calendarview/actions/runs/43836063805)); the

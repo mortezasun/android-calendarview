@@ -7,13 +7,17 @@ plugins {
 
 extensions.configure<ApplicationExtension> {
     namespace = "com.develotter.calendarviewsample"
-    compileSdk = 37
+    compileSdk {
+        version = release(37) {
+            minorApiLevel = 1
+        }
+    }
     defaultConfig {
         applicationId = "com.develotter.calendarviewsample"
         minSdk = 27
         targetSdk = 37
-        versionCode = 30000
-        versionName = "3.0.0"
+        versionCode = 30100
+        versionName = "3.1.0-beta"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

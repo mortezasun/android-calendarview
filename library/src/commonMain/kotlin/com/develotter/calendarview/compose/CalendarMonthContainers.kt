@@ -27,7 +27,7 @@ enum class CalendarScrollAxis { Vertical, Horizontal }
 
 /**
  * Lazy calendar-independent month list. The caller maps each index to a calendar month
- * and supplies its composable, normally one of the three calendar entry points.
+ * and supplies its composable, normally one of the engine calendar entry points.
  * Selection is caller-owned and can be shared across all items.
  *
  * Vertical lists require bounded height; horizontal lists require bounded width and use

@@ -5,6 +5,7 @@ import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -125,6 +126,7 @@ fun rememberSolarHijriNativeMonthState(
     maxMonth: SolarHijriDate? = null,
     currentEpochDay: () -> Long = { SolarHijriPlatform.currentEpochDay() },
 ): SolarHijriNativeMonthState {
+    val latestCurrentEpochDay by rememberUpdatedState(currentEpochDay)
     val saver = remember(initialMonth.year, initialMonth.month, minMonth, maxMonth) {
         listSaver<SolarHijriNativeMonthState, Int>(
             save = { listOf(it.year, it.monthNumber) },
@@ -133,12 +135,11 @@ fun rememberSolarHijriNativeMonthState(
                     SolarHijriDate(it[0], it[1], 1),
                     minMonth,
                     maxMonth,
-                    currentEpochDay,
-                )
+                ) { latestCurrentEpochDay() }
             },
         )
     }
     return rememberSaveable(initialMonth.year, initialMonth.month, minMonth, maxMonth, saver = saver) {
-        SolarHijriNativeMonthState(initialMonth, minMonth, maxMonth, currentEpochDay)
+        SolarHijriNativeMonthState(initialMonth, minMonth, maxMonth) { latestCurrentEpochDay() }
     }
 }

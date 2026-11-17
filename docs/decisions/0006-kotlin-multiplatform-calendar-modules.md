@@ -71,3 +71,19 @@ Consequences of the shared identity:
 - `publishToMavenLocal` succeeds for the seven modules and the BOM; `scripts/api-check.sh`,
   `scripts/klib-api-check.sh` and `scripts/check-commonmain-purity.sh` pass.
 - iOS simulator tests and an `iosApp` sample were not executed: they require macOS/Xcode.
+
+## Post-release multiplatform expansion (uncommitted)
+
+Subsequent uncommitted work after `3.0.0` (on Kotlin `2.5.0-RC` and Compose Multiplatform
+`1.13.0-beta02`, `compileSdk 37.1`):
+
+- Consolidated Apple actuals from `iosMain` into `appleMain` and fixed the previously recorded Apple
+  time-zone, civil-day, calendar-identifier and Hijri 12:00 UTC anchoring gaps.
+- Added `macosArm64`, `js` and `wasmJs` targets to `:library` and all five Compose calendar modules,
+  backed by `webMain` (`jsMain` + `wasmJsMain`) platform formatters using standard JS `Intl`/`Date`
+  interop in `webMain` (`commonMain` purity intact).
+- Expanded `:calendar-chinese-native` to `jvm`, `linuxX64`, `linuxArm64`, `mingwX64`, `iosX64`,
+  `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js` and `wasmJs`, giving a 60-module/variant
+  publication set together with `:calendar-bom`.
+- Native execution on Apple (`ios*`, `macosArm64`), `linuxArm64` and `mingwX64` hardware remains
+  unverified on Linux; see [PROJECT_STATUS.md](../PROJECT_STATUS.md).

@@ -28,17 +28,22 @@ uses for year/quarter heatmaps.
 
 ## Measured run
 
-Environment: Linux container, 8 vCPU, JDK 21.0.13, Gradle 9.9.1, Kotlin 2.4.21, kotlinx-benchmark
-0.5.0, JMH 1.37, 2026-11-16.
+Environment: Linux VM container, 2 vCPU, OpenJDK 17.0.21, Gradle 9.9.1, Kotlin `2.5.0-RC`,
+kotlinx-benchmark 0.5.0, JMH 1.37, 2026-11-16 (UTC 2026-11-17).
 
 ```text
-Benchmark                                     Mode  Cnt   Score   Error  Units
-CalendarBenchmarks.gregorianHeatmapAdapter    avgt    5   0.975 ± 0.425  us/op
-CalendarBenchmarks.gregorianMonthCalculation  avgt    5   0.450 ± 0.153  us/op
-CalendarBenchmarks.hijriHeatmapAdapter        avgt    5   0.771 ± 0.100  us/op
-CalendarBenchmarks.hijriMonthCalculation      avgt    5  10.786 ± 1.816  us/op
+Benchmark                                     Mode  Cnt   Score    Error  Units
+CalendarBenchmarks.gregorianHeatmapAdapter    avgt    5   5.345 ± 17.577  us/op
+CalendarBenchmarks.gregorianMonthCalculation  avgt    5   0.454 ±  0.023  us/op
+CalendarBenchmarks.hijriHeatmapAdapter        avgt    5   0.786 ±  0.185  us/op
+CalendarBenchmarks.hijriMonthCalculation      avgt    5  12.009 ±  5.985  us/op
 ```
 
-The numbers are useful for regression direction only. The container is shared and the fast
-operations have relatively high variance; rerun on the target device class before making a
-performance budget or release claim.
+For reference, the earlier post-`3.0.0` smoke run on an 8 vCPU Linux container (JDK 21.0.13,
+Kotlin `2.4.21`, 2026-11-16) measured `0.975 ± 0.425` (`gregorianHeatmapAdapter`),
+`0.450 ± 0.153` (`gregorianMonthCalculation`), `0.771 ± 0.100` (`hijriHeatmapAdapter`), and
+`10.786 ± 1.816` us/op (`hijriMonthCalculation`).
+
+The numbers are useful for regression direction only. The 2 vCPU VM container is shared and fast
+allocation-sensitive operations (`gregorianHeatmapAdapter`, min `0.971` / max `11.172` us/op) show
+high variance; rerun on the target device class before making a performance budget or release claim.

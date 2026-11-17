@@ -1,13 +1,74 @@
 # Project status
 
-Last updated: 2026-11-16
-Version: `3.0.0` (Kotlin Multiplatform release, 2026-11-16; previous: `2.4.0`)
-Branches: `kmp` is the working branch; `master` was fast-forwarded to the same 3.0.0 plus post-release tooling tree
+Last updated: 2026-11-17 (UTC)
+Version: `3.1.0-beta` pre-release preparation (latest tagged release: `3.0.0` at `a0c686e`; `master`/`kmp` base `a116b81`)
+Branches: preparing commit to push identically to `master` and `kmp`; `3.1.0-beta` tag and GitHub Pre-Release await CI runs and manual debug APK test verification.
 
-## Post-3.0.0 tooling (branch `kmp`, unreleased)
+## `3.1.0-beta` pre-release preparation (`Kotlin 2.5.0-RC` & multiplatform target expansion)
 
-Status: implemented and locally verified on Gradle 9.9.1. No new tag or GitHub Release is part of
-this tooling change.
+Status: implemented and verified on Linux against **Kotlin `2.5.0-RC`**, **Compose Multiplatform
+`1.13.0-beta02`**, Android SDK Platform `37.1`, OpenJDK `17.0.21`, and Gradle `9.9.1`; ready for
+branch push (`master` and `kmp`), CI verification, and debug APK device testing prior to tagging
+`3.1.0-beta`.
+
+- **Release prep, sample app, and repo hygiene:**
+  - Set publication `version = "3.1.0-beta"`, aligned `tools/consumer-check` BOM references to
+    `3.1.0-beta`, and updated `:calendarviewsample` (`versionCode = 30100`, `versionName = "3.1.0-beta"`,
+    header subtitle `"KMP 3.1.0-beta · All calendar modules"`, and `"CN Leap"` showcase badge).
+  - Added `kotlin-js-store/` to `.gitignore` so local JS/Wasm Yarn lockfiles remain untracked.
+- **Multiplatform target expansion & shared actuals:**
+  - All six Compose modules (`:library`, `:calendar-gregorian`, `:calendar-hijri`,
+    `:calendar-solarHijri`, `:calendar-solarHijri-native`, `:calendar-chinese-compose`) now target
+    `android`, `jvm`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js` (`browser` + `nodejs`), and
+    `wasmJs` (`browser`). `:calendar-chinese-native` targets `jvm`, `linuxX64`, `linuxArm64`,
+    `mingwX64`, `iosX64`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js`, and `wasmJs`.
+  - Replaced single-target `iosMain` adapters with shared `appleMain` actuals (`iOS` + `macOS`)
+    and added `webMain` (`jsMain` + `wasmJsMain`) formatters and `currentEpochDay` implementations.
+  - Resolved the `3.0.0` Apple source implementation gaps noted below: `appleMain` `currentEpochDay()`
+    now reads local civil year/month/day, formatters explicitly set `localTimeZone` / explicit
+    Gregorian or Umm-al-Qura calendar IDs, and `HijriPlatform.apple.kt` anchors dates uniformly at
+    12:00 UTC. Apple runtime execution itself still requires macOS/Xcode hardware.
+- **Review fixes & regression coverage:**
+  - Fixed `HijriPlatform.formatFullDate` and `OffsetHijriDateProvider` wiring so accessibility labels
+    keep the actual timeline weekday (`weekdayEpochDay`) when dates are shifted by whole days.
+  - Fixed `rememberSolarHijriMonthState` and `rememberSolarHijriNativeMonthState` to capture
+    `currentEpochDay` via `rememberUpdatedState`, keeping visible navigation intact when callers
+    replace the callback; added `SolarHijriComposeRegressionTest` (2 tests).
+  - Configured `binaries.executable()` alongside `useChromeHeadlessNoSandbox()` for JS/Wasm
+    browser tests on all Compose modules and declared Node/Yarn/Binaryen Ivy repositories in
+    `settings.gradle.kts` under `FAIL_ON_PROJECT_REPOS`.
+  - Hardened `scripts/verify-publication.sh` to validate all 60 publication artifact directories
+    (root metadata, `-android`, `-jvm`, Apple/ARM/MinGW/JS/Wasm KLIBs, POMs, `.module` references,
+    and BOM constraints) and updated `.github/workflows/*.yml`.
+  - Split `README.md` into a concise overview linking [GETTING_STARTED.md](GETTING_STARTED.md) and
+    [USAGE_GUIDE.md](USAGE_GUIDE.md).
+- **Verified locally on Linux:**
+  - Unit & multiplatform tests: `169` `jvmTest`, `152` `testAndroidHostTest`, `62` sample unit
+    tests, `168` `jsNodeTest`, `168` `jsBrowserTest`, `16` `:calendar-chinese-native:wasmJsNodeTest`,
+    `168` `wasmJsBrowserTest`, `16` `linuxX64Test`, plus Python tests in `scripts/` &
+    `tools/chinese-calendar/` (`kotlin-js-store/` is ignored in `.gitignore`).
+  - Builds & static guards: `:calendarviewsample:assembleDebug` / `assembleRelease`,
+    `assembleAndroidMain`, `:calendar-chinese-native:jvmJar`, `lint`, `46` compiled instrumentation
+    tests (compile-verified only), `scripts/check-commonmain-purity.sh`, `scripts/api-check.sh`,
+    all Apple/ARM/MinGW KLIB compilations, `scripts/klib-api-check.sh`, 60-module isolated
+    publication verification (`3.1.0-beta`) + `:jvm-consumer:run` +
+    `:android-consumer:assembleRelease`, `:dokkaGenerate`, and `:benchmarks:mainBenchmark` (2 vCPU
+    numbers in [BENCHMARKS.md](BENCHMARKS.md)).
+- **Remaining open gates (unverified on this Linux host):**
+  - User manual verification of `:calendarviewsample` (`calendarviewsample-debug.apk`) on device and
+    GitHub Actions completion (including API 29 emulator execution of the updated 46-test suite)
+    before tagging `3.1.0-beta` pre-release.
+  - Native runtime execution on Apple (`ios*`, `macosArm64`), `linuxArm64`, and Windows (`mingwX64`)
+    hardware (cross-compiled and KLIB-ABI-checked only on Linux).
+  - Replacing pre-release `Kotlin 2.5.0-RC` and `Compose Multiplatform 1.13.0-beta02` with final
+    stable releases before cutting any stable (`3.1.0`) release tag.
+  - Physical device / fold / TalkBack acceptance, Maven Central signing/credentials, GitHub Pages
+    `build_type: workflow` setting, and JitPack consumption of the pushed `3.1.0-beta` tree.
+
+## Post-3.0.0 tooling (branch `kmp` / `master` at `a116b81`)
+
+Status: committed tooling on `a116b81` (`3.0.0` at `a0c686e` plus Dokka, benchmark, and API-guard
+commits). No new tag or GitHub Release is part of this tooling change.
 
 - **Dokka:** Dokka `2.3.0` is applied to all seven published KMP modules and aggregates them with
   the root `:dokkaGenerate` task. HTML is written to `build/dokka/html`; the `API documentation`
@@ -31,27 +92,24 @@ this tooling change.
 - **API guard scope:** the five platform adapter objects are internal implementation details. The
   JVM dump filters their exact JVM bytecode names because Kotlin `internal` is public bytecode and
   the binary-compatibility-validator plugin creates no tasks with AGP 9's built-in Kotlin support;
-  the KLIB guard rejects any leak. The regenerated `api/*.api` dumps contain none of the five
-  objects, and the KLIB snapshots already contained none. See [DEVELOPMENT.md](DEVELOPMENT.md#public-api-guard).
-- **Gradle:** wrapper raised from `9.8.2` to `9.9.1`. The local gate stack (tests, lint, sample
-  release, device-test compilation, JVM API, KLIB ABI, `commonMain` purity) is green.
-- **Deprecations:** Gradle 9.9.1 reports upstream warnings from Kotlin Gradle Plugin 2.4.x
-  (`KotlinNativeBundleArtifactsTypes` attribute) and Compose (`HotReloadUsageType`); clearing them
-  requires a KGP 2.5+/Compose upgrade, not a repository change. `Configuration.setVisible` is
-  reported by the current plugin stack. Configuration-cache storage works for `help`.
+  the KLIB guard rejects any leak. The `api/*.api` dumps contain none of the five objects, and the
+  KLIB snapshots contain none. See [DEVELOPMENT.md](DEVELOPMENT.md#public-api-guard).
+- **Gradle:** wrapper raised from `9.8.2` to `9.9.1`.
+- **Deprecations:** Gradle 9.9.1 still reports upstream deprecation warnings during build execution;
+  record plugin-owned deprecations rather than suppressing them. Configuration-cache storage works
+  for `help`.
 
-Open blockers: iOS runtime/simulator tests and an `iosApp` sample require macOS/Xcode; Maven
-Central signing, namespace verification and credentials are not configured; real process-death
-and physical-device/fold/TalkBack acceptance still need dedicated hardware or a stable emulator
-harness.
+Open blockers: Apple/Windows/`linuxArm64` hardware runtime verification, live API 29 emulator run of
+the expanded 46-test suite, Maven Central signing/credentials, and real process-death/hardware
+acceptance remain open.
 
-## Kotlin 2.5.0 upgrade planning
+## Kotlin 2.5.0 upgrade status
 
-No Kotlin 2.5 upgrade is applied. The current tree uses Kotlin `2.4.21`, Compose Multiplatform
-`1.12.2`, Gradle `9.9.1` and AGP `9.5.1`. Kotlin `2.5.0` is officially listed as planned for
-December 2026, and the `2.5.0-RC` notes describe an experimental multiplatform publication format.
-The concrete checklist, open compatibility questions and official references are in
-[KOTLIN_2_5_UPGRADE.md](KOTLIN_2_5_UPGRADE.md).
+While tagged `3.0.0` used Kotlin `2.4.21` and Compose Multiplatform `1.12.2`, the uncommitted local
+working tree actively tests Kotlin `2.5.0-RC` and Compose Multiplatform `1.13.0-beta02` against
+Android SDK Platform `37.1`, Gradle `9.9.1`, and AGP `9.5.1` (keeping the experimental `.kar`
+`KOTLIN_ARCHIVE` publication format disabled). The checklist, tested scope, and remaining stable-release
+promotion questions are tracked in [KOTLIN_2_5_UPGRADE.md](KOTLIN_2_5_UPGRADE.md).
 
 ## Kotlin Multiplatform release 3.0.0
 

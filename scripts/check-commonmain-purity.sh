@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Guards the Kotlin Multiplatform boundary: commonMain must stay free of JVM/Android APIs and of
-# the removed jalalicalendar dependency. Compose UI packages are the only allowed androidx imports.
+# Guards the Kotlin Multiplatform boundary: commonMain must stay free of JVM/Android/Apple/Web
+# platform APIs and of the removed jalalicalendar dependency. Compose UI packages are the only
+# allowed androidx imports.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -11,7 +12,7 @@ while IFS= read -r line; do
     [[ -z "$line" ]] && continue
     echo "Forbidden platform import in commonMain: $line" >&2
     status=1
-done < <(grep -rnE '^import (java|javax|android|ir\.huri)\.' \
+done < <(grep -rnE '^import (java|javax|android|ir\.huri|platform|kotlinx\.browser|kotlin\.js)\.' \
     --include="*.kt" library/src/commonMain calendar-*/src/commonMain 2>/dev/null || true)
 
 while IFS= read -r line; do

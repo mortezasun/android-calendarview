@@ -37,7 +37,7 @@ jobs:
           packages: ''
 
       - name: Install documented compile SDK and build tools
-        run: sdkmanager "platform-tools" "platforms;android-37.0" "build-tools;36.0.0"
+        run: sdkmanager "platform-tools" "platforms;android-37.1" "build-tools;36.0.0"
 
       - name: Compile core and sample instrumentation APKs
         run: bash ./gradlew :library:assembleAndroidDeviceTest :calendarviewsample:assembleDebugAndroidTest --no-daemon --stacktrace --console=plain
