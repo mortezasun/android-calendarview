@@ -3,6 +3,8 @@ package com.develotter.calendarviewsample
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.FilterChip
@@ -17,6 +19,7 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.enums.TypeSelectDay
 
 /** Demo-only configuration controls: calendar, secondary overlay, selection mode, locale and display options. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun CalendarSampleControls(state: CalendarSampleState) {
     val calendar = state.calendar
@@ -26,7 +29,10 @@ internal fun CalendarSampleControls(state: CalendarSampleState) {
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
             SampleCalendar.entries.forEach { item ->
                 FilterChip(selected = calendar == item, onClick = { state.selectCalendar(item) }, label = { Text(item.name) })
             }
@@ -40,12 +46,19 @@ internal fun CalendarSampleControls(state: CalendarSampleState) {
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
             TypeSelectDay.entries.forEach { mode ->
                 FilterChip(selected = mode.name == state.modeName, onClick = { state.modeName = mode.name }, label = { Text(mode.name) })
             }
         }
-        Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
+        ) {
             listOf("en", "de", "fa", "ar").forEach { tag ->
                 FilterChip(selected = state.localeTag == tag, onClick = { state.localeTag = tag }, label = { Text(tag) })
             }
@@ -77,7 +90,11 @@ internal fun CalendarSampleControls(state: CalendarSampleState) {
             Switch(checked = state.limitRange, onCheckedChange = { state.limitRange = it })
         }
         if (calendar == SampleCalendar.Chinese) {
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text("Chinese labels")
                 ChineseTextStyle.entries.forEach { style ->
                     FilterChip(
@@ -95,7 +112,11 @@ internal fun CalendarSampleControls(state: CalendarSampleState) {
             }
         }
         if (calendar == SampleCalendar.Hijri) {
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
                 Text("Hijri method")
                 listOf(-1, 0, 1).forEach { offset ->
                     FilterChip(
@@ -117,7 +138,8 @@ internal fun CalendarSampleControls(state: CalendarSampleState) {
     }
 }
 
-/** Shared horizontal picker to attach any alternative calendar module as secondary day labels. */
+/** Shared wrapping picker to attach any alternative calendar module as secondary day labels. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun SecondaryCalendarSelector(
     selected: SampleSecondaryCalendar,
@@ -129,10 +151,9 @@ internal fun SecondaryCalendarSelector(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Row(
-            Modifier.horizontalScroll(rememberScrollState()),
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             SampleSecondaryCalendar.entries.forEach { option ->
                 FilterChip(

@@ -45,14 +45,16 @@ internal fun rememberSampleMonthNavigation(
     onMonthChanged: (Long) -> Unit,
 ): SampleMonthNavigation {
     val onChanged by rememberUpdatedState(onMonthChanged)
+    val currentAnchor by rememberUpdatedState(anchor)
     return when (calendar) {
         SampleCalendar.Gregorian -> {
             // Keep the state initializer stable; the anchor effect below is the controlled input.
             val initialMonth = remember { GregorianYearMonth.fromEpochDay(anchor) }
             val state = rememberGregorianMonthState(initialMonth)
             LaunchedEffect(state.month) {
-                val epochDay = state.month.atDay(1)
-                if (epochDay != anchor) onChanged(epochDay)
+                if (state.month != GregorianYearMonth.fromEpochDay(currentAnchor)) {
+                    onChanged(state.month.atDay(1))
+                }
             }
             LaunchedEffect(anchor) {
                 val target = GregorianYearMonth.fromEpochDay(anchor)
@@ -69,8 +71,10 @@ internal fun rememberSampleMonthNavigation(
                 dateProvider = hijriDateProvider,
             )
             LaunchedEffect(state.month) {
-                val epochDay = hijriDateProvider.epochDayFor(state.month)
-                if (epochDay != anchor) onChanged(epochDay)
+                val anchorMonth = hijriDateProvider.dateForEpochDay(currentAnchor).copy(dayOfMonth = 1)
+                if (state.month != anchorMonth) {
+                    onChanged(hijriDateProvider.epochDayFor(state.month))
+                }
             }
             LaunchedEffect(anchor) {
                 val target = hijriDateProvider.dateForEpochDay(anchor).copy(dayOfMonth = 1)
@@ -82,8 +86,10 @@ internal fun rememberSampleMonthNavigation(
             val initialMonth = remember { SolarHijriDate.fromEpochDay(anchor) }
             val state = rememberSolarHijriMonthState(initialMonth)
             LaunchedEffect(state.year, state.monthNumber) {
-                val epochDay = state.month.toEpochDay()
-                if (epochDay != anchor) onChanged(epochDay)
+                val anchorMonth = SolarHijriDate.fromEpochDay(currentAnchor).withDayOfMonth(1)
+                if (state.year != anchorMonth.year || state.monthNumber != anchorMonth.month) {
+                    onChanged(state.month.toEpochDay())
+                }
             }
             LaunchedEffect(anchor) {
                 val target = SolarHijriDate.fromEpochDay(anchor).withDayOfMonth(1)
@@ -97,8 +103,9 @@ internal fun rememberSampleMonthNavigation(
             val initialMonth = remember { GregorianYearMonth.fromEpochDay(anchor) }
             val state = rememberGregorianMonthState(initialMonth)
             LaunchedEffect(state.month) {
-                val epochDay = state.month.atDay(1)
-                if (epochDay != anchor) onChanged(epochDay)
+                if (state.month != GregorianYearMonth.fromEpochDay(currentAnchor)) {
+                    onChanged(state.month.atDay(1))
+                }
             }
             LaunchedEffect(anchor) {
                 val target = GregorianYearMonth.fromEpochDay(anchor)
@@ -116,8 +123,14 @@ internal fun rememberSampleMonthNavigation(
             val initialMonth = remember { ChineseMonth.fromEpochDay(safeAnchor) }
             val state = rememberChineseMonthState(initialMonth)
             LaunchedEffect(state.month) {
-                val epochDay = state.month.startEpochDay()
-                if (epochDay != anchor) onChanged(epochDay)
+                val clamped = currentAnchor.coerceIn(
+                    ChineseCalendarEngine.MIN_EPOCH_DAY,
+                    ChineseCalendarEngine.MAX_EPOCH_DAY,
+                )
+                val anchorMonth = ChineseMonth.fromEpochDay(clamped)
+                if (state.month != anchorMonth || currentAnchor != clamped) {
+                    onChanged(state.month.startEpochDay())
+                }
             }
             LaunchedEffect(anchor) {
                 val epochDay = anchor.coerceIn(
@@ -133,8 +146,10 @@ internal fun rememberSampleMonthNavigation(
             val initialMonth = remember { SolarHijriDate.fromEpochDay(anchor) }
             val state = rememberSolarHijriNativeMonthState(initialMonth)
             LaunchedEffect(state.year, state.monthNumber) {
-                val epochDay = state.month.toEpochDay()
-                if (epochDay != anchor) onChanged(epochDay)
+                val anchorMonth = SolarHijriDate.fromEpochDay(currentAnchor).withDayOfMonth(1)
+                if (state.year != anchorMonth.year || state.monthNumber != anchorMonth.month) {
+                    onChanged(state.month.toEpochDay())
+                }
             }
             LaunchedEffect(anchor) {
                 val target = SolarHijriDate.fromEpochDay(anchor).withDayOfMonth(1)

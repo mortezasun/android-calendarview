@@ -78,7 +78,7 @@ class CalendarSampleUiTest {
 
     private fun assertMonth(month: GregorianYearMonth) {
         showViewport()
-        compose.onNodeWithText(caption(month)).assertIsDisplayed()
+        assertDisplayedInMainViewport(compose.onNodeWithText(caption(month)))
     }
 
     private fun selectSingleGregorian() {
@@ -119,7 +119,11 @@ class CalendarSampleUiTest {
         } catch (_: AssertionError) {
             scrollMainViewportUp()
         }
-        node.performScrollTo()
+        try {
+            node.performScrollTo()
+        } catch (_: AssertionError) {
+            // Node is already scrolled into view inside the outer viewport container.
+        }
         compose.waitForIdle()
         assertDisplayed(node, "Main calendar day")
     }
@@ -152,22 +156,18 @@ class CalendarSampleUiTest {
 
     @Test
     fun calendarsExplorerSupportsDynamicSecondaryLabelsAndViewModes() {
-        val firstOfMonth = LocalDate.now().withDayOfMonth(1)
-        val firstEpochDay = firstOfMonth.toEpochDay()
+        val todayEpochDay = LocalDate.now().toEpochDay()
         click("Calendars")
         compose.onNodeWithText("Gregorian Module").assertIsDisplayed()
 
         click("2nd: Hijri")
-        val hijriSecondaryA11y = requireNotNull(hijriAccessibilityLabel(firstEpochDay))
+        val hijriSecondaryA11y = requireNotNull(hijriAccessibilityLabel(todayEpochDay))
         val cellWithHijri = compose.onNodeWithContentDescription(hijriSecondaryA11y, substring = true)
         cellWithHijri.performScrollTo()
         cellWithHijri.assertIsDisplayed()
 
         click("Week")
-        compose.onNodeWithContentDescription(
-            requireNotNull(hijriAccessibilityLabel(LocalDate.now().toEpochDay())),
-            substring = true,
-        ).assertExists()
+        compose.onNodeWithContentDescription(hijriSecondaryA11y, substring = true).assertExists()
 
         click("Agenda")
         compose.onNode(hasText("Agenda:", substring = true)).assertExists()
@@ -176,7 +176,7 @@ class CalendarSampleUiTest {
         click("SolarHijriNative")
         compose.onNodeWithText("Solar Hijri (Native) Module").assertIsDisplayed()
         click("2nd: Chinese")
-        val chineseSecondaryA11y = requireNotNull(chineseAccessibilityLabel(firstEpochDay))
+        val chineseSecondaryA11y = requireNotNull(chineseAccessibilityLabel(todayEpochDay))
         val solarWithChinese = compose.onNodeWithContentDescription(chineseSecondaryA11y, substring = true)
         solarWithChinese.performScrollTo()
         solarWithChinese.assertIsDisplayed()

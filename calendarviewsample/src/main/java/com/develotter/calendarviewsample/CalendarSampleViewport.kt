@@ -1,10 +1,10 @@
 package com.develotter.calendarviewsample
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
@@ -45,6 +45,7 @@ internal enum class SampleDisplayMode { Single, VerticalList, HorizontalList, Ho
  * Mode changes start at the controlled month and reset intra-month offsets.
  * The default height follows the host pane; explicit heights remain caller-controlled.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun CalendarSampleViewport(
     calendar: SampleCalendar,
@@ -73,7 +74,10 @@ internal fun CalendarSampleViewport(
     }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (showModeSelector) {
-            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
                 SampleDisplayMode.entries.forEach { item ->
                     FilterChip(selected = mode == item, onClick = { modeName = item.name }, label = { Text(item.name) })
                 }

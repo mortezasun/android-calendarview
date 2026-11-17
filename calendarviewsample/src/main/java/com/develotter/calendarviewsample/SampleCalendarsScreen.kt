@@ -1,6 +1,5 @@
 package com.develotter.calendarviewsample
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -97,9 +96,9 @@ internal fun SampleCalendarsScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             SampleCalendar.entries.forEach { item ->
                 FilterChip(
@@ -358,10 +357,10 @@ private fun CalendarSpecificControlsCard(
             )
             when (calendar) {
                 SampleCalendar.Hijri -> {
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        itemVerticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text("Method offset", style = MaterialTheme.typography.labelMedium)
                         listOf(-1, 0, 1).forEach { offset ->
@@ -382,10 +381,10 @@ private fun CalendarSpecificControlsCard(
                     }
                 }
                 SampleCalendar.Chinese -> {
-                    Row(
-                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        itemVerticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text("Script", style = MaterialTheme.typography.labelMedium)
                         ChineseTextStyle.entries.forEach { style ->
