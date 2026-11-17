@@ -2,14 +2,11 @@
 
 Last updated: 2026-11-17 (UTC)
 Version: `3.1.0-beta` pre-release preparation (latest tagged release: `3.0.0` at `a0c686e`; `master`/`kmp` base `a116b81`)
-Branches: preparing commit to push identically to `master` and `kmp`; `3.1.0-beta` tag and GitHub Pre-Release await CI runs and manual debug APK test verification.
+Branches: `master` and `kmp` synced at `c8b1287` (following `e5e7c73`); `3.1.0-beta` tag and GitHub Pre-Release await manual debug APK verification and explicit release approval.
 
 ## `3.1.0-beta` pre-release preparation (`Kotlin 2.5.0-RC` & multiplatform target expansion)
 
-Status: implemented and verified on Linux against **Kotlin `2.5.0-RC`**, **Compose Multiplatform
-`1.13.0-beta02`**, Android SDK Platform `37.1`, OpenJDK `17.0.21`, and Gradle `9.9.1`; ready for
-branch push (`master` and `kmp`), CI verification, and debug APK device testing prior to tagging
-`3.1.0-beta`.
+Status: implemented, pushed identically to `master` and `kmp`, and verified both locally on Linux and across all five GitHub Actions workflows (including API 29 phone and tablet emulators) against **Kotlin `2.5.0-RC`**, **Compose Multiplatform `1.13.0-beta02`**, Android SDK Platform `37.1`, OpenJDK `17.0.21`, and Gradle `9.9.1`; ready for manual debug APK device testing prior to tagging `3.1.0-beta`.
 
 - **Release prep, sample app, and repo hygiene:**
   - Set publication `version = "3.1.0-beta"`, aligned `tools/consumer-check` BOM references to
@@ -28,6 +25,10 @@ branch push (`master` and `kmp`), CI verification, and debug APK device testing 
     feature cards, `SingleChoiceSegmentedButtonRow` (`Month` | `Week` | `Agenda`), and a live
     Selected Date Inspector; full interactive **Playground** workbench; and integrated **Heatmaps**
     tab (`HeatMapViewActivity`).
+  - Follow-up fix (`c8b1287`): updated `rememberSampleMonthNavigation` to compare against the
+    current anchor's month instead of overwriting intra-month anchors with day 1 (preserving the
+    selected/today week when switching to Week view), replaced nested `horizontalScroll` chip strips
+    with wrapping `FlowRow` layouts, and hardened `CalendarSampleUiTest` viewport assertions.
   - Added `kotlin-js-store/` to `.gitignore` so local JS/Wasm Yarn lockfiles remain untracked.
 - **Multiplatform target expansion & shared actuals:**
   - All six Compose modules (`:library`, `:calendar-gregorian`, `:calendar-hijri`,
@@ -55,21 +56,26 @@ branch push (`master` and `kmp`), CI verification, and debug APK device testing 
     and BOM constraints) and updated `.github/workflows/*.yml`.
   - Split `README.md` into a concise overview linking [GETTING_STARTED.md](GETTING_STARTED.md) and
     [USAGE_GUIDE.md](USAGE_GUIDE.md).
-- **Verified locally on Linux:**
+- **Verified locally on Linux & on GitHub Actions (`c8b1287`):**
   - Unit & multiplatform tests: `174` `jvmTest`, `157` `testAndroidHostTest`, `68` sample unit
     tests, `173` `jsNodeTest`, `173` `jsBrowserTest`, `16` `:calendar-chinese-native:wasmJsNodeTest`,
     `173` `wasmJsBrowserTest`, `16` `linuxX64Test`, plus Python tests in `scripts/` &
     `tools/chinese-calendar/` (`kotlin-js-store/` is ignored in `.gitignore`).
   - Builds & static guards: `:calendarviewsample:assembleDebug` / `assembleRelease`,
-    `assembleAndroidMain`, `:calendar-chinese-native:jvmJar`, `lint`, `52` compiled instrumentation
-    tests (`21` library + `31` sample, compile-verified only), `scripts/check-commonmain-purity.sh`,
-    updated `scripts/api-check.sh` and `scripts/klib-api-check.sh`, all Apple/ARM/MinGW KLIB
-    compilations, 60-module isolated publication verification (`3.1.0-beta`) + `:jvm-consumer:run` +
+    `assembleAndroidMain`, `:calendar-chinese-native:jvmJar`, `lint`,
+    `scripts/check-commonmain-purity.sh`, updated `scripts/api-check.sh` and
+    `scripts/klib-api-check.sh`, all Apple/ARM/MinGW KLIB compilations, 60-module isolated
+    publication verification (`3.1.0-beta`) + `:jvm-consumer:run` +
     `:android-consumer:assembleRelease`, and `:dokkaGenerate`.
+  - GitHub Actions (`master` & `kmp` at `c8b1287`): all 5 active workflows succeeded —
+    `Android verification` (`44064747948` / `44064748169`), `Android instrumentation`
+    (`44064748139` / `44064748054`, API 29 phone emulator: 52/52 tests passed = 21 library + 31
+    sample), `Android tablet verification` (`44064747953` / `44064747967`, API 29 tablet emulator:
+    52/52 tests passed = 21 library + 31 sample), `Android publishing verification` (`44064747918` /
+    `44064748231`), and `API documentation` (`44064747960` / `44064747993`).
 - **Remaining open gates (unverified on this Linux host):**
   - User manual verification of `:calendarviewsample` (`calendarviewsample-debug.apk`) on device and
-    GitHub Actions completion (including API 29 emulator execution of the updated 52-test suite)
-    before tagging `3.1.0-beta` pre-release.
+    explicit release approval before tagging `3.1.0-beta` pre-release.
   - Native runtime execution on Apple (`ios*`, `macosArm64`), `linuxArm64`, and Windows (`mingwX64`)
     hardware (cross-compiled and KLIB-ABI-checked only on Linux).
   - Replacing pre-release `Kotlin 2.5.0-RC` and `Compose Multiplatform 1.13.0-beta02` with final
