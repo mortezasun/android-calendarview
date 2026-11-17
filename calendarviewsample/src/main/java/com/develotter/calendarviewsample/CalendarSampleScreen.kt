@@ -7,16 +7,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -27,13 +36,13 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.develotter.calendarview.calendars.chineseCompose.ChineseCalendarMonth
+import com.develotter.calendarview.calendars.chineseCompose.GregorianChineseCalendarMonth
+import com.develotter.calendarview.calendars.chineseCompose.chineseWeekData
 import com.develotter.calendarview.calendars.chineseNative.ChineseDate
 import com.develotter.calendarview.calendars.chineseNative.ChineseFormat
 import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
-import com.develotter.calendarview.calendars.chineseCompose.ChineseCalendarMonth
-import com.develotter.calendarview.calendars.chineseCompose.GregorianChineseCalendarMonth
-import com.develotter.calendarview.calendars.chineseCompose.chineseWeekData
 import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.calendars.gregorian.compose.GregorianCalendarMonth
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianWeekData
@@ -43,7 +52,6 @@ import com.develotter.calendarview.calendars.hijri.OffsetHijriDateProvider
 import com.develotter.calendarview.calendars.hijri.compose.HijriCalendarMonth
 import com.develotter.calendarview.calendars.hijri.compose.hijriWeekData
 import com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriCalendarMonth
-import com.develotter.calendarview.calendars.solarHijri.solarHijriEpochDay
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriWeekData
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeCalendarMonth
@@ -63,12 +71,14 @@ import com.develotter.calendarview.selection.CalendarSelection
 import java.time.LocalDate
 import java.util.Locale
 
-/** Saves UI configuration; selection and the settled visible month are shared with the dialog. */
+/**
+ * Root Compose demo shell with Material 3 NavigationBar / NavigationRail, library Home overview,
+ * individual Calendar Explorer, full interactive Playground, and integrated Heatmaps tab.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CalendarSample(onHeatmap: () -> Unit) {
     val ui = rememberCalendarSampleState()
-    val calendar = ui.calendar
-    val locale = ui.locale
     val hijriProvider: HijriDateProvider = remember(ui.hijriOffset) { OffsetHijriDateProvider(ui.hijriOffset) }
     val hijriToday = remember(ui.hijriOffset) {
         hijriProvider.dateForEpochDay(LocalDate.now().toEpochDay())
@@ -96,74 +106,287 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
         LocalCalendarStyle provides calendarStyle,
     ) {
         Surface(Modifier.fillMaxSize()) {
-            CalendarSampleAdaptiveLayout(
-                header = {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                "Compose Calendar Demo",
-                                style = MaterialTheme.typography.headlineSmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                            Text(
-                                "KMP 3.1.0-beta · All calendar modules",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                            )
+            BoxWithConstraints(Modifier.fillMaxSize()) {
+                val useRail = maxWidth >= SampleExpandedPaneMinWidth
+                val appBarTitle = when (ui.destination) {
+                    SampleDestination.Home -> "CalendarView Showcase"
+                    SampleDestination.Calendars -> "Calendar Explorer"
+                    SampleDestination.Playground -> "Interactive Workbench"
+                    SampleDestination.Heatmaps -> "Contribution Heatmaps"
+                }
+                Row(Modifier.fillMaxSize()) {
+                    if (useRail) {
+                        NavigationRail(Modifier.fillMaxHeight()) {
+                            SampleDestination.entries.forEach { destination ->
+                                NavigationRailItem(
+                                    selected = ui.destination == destination,
+                                    onClick = { ui.navigateTo(destination) },
+                                    icon = { Icon(destinationIcon(destination), contentDescription = null) },
+                                    label = { Text(destination.label) },
+                                )
+                            }
                         }
+                    }
+                    Scaffold(
+                        modifier = Modifier.weight(1f),
+                        topBar = {
+                            TopAppBar(
+                                title = {
+                                    Column {
+                                        Text(
+                                            text = appBarTitle,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                        Text(
+                                            text = "KMP 3.1.0-beta · All calendar modules",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
+                                },
+                            )
+                        },
+                        bottomBar = {
+                            if (!useRail) {
+                                NavigationBar {
+                                    SampleDestination.entries.forEach { destination ->
+                                        NavigationBarItem(
+                                            selected = ui.destination == destination,
+                                            onClick = { ui.navigateTo(destination) },
+                                            icon = { Icon(destinationIcon(destination), contentDescription = null) },
+                                            label = { Text(destination.label) },
+                                        )
+                                    }
+                                }
+                            }
+                        },
+                    ) { innerPadding ->
                         Box(
                             Modifier
-                                .clip(MaterialTheme.shapes.small)
-                                .background(MaterialTheme.colorScheme.primary)
-                                .clickable(onClick = ui::showChineseDemo)
-                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                                .fillMaxSize()
+                                .padding(innerPadding),
                         ) {
-                            Text(
-                                "CN Leap",
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                style = MaterialTheme.typography.labelMedium,
-                            )
+                            when (ui.destination) {
+                                SampleDestination.Home -> SampleHomeScreen(ui = ui)
+                                SampleDestination.Calendars -> SampleCalendarsScreen(
+                                    ui = ui,
+                                    state = state,
+                                    hijriProvider = hijriProvider,
+                                    hijriToday = hijriToday,
+                                )
+                                SampleDestination.Playground -> PlaygroundPane(
+                                    ui = ui,
+                                    state = state,
+                                    hijriProvider = hijriProvider,
+                                    hijriToday = hijriToday,
+                                    onHeatmap = onHeatmap,
+                                )
+                                SampleDestination.Heatmaps -> HeatmapSample(applySafeDrawing = false)
+                            }
                         }
                     }
-                    CalendarSampleControls(ui)
-                },
-                content = {
-                    if (ui.useHeaderApi) {
-                        val navigation = rememberSampleMonthNavigation(
-                            calendar = calendar,
-                            anchor = ui.anchor,
-                            locale = locale,
-                            hijriDateProvider = hijriProvider,
-                            chineseStyle = ui.chineseStyle,
-                            chineseGregorianGrid = ui.chineseGregorianGrid,
-                        ) { visible -> ui.showMonth(visible) }
-                        CalendarMonthHeader(
-                            title = navigation.title,
-                            state = navigation.state,
-                            previousMonthContentDescription = "Previous month",
-                            nextMonthContentDescription = "Next month",
-                            todayLabel = sampleTodayDescription(locale),
-                        )
-                    } else {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Button(onClick = { ui.move(-1) }) { Text("Previous") }
-                            Button(onClick = { ui.goToToday() }) { Text("Today") }
-                            Button(onClick = { ui.move(1) }) { Text("Next") }
-                        }
+                }
+            }
+        }
+    }
+}
+
+private fun destinationIcon(destination: SampleDestination) = when (destination) {
+    SampleDestination.Home -> SampleIcons.Home
+    SampleDestination.Calendars -> SampleIcons.CalendarMonth
+    SampleDestination.Playground -> SampleIcons.Tune
+    SampleDestination.Heatmaps -> SampleIcons.GridView
+}
+
+/** Combined feature workbench exposing all containers, options, dialogs, and cross-calendar overlays. */
+@Composable
+private fun PlaygroundPane(
+    ui: CalendarSampleState,
+    state: CalendarSelectionState,
+    hijriProvider: HijriDateProvider,
+    hijriToday: HijriDate,
+    onHeatmap: () -> Unit,
+) {
+    val calendar = ui.calendar
+    val locale = ui.locale
+    val secondaryCalendar = if (calendar == SampleCalendar.Chinese && ui.chineseGregorianGrid) {
+        SampleSecondaryCalendar.Chinese
+    } else {
+        ui.secondaryCalendar
+    }
+    val secondaryLabelProvider = remember(secondaryCalendar, hijriProvider, ui.chineseStyleName) {
+        sampleSecondaryLabelProvider(
+            secondary = secondaryCalendar,
+            hijriDateProvider = hijriProvider,
+            chineseStyle = ui.chineseStyle,
+        )
+    }
+    val secondaryAccessibilityProvider = remember(secondaryCalendar, hijriProvider, ui.chineseStyleName) {
+        sampleSecondaryAccessibilityProvider(
+            secondary = secondaryCalendar,
+            hijriDateProvider = hijriProvider,
+            chineseStyle = ui.chineseStyle,
+        )
+    }
+
+    CalendarSampleAdaptiveLayout(
+        applySafeDrawing = false,
+        header = {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Compose Calendar Demo",
+                        style = MaterialTheme.typography.headlineSmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        "All containers, selection policies, secondary labels & layouts",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Box(
+                    Modifier
+                        .clip(MaterialTheme.shapes.small)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .clickable(onClick = ui::showChineseDemo)
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                ) {
+                    Text(
+                        "CN Leap",
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                }
+            }
+            CalendarSampleControls(ui)
+        },
+        content = {
+            if (ui.useHeaderApi) {
+                val navigation = rememberSampleMonthNavigation(
+                    calendar = calendar,
+                    anchor = ui.anchor,
+                    locale = locale,
+                    hijriDateProvider = hijriProvider,
+                    chineseStyle = ui.chineseStyle,
+                    chineseGregorianGrid = ui.chineseGregorianGrid,
+                ) { visible -> ui.showMonth(visible) }
+                CalendarMonthHeader(
+                    title = navigation.title,
+                    state = navigation.state,
+                    previousMonthContentDescription = "Previous month",
+                    nextMonthContentDescription = "Next month",
+                    todayLabel = sampleTodayDescription(locale),
+                )
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = { ui.move(-1) }) { Text("Previous") }
+                    Button(onClick = { ui.goToToday() }) { Text("Today") }
+                    Button(onClick = { ui.move(1) }) { Text("Next") }
+                }
+            }
+            ui.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+            CalendarSampleViewport(
+                calendar = calendar,
+                anchor = ui.anchor,
+                monthCalendar = sampleMonthNavigationCalendar(calendar, ui.chineseGregorianGrid),
+                onVisibleMonthChanged = { ui.showMonth(it) },
+                minMonthWidth = sampleTargetMonthWidth(ui.showWeekNumbers),
+            ) { monthAnchor ->
+                SampleMonth(
+                    calendar = calendar,
+                    anchor = monthAnchor,
+                    locale = locale,
+                    state = state,
+                    previousDays = ui.previousDays,
+                    nextDays = ui.nextDays,
+                    fixedSixRows = ui.fixedSixRows,
+                    hijriProvider = hijriProvider,
+                    hijriToday = hijriToday,
+                    showHeader = !ui.useHeaderApi,
+                    showWeekNumbers = ui.showWeekNumbers,
+                    chineseStyle = ui.chineseStyle,
+                    chineseGregorianGrid = ui.chineseGregorianGrid,
+                    secondaryLabel = secondaryLabelProvider,
+                    secondaryAccessibilityLabel = secondaryAccessibilityProvider,
+                )
+            }
+            if (ui.showWeek) {
+                SampleWeek(
+                    calendar = calendar,
+                    anchor = ui.anchor,
+                    locale = locale,
+                    state = state,
+                    hijriProvider = hijriProvider,
+                    hijriToday = hijriToday,
+                    showWeekNumbers = ui.showWeekNumbers,
+                    chineseStyle = ui.chineseStyle,
+                    secondaryLabel = secondaryLabelProvider,
+                    secondaryAccessibilityLabel = secondaryAccessibilityProvider,
+                )
+            }
+            if (ui.showAgenda) {
+                SampleAgenda(
+                    calendar = calendar,
+                    anchor = ui.anchor,
+                    locale = locale,
+                    state = state,
+                    hijriProvider = hijriProvider,
+                    chineseStyle = ui.chineseStyle,
+                    secondaryLabel = secondaryLabelProvider,
+                    secondaryAccessibilityLabel = secondaryAccessibilityProvider,
+                )
+            }
+            if (ui.showChineseDetails && calendar == SampleCalendar.Chinese) {
+                ChineseDetails(
+                    anchor = ui.anchor,
+                    selection = state.selection,
+                    style = ui.chineseStyle,
+                )
+            }
+        },
+        actions = {
+            Text("Selected dates / range endpoints (ISO):")
+            Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = state::clear) { Text("Clear selection") }
+                if (state.selection.mode == TypeSelectDay.Range) {
+                    TextButton(onClick = { state.selectRange(ui.anchor, ui.anchor + 4) }) {
+                        Text("Select 5-day range")
                     }
-                    ui.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                }
+                TextButton(onClick = { ui.showDialog = true }) { Text("Open dialog") }
+            }
+            TextButton(onClick = onHeatmap) { Text("Compose heatmap demo") }
+        },
+    )
+    if (ui.showDialog) {
+        AlertDialog(
+            onDismissRequest = { ui.showDialog = false },
+            confirmButton = { TextButton(onClick = { ui.showDialog = false }) { Text("Close") } },
+            title = { Text("${calendar.name} calendar") },
+            text = {
+                BoxWithConstraints(Modifier.fillMaxWidth()) {
+                    val dialogHeight = sampleDialogViewportHeight(maxHeight)
                     CalendarSampleViewport(
                         calendar = calendar,
                         anchor = ui.anchor,
                         monthCalendar = sampleMonthNavigationCalendar(calendar, ui.chineseGregorianGrid),
                         onVisibleMonthChanged = { ui.showMonth(it) },
+                        showModeSelector = false,
+                        showWindowLabel = false,
+                        forcedMode = SampleDisplayMode.HorizontalPager,
+                        viewportHeight = dialogHeight,
                         minMonthWidth = sampleTargetMonthWidth(ui.showWeekNumbers),
                     ) { monthAnchor ->
                         SampleMonth(
@@ -176,101 +399,21 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                             fixedSixRows = ui.fixedSixRows,
                             hijriProvider = hijriProvider,
                             hijriToday = hijriToday,
-                            showHeader = !ui.useHeaderApi,
                             showWeekNumbers = ui.showWeekNumbers,
                             chineseStyle = ui.chineseStyle,
                             chineseGregorianGrid = ui.chineseGregorianGrid,
+                            secondaryLabel = secondaryLabelProvider,
+                            secondaryAccessibilityLabel = secondaryAccessibilityProvider,
                         )
                     }
-                    if (ui.showWeek) {
-                        SampleWeek(
-                            calendar = calendar,
-                            anchor = ui.anchor,
-                            locale = locale,
-                            state = state,
-                            hijriProvider = hijriProvider,
-                            hijriToday = hijriToday,
-                            showWeekNumbers = ui.showWeekNumbers,
-                            chineseStyle = ui.chineseStyle,
-                        )
-                    }
-                    if (ui.showAgenda) {
-                        SampleAgenda(
-                            calendar = calendar,
-                            anchor = ui.anchor,
-                            locale = locale,
-                            state = state,
-                            hijriProvider = hijriProvider,
-                            chineseStyle = ui.chineseStyle,
-                        )
-                    }
-                    if (ui.showChineseDetails && calendar == SampleCalendar.Chinese) {
-                        ChineseDetails(
-                            anchor = ui.anchor,
-                            selection = state.selection,
-                            style = ui.chineseStyle,
-                        )
-                    }
-                },
-                actions = {
-                    Text("Selected dates / range endpoints (ISO):")
-                    Text(state.selection.selectedDays.joinToString { LocalDate.ofEpochDay(it).toString() }.ifEmpty { "None" })
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = state::clear) { Text("Clear selection") }
-                        if (state.selection.mode == TypeSelectDay.Range) {
-                            TextButton(onClick = { state.selectRange(ui.anchor, ui.anchor + 4) }) {
-                                Text("Select 5-day range")
-                            }
-                        }
-                        TextButton(onClick = { ui.showDialog = true }) { Text("Open dialog") }
-                    }
-                    TextButton(onClick = onHeatmap) { Text("Compose heatmap demo") }
-                },
-            )
-        }
-        if (ui.showDialog) {
-            AlertDialog(
-                onDismissRequest = { ui.showDialog = false },
-                confirmButton = { TextButton(onClick = { ui.showDialog = false }) { Text("Close") } },
-                title = { Text("${calendar.name} calendar") },
-                text = {
-                    BoxWithConstraints(Modifier.fillMaxWidth()) {
-                        val dialogHeight = sampleDialogViewportHeight(maxHeight)
-                        CalendarSampleViewport(
-                            calendar = calendar,
-                            anchor = ui.anchor,
-                            monthCalendar = sampleMonthNavigationCalendar(calendar, ui.chineseGregorianGrid),
-                            onVisibleMonthChanged = { ui.showMonth(it) },
-                            showModeSelector = false,
-                            showWindowLabel = false,
-                            forcedMode = SampleDisplayMode.HorizontalPager,
-                            viewportHeight = dialogHeight,
-                            minMonthWidth = sampleTargetMonthWidth(ui.showWeekNumbers),
-                        ) { monthAnchor ->
-                            SampleMonth(
-                                calendar = calendar,
-                                anchor = monthAnchor,
-                                locale = locale,
-                                state = state,
-                                previousDays = ui.previousDays,
-                                nextDays = ui.nextDays,
-                                fixedSixRows = ui.fixedSixRows,
-                                hijriProvider = hijriProvider,
-                                hijriToday = hijriToday,
-                                showWeekNumbers = ui.showWeekNumbers,
-                                chineseStyle = ui.chineseStyle,
-                                chineseGregorianGrid = ui.chineseGregorianGrid,
-                            )
-                        }
-                    }
-                },
-            )
-        }
+                }
+            },
+        )
     }
 }
 
 @Composable
-private fun SampleMonth(
+internal fun SampleMonth(
     calendar: SampleCalendar,
     anchor: Long,
     locale: Locale,
@@ -284,6 +427,8 @@ private fun SampleMonth(
     showWeekNumbers: Boolean = false,
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
     chineseGregorianGrid: Boolean = false,
+    secondaryLabel: ((Long) -> String?)? = null,
+    secondaryAccessibilityLabel: ((Long) -> String?)? = null,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
     val todayDescription = sampleTodayDescription(locale)
@@ -299,6 +444,7 @@ private fun SampleMonth(
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider,
+            secondaryLabel = secondaryLabel, secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         )
         SampleCalendar.Hijri -> HijriCalendarMonth(
             month = hijriProvider.dateForEpochDay(anchor), selection = state.selection,
@@ -308,6 +454,7 @@ private fun SampleMonth(
             todayEpochDay = hijriProvider.epochDayFor(hijriToday),
             todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider, dateProvider = hijriProvider,
+            secondaryLabel = secondaryLabel, secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         )
         SampleCalendar.SolarHijri -> SolarHijriCalendarMonth(
             month = SolarHijriDate.fromEpochDay(anchor), selection = state.selection,
@@ -315,6 +462,7 @@ private fun SampleMonth(
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider,
+            secondaryLabel = secondaryLabel, secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         )
         SampleCalendar.SolarHijriNative -> SolarHijriNativeCalendarMonth(
             month = SolarHijriDate.fromEpochDay(anchor), selection = state.selection,
@@ -322,6 +470,7 @@ private fun SampleMonth(
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider,
+            secondaryLabel = secondaryLabel, secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         )
         SampleCalendar.Chinese -> if (chineseGregorianGrid) {
             GregorianChineseCalendarMonth(
@@ -338,6 +487,7 @@ private fun SampleMonth(
                 style = chineseStyle, showPreviousMonthDays = previousDays, showNextMonthDays = nextDays,
                 fixedSixRows = fixedSixRows, todayDescription = todayDescription, markers = sampleMarkers(date),
                 showHeader = showHeader, weekNumber = weekNumberProvider,
+                secondaryLabel = secondaryLabel, secondaryAccessibilityLabel = secondaryAccessibilityLabel,
             )
         }
     }
@@ -345,7 +495,7 @@ private fun SampleMonth(
 
 /** Demo-only weekly view sharing the month selection and event markers. */
 @Composable
-private fun SampleWeek(
+internal fun SampleWeek(
     calendar: SampleCalendar,
     anchor: Long,
     locale: Locale,
@@ -354,6 +504,8 @@ private fun SampleWeek(
     hijriToday: HijriDate,
     showWeekNumbers: Boolean,
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
+    secondaryLabel: ((Long) -> String?)? = null,
+    secondaryAccessibilityLabel: ((Long) -> String?)? = null,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
     val week: CalendarWeekData? = runCatching { when (calendar) {
@@ -385,6 +537,8 @@ private fun SampleWeek(
         selection = state.selection, onDayClick = { state.onDayClick(it) },
         weekNumber = weekNumber, todayDescription = sampleTodayDescription(locale),
         markers = sampleMarkers(date),
+        secondaryLabel = secondaryLabel,
+        secondaryAccessibilityLabel = secondaryAccessibilityLabel,
     )
 }
 
@@ -397,6 +551,8 @@ internal fun SampleAgenda(
     state: CalendarSelectionState,
     hijriProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
+    secondaryLabel: ((Long) -> String?)? = null,
+    secondaryAccessibilityLabel: ((Long) -> String?)? = null,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
     val data = remember(calendar, anchor, locale, hijriProvider, chineseStyle) {
@@ -422,6 +578,8 @@ internal fun SampleAgenda(
                 ),
                 markers = sampleMarkers(date),
                 todayDescription = sampleTodayDescription(locale),
+                secondaryLabel = secondaryLabel,
+                secondaryAccessibilityLabel = secondaryAccessibilityLabel,
             )
         },
         onFailure = { exception ->
@@ -447,7 +605,7 @@ private fun sampleMarkers(date: LocalDate): Map<Long, List<CalendarDayMarker>> {
 }
 
 /** Demo-only localized "today" description; the library deliberately ships no UI strings. */
-private fun sampleTodayDescription(locale: Locale): String = when (locale.language) {
+internal fun sampleTodayDescription(locale: Locale): String = when (locale.language) {
     "de" -> "Heute"
     "fa" -> "امروز"
     "ar" -> "اليوم"

@@ -268,5 +268,23 @@ class CalendarSampleStateTest {
         assertEquals(SampleCalendar.SolarHijriNative, state.calendar)
         assertNull(state.error)
     }
+
+    @Test
+    fun openCalendarAndNavigateToSwitchDestinationAndSecondaryCalendar() {
+        val state = sampleState(LocalDate.of(2026, 6, 15).toEpochDay())
+        assertEquals(SampleDestination.Home, state.destination)
+        assertEquals(SampleSecondaryCalendar.None, state.secondaryCalendar)
+        assertEquals(SampleCalendarViewMode.Month, state.calendarViewMode)
+
+        state.openCalendar(SampleCalendar.Hijri, SampleSecondaryCalendar.Gregorian)
+        assertEquals(SampleDestination.Calendars, state.destination)
+        assertEquals(SampleCalendar.Hijri, state.calendar)
+        assertEquals(SampleSecondaryCalendar.Gregorian, state.secondaryCalendar)
+
+        state.navigateTo(SampleDestination.Playground)
+        assertEquals(SampleDestination.Playground, state.destination)
+        state.calendarViewModeName = SampleCalendarViewMode.Agenda.name
+        assertEquals(SampleCalendarViewMode.Agenda, state.calendarViewMode)
+    }
 }
 

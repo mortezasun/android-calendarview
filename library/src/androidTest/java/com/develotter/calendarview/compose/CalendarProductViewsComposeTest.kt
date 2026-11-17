@@ -73,4 +73,57 @@ class CalendarProductViewsComposeTest {
         compose.onNodeWithText("Day 2").performClick()
         compose.runOnIdle { assertEquals(11L, clicked) }
     }
+
+    @Test
+    fun weekDataOverloadAndAgendaSupportSecondaryLabels() {
+        val days = (0 until 7).map { index ->
+            CalendarDayCell(
+                epochDay = 200L + index,
+                label = "${index + 1}",
+                accessibilityLabel = "Day ${index + 1}",
+            )
+        }
+        val weekData = object : CalendarWeekData {
+            override val title: String = "Week Data Title"
+            override val weekdayLabels: List<String> = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+            override val days: List<CalendarDayCell> = days
+            override val weekNumber: String = "W7"
+        }
+        compose.setContent {
+            MaterialTheme {
+                CalendarWeekGrid(
+                    data = weekData,
+                    selection = CalendarSelection.empty(TypeSelectDay.Single),
+                    onDayClick = {},
+                    secondaryLabel = { epochDay -> if (epochDay == 200L) "Alt 1" else null },
+                    secondaryAccessibilityLabel = { epochDay -> if (epochDay == 200L) "Alternative Day 1" else null },
+                )
+            }
+        }
+
+        compose.onNodeWithText("W7").assertExists()
+        compose.onNodeWithText("Alt 1").assertExists()
+        compose.onNodeWithContentDescription("Day 1, Alternative Day 1").assertExists()
+    }
+
+    @Test
+    fun agendaRendersSecondarySubtitleAndAccessibilityDescription() {
+        val days = listOf(
+            CalendarDayCell(epochDay = 300L, label = "10", accessibilityLabel = "Friday, 10 Apr"),
+        )
+        compose.setContent {
+            MaterialTheme {
+                CalendarAgenda(
+                    days = days,
+                    selection = CalendarSelection.empty(TypeSelectDay.Single),
+                    onDayClick = {},
+                    secondaryLabel = { "Shawwal 22" },
+                    secondaryAccessibilityLabel = { "Friday, 22 Shawwal 1447" },
+                )
+            }
+        }
+
+        compose.onNodeWithText("Friday, 22 Shawwal 1447").assertExists()
+        compose.onNodeWithContentDescription("Friday, 10 Apr, Friday, 22 Shawwal 1447").assertExists()
+    }
 }

@@ -2,8 +2,8 @@
 
 Last CI emulator execution: 2026-11-16 (`3.0.0` release commit `a0c686e`: 44/44 tests passed in both
 emulator workflows; the earlier `1a24725` run passed 42/42 before the accessibility tests were
-added). Current uncommitted inventory: **46 test methods** (18 library, 28 sample, compile-verified
-on Linux with Kotlin `2.5.0-RC` / Platform `37.1`; not yet executed on an emulator).
+added). Current branch inventory: **52 test methods** (21 library, 31 sample, compile-verified on
+Linux with Kotlin `2.5.0-RC` / Platform `37.1`; awaiting CI API 29 emulator execution).
 
 Historical post-migration execution for `1a24725`: 42/42 tests passed in both the tablet and
 phone workflows with the `junit4.v2` rules.
@@ -13,8 +13,8 @@ Historical: the 2.1.0 release-tree runs passed the then 26 tests on API 29 on 20
 
 ## Test inventory
 
-The checked-in Android instrumentation suite contains **46 test methods**:
-**18 in `:library`** and **28 in `:calendarviewsample`**. The rules come from
+The checked-in Android instrumentation suite contains **52 test methods**:
+**21 in `:library`** and **31 in `:calendarviewsample`**. The rules come from
 `androidx.compose.ui.test.junit4.v2` and therefore use the standard test dispatcher. The source
 inventory is:
 
@@ -27,17 +27,18 @@ inventory is:
   touch target for small cells.
 - `CalendarMonthHeaderComposeTest` (2 tests): disabled navigation and the optional
   localized today suffix in a day description.
-- `CalendarProductViewsComposeTest` (2 tests): week grid and agenda rendering and click
-  reporting.
-- `CalendarAccessibilityComposeTest` (2 tests): day descriptions plus selected semantics, and
-  RTL with a 200% font scale.
+- `CalendarProductViewsComposeTest` (4 tests): week grid and agenda rendering, click reporting,
+  `CalendarWeekGrid(data = ...)` convenience overload, and secondary-calendar subtitles/accessibility labels.
+- `CalendarAccessibilityComposeTest` (3 tests): day descriptions plus selected semantics, RTL with a
+  200% font scale, and `CalendarMonthGrid(data = ...)` secondary-label blank-cell handling.
 - `ExampleInstrumentedTest` (1 test): generated package check.
 
 ### `:calendarviewsample`
 
-- `CalendarSampleUiTest` (9 tests): list/pager navigation, dialog selection, dialog
-  pager swipe, caption content, caption visibility, activity restoration and the two
-  main-viewport selection tests described below.
+- `CalendarSampleUiTest` (12 tests): Home showcase + explorer navigation, Calendars explorer with
+  dynamic secondary-calendar pairing and `Month`/`Week`/`Agenda` segmented modes, integrated
+  Heatmaps tab, list/pager navigation, dialog selection, dialog pager swipe, caption content,
+  caption visibility, activity restoration and main-viewport selection tests.
 - `ChineseComposeRegressionTest` (8 tests): Chinese month-state restoration, boundary
   windows in Single/Pager mode, invalid-anchor recovery, Gregorian overlay navigation and
   agenda label rebuilding.

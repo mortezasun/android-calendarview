@@ -1,5 +1,6 @@
 package com.develotter.calendarview.calendars.solarHijri.compose
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
@@ -7,8 +8,11 @@ import androidx.compose.ui.graphics.Color
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriEngine
 import com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeCalendarMonth
+import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeAccessibilityLabel
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeDayCell
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
+import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthTitle
+import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeSecondaryLabel
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarDayMarker
 import com.develotter.calendarview.compose.CalendarMonthData
@@ -25,6 +29,24 @@ data class SolarHijriMonthData(
     override val firstDayOffset: Int,
     override val days: List<CalendarDayCell>,
 ) : CalendarMonthData
+
+/** Localized Solar Hijri month-year title, for example `Farvardin 1404`. */
+fun solarHijriMonthTitle(month: SolarHijriDate): String =
+    solarHijriNativeMonthTitle(month)
+
+/**
+ * Compact Solar Hijri secondary label for another primary calendar grid, or `null` if [epochDay]
+ * falls outside the supported Solar Hijri range.
+ */
+fun solarHijriSecondaryLabel(epochDay: Long): String? =
+    solarHijriNativeSecondaryLabel(epochDay)
+
+/**
+ * Localized full Solar Hijri date description suitable for screen readers and date inspectors, or
+ * `null` if [epochDay] falls outside the supported Solar Hijri range.
+ */
+fun solarHijriAccessibilityLabel(epochDay: Long): String? =
+    solarHijriNativeAccessibilityLabel(epochDay)
 
 /** Formats one Solar Hijri date; [isDateEnabled] receives the absolute epoch day. */
 fun solarHijriDayCell(
@@ -54,11 +76,11 @@ fun solarHijriMonthData(
     )
 }
 
-/**
- * Controlled month UI with independently visible adjacent dates, blank by default.
- * Adjacent dates use checked Solar Hijri conversion and the same enabled predicate. Clicking
- * selects/calls back without navigation. Locale does not set layout direction.
- */
+/** Binary-compatible overload for callers compiled against 3.0.0. */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 3.0.0.",
+    level = DeprecationLevel.HIDDEN,
+)
 @Composable
 fun SolarHijriCalendarMonth(
     month: SolarHijriDate,
@@ -78,6 +100,56 @@ fun SolarHijriCalendarMonth(
     weekNumber: ((Long) -> String?)? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ) {
+    SolarHijriCalendarMonth(
+        month = month,
+        selection = selection,
+        onDateClick = onDateClick,
+        modifier = modifier,
+        firstDayOfWeek = firstDayOfWeek,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        todayEpochDay = todayEpochDay,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = todayDescription,
+        markers = markers,
+        weekNumber = weekNumber,
+        isDateEnabled = isDateEnabled,
+        secondaryLabel = null,
+        secondaryAccessibilityLabel = null,
+    )
+}
+
+/**
+ * Controlled month UI with independently visible adjacent dates, blank by default.
+ * Adjacent dates use checked Solar Hijri conversion and the same enabled predicate. [secondaryLabel]
+ * and [secondaryAccessibilityLabel] display an optional second calendar label below each day cell.
+ * Clicking selects/calls back without navigation. Locale does not set layout direction.
+ */
+@Composable
+fun SolarHijriCalendarMonth(
+    month: SolarHijriDate,
+    selection: CalendarSelection,
+    onDateClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    firstDayOfWeek: Int = DEFAULT_FIRST_DAY_OF_WEEK,
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    todayEpochDay: Long = SolarHijriDate.now().toEpochDay(),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color? = null,
+    todayDescription: String? = null,
+    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
+    weekNumber: ((Long) -> String?)? = null,
+    isDateEnabled: (Long) -> Boolean = { true },
+    secondaryLabel: ((Long) -> String?)? = null,
+    secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+    dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
+) {
     SolarHijriNativeCalendarMonth(
         month = month,
         selection = selection,
@@ -95,5 +167,8 @@ fun SolarHijriCalendarMonth(
         markers = markers,
         weekNumber = weekNumber,
         isDateEnabled = isDateEnabled,
+        secondaryLabel = secondaryLabel,
+        secondaryAccessibilityLabel = secondaryAccessibilityLabel,
+        dayContent = dayContent,
     )
 }

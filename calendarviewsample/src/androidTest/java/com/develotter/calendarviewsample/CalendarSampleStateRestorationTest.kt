@@ -58,6 +58,9 @@ class CalendarSampleStateRestorationTest {
                     Text("chineseStyle:${ui.chineseStyleName}")
                     Text("showChineseDetails:${ui.showChineseDetails}")
                     Text("chineseGregorianGrid:${ui.chineseGregorianGrid}")
+                    Text("secondary:${ui.secondaryCalendarName}")
+                    Text("destination:${ui.destinationName}")
+                    Text("viewMode:${ui.calendarViewModeName}")
 
                     Button(onClick = {
                         ui.selectCalendar(SampleCalendar.Hijri)
@@ -79,6 +82,9 @@ class CalendarSampleStateRestorationTest {
                         ui.chineseStyleName = "SimplifiedChinese"
                         ui.showChineseDetails = true
                         ui.chineseGregorianGrid = true
+                        ui.secondaryCalendarName = SampleSecondaryCalendar.Chinese.name
+                        ui.navigateTo(SampleDestination.Calendars)
+                        ui.calendarViewModeName = SampleCalendarViewMode.Week.name
                     }) {
                         Text("modify")
                     }
@@ -107,6 +113,9 @@ class CalendarSampleStateRestorationTest {
         compose.onNodeWithText("chineseStyle:SimplifiedChinese").assertExists()
         compose.onNodeWithText("showChineseDetails:true").assertExists()
         compose.onNodeWithText("chineseGregorianGrid:true").assertExists()
+        compose.onNodeWithText("secondary:Chinese").assertExists()
+        compose.onNodeWithText("destination:Calendars").assertExists()
+        compose.onNodeWithText("viewMode:Week").assertExists()
 
         restoration.emulateSavedInstanceStateRestore()
 
@@ -129,6 +138,9 @@ class CalendarSampleStateRestorationTest {
         compose.onNodeWithText("chineseStyle:SimplifiedChinese").assertTextEquals("chineseStyle:SimplifiedChinese")
         compose.onNodeWithText("showChineseDetails:true").assertTextEquals("showChineseDetails:true")
         compose.onNodeWithText("chineseGregorianGrid:true").assertTextEquals("chineseGregorianGrid:true")
+        compose.onNodeWithText("secondary:Chinese").assertTextEquals("secondary:Chinese")
+        compose.onNodeWithText("destination:Calendars").assertTextEquals("destination:Calendars")
+        compose.onNodeWithText("viewMode:Week").assertTextEquals("viewMode:Week")
     }
 
     @Test

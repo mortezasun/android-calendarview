@@ -3,6 +3,7 @@ package com.develotter.calendarview.compose
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,12 +25,48 @@ import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.selection.CalendarSelection
 
 /**
+ * Binary-compatible overload for callers compiled against 3.0.0.
+ */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 3.0.0.",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+fun CalendarAgenda(
+    days: List<CalendarDayCell>,
+    selection: CalendarSelection,
+    onDayClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
+    todayDescription: String? = null,
+    todayBorderColor: Color? = null,
+    dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ ->
+        Text(day.accessibilityLabel)
+    },
+) {
+    CalendarAgenda(
+        days = days,
+        selection = selection,
+        onDayClick = onDayClick,
+        modifier = modifier,
+        markers = markers,
+        todayDescription = todayDescription,
+        todayBorderColor = todayBorderColor,
+        secondaryLabel = null,
+        secondaryAccessibilityLabel = null,
+        dayContent = dayContent,
+    )
+}
+
+/**
  * Vertical day agenda with caller-owned selection and markers.
  *
  * [days] are rendered in the supplied order and need unique epoch identities. The host must give
  * the list a bounded height. [dayContent] receives the cell, selected state and range-endpoint
- * state; the default shows the full localized accessibility label. [todayDescription] is only
- * appended to today's accessible description. Marker descriptions are appended for every day.
+ * state; the default shows the full localized accessibility label. [secondaryLabel] and
+ * [secondaryAccessibilityLabel] optionally display and announce a second calendar system per row.
+ * [todayDescription] is only appended to today's accessible description. Marker descriptions are
+ * appended for every day.
  */
 @Composable
 fun CalendarAgenda(
@@ -40,6 +77,8 @@ fun CalendarAgenda(
     markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
     todayDescription: String? = null,
     todayBorderColor: Color? = null,
+    secondaryLabel: ((Long) -> String?)? = null,
+    secondaryAccessibilityLabel: ((Long) -> String?)? = null,
     dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ ->
         Text(day.accessibilityLabel)
     },
@@ -59,11 +98,27 @@ fun CalendarAgenda(
         items(items = days, key = { it.epochDay }) { day ->
             val selected = day.epochDay in selection
             val dayMarkers = markers[day.epochDay].orEmpty()
-            val suffix = calendarMarkerDescription(dayMarkers, day.isToday, todayDescription)
-            val description = if (suffix == null) {
-                day.accessibilityLabel
+            val secondaryDescription = if (day.label.isNotEmpty()) {
+                secondaryAccessibilityLabel?.invoke(day.epochDay)?.takeIf { it.isNotBlank() }
             } else {
-                "${day.accessibilityLabel}, $suffix"
+                null
+            }
+            val secondaryLine = if (day.label.isNotEmpty()) {
+                (secondaryDescription ?: secondaryLabel?.invoke(day.epochDay))?.takeIf { it.isNotBlank() }
+            } else {
+                null
+            }
+            val suffix = calendarMarkerDescription(dayMarkers, day.isToday, todayDescription)
+            val description = buildString {
+                append(day.accessibilityLabel)
+                if (secondaryDescription != null) {
+                    if (isNotEmpty()) append(", ")
+                    append(secondaryDescription)
+                }
+                if (suffix != null) {
+                    if (isNotEmpty()) append(", ")
+                    append(suffix)
+                }
             }
             Surface(
                 modifier = Modifier
@@ -93,7 +148,20 @@ fun CalendarAgenda(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Box(Modifier.weight(1f)) {
-                        dayContent(day, selected, selection.isRangeEndpoint(day.epochDay))
+                        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                            dayContent(day, selected, selection.isRangeEndpoint(day.epochDay))
+                            if (secondaryLine != null) {
+                                Text(
+                                    text = secondaryLine,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = if (selected) {
+                                        style.selectedContentColor ?: MaterialTheme.colorScheme.onPrimaryContainer
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurfaceVariant
+                                    },
+                                )
+                            }
+                        }
                     }
                     if (dayMarkers.isNotEmpty()) {
                         CalendarMarkerRow(dayMarkers)

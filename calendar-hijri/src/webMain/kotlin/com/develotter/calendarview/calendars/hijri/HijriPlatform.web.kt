@@ -12,6 +12,8 @@ internal expect fun webHijriPartsFromEpochMs(epochMs: Double): String
 
 internal expect fun webHijriFormatMonthYear(epochMs: Double): String
 
+internal expect fun webHijriFormatShortMonth(epochMs: Double): String
+
 internal expect fun webHijriFormatFullDate(canonicalMs: Double, actualMs: Double): String
 
 internal expect fun webHijriFormatShortDayMonthYear(epochMs: Double): String
@@ -82,6 +84,9 @@ internal actual object HijriPlatform {
 
     actual fun formatMonthYear(year: Int, month: Int): String =
         webHijriFormatMonthYear(utcNoonMillis(toEpochDay(HijriDate(year, month, 1))))
+
+    actual fun formatShortMonth(year: Int, month: Int): String =
+        webHijriFormatShortMonth(utcNoonMillis(toEpochDay(HijriDate(year, month, 1))))
 
     actual fun formatFullDate(date: HijriDate, weekdayEpochDay: Long): String =
         webHijriFormatFullDate(utcNoonMillis(toEpochDay(date)), utcNoonMillis(weekdayEpochDay))

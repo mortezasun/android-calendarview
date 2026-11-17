@@ -107,6 +107,17 @@ internal actual object HijriPlatform {
         return formatter.stringFromDate(utcNoonDate(epochDay))
     }
 
+    actual fun formatShortMonth(year: Int, month: Int): String {
+        val epochDay = toEpochDay(HijriDate(year, month, 1))
+        val formatter = NSDateFormatter().apply {
+            calendar = ummAlQuraUtcCalendar()
+            locale = NSLocale.currentLocale
+            timeZone = utcTimeZone()
+            dateFormat = "LLL"
+        }
+        return formatter.stringFromDate(utcNoonDate(epochDay))
+    }
+
     actual fun formatFullDate(date: HijriDate, weekdayEpochDay: Long): String {
         val canonicalEpoch = toEpochDay(date)
         val cal = ummAlQuraUtcCalendar()

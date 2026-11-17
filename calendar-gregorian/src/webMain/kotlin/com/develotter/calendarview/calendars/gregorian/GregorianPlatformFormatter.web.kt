@@ -10,6 +10,8 @@ internal expect fun webGregorianDefaultFirstDayOfWeek(): Int
 
 internal expect fun webGregorianFormatMonthYear(epochMs: Double): String
 
+internal expect fun webGregorianFormatShortMonth(epochMs: Double): String
+
 internal expect fun webGregorianFormatFullDate(epochMs: Double): String
 
 internal expect fun webGregorianFormatShortDayMonth(epochMs: Double): String
@@ -34,6 +36,9 @@ internal actual object GregorianPlatformFormatter {
 
     actual fun formatMonthYear(year: Int, month: Int): String =
         webGregorianFormatMonthYear(utcNoonMillis(GregorianYearMonth.gregorianToEpochDay(year, month, 1)))
+
+    actual fun formatShortMonth(year: Int, month: Int): String =
+        webGregorianFormatShortMonth(utcNoonMillis(GregorianYearMonth.gregorianToEpochDay(year, month, 1)))
 
     actual fun formatFullDate(epochDay: Long): String =
         webGregorianFormatFullDate(utcNoonMillis(epochDay))

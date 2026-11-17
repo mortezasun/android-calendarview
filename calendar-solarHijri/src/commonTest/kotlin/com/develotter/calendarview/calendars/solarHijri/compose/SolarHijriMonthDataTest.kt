@@ -60,4 +60,15 @@ class SolarHijriMonthDataTest {
         assertEquals(1, data.days.count { it.isToday })
         assertEquals(today, data.days.single { it.isToday }.epochDay)
     }
+
+    @Test
+    fun titleAndSecondaryHelpersDelegateAndReturnNullOutOfRange() {
+        val first = SolarHijriDate(1404, 1, 1)
+        val firstEpochDay = first.toEpochDay()
+        assertEquals(SolarHijriLocale.formatMonthYear(1404, 1), solarHijriMonthTitle(first))
+        assertTrue(!solarHijriSecondaryLabel(firstEpochDay).isNullOrBlank())
+        assertTrue(!solarHijriAccessibilityLabel(firstEpochDay).isNullOrBlank())
+        assertEquals(null, solarHijriSecondaryLabel(-1_000_000L))
+        assertEquals(null, solarHijriAccessibilityLabel(-1_000_000L))
+    }
 }

@@ -24,20 +24,21 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.test.swipeLeft
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.develotter.calendarview.calendars.chineseCompose.chineseAccessibilityLabel
+import com.develotter.calendarview.calendars.chineseCompose.chineseMonthData
+import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthData
 import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
+import com.develotter.calendarview.calendars.hijri.compose.hijriAccessibilityLabel
 import com.develotter.calendarview.calendars.hijri.compose.hijriMonthData
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthData
-import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
-import com.develotter.calendarview.calendars.chineseCompose.chineseMonthData
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
-import java.util.Locale
 
 /** Exercises the real launcher and its production callbacks, not a replacement fixture. */
 @RunWith(AndroidJUnit4::class)
@@ -50,10 +51,14 @@ class CalendarSampleUiTest {
         try {
             node.performScrollTo()
         } catch (_: AssertionError) {
-            // Node is outside any scrollable container (e.g. dialog action bar)
+            // Node is outside any scrollable container (e.g. navigation bar / dialog action bar)
         }
         node.performClick()
         compose.waitForIdle()
+    }
+
+    private fun openPlayground() {
+        click("Playground")
     }
 
     private fun clickDialog(label: String) {
@@ -133,7 +138,59 @@ class CalendarSampleUiTest {
         gregorianMonthData(monthOf(date)).days.first { it.epochDay == date.toEpochDay() }.accessibilityLabel
 
     @Test
+    fun homeShowcaseDisplaysAllCalendarModulesAndNavigatesToExplorer() {
+        compose.onNodeWithText("Multi-Calendar Compose Toolkit").assertIsDisplayed()
+        compose.onNodeWithText("Today Across All Calendars").assertExists()
+        for (info in SampleCalendarCatalog) {
+            val artifact = compose.onNodeWithText(info.artifact)
+            artifact.performScrollTo()
+            artifact.assertIsDisplayed()
+        }
+        click("Explore Hijri")
+        compose.onNodeWithText("Hijri Module").assertIsDisplayed()
+    }
+
+    @Test
+    fun calendarsExplorerSupportsDynamicSecondaryLabelsAndViewModes() {
+        val firstOfMonth = LocalDate.now().withDayOfMonth(1)
+        val firstEpochDay = firstOfMonth.toEpochDay()
+        click("Calendars")
+        compose.onNodeWithText("Gregorian Module").assertIsDisplayed()
+
+        click("2nd: Hijri")
+        val hijriSecondaryA11y = requireNotNull(hijriAccessibilityLabel(firstEpochDay))
+        val cellWithHijri = compose.onNodeWithContentDescription(hijriSecondaryA11y, substring = true)
+        cellWithHijri.performScrollTo()
+        cellWithHijri.assertIsDisplayed()
+
+        click("Week")
+        compose.onNodeWithContentDescription(
+            requireNotNull(hijriAccessibilityLabel(LocalDate.now().toEpochDay())),
+            substring = true,
+        ).assertExists()
+
+        click("Agenda")
+        compose.onNode(hasText("Agenda:", substring = true)).assertExists()
+
+        click("Month")
+        click("SolarHijriNative")
+        compose.onNodeWithText("Solar Hijri (Native) Module").assertIsDisplayed()
+        click("2nd: Chinese")
+        val chineseSecondaryA11y = requireNotNull(chineseAccessibilityLabel(firstEpochDay))
+        val solarWithChinese = compose.onNodeWithContentDescription(chineseSecondaryA11y, substring = true)
+        solarWithChinese.performScrollTo()
+        solarWithChinese.assertIsDisplayed()
+    }
+
+    @Test
+    fun heatmapsTabRendersIntegratedHeatmapView() {
+        click("Heatmaps")
+        compose.onNode(hasText("Gregorian heatmap:", substring = true)).assertIsDisplayed()
+    }
+
+    @Test
     fun swipeThenNextDialogAndModeSwitchUseTheReachedMonth() {
+        openPlayground()
         val initial = monthOf(LocalDate.now())
         click("HorizontalPager")
         assertMonth(initial)
@@ -153,6 +210,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun everyListAndPagerModeAcceptsProgrammaticNavigation() {
+        openPlayground()
         val initial = monthOf(LocalDate.now())
         assertMonth(initial)
         for (mode in listOf("VerticalList", "HorizontalList", "HorizontalPager", "VerticalPager")) {
@@ -167,6 +225,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun selectingVisibleDayInMainViewportUpdatesSelection() {
+        openPlayground()
         val selected = LocalDate.ofEpochDay(monthOf(LocalDate.now()).atDay(1))
         val description = englishDescription(selected)
         selectSingleGregorian()
@@ -180,6 +239,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun touchingVisibleDayInMainViewportUpdatesSelection() {
+        openPlayground()
         val selected = LocalDate.ofEpochDay(monthOf(LocalDate.now()).atDay(1))
         val description = englishDescription(selected)
         selectSingleGregorian()
@@ -193,6 +253,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun selectedDateAndVisibleMonthSurviveActualActivityRecreation() {
+        openPlayground()
         val initial = monthOf(LocalDate.now())
         val selected = LocalDate.ofEpochDay(initial.atDay(1))
         val description = englishDescription(selected)
@@ -219,6 +280,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun selectingInDialogUpdatesTheMainSelectionSummary() {
+        openPlayground()
         val selected = LocalDate.ofEpochDay(monthOf(LocalDate.now()).atDay(1))
         val description = englishDescription(selected)
         click("Open dialog")
@@ -231,6 +293,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun dialogPagerSwipesToAdjacentMonth() {
+        openPlayground()
         val initial = monthOf(LocalDate.now())
         click("Open dialog")
         compose.onNode(hasText(caption(initial)) and hasAnyAncestor(isDialog())).assertIsDisplayed()
@@ -243,6 +306,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun everyCalendarAndLocaleRendersTheExpectedCaptionContent() {
+        openPlayground()
         val today = LocalDate.now()
         for (tag in listOf("en", "de", "fa", "ar")) {
             click(tag)
@@ -268,6 +332,7 @@ class CalendarSampleUiTest {
 
     @Test
     fun gregorianCaptionIsDisplayedInSingleMainViewport() {
+        openPlayground()
         val today = LocalDate.now()
         click("en")
         click("Gregorian")

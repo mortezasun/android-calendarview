@@ -1,6 +1,6 @@
 package com.develotter.calendarview.calendars.hijri.compose
 
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
@@ -23,6 +23,39 @@ data class HijriMonthData(
     override val firstDayOffset: Int,
     override val days: List<CalendarDayCell>,
 ) : CalendarMonthData
+
+/** Localized Hijri month-year title, for example `Shawwal 1447`. */
+fun hijriMonthTitle(month: HijriDate): String =
+    HijriPlatform.formatMonthYear(month.year, month.month)
+
+/**
+ * Compact Hijri secondary label for another primary calendar grid: renders the short month name
+ * on the 1st of the Hijri month and the localized day number on other days, or `null` if
+ * [epochDay] falls outside the platform's supported Hijri range.
+ */
+fun hijriSecondaryLabel(
+    epochDay: Long,
+    dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+): String? = runCatching {
+    val date = dateProvider.dateForEpochDay(epochDay)
+    if (date.dayOfMonth == 1) {
+        HijriPlatform.formatShortMonth(date.year, date.month)
+    } else {
+        HijriPlatform.formatDayNumber(date.dayOfMonth)
+    }
+}.getOrNull()
+
+/**
+ * Localized full Hijri date description suitable for screen readers and date inspectors, or `null`
+ * if [epochDay] falls outside the platform's supported Hijri range.
+ */
+fun hijriAccessibilityLabel(
+    epochDay: Long,
+    dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+): String? = runCatching {
+    val date = dateProvider.dateForEpochDay(epochDay)
+    HijriPlatform.formatFullDate(date, epochDay)
+}.getOrNull()
 
 /** Formats a Hijri day with its own chronology, including dates in adjacent months. */
 fun hijriDayCell(
@@ -66,7 +99,7 @@ fun hijriMonthData(
     val first = month.copy(dayOfMonth = 1)
     val firstEpochDay = dateProvider.epochDayFor(first)
     return HijriMonthData(
-        title = HijriPlatform.formatMonthYear(first.year, first.month),
+        title = hijriMonthTitle(first),
         weekdayLabels = hijriWeekdayLabels(firstDayOfWeek),
         // The displayed Hijri date may be offset from its absolute timeline weekday.
         firstDayOffset = hijriDayOfWeekOffset(firstEpochDay, firstDayOfWeek),
@@ -81,12 +114,11 @@ fun hijriMonthData(
     )
 }
 
-/**
- * Controlled Hijri month UI using [dateProvider]. Adjacent cells retain the provider's
- * chronology and use the same enabled predicate and click callback. [onDateClick] receives the
- * absolute epoch day of the clicked cell. Visibility is independent and defaults to blank
- * padding. Engine date-range errors propagate. Locale does not set layout direction.
- */
+/** Binary-compatible overload for callers compiled against 3.0.0. */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 3.0.0.",
+    level = DeprecationLevel.HIDDEN,
+)
 @Composable
 fun HijriCalendarMonth(
     month: HijriDate,
@@ -107,6 +139,59 @@ fun HijriCalendarMonth(
     dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
     isDateEnabled: (Long) -> Boolean = { true },
 ) {
+    HijriCalendarMonth(
+        month = month,
+        selection = selection,
+        onDateClick = onDateClick,
+        modifier = modifier,
+        firstDayOfWeek = firstDayOfWeek,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        todayEpochDay = todayEpochDay,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = todayDescription,
+        markers = markers,
+        weekNumber = weekNumber,
+        dateProvider = dateProvider,
+        isDateEnabled = isDateEnabled,
+        secondaryLabel = null,
+        secondaryAccessibilityLabel = null,
+    )
+}
+
+/**
+ * Controlled Hijri month UI using [dateProvider]. Adjacent cells retain the provider's
+ * chronology and use the same enabled predicate and click callback. [onDateClick] receives the
+ * absolute epoch day of the clicked cell. Visibility is independent and defaults to blank
+ * padding. [secondaryLabel] and [secondaryAccessibilityLabel] display an optional second calendar
+ * label below each day cell. Engine date-range errors propagate. Locale does not set layout direction.
+ */
+@Composable
+fun HijriCalendarMonth(
+    month: HijriDate,
+    selection: CalendarSelection,
+    onDateClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    firstDayOfWeek: Int = HijriDefaultFirstDayOfWeek,
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    todayEpochDay: Long = HijriPlatform.currentEpochDay(),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color? = null,
+    todayDescription: String? = null,
+    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
+    weekNumber: ((Long) -> String?)? = null,
+    dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+    isDateEnabled: (Long) -> Boolean = { true },
+    secondaryLabel: ((Long) -> String?)? = null,
+    secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+    dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
+) {
     val data = hijriMonthData(
         month = month,
         firstDayOfWeek = firstDayOfWeek,
@@ -118,12 +203,15 @@ fun HijriCalendarMonth(
         title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
         days = data.days, selection = selection, modifier = modifier,
         onDayClick = onDateClick,
+        dayContent = dayContent,
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
         showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
         todayBorderColor = todayBorderColor,
         todayDescription = todayDescription,
         markers = markers,
         weekNumber = weekNumber,
+        secondaryLabel = secondaryLabel,
+        secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         adjacentDayProvider = { adjacentEpochDay ->
             hijriDayCellForEpoch(
                 date = dateProvider.dateForEpochDay(adjacentEpochDay),

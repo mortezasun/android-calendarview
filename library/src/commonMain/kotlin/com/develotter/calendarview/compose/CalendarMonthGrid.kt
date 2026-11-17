@@ -27,6 +27,8 @@ import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.selection.CalendarSelection
 
@@ -81,6 +83,119 @@ fun CalendarMonthGrid(
         todayDescription = null,
         markers = emptyMap(),
         weekNumber = null,
+        secondaryLabel = null,
+        secondaryAccessibilityLabel = null,
+    )
+}
+
+/**
+ * Binary-compatible overload for callers compiled against 3.0.0.
+ */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 3.0.0.",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+fun CalendarMonthGrid(
+    title: String,
+    weekdayLabels: List<String>,
+    firstDayOffset: Int,
+    days: List<CalendarDayCell>,
+    selection: CalendarSelection,
+    onDayClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    header: @Composable (String) -> Unit = { Text(it, style = MaterialTheme.typography.titleMedium) },
+    weekdayContent: @Composable (String) -> Unit = { Text(it) },
+    dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    adjacentDayProvider: ((Long) -> CalendarDayCell)? = null,
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color? = null,
+    todayDescription: String? = null,
+    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
+    weekNumber: ((Long) -> String?)? = null,
+    weekNumberContent: @Composable (String) -> Unit = { Text(it) },
+) {
+    CalendarMonthGrid(
+        title = title,
+        weekdayLabels = weekdayLabels,
+        firstDayOffset = firstDayOffset,
+        days = days,
+        selection = selection,
+        onDayClick = onDayClick,
+        modifier = modifier,
+        header = header,
+        weekdayContent = weekdayContent,
+        dayContent = dayContent,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        adjacentDayProvider = adjacentDayProvider,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = todayDescription,
+        markers = markers,
+        weekNumber = weekNumber,
+        weekNumberContent = weekNumberContent,
+        secondaryLabel = null,
+        secondaryAccessibilityLabel = null,
+    )
+}
+
+/**
+ * Convenience overload rendering a shared [CalendarMonthData] snapshot directly.
+ */
+@Composable
+fun CalendarMonthGrid(
+    data: CalendarMonthData,
+    selection: CalendarSelection,
+    onDayClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    header: @Composable (String) -> Unit = { Text(it, style = MaterialTheme.typography.titleMedium) },
+    weekdayContent: @Composable (String) -> Unit = { Text(it) },
+    dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    adjacentDayProvider: ((Long) -> CalendarDayCell)? = null,
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color? = null,
+    todayDescription: String? = null,
+    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
+    weekNumber: ((Long) -> String?)? = null,
+    weekNumberContent: @Composable (String) -> Unit = { Text(it) },
+    secondaryLabel: ((Long) -> String?)? = null,
+    secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+) {
+    CalendarMonthGrid(
+        title = data.title,
+        weekdayLabels = data.weekdayLabels,
+        firstDayOffset = data.firstDayOffset,
+        days = data.days,
+        selection = selection,
+        onDayClick = onDayClick,
+        modifier = modifier,
+        header = header,
+        weekdayContent = weekdayContent,
+        dayContent = dayContent,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        adjacentDayProvider = adjacentDayProvider,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = todayDescription,
+        markers = markers,
+        weekNumber = weekNumber,
+        weekNumberContent = weekNumberContent,
+        secondaryLabel = secondaryLabel,
+        secondaryAccessibilityLabel = secondaryAccessibilityLabel,
     )
 }
 
@@ -100,6 +215,9 @@ fun CalendarMonthGrid(
  * [markers] are keyed by epoch day and render up to four dots below the day content. Their
  * localized descriptions are appended to the day's accessibility label. [weekNumber] adds a
  * leading, caller-formatted week column when non-null; it receives the first day of the week.
+ * [secondaryLabel] renders an optional compact second line (for example a second calendar
+ * system's day or month name) beneath [dayContent] without coupling `:library` to any calendar
+ * engine; [secondaryAccessibilityLabel] appends that secondary date description for screen readers.
  * [LocalCalendarStyle] supplies optional colors; null colors fall back to MaterialTheme.
  */
 @Composable
@@ -125,6 +243,8 @@ fun CalendarMonthGrid(
     markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
     weekNumber: ((Long) -> String?)? = null,
     weekNumberContent: @Composable (String) -> Unit = { Text(it) },
+    secondaryLabel: ((Long) -> String?)? = null,
+    secondaryAccessibilityLabel: ((Long) -> String?)? = null,
 ) {
     require(weekdayLabels.size == 7) { "Exactly seven weekday labels are required" }
     val cells = buildCalendarMonthCells(
@@ -194,11 +314,22 @@ fun CalendarMonthGrid(
                         } else {
                             val selected = day.epochDay in selection
                             val dayMarkers = markers[day.epochDay].orEmpty()
-                            val suffix = calendarMarkerDescription(dayMarkers, day.isToday, todayDescription)
-                            val description = if (suffix == null) {
-                                day.accessibilityLabel
+                            val secondaryDescription = if (day.label.isNotEmpty()) {
+                                secondaryAccessibilityLabel?.invoke(day.epochDay)?.takeIf { it.isNotBlank() }
                             } else {
-                                "${day.accessibilityLabel}, $suffix"
+                                null
+                            }
+                            val suffix = calendarMarkerDescription(dayMarkers, day.isToday, todayDescription)
+                            val description = buildString {
+                                append(day.accessibilityLabel)
+                                if (secondaryDescription != null) {
+                                    if (isNotEmpty()) append(", ")
+                                    append(secondaryDescription)
+                                }
+                                if (suffix != null) {
+                                    if (isNotEmpty()) append(", ")
+                                    append(suffix)
+                                }
                             }
                             Surface(
                                 modifier = cellModifier
@@ -234,11 +365,36 @@ fun CalendarMonthGrid(
                                 },
                                 shape = RoundedCornerShape(8.dp),
                             ) {
+                                val extraLabel = if (day.label.isNotEmpty()) {
+                                    secondaryLabel?.invoke(day.epochDay)?.takeIf { it.isNotBlank() }
+                                } else {
+                                    null
+                                }
                                 Column(
-                                    Modifier.padding(8.dp),
+                                    Modifier.padding(
+                                        horizontal = if (secondaryLabel != null) 4.dp else 8.dp,
+                                        vertical = if (secondaryLabel != null) 6.dp else 8.dp,
+                                    ),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
                                     dayContent(day, selected, selection.isRangeEndpoint(day.epochDay))
+                                    if (extraLabel != null) {
+                                        Text(
+                                            text = extraLabel,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = when {
+                                                selected -> style.selectedContentColor
+                                                    ?: MaterialTheme.colorScheme.onPrimaryContainer
+                                                !day.isCurrentMonth -> style.adjacentContentColor
+                                                    ?: MaterialTheme.colorScheme.onSurfaceVariant
+                                                else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                            },
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier.padding(top = 1.dp),
+                                        )
+                                    }
                                     if (dayMarkers.isNotEmpty()) {
                                         Spacer(Modifier.height(2.dp))
                                         CalendarMarkerRow(dayMarkers)

@@ -43,6 +43,12 @@ internal actual object HijriPlatform {
         return HijrahDate.of(year, month, 1).format(formatter)
     }
 
+    actual fun formatShortMonth(year: Int, month: Int): String {
+        val formatter = DateTimeFormatter.ofPattern("LLL", Locale.getDefault())
+            .withChronology(HijrahChronology.INSTANCE)
+        return HijrahDate.of(year, month, 1).format(formatter)
+    }
+
     actual fun formatFullDate(date: HijriDate, weekdayEpochDay: Long): String {
         val hijrahDate = HijrahDate.of(date.year, date.month, date.dayOfMonth)
         val actualWeekday = LocalDate.ofEpochDay(weekdayEpochDay).dayOfWeek.value.toLong()

@@ -65,6 +65,17 @@ internal actual object GregorianPlatformFormatter {
         return formatter.stringFromDate(utcNoonDate(epochDay))
     }
 
+    actual fun formatShortMonth(year: Int, month: Int): String {
+        val epochDay = GregorianYearMonth.gregorianToEpochDay(year, month, 1)
+        val formatter = NSDateFormatter().apply {
+            calendar = gregorianUtcCalendar()
+            locale = NSLocale.currentLocale
+            timeZone = utcTimeZone()
+            dateFormat = "LLL"
+        }
+        return formatter.stringFromDate(utcNoonDate(epochDay))
+    }
+
     actual fun formatFullDate(epochDay: Long): String {
         val formatter = NSDateFormatter().apply {
             calendar = gregorianUtcCalendar()

@@ -18,6 +18,21 @@ import com.develotter.calendarview.enums.TypeSelectDay
 import java.time.LocalDate
 import java.util.Locale
 
+/** Top-level destinations in the native Material 3 sample navigation shell. */
+internal enum class SampleDestination(val label: String) {
+    Home("Home"),
+    Calendars("Calendars"),
+    Playground("Playground"),
+    Heatmaps("Heatmaps"),
+}
+
+/** Focused view modes inside each individual calendar page. */
+internal enum class SampleCalendarViewMode(val label: String) {
+    Month("Month"),
+    Week("Week"),
+    Agenda("Agenda"),
+}
+
 /**
  * Demo-only UI configuration. Every value is backed by `rememberSaveable`, so it survives
  * rotation, folding and window resizing. Selection itself stays in
@@ -45,6 +60,9 @@ internal class CalendarSampleState(
     private val chineseStyleNameState: MutableState<String> = mutableStateOf(ChineseTextStyle.English.name),
     private val showChineseDetailsState: MutableState<Boolean> = mutableStateOf(false),
     private val chineseGregorianGridState: MutableState<Boolean> = mutableStateOf(false),
+    private val secondaryCalendarNameState: MutableState<String> = mutableStateOf(SampleSecondaryCalendar.None.name),
+    private val destinationNameState: MutableState<String> = mutableStateOf(SampleDestination.Home.name),
+    private val calendarViewModeNameState: MutableState<String> = mutableStateOf(SampleCalendarViewMode.Month.name),
 ) {
     var calendarName: String by calendarNameState
     var modeName: String by modeNameState
@@ -65,6 +83,9 @@ internal class CalendarSampleState(
     var error: String? by errorState
     var chineseStyleName: String by chineseStyleNameState
     var showChineseDetails: Boolean by showChineseDetailsState
+    var secondaryCalendarName: String by secondaryCalendarNameState
+    var destinationName: String by destinationNameState
+    var calendarViewModeName: String by calendarViewModeNameState
 
     /**
      * Gregorian overlay toggle. Turning it off returns to the Chinese month grid; an anchor that
@@ -83,6 +104,24 @@ internal class CalendarSampleState(
     val mode: TypeSelectDay get() = TypeSelectDay.valueOf(modeName)
     val locale: Locale get() = Locale.forLanguageTag(localeTag)
     val chineseStyle: ChineseTextStyle get() = ChineseTextStyle.valueOf(chineseStyleName)
+    val secondaryCalendar: SampleSecondaryCalendar get() = SampleSecondaryCalendar.valueOf(secondaryCalendarName)
+    val destination: SampleDestination get() = SampleDestination.valueOf(destinationName)
+    val calendarViewMode: SampleCalendarViewMode get() = SampleCalendarViewMode.valueOf(calendarViewModeName)
+
+    /** Switches destination in the Material 3 navigation shell. */
+    fun navigateTo(target: SampleDestination) {
+        destinationName = target.name
+    }
+
+    /** Opens a specific calendar module page inside [SampleDestination.Calendars]. */
+    fun openCalendar(
+        item: SampleCalendar,
+        secondary: SampleSecondaryCalendar = secondaryCalendar,
+    ) {
+        secondaryCalendarName = secondary.name
+        selectCalendar(item)
+        navigateTo(SampleDestination.Calendars)
+    }
 
     /** Switches the calendar engine and clears a stale navigation error. */
     fun selectCalendar(item: SampleCalendar) {
@@ -172,9 +211,13 @@ internal fun rememberCalendarSampleState(): CalendarSampleState {
     val chineseStyleName = rememberSaveable { mutableStateOf(ChineseTextStyle.English.name) }
     val showChineseDetails = rememberSaveable { mutableStateOf(false) }
     val chineseGregorianGrid = rememberSaveable { mutableStateOf(false) }
+    val secondaryCalendarName = rememberSaveable { mutableStateOf(SampleSecondaryCalendar.None.name) }
+    val destinationName = rememberSaveable { mutableStateOf(SampleDestination.Home.name) }
+    val calendarViewModeName = rememberSaveable { mutableStateOf(SampleCalendarViewMode.Month.name) }
     return CalendarSampleState(
         calendarName, modeName, localeTag, rtl, previousDays, nextDays, fixedSixRows, showWeek,
         showAgenda, showWeekNumbers, customStyle, useHeaderApi, limitRange, hijriOffset, anchor,
         showDialog, error, chineseStyleName, showChineseDetails, chineseGregorianGrid,
+        secondaryCalendarName, destinationName, calendarViewModeName,
     )
 }

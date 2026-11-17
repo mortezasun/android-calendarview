@@ -66,4 +66,19 @@ class SolarHijriNativeMonthDataTest {
         assertFalse(cell.enabled)
         assertFalse(cell.isToday)
     }
+
+    @Test
+    fun titleAndSecondaryHelpersFormatAndRespectEngineBounds() {
+        val first = SolarHijriDate(1404, 1, 1)
+        val firstEpochDay = first.toEpochDay()
+        assertEquals(solarHijriNativeMonthData(first, todayEpochDay = 0L).title, solarHijriNativeMonthTitle(first))
+        val firstLabel = solarHijriNativeSecondaryLabel(firstEpochDay)
+        val secondLabel = solarHijriNativeSecondaryLabel(firstEpochDay + 1)
+        assertTrue(!firstLabel.isNullOrBlank())
+        assertTrue(!secondLabel.isNullOrBlank())
+        assertTrue(firstLabel != secondLabel)
+        assertTrue(!solarHijriNativeAccessibilityLabel(firstEpochDay).isNullOrBlank())
+        assertEquals(null, solarHijriNativeSecondaryLabel(SolarHijriEngine.MAX_EPOCH_DAY + 1))
+        assertEquals(null, solarHijriNativeAccessibilityLabel(SolarHijriEngine.MIN_EPOCH_DAY - 1))
+    }
 }

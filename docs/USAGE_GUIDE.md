@@ -356,12 +356,45 @@ See [ADAPTIVE_LAYOUT.md](ADAPTIVE_LAYOUT.md) for responsive pane and fold notes.
 
 ---
 
+### Dynamic Secondary Calendar Labels
+
+Every engine exposes compact secondary-label, accessibility-label, and month-title helpers keyed
+by absolute epoch day (`Long`) or month descriptor:
+
+| Module | Helpers |
+|--------|---------|
+| `:calendar-gregorian` | `gregorianMonthTitle`, `gregorianSecondaryLabel`, `gregorianAccessibilityLabel` |
+| `:calendar-hijri` | `hijriMonthTitle`, `hijriSecondaryLabel`, `hijriAccessibilityLabel` |
+| `:calendar-solarHijri-native` | `solarHijriNativeMonthTitle`, `solarHijriNativeSecondaryLabel`, `solarHijriNativeAccessibilityLabel` |
+| `:calendar-solarHijri` | `solarHijriMonthTitle`, `solarHijriSecondaryLabel`, `solarHijriAccessibilityLabel` |
+| `:calendar-chinese-compose` | `chineseMonthTitle`, `chineseSecondaryLabel`, `chineseAccessibilityLabel` |
+
+Pass any `secondaryLabel` and `secondaryAccessibilityLabel` pair into any month composable,
+`CalendarMonthGrid`, `CalendarWeekGrid`, or `CalendarAgenda` to pair two calendar systems dynamically:
+
+```kotlin
+GregorianCalendarMonth(
+    month = GregorianYearMonth.now(),
+    selection = state.selection,
+    onDateClick = { epochDay -> state.onDayClick(epochDay) },
+    secondaryLabel = { epochDay -> hijriSecondaryLabel(epochDay) },
+    secondaryAccessibilityLabel = { epochDay -> hijriAccessibilityLabel(epochDay) },
+)
+```
+
+`CalendarMonthGrid(data = ...)` and `CalendarWeekGrid(data = ...)` also accept an engine
+`CalendarMonthData` or `CalendarWeekData` snapshot directly alongside `secondaryLabel` and
+custom trailing `dayContent`.
+
+---
+
 ## Customization & Styling
 
 The six month composables (`GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHijriCalendarMonth`,
 `SolarHijriNativeCalendarMonth`, `ChineseCalendarMonth`, and `GregorianChineseCalendarMonth`) share
 these common optional parameters (`ChineseCalendarMonth` and `GregorianChineseCalendarMonth` also add
-`style: ChineseTextStyle`; `GregorianChineseCalendarMonth` omits `isDateEnabled`):
+`style: ChineseTextStyle`; `GregorianChineseCalendarMonth` omits `isDateEnabled`,
+`secondaryLabel`, and `secondaryAccessibilityLabel`):
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -376,6 +409,9 @@ these common optional parameters (`ChineseCalendarMonth` and `GregorianChineseCa
 | `markers` | `emptyMap()` | Event markers keyed by epoch day. |
 | `weekNumber` | `null` | Optional caller-formatted week-number column. |
 | `isDateEnabled` | `{ true }` | Predicate controlling interactive day state. |
+| `secondaryLabel` | `null` | Optional compact secondary calendar line rendered inside each day cell. |
+| `secondaryAccessibilityLabel` | `null` | Optional screen-reader description appended for the secondary calendar date. |
+| `dayContent` | `Text(day.label)` | Trailing composable slot customizing the primary cell content. |
 
 ### `LocalCalendarStyle` & `CalendarRangePolicy`
 

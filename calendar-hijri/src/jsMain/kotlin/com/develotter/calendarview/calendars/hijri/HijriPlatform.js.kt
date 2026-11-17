@@ -23,6 +23,13 @@ private val jsHijriMonthYearFn: dynamic = js(
 internal actual fun webHijriFormatMonthYear(epochMs: Double): String =
     jsHijriMonthYearFn(epochMs).unsafeCast<String>()
 
+private val jsHijriShortMonthFn: dynamic = js(
+    "(function(epochMs) { var fmt = new Intl.DateTimeFormat(undefined, { calendar: 'islamic-umalqura', month: 'short', timeZone: 'UTC' }); return fmt.format(new Date(epochMs)); })",
+)
+
+internal actual fun webHijriFormatShortMonth(epochMs: Double): String =
+    jsHijriShortMonthFn(epochMs).unsafeCast<String>()
+
 private val jsHijriFullDateFn: dynamic = js(
     "(function(canonicalMs, actualMs) { var fmt = new Intl.DateTimeFormat(undefined, { calendar: 'islamic-umalqura', dateStyle: 'full', timeZone: 'UTC' }); if (canonicalMs === actualMs) return fmt.format(new Date(canonicalMs)); var parts = fmt.formatToParts(new Date(canonicalMs)); var actualParts = fmt.formatToParts(new Date(actualMs)); var weekdayValue = null; for (var i = 0; i < actualParts.length; i++) { if (actualParts[i].type === 'weekday') { weekdayValue = actualParts[i].value; break; } } var out = ''; for (var j = 0; j < parts.length; j++) { out += (parts[j].type === 'weekday' && weekdayValue !== null) ? weekdayValue : parts[j].value; } return out; })",
 )

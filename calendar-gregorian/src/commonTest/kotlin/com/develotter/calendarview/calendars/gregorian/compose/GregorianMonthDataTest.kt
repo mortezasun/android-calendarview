@@ -57,4 +57,18 @@ class GregorianMonthDataTest {
         assertEquals(today, data.days.single { it.isToday }.epochDay)
         assertEquals(month, GregorianYearMonth.fromEpochDay(today))
     }
+
+    @Test
+    fun titleAndSecondaryHelpersFormatFirstAndSubsequentDays() {
+        val month = GregorianYearMonth(2026, 4)
+        val firstDay = month.atDay(1)
+        val secondDay = month.atDay(2)
+        assertEquals(gregorianMonthData(month, todayEpochDay = 0L).title, gregorianMonthTitle(month))
+        val firstSecondary = gregorianSecondaryLabel(firstDay)
+        val secondSecondary = gregorianSecondaryLabel(secondDay)
+        assertTrue(firstSecondary.isNotBlank())
+        assertTrue(secondSecondary.isNotBlank())
+        assertTrue(firstSecondary != secondSecondary)
+        assertTrue(gregorianAccessibilityLabel(firstDay).isNotBlank())
+    }
 }

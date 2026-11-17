@@ -20,6 +20,11 @@ internal actual object GregorianPlatformFormatter {
         return YearMonth.of(year, month).format(formatter)
     }
 
+    actual fun formatShortMonth(year: Int, month: Int): String {
+        val formatter = DateTimeFormatter.ofPattern("LLL", Locale.getDefault())
+        return YearMonth.of(year, month).format(formatter)
+    }
+
     actual fun formatFullDate(epochDay: Long): String {
         val formatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(Locale.getDefault())
         return LocalDate.ofEpochDay(epochDay).format(formatter)

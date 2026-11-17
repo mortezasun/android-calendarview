@@ -13,8 +13,21 @@ branch push (`master` and `kmp`), CI verification, and debug APK device testing 
 
 - **Release prep, sample app, and repo hygiene:**
   - Set publication `version = "3.1.0-beta"`, aligned `tools/consumer-check` BOM references to
-    `3.1.0-beta`, and updated `:calendarviewsample` (`versionCode = 30100`, `versionName = "3.1.0-beta"`,
-    header subtitle `"KMP 3.1.0-beta · All calendar modules"`, and `"CN Leap"` showcase badge).
+    `3.1.0-beta`, and updated `:calendarviewsample` (`versionCode = 30100`, `versionName = "3.1.0-beta"`).
+  - Added generic cross-calendar pairing support directly into `:library` and all five Compose
+    calendar engines: `CalendarMonthGrid`, `CalendarWeekGrid`, `CalendarAgenda`, and all five
+    `*CalendarMonth` composables accept `secondaryLabel` and `secondaryAccessibilityLabel`
+    alongside `CalendarMonthData` / `CalendarWeekData` convenience overloads, trailing `dayContent`,
+    and `@Deprecated(..., HIDDEN)` 3.0.0 binary-compatibility overloads. Each engine exposes
+    `*MonthTitle`, `*SecondaryLabel`, and `*AccessibilityLabel` helpers (including range-safe
+    fallbacks and platform `formatShortMonth` / `SolarHijriLocale.formatFullDate`).
+  - Restructured `:calendarviewsample` with a Material 3 edge-to-edge navigation shell
+    (`NavigationBar` / `NavigationRail` + `SampleTheme` dynamic colors): **Home** showcase
+    with live multi-calendar "Today Across All Calendars" conversions and 5 module entry cards;
+    **Calendars** explorer with dynamic **Alternative Secondary Calendar** pairing, per-engine
+    feature cards, `SingleChoiceSegmentedButtonRow` (`Month` | `Week` | `Agenda`), and a live
+    Selected Date Inspector; full interactive **Playground** workbench; and integrated **Heatmaps**
+    tab (`HeatMapViewActivity`).
   - Added `kotlin-js-store/` to `.gitignore` so local JS/Wasm Yarn lockfiles remain untracked.
 - **Multiplatform target expansion & shared actuals:**
   - All six Compose modules (`:library`, `:calendar-gregorian`, `:calendar-hijri`,
@@ -43,20 +56,19 @@ branch push (`master` and `kmp`), CI verification, and debug APK device testing 
   - Split `README.md` into a concise overview linking [GETTING_STARTED.md](GETTING_STARTED.md) and
     [USAGE_GUIDE.md](USAGE_GUIDE.md).
 - **Verified locally on Linux:**
-  - Unit & multiplatform tests: `169` `jvmTest`, `152` `testAndroidHostTest`, `62` sample unit
-    tests, `168` `jsNodeTest`, `168` `jsBrowserTest`, `16` `:calendar-chinese-native:wasmJsNodeTest`,
-    `168` `wasmJsBrowserTest`, `16` `linuxX64Test`, plus Python tests in `scripts/` &
+  - Unit & multiplatform tests: `174` `jvmTest`, `157` `testAndroidHostTest`, `68` sample unit
+    tests, `173` `jsNodeTest`, `173` `jsBrowserTest`, `16` `:calendar-chinese-native:wasmJsNodeTest`,
+    `173` `wasmJsBrowserTest`, `16` `linuxX64Test`, plus Python tests in `scripts/` &
     `tools/chinese-calendar/` (`kotlin-js-store/` is ignored in `.gitignore`).
   - Builds & static guards: `:calendarviewsample:assembleDebug` / `assembleRelease`,
-    `assembleAndroidMain`, `:calendar-chinese-native:jvmJar`, `lint`, `46` compiled instrumentation
-    tests (compile-verified only), `scripts/check-commonmain-purity.sh`, `scripts/api-check.sh`,
-    all Apple/ARM/MinGW KLIB compilations, `scripts/klib-api-check.sh`, 60-module isolated
-    publication verification (`3.1.0-beta`) + `:jvm-consumer:run` +
-    `:android-consumer:assembleRelease`, `:dokkaGenerate`, and `:benchmarks:mainBenchmark` (2 vCPU
-    numbers in [BENCHMARKS.md](BENCHMARKS.md)).
+    `assembleAndroidMain`, `:calendar-chinese-native:jvmJar`, `lint`, `52` compiled instrumentation
+    tests (`21` library + `31` sample, compile-verified only), `scripts/check-commonmain-purity.sh`,
+    updated `scripts/api-check.sh` and `scripts/klib-api-check.sh`, all Apple/ARM/MinGW KLIB
+    compilations, 60-module isolated publication verification (`3.1.0-beta`) + `:jvm-consumer:run` +
+    `:android-consumer:assembleRelease`, and `:dokkaGenerate`.
 - **Remaining open gates (unverified on this Linux host):**
   - User manual verification of `:calendarviewsample` (`calendarviewsample-debug.apk`) on device and
-    GitHub Actions completion (including API 29 emulator execution of the updated 46-test suite)
+    GitHub Actions completion (including API 29 emulator execution of the updated 52-test suite)
     before tagging `3.1.0-beta` pre-release.
   - Native runtime execution on Apple (`ios*`, `macosArm64`), `linuxArm64`, and Windows (`mingwX64`)
     hardware (cross-compiled and KLIB-ABI-checked only on Linux).

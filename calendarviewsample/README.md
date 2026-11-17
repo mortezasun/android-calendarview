@@ -24,35 +24,28 @@ from the **Compose heatmap demo** button in the main screen.
 
 ## What the app covers
 
-The main screen can switch between all five calendar entries:
+The launcher activity (`LauncherActivity`) hosts a Material 3 adaptive navigation shell
+(`NavigationBar` on compact/medium widths, `NavigationRail` on expanded screens) with four focused
+destinations:
+
+- **Home:** Overview of the library, live **"Today Across All Calendars"** epoch-day conversions, quick links into each calendar module, and the full capability catalog.
+- **Calendars:** Dedicated explorer for each published module (`Gregorian`, `Hijri`, `SolarHijriNative`, `SolarHijri`, `Chinese`), calendar-specific options (Hijri offset, Chinese scripts & 2023 leap month, Solar Hijri leap-year status), **Alternative Secondary Calendar** pairing (`None` + all 5 calendars), a `SingleChoiceSegmentedButtonRow` (`Month` | `Week` | `Agenda`), and a live Selected Date Inspector.
+- **Playground:** Full combined workbench preserving all selection modes, `CalendarRangePolicy`, `CalendarMonthList` / `CalendarMonthPager` / `CalendarMonthColumns`, `CalendarMonthHeader`, custom `CalendarStyle`, RTL switching, dynamic secondary calendars, dialog previews, and `CN Leap`.
+- **Heatmaps:** Integrated contribution heatmap explorer (also directly launchable as `HeatMapViewActivity`) supporting Gregorian, Hijri, Solar Hijri, and Chinese datasets with `WeeksAsColumns` / `WeeksAsRows` orientation, color palettes, and cell styles.
+
+The five calendar entries demonstrated across `Calendars` and `Playground`:
 
 | Entry | What it demonstrates |
 |---|---|
-| `Gregorian` | Gregorian month grid, month header, week and agenda views. |
+| `Gregorian` | Gregorian month grid, month header, adjacent days, ISO week numbers, week and agenda views. |
 | `Hijri` | Umm al-Qura month view with an offset method (`-1`, default, `+1` days), week and agenda data. |
-| `SolarHijri` | The facade over the dependency-free Solar Hijri engine. |
-| `SolarHijriNative` | The dependency-free native Solar Hijri engine directly. |
-| `Chinese` | Chinese lunisolar month with leap months, Chinese labels, a Gregorian grid with Chinese secondary labels and a details panel. |
-
-Shared controls and views include:
-
-- selection modes `None`, `Single`, `Multiple` and `Range`, including a 2–14 day range policy;
-- previous/next month, today, month bounds and the `CalendarMonthHeader` API;
-- fixed six-row grids, previous/next-month days, week numbers and event markers;
-- locale choices, RTL layout direction, custom style and the Hijri method offset;
-- month list and pager containers, a week grid and an agenda;
-- adaptive side-by-side panes on wide windows, fold/posture-aware sample geometry and adaptive
-  dialog height;
-- saved selection, display settings and visible month across activity recreation;
-- Gregorian, Hijri, Solar Hijri and Chinese heatmaps with orientation, palette, cell style,
-  today border, labels, disabled future days and selection modes.
-
-The `CN Leap` demo badge and the heatmap screen are demo-only wiring in this module; they are not
-part of the published API.
+| `SolarHijriNative` | Dependency-free Borkowski native Solar Hijri engine with astronomical leap-year status. |
+| `SolarHijri` | Compatibility facade over `:calendar-solarHijri-native`. |
+| `Chinese` | Chinese lunisolar month with leap months (`2023 Leap 2nd Month`), 4 text scripts, Gregorian overlay, and date details. |
 
 ## Tests
 
-Unit tests for the sample's state, geometry, navigation and heatmap helpers:
+Unit tests for the sample's state, geometry, secondary-calendar helpers, navigation and heatmap helpers:
 
 ```bash
 ./gradlew :calendarviewsample:testDebugUnitTest
@@ -70,11 +63,7 @@ Run the instrumentation suite on a connected device or emulator:
 ./gradlew :calendarviewsample:connectedDebugAndroidTest
 ```
 
-The checked-in instrumentation suite totals **46 tests (18 library and 28 sample)** after adding
-`SolarHijriComposeRegressionTest` (`versionName = "3.1.0-beta"`, `versionCode = 30100`). The CI
-emulator workflows ran the 44-test suite present at `3.0.0` (`a0c686e`: 18 library and 26 sample)
-on API 29 phone and tablet emulators; the updated 46-test suite is compile-verified on Linux and
-awaits emulator execution. See
+See
 [../docs/COMPOSE_TESTS.md](../docs/COMPOSE_TESTS.md),
 [../docs/SAMPLE_UI_TESTS.md](../docs/SAMPLE_UI_TESTS.md) and
 [../docs/CI.md](../docs/CI.md).

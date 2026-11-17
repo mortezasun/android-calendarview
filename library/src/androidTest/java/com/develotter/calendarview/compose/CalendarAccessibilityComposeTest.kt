@@ -76,4 +76,31 @@ class CalendarAccessibilityComposeTest {
         compose.onNodeWithContentDescription("Day 1").assertExists().assertIsDisplayed()
         compose.onNodeWithContentDescription("Day 31").assertExists()
     }
+
+    @Test
+    fun monthGridDataOverloadRendersSecondaryLabelAndSkipsBlankCells() {
+        val monthData = object : CalendarMonthData {
+            override val title: String = "April 2026"
+            override val weekdayLabels: List<String> = listOf("M", "T", "W", "T", "F", "S", "S")
+            override val firstDayOffset: Int = 0
+            override val days: List<CalendarDayCell> = listOf(
+                CalendarDayCell(epochDay = 20_100L, label = "1", accessibilityLabel = "Day 1"),
+                CalendarDayCell(epochDay = 20_101L, label = "", accessibilityLabel = "", enabled = false),
+            )
+        }
+        compose.setContent {
+            MaterialTheme {
+                CalendarMonthGrid(
+                    data = monthData,
+                    selection = CalendarSelection.empty(TypeSelectDay.Single),
+                    onDayClick = {},
+                    secondaryLabel = { epochDay -> "Sec $epochDay" },
+                    secondaryAccessibilityLabel = { epochDay -> "Second $epochDay" },
+                )
+            }
+        }
+
+        compose.onNodeWithContentDescription("Day 1, Second 20100").assertExists().assertIsDisplayed()
+        compose.onNodeWithContentDescription(", Second 20101").assertDoesNotExist()
+    }
 }

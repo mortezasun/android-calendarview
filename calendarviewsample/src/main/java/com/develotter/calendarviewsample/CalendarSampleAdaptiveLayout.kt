@@ -45,6 +45,7 @@ internal fun CalendarSampleAdaptiveLayout(
     header: @Composable () -> Unit,
     content: @Composable () -> Unit,
     actions: @Composable () -> Unit,
+    applySafeDrawing: Boolean = true,
 ) {
     val currentHeader by rememberUpdatedState(header)
     val currentContent by rememberUpdatedState(content)
@@ -57,7 +58,8 @@ internal fun CalendarSampleAdaptiveLayout(
     val density = LocalDensity.current
     var origin by remember { mutableStateOf<Offset?>(null) }
     // Apply insets once, outside the measured coordinate space used for pane placement.
-    Box(Modifier.fillMaxSize().safeDrawingPadding()) {
+    val rootModifier = if (applySafeDrawing) Modifier.fillMaxSize().safeDrawingPadding() else Modifier.fillMaxSize()
+    Box(rootModifier) {
         BoxWithConstraints(
             Modifier.fillMaxSize().onGloballyPositioned { origin = it.positionInWindow() },
         ) {

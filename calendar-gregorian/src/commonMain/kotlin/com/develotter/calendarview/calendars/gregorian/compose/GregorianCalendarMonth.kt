@@ -1,6 +1,7 @@
 package com.develotter.calendarview.calendars.gregorian.compose
 
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
@@ -21,6 +22,28 @@ data class GregorianMonthData(
     override val firstDayOffset: Int,
     override val days: List<CalendarDayCell>,
 ) : CalendarMonthData
+
+/** Localized Gregorian month-year title, for example `April 2026`. */
+fun gregorianMonthTitle(month: GregorianYearMonth): String =
+    GregorianPlatformFormatter.formatMonthYear(month.year, month.month)
+
+/**
+ * Compact Gregorian secondary label for another primary calendar grid: renders the short month
+ * name on the 1st of the Gregorian month and the localized day number on other days.
+ */
+fun gregorianSecondaryLabel(epochDay: Long): String {
+    val month = GregorianYearMonth.fromEpochDay(epochDay)
+    val dayOfMonth = (epochDay - month.atDay(1)).toInt() + 1
+    return if (dayOfMonth == 1) {
+        GregorianPlatformFormatter.formatShortMonth(month.year, month.month)
+    } else {
+        GregorianPlatformFormatter.formatDayNumber(dayOfMonth)
+    }
+}
+
+/** Localized full Gregorian date description suitable for screen readers and date inspectors. */
+fun gregorianAccessibilityLabel(epochDay: Long): String =
+    GregorianPlatformFormatter.formatFullDate(epochDay)
 
 /**
  * Formats one Gregorian date for either current or adjacent month rendering.
@@ -54,7 +77,7 @@ fun gregorianMonthData(
 ): GregorianMonthData {
     val firstEpochDay = month.atDay(1)
     return GregorianMonthData(
-        title = GregorianPlatformFormatter.formatMonthYear(month.year, month.month),
+        title = gregorianMonthTitle(month),
         weekdayLabels = gregorianWeekdayLabels(firstDayOfWeek),
         firstDayOffset = gregorianDayOfWeekOffset(firstEpochDay, firstDayOfWeek),
         days = (1..month.lengthOfMonth()).map { day ->
@@ -67,11 +90,58 @@ fun gregorianMonthData(
     )
 }
 
+/** Binary-compatible overload for callers compiled against 3.0.0. */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 3.0.0.",
+    level = DeprecationLevel.HIDDEN,
+)
+@Composable
+fun GregorianCalendarMonth(
+    month: GregorianYearMonth,
+    selection: CalendarSelection,
+    onDateClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    firstDayOfWeek: Int = GregorianPlatformFormatter.defaultFirstDayOfWeek(),
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    todayEpochDay: Long = GregorianPlatformFormatter.currentEpochDay(),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color? = null,
+    todayDescription: String? = null,
+    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
+    weekNumber: ((Long) -> String?)? = null,
+    isDateEnabled: (Long) -> Boolean = { true },
+) {
+    GregorianCalendarMonth(
+        month = month,
+        selection = selection,
+        onDateClick = onDateClick,
+        modifier = modifier,
+        firstDayOfWeek = firstDayOfWeek,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        todayEpochDay = todayEpochDay,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = todayDescription,
+        markers = markers,
+        weekNumber = weekNumber,
+        isDateEnabled = isDateEnabled,
+        secondaryLabel = null,
+        secondaryAccessibilityLabel = null,
+    )
+}
+
 /**
  * Controlled month UI; caller owns selection and navigation. Adjacent visibility is
  * independent on each side, disabled by default. Adjacent clicks do not navigate.
  * Locale does not set layout direction; [firstDayOfWeek] and all labels come from the
- * platform formatter. For custom slots use month/day builders with CalendarMonthGrid.
+ * platform formatter. [secondaryLabel] and [secondaryAccessibilityLabel] display an optional
+ * second calendar label below each day cell.
  * Date-range errors propagate rather than displaying incorrect dates.
  */
 @Composable
@@ -92,6 +162,9 @@ fun GregorianCalendarMonth(
     markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
     weekNumber: ((Long) -> String?)? = null,
     isDateEnabled: (Long) -> Boolean = { true },
+    secondaryLabel: ((Long) -> String?)? = null,
+    secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+    dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
 ) {
     val data = gregorianMonthData(
         month = month,
@@ -103,12 +176,15 @@ fun GregorianCalendarMonth(
         title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
         days = data.days, selection = selection, modifier = modifier,
         onDayClick = onDateClick,
+        dayContent = dayContent,
         showPreviousMonthDays = showPreviousMonthDays, showNextMonthDays = showNextMonthDays,
         showHeader = showHeader, showWeekdayLabels = showWeekdayLabels, fixedSixRows = fixedSixRows,
         todayBorderColor = todayBorderColor,
         todayDescription = todayDescription,
         markers = markers,
         weekNumber = weekNumber,
+        secondaryLabel = secondaryLabel,
+        secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         adjacentDayProvider = { adjacentEpochDay ->
             gregorianDayCell(
                 epochDay = adjacentEpochDay,

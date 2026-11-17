@@ -41,4 +41,13 @@ object SolarHijriLocale {
     /** Month caption such as `Farvardin 1404`. */
     fun formatMonthYear(year: Int, month: Int): String =
         "${monthName(month)} ${formatNumber(year)}"
+
+    /** Localized full date label including weekday, day, month name and year. */
+    fun formatFullDate(date: SolarHijriDate): String {
+        val weekday = SolarHijriPlatform.weekdayFullLabel(date.isoWeekday())
+        val day = formatNumber(date.day)
+        val month = monthName(date.month)
+        val year = formatNumber(date.year)
+        return "$weekday, $day $month $year"
+    }
 }

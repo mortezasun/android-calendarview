@@ -1,16 +1,10 @@
 package com.develotter.calendarview.calendars.chineseCompose
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
 import com.develotter.calendarview.calendars.chineseNative.ChineseDate
 import com.develotter.calendarview.calendars.chineseNative.ChineseFormat
@@ -32,6 +26,12 @@ data class ChineseMonthData(
     override val firstDayOffset: Int,
     override val days: List<CalendarDayCell>,
 ) : CalendarMonthData
+
+/** Localized Chinese month title, for example `2023 Leap 2nd Month`. */
+fun chineseMonthTitle(
+    month: ChineseMonth,
+    style: ChineseTextStyle = ChineseTextStyle.English,
+): String = ChineseFormat.monthTitle(month, style)
 
 /** Empty cell used for adjacent positions outside the supported data range. */
 private fun unsupportedAdjacentCell(epochDay: Long): CalendarDayCell = CalendarDayCell(
@@ -76,7 +76,7 @@ fun chineseMonthData(
     val firstEpochDay = month.startEpochDay()
     return ChineseMonthData(
         month = month,
-        title = ChineseFormat.monthTitle(month, style),
+        title = chineseMonthTitle(month, style),
         weekdayLabels = chineseWeekdayLabels(firstDayOfWeek),
         firstDayOffset = chineseDayOfWeekOffset(firstEpochDay, firstDayOfWeek),
         days = List(month.lengthOfMonth) { index ->
@@ -91,16 +91,11 @@ fun chineseMonthData(
     )
 }
 
-/**
- * Controlled Chinese month view built on the shared [CalendarMonthGrid].
- *
- * Selection, navigation and the visible month stay with the caller; clicks report the absolute
- * epoch day. The title and screen-reader labels always include the leap-month marker. Adjacent
- * days are rendered only where they exist in the supported range; boundary cells stay empty and
- * disabled instead of being converted speculatively. Weekday labels and the default first day
- * of the week come from the platform locale and do not change the calculation or the layout
- * direction.
- */
+/** Binary-compatible overload for callers compiled against 3.0.0. */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 3.0.0.",
+    level = DeprecationLevel.HIDDEN,
+)
 @Composable
 fun ChineseCalendarMonth(
     month: ChineseMonth,
@@ -121,6 +116,63 @@ fun ChineseCalendarMonth(
     weekNumber: ((Long) -> String?)? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ) {
+    ChineseCalendarMonth(
+        month = month,
+        selection = selection,
+        onDateClick = onDateClick,
+        modifier = modifier,
+        style = style,
+        firstDayOfWeek = firstDayOfWeek,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        todayEpochDay = todayEpochDay,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = todayDescription,
+        markers = markers,
+        weekNumber = weekNumber,
+        isDateEnabled = isDateEnabled,
+        secondaryLabel = null,
+        secondaryAccessibilityLabel = null,
+    )
+}
+
+/**
+ * Controlled Chinese month view built on the shared [CalendarMonthGrid].
+ *
+ * Selection, navigation and the visible month stay with the caller; clicks report the absolute
+ * epoch day. The title and screen-reader labels always include the leap-month marker. Adjacent
+ * days are rendered only where they exist in the supported range; boundary cells stay empty and
+ * disabled instead of being converted speculatively. [secondaryLabel] and
+ * [secondaryAccessibilityLabel] display an optional second calendar label below each day cell.
+ * Weekday labels and the default first day of the week come from the platform locale and do not
+ * change the calculation or the layout direction.
+ */
+@Composable
+fun ChineseCalendarMonth(
+    month: ChineseMonth,
+    selection: CalendarSelection,
+    onDateClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    style: ChineseTextStyle = ChineseTextStyle.English,
+    firstDayOfWeek: Int = ChinesePlatform.defaultFirstDayOfWeek(),
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    todayEpochDay: Long = ChinesePlatform.currentEpochDay(),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color? = null,
+    todayDescription: String? = null,
+    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
+    weekNumber: ((Long) -> String?)? = null,
+    isDateEnabled: (Long) -> Boolean = { true },
+    secondaryLabel: ((Long) -> String?)? = null,
+    secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+    dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
+) {
     val data = chineseMonthData(
         month = month,
         style = style,
@@ -136,6 +188,7 @@ fun ChineseCalendarMonth(
         selection = selection,
         onDayClick = onDateClick,
         modifier = modifier,
+        dayContent = dayContent,
         showPreviousMonthDays = showPreviousMonthDays,
         showNextMonthDays = showNextMonthDays,
         showHeader = showHeader,
@@ -145,6 +198,8 @@ fun ChineseCalendarMonth(
         todayDescription = todayDescription,
         markers = markers,
         weekNumber = weekNumber,
+        secondaryLabel = secondaryLabel,
+        secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         adjacentDayProvider = { epochDay ->
             if (ChineseCalendarEngine.isSupported(epochDay)) {
                 chineseDayCell(epochDay, style, todayEpochDay, isDateEnabled)
@@ -181,7 +236,7 @@ fun GregorianChineseCalendarMonth(
     markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
     weekNumber: ((Long) -> String?)? = null,
 ) {
-    val data = gregorianOverlayData(month, firstDayOfWeek, todayEpochDay, style)
+    val data = gregorianOverlayData(month, firstDayOfWeek, todayEpochDay)
     CalendarMonthGrid(
         title = data.title,
         weekdayLabels = data.weekdayLabels,
@@ -199,21 +254,9 @@ fun GregorianChineseCalendarMonth(
         todayDescription = todayDescription,
         markers = markers,
         weekNumber = weekNumber,
-        adjacentDayProvider = { epochDay -> gregorianDayCell(epochDay, todayEpochDay, style) },
-        dayContent = { day, _, _ ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(day.label)
-                val chinese = chineseLabelFor(day.epochDay, style)
-                if (chinese != null) {
-                    Text(
-                        chinese,
-                        style = MaterialTheme.typography.labelSmall,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(top = 2.dp),
-                    )
-                }
-            }
-        },
+        adjacentDayProvider = { epochDay -> gregorianDayCell(epochDay, todayEpochDay) },
+        secondaryLabel = { epochDay -> chineseSecondaryLabel(epochDay, style) },
+        secondaryAccessibilityLabel = { epochDay -> chineseAccessibilityLabel(epochDay, style) },
     )
 }
 
@@ -228,38 +271,54 @@ private fun gregorianOverlayData(
     month: GregorianYearMonth,
     firstDayOfWeek: Int,
     todayEpochDay: Long,
-    style: ChineseTextStyle,
 ): GregorianOverlayData = GregorianOverlayData(
     title = ChinesePlatform.formatMonthYear(month.year, month.month),
     weekdayLabels = chineseWeekdayLabels(firstDayOfWeek),
     firstDayOffset = chineseDayOfWeekOffset(month.atDay(1), firstDayOfWeek),
     days = (1..month.lengthOfMonth()).map { day ->
-        gregorianDayCell(month.atDay(day), todayEpochDay, style)
+        gregorianDayCell(month.atDay(day), todayEpochDay)
     },
 )
 
 private fun gregorianDayCell(
     epochDay: Long,
     todayEpochDay: Long,
-    style: ChineseTextStyle,
 ): CalendarDayCell {
-    val gregorianLabel = ChinesePlatform.formatFullDate(epochDay)
-    val chineseLabel = chineseAccessibilityLabelFor(epochDay, style)
     val dayOfMonth = (epochDay - GregorianYearMonth.fromEpochDay(epochDay).atDay(1)).toInt() + 1
     return CalendarDayCell(
         epochDay = epochDay,
         label = ChinesePlatform.formatDayNumber(dayOfMonth),
-        accessibilityLabel = if (chineseLabel == null) {
-            gregorianLabel
-        } else {
-            "$gregorianLabel, $chineseLabel"
-        },
+        accessibilityLabel = ChinesePlatform.formatFullDate(epochDay),
         isToday = epochDay == todayEpochDay,
     )
 }
 
-/** Full Chinese date for the overlay's accessibility label, including leap-month identity. */
-private fun chineseAccessibilityLabelFor(epochDay: Long, style: ChineseTextStyle): String? {
+/**
+ * Compact Chinese secondary label for another primary calendar grid: renders the Chinese month
+ * name on the 1st of the Chinese month (preserving leap-month names) and the day label otherwise,
+ * or `null` when [epochDay] falls outside the Chinese engine range.
+ */
+fun chineseSecondaryLabel(
+    epochDay: Long,
+    style: ChineseTextStyle = ChineseTextStyle.English,
+): String? {
+    if (!ChineseCalendarEngine.isSupported(epochDay)) return null
+    val date = ChineseDate.fromEpochDay(epochDay)
+    return if (date.dayOfMonth == 1) {
+        ChineseFormat.monthName(date.month, style)
+    } else {
+        ChineseFormat.dayLabel(date.dayOfMonth, style)
+    }
+}
+
+/**
+ * Full Chinese date for secondary screen-reader labels and date inspectors, including leap-month
+ * identity, or `null` when [epochDay] falls outside the Chinese engine range.
+ */
+fun chineseAccessibilityLabel(
+    epochDay: Long,
+    style: ChineseTextStyle = ChineseTextStyle.English,
+): String? {
     if (!ChineseCalendarEngine.isSupported(epochDay)) return null
     return ChineseFormat.dateLabel(ChineseDate.fromEpochDay(epochDay), style)
 }
@@ -268,16 +327,6 @@ private fun chineseAccessibilityLabelFor(epochDay: Long, style: ChineseTextStyle
 fun chineseMonthOfOrNull(month: GregorianYearMonth): ChineseMonth? {
     val epochDay = month.atDay(1)
     return if (ChineseCalendarEngine.isSupported(epochDay)) ChineseMonth.fromEpochDay(epochDay) else null
-}
-
-private fun chineseLabelFor(epochDay: Long, style: ChineseTextStyle): String? {
-    if (!ChineseCalendarEngine.isSupported(epochDay)) return null
-    val date = ChineseDate.fromEpochDay(epochDay)
-    return if (date.dayOfMonth == 1) {
-        ChineseFormat.monthName(date.month, style)
-    } else {
-        ChineseFormat.dayLabel(date.dayOfMonth, style)
-    }
 }
 
 /** Seven localized short weekday labels in grid order starting at [firstDayOfWeek] (ISO 1..7). */

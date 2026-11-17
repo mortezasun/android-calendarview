@@ -23,6 +23,13 @@ private val jsGregorianMonthYearFn: dynamic = js(
 internal actual fun webGregorianFormatMonthYear(epochMs: Double): String =
     jsGregorianMonthYearFn(epochMs).unsafeCast<String>()
 
+private val jsGregorianShortMonthFn: dynamic = js(
+    "(function(epochMs) { var fmt = new Intl.DateTimeFormat(undefined, { calendar: 'gregory', month: 'short', timeZone: 'UTC' }); return fmt.format(new Date(epochMs)); })",
+)
+
+internal actual fun webGregorianFormatShortMonth(epochMs: Double): String =
+    jsGregorianShortMonthFn(epochMs).unsafeCast<String>()
+
 private val jsGregorianFullDateFn: dynamic = js(
     "(function(epochMs) { var fmt = new Intl.DateTimeFormat(undefined, { calendar: 'gregory', dateStyle: 'full', timeZone: 'UTC' }); return fmt.format(new Date(epochMs)); })",
 )

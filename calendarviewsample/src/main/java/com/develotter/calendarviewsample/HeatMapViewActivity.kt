@@ -3,8 +3,8 @@ package com.develotter.calendarviewsample
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,8 +18,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -50,8 +48,9 @@ import java.util.Locale
 class HeatMapViewActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
-            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else lightColorScheme()) {
+            SampleTheme {
                 HeatmapSample()
             }
         }
@@ -75,7 +74,7 @@ private val firstDayOptions = listOf<DayOfWeek?>(null, DayOfWeek.MONDAY, DayOfWe
  * dates, selection modes) plus heatmap-specific orientation, palette and cell style.
  */
 @Composable
-private fun HeatmapSample() {
+internal fun HeatmapSample(applySafeDrawing: Boolean = true) {
     var calendarName by rememberSaveable { mutableStateOf(SampleCalendar.Gregorian.name) }
     val calendar = SampleCalendar.valueOf(calendarName)
     var hijriOffset by rememberSaveable { mutableIntStateOf(0) }
@@ -132,6 +131,7 @@ private fun HeatmapSample() {
     CompositionLocalProvider(LocalLayoutDirection provides if (rtl) LayoutDirection.Rtl else LayoutDirection.Ltr) {
         Surface(Modifier.fillMaxSize()) {
             CalendarSampleAdaptiveLayout(
+                applySafeDrawing = applySafeDrawing,
                 header = {
                     Text("${calendar.name} heatmap: $year", style = MaterialTheme.typography.headlineSmall)
                     val orientation = HeatmapOrientation.valueOf(orientationName)

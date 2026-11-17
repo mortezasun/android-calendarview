@@ -28,7 +28,7 @@ The architecture follows standard Compose state and rendering patterns:
 | `:calendar-chinese-compose` | Compose facade (`ChineseCalendarMonth`, `GregorianChineseCalendarMonth`, `ChineseMonthData`, `ChineseWeekData`, `ChineseMonthState`, `chineseYearHeatmap`) depending on `:calendar-chinese-native`, `:calendar-gregorian` and `:library` (`android`, `jvm`, `iosArm64`, `iosSimulatorArm64`, `macosArm64`, `js`, `wasmJs`). |
 | `:calendar-bom` | `java-platform` constraints for the seven published library artifacts; no runtime classes. |
 | `:benchmarks` | Standalone Kotlin/JVM kotlinx-benchmark module for Gregorian/Hijri month calculations and the shared heatmap adapters. Not published and not part of `check`/`build`. |
-| `:calendarviewsample` | Interactive Compose Android demo app illustrating configuration, selection modes, navigation, dialogs, and heatmaps. |
+| `:calendarviewsample` | Interactive Material 3 Compose Android demo app (`Home`, `Calendars`, `Playground`, `Heatmaps`) illustrating dynamic secondary calendars, configuration, selection modes, navigation, dialogs, and heatmaps. |
 
 ### Dependency Rules
 
@@ -49,7 +49,7 @@ The architecture follows standard Compose state and rendering patterns:
 2. **Cell Grid Layout:**
    `buildCalendarMonthCells` creates complete 7-column rows. When `fixedSixRows = true`, the grid always produces 42 cells. Padding cells for previous and next months are either left blank (`null`) or populated with real adjacent day identities via `adjacentDayProvider`.
 3. **Compose Month Grid:**
-   `CalendarMonthGrid` lays out the month title (optional), weekday header row (optional), and the 7-column cell grid using Compose `Column`, `Row`, and `Surface`.
+   `CalendarMonthGrid` lays out the month title (optional), weekday header row (optional), and the 7-column cell grid using Compose `Column`, `Row`, and `Surface`. It also accepts a `CalendarMonthData` snapshot directly alongside optional `secondaryLabel` and `secondaryAccessibilityLabel` callbacks for cross-calendar day annotations.
 4. **Day Interaction & Focus:**
    Day cells display their localized labels. Current days have a primary-colored border focus indicator (`day.isToday`). Clicks pass the cell's `epochDay` to `onDayClick`. Disabled dates reject interactions.
 5. **RTL Support:**
@@ -91,8 +91,8 @@ State is managed declaratively and cleanly separated from UI rendering:
 
 ## Product views, markers and styling
 
-- **Week view:** `CalendarWeekData` is the seven-day contract; each engine has a `*WeekData` builder that aligns to the configured first day and returns consecutive cells. `CalendarWeekGrid` reuses the month grid renderer, so selection, markers, week numbers and accessibility stay identical.
-- **Agenda:** `CalendarAgenda` is a bounded `LazyColumn` over `CalendarDayCell` values. It keeps selection and markers caller-owned and appends marker/today descriptions to the accessible day label.
+- **Week view:** `CalendarWeekData` is the seven-day contract; each engine has a `*WeekData` builder that aligns to the configured first day and returns consecutive cells. `CalendarWeekGrid` accepts explicit fields or a `CalendarWeekData` snapshot directly and reuses the month grid's styling, markers, week numbers, `secondaryLabel` / `secondaryAccessibilityLabel`, and accessibility rules.
+- **Agenda:** `CalendarAgenda` is a bounded `LazyColumn` over `CalendarDayCell` values. It keeps selection and markers caller-owned, supports optional `secondaryLabel` / `secondaryAccessibilityLabel` subtitles, and appends marker/today/secondary descriptions to the accessible day label.
 - **Markers:** `CalendarDayMarker` is keyed by epoch day in a caller-owned map. The renderer draws at most four decorative dots; content descriptions are merged into the day label, so markers add information without creating noisy focus targets.
 - **Week numbers:** an optional callback on `CalendarMonthGrid` receives the first epoch day of each week. The library deliberately does not choose a week-numbering convention; engines and hosts localize it.
 - **Adaptive months:** `CalendarMonthColumns` derives one or more columns from the available width and inter-column spacing, so each month keeps its minimum width, and exposes `LazyGridState`. It is a layout container, not a new calendar engine. Width rules, active-month definition and state contract: [ADAPTIVE_LAYOUT.md](ADAPTIVE_LAYOUT.md).

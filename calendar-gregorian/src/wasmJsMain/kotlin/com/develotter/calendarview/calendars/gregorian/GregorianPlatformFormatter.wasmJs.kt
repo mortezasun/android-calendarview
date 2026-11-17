@@ -18,6 +18,10 @@ internal actual fun webGregorianFormatMonthYear(epochMs: Double): String = js(
     "new Intl.DateTimeFormat(undefined, { calendar: 'gregory', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(epochMs))",
 )
 
+internal actual fun webGregorianFormatShortMonth(epochMs: Double): String = js(
+    "new Intl.DateTimeFormat(undefined, { calendar: 'gregory', month: 'short', timeZone: 'UTC' }).format(new Date(epochMs))",
+)
+
 internal actual fun webGregorianFormatFullDate(epochMs: Double): String = js(
     "new Intl.DateTimeFormat(undefined, { calendar: 'gregory', dateStyle: 'full', timeZone: 'UTC' }).format(new Date(epochMs))",
 )

@@ -134,4 +134,16 @@ class ChineseComposeDataTest {
         assertTrue(ChinesePlatform.formatDayNumber(15).isNotBlank())
         assertTrue((1..7).all { ChinesePlatform.weekdayShortLabel(it).isNotBlank() })
     }
+
+    @Test
+    fun secondaryHelpersExposeMonthBoundaryLeapLabelAndRangeGuard() {
+        val leapMonth = ChineseMonth.of(2023, 2, isLeapMonth = true)
+        val leapFirst = ChineseDate(2023, 2, true, 1).toEpochDay()
+        assertEquals(ChineseFormat.monthTitle(leapMonth, ChineseTextStyle.English), chineseMonthTitle(leapMonth))
+        assertEquals("Leap 2nd Month", chineseSecondaryLabel(leapFirst, ChineseTextStyle.English))
+        assertEquals("2", chineseSecondaryLabel(leapFirst + 1, ChineseTextStyle.English))
+        assertTrue(chineseAccessibilityLabel(leapFirst, ChineseTextStyle.English)!!.contains("Leap 2nd Month"))
+        assertNull(chineseSecondaryLabel(ChineseCalendarEngine.MIN_EPOCH_DAY - 1))
+        assertNull(chineseAccessibilityLabel(ChineseCalendarEngine.MAX_EPOCH_DAY + 1))
+    }
 }

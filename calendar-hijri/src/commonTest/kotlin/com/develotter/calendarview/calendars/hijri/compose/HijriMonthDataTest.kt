@@ -60,4 +60,20 @@ class HijriMonthDataTest {
         assertEquals(1, data.days.count { it.isToday })
         assertEquals(firstEpochDay + 1, data.days.single { it.isToday }.epochDay)
     }
+
+    @Test
+    fun titleAndSecondaryHelpersFormatAndGuardOutOfRangeEpochDays() {
+        val first = HijriDate(1447, 9, 1)
+        val firstEpochDay = HijriPlatform.toEpochDay(first)
+        assertEquals(hijriMonthData(first, todayEpochDay = 0L).title, hijriMonthTitle(first))
+        val firstLabel = hijriSecondaryLabel(firstEpochDay)
+        val secondLabel = hijriSecondaryLabel(firstEpochDay + 1)
+        assertTrue(!firstLabel.isNullOrBlank())
+        assertTrue(!secondLabel.isNullOrBlank())
+        assertTrue(firstLabel != secondLabel)
+        assertTrue(!hijriAccessibilityLabel(firstEpochDay).isNullOrBlank())
+        // Extremely far epoch days outside Umm-al-Qura range must return null rather than throwing.
+        assertEquals(null, hijriSecondaryLabel(-1_000_000L))
+        assertEquals(null, hijriAccessibilityLabel(-1_000_000L))
+    }
 }

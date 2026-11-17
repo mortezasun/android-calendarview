@@ -23,10 +23,11 @@ A **Kotlin Multiplatform** Jetpack Compose calendar library built around a share
 
 - **100% Jetpack Compose** – Declarative month grids, scrolling containers, heatmaps, and product views with no XML layouts or reflection.
 - **Four Calendar Systems (Five Engine Entries)** – Gregorian (`GregorianYearMonth`), Hijri (`HijriDate` with pluggable `HijriDateProvider`), Solar Hijri / Jalali (`SolarHijriDate` via a dependency-free Borkowski engine), and Chinese lunisolar (`ChineseCalendarEngine`, pure Kotlin across `1901..2099` with explicit leap months).
+- **Dynamic Alternative Calendar Labels** – Pair any primary calendar with any secondary calendar (`gregorianSecondaryLabel`, `hijriSecondaryLabel`, `solarHijriSecondaryLabel`, `solarHijriNativeSecondaryLabel`, `chineseSecondaryLabel` + matching accessibility & title helpers) in `Month`, `CalendarWeekGrid`, and `CalendarAgenda`.
 - **Universal Epoch-Day Selection** – `None`, `Single`, `Multiple`, and `Range` modes (with optional `CalendarRangePolicy`) keyed by `Long` epoch days and persisted with `rememberSaveable`.
 - **Stateless & Controlled** – Callers own selection state and visible month bounds via saveable engine `*MonthState` holders and `CalendarMonthHeader`.
-- **Rich Product Views** – `CalendarWeekGrid`, `CalendarAgenda`, `CalendarMonthList`, `CalendarMonthPager`, `CalendarMonthColumns`, event markers, optional week numbers, `LocalCalendarStyle`, and `CalendarMonthData.toHeatmap()` adapters.
-- **Accessibility & RTL** – Localized date/marker descriptions, collection/heading semantics, and automatic RTL mirroring via `LocalLayoutDirection`.
+- **Rich Product Views** – `CalendarWeekGrid`, `CalendarAgenda`, `CalendarMonthList`, `CalendarMonthPager`, `CalendarMonthColumns`, event markers, optional week numbers, `LocalCalendarStyle`, custom `dayContent`, `CalendarMonthData` / `CalendarWeekData` overloads, and `toHeatmap()` adapters.
+- **Accessibility & RTL** – Localized date/marker descriptions (including merged secondary-calendar descriptions), collection/heading semantics, and automatic RTL mirroring via `LocalLayoutDirection`.
 
 ---
 
