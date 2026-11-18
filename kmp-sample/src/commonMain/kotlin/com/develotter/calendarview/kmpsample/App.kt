@@ -19,21 +19,22 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.develotter.calendarview.calendars.chinese.ChineseCalendarMonth
-import com.develotter.calendarview.calendars.chinese.ChineseMonth
-import com.develotter.calendarview.calendars.gregorian.GregorianCalendarMonth
-import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
-import com.develotter.calendarview.calendars.hijri.HijriCalendarMonth
-import com.develotter.calendarview.calendars.hijri.HijriYearMonth
-import com.develotter.calendarview.calendars.solarhijri.SolarHijriCalendarMonth
-import com.develotter.calendarview.calendars.solarhijri.SolarHijriYearMonth
-import com.develotter.calendarview.core.TypeSelectDay
-import com.develotter.calendarview.core.rememberCalendarSelectionState
+import com.develotter.calendarview.calendars.chineseCompose.ChineseCalendarMonth
+import com.develotter.calendarview.calendars.chineseCompose.rememberChineseMonthState
+import com.develotter.calendarview.calendars.gregorian.compose.GregorianCalendarMonth
+import com.develotter.calendarview.calendars.gregorian.compose.rememberGregorianMonthState
+import com.develotter.calendarview.calendars.hijri.compose.HijriCalendarMonth
+import com.develotter.calendarview.calendars.hijri.compose.rememberHijriMonthState
+import com.develotter.calendarview.calendars.solarHijri.compose.SolarHijriCalendarMonth
+import com.develotter.calendarview.calendars.solarHijri.compose.rememberSolarHijriMonthState
+import com.develotter.calendarview.compose.rememberCalendarSelectionState
+import com.develotter.calendarview.enums.TypeSelectDay
 
 private enum class SampleCalendar(val label: String) {
     Gregorian("Gregorian"),
@@ -47,12 +48,12 @@ private enum class SampleCalendar(val label: String) {
 fun App() {
     var selectedCalendar by remember { mutableStateOf(SampleCalendar.Gregorian) }
     var selectionMode by remember { mutableStateOf(TypeSelectDay.Range) }
-    var gregorianMonth by remember { mutableStateOf(GregorianYearMonth.now()) }
-    var hijriMonth by remember { mutableStateOf(HijriYearMonth.now()) }
-    var solarHijriMonth by remember { mutableStateOf(SolarHijriYearMonth.now()) }
-    var chineseMonth by remember { mutableStateOf(ChineseMonth.now()) }
+    val gregorianState = rememberGregorianMonthState()
+    val hijriState = rememberHijriMonthState()
+    val solarHijriState = rememberSolarHijriMonthState()
+    val chineseState = rememberChineseMonthState()
 
-    val selectionState = rememberCalendarSelectionState(selectionMode)
+    val selectionState = key(selectionMode) { rememberCalendarSelectionState(mode = selectionMode) }
 
     MaterialTheme {
         Surface(modifier = Modifier.fillMaxSize()) {
@@ -99,10 +100,10 @@ fun App() {
                     OutlinedButton(
                         onClick = {
                             when (selectedCalendar) {
-                                SampleCalendar.Gregorian -> gregorianMonth = gregorianMonth.minusMonths(1)
-                                SampleCalendar.Hijri -> hijriMonth = hijriMonth.minusMonths(1)
-                                SampleCalendar.SolarHijri -> solarHijriMonth = solarHijriMonth.minusMonths(1)
-                                SampleCalendar.Chinese -> chineseMonth = chineseMonth.minusMonths(1)
+                                SampleCalendar.Gregorian -> gregorianState.previous()
+                                SampleCalendar.Hijri -> hijriState.previous()
+                                SampleCalendar.SolarHijri -> solarHijriState.previous()
+                                SampleCalendar.Chinese -> chineseState.previous()
                             }
                         },
                     ) { Text("Previous") }
@@ -110,10 +111,10 @@ fun App() {
                     OutlinedButton(
                         onClick = {
                             when (selectedCalendar) {
-                                SampleCalendar.Gregorian -> gregorianMonth = GregorianYearMonth.now()
-                                SampleCalendar.Hijri -> hijriMonth = HijriYearMonth.now()
-                                SampleCalendar.SolarHijri -> solarHijriMonth = SolarHijriYearMonth.now()
-                                SampleCalendar.Chinese -> chineseMonth = ChineseMonth.now()
+                                SampleCalendar.Gregorian -> gregorianState.goToToday()
+                                SampleCalendar.Hijri -> hijriState.goToToday()
+                                SampleCalendar.SolarHijri -> solarHijriState.goToToday()
+                                SampleCalendar.Chinese -> chineseState.goToToday()
                             }
                         },
                     ) { Text("Today") }
@@ -121,10 +122,10 @@ fun App() {
                     OutlinedButton(
                         onClick = {
                             when (selectedCalendar) {
-                                SampleCalendar.Gregorian -> gregorianMonth = gregorianMonth.plusMonths(1)
-                                SampleCalendar.Hijri -> hijriMonth = hijriMonth.plusMonths(1)
-                                SampleCalendar.SolarHijri -> solarHijriMonth = solarHijriMonth.plusMonths(1)
-                                SampleCalendar.Chinese -> chineseMonth = chineseMonth.plusMonths(1)
+                                SampleCalendar.Gregorian -> gregorianState.next()
+                                SampleCalendar.Hijri -> hijriState.next()
+                                SampleCalendar.SolarHijri -> solarHijriState.next()
+                                SampleCalendar.Chinese -> chineseState.next()
                             }
                         },
                     ) { Text("Next") }
@@ -133,28 +134,28 @@ fun App() {
                 Spacer(modifier = Modifier.height(12.dp))
                 when (selectedCalendar) {
                     SampleCalendar.Gregorian -> GregorianCalendarMonth(
-                        month = gregorianMonth,
+                        month = gregorianState.month,
                         selection = selectionState.selection,
                         onDateClick = { epochDay -> selectionState.onDayClick(epochDay) },
                         fixedSixRows = true,
                     )
 
                     SampleCalendar.Hijri -> HijriCalendarMonth(
-                        month = hijriMonth,
+                        month = hijriState.month,
                         selection = selectionState.selection,
                         onDateClick = { epochDay -> selectionState.onDayClick(epochDay) },
                         fixedSixRows = true,
                     )
 
                     SampleCalendar.SolarHijri -> SolarHijriCalendarMonth(
-                        month = solarHijriMonth,
+                        month = solarHijriState.month,
                         selection = selectionState.selection,
                         onDateClick = { epochDay -> selectionState.onDayClick(epochDay) },
                         fixedSixRows = true,
                     )
 
                     SampleCalendar.Chinese -> ChineseCalendarMonth(
-                        month = chineseMonth,
+                        month = chineseState.month,
                         selection = selectionState.selection,
                         onDateClick = { epochDay -> selectionState.onDayClick(epochDay) },
                         fixedSixRows = true,
