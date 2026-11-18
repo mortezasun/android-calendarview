@@ -37,6 +37,10 @@ kotlin {
             implementation(libs.compose.ui)
             implementation(project(":library"))
             implementation(project(":calendar-gregorian"))
+            implementation(project(":calendar-hijri"))
+            implementation(project(":calendar-solarHijri"))
+            implementation(project(":calendar-solarHijri-native"))
+            implementation(project(":calendar-chinese-compose"))
         }
 
         val desktopMain by getting {
