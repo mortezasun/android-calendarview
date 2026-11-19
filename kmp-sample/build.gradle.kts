@@ -49,6 +49,10 @@ kotlin {
             implementation(project(":calendar-chinese-compose"))
         }
 
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
+
         val desktopMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
