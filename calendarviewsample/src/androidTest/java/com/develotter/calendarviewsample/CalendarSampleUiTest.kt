@@ -35,6 +35,7 @@ import com.develotter.calendarview.calendars.hijri.compose.hijriMonthData
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthData
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
+import com.develotter.calendarview.locale.CalendarLocale
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -69,7 +70,10 @@ class CalendarSampleUiTest {
     private fun monthOf(date: LocalDate): GregorianYearMonth =
         GregorianYearMonth(date.year, date.monthValue)
 
-    private fun caption(month: GregorianYearMonth): String = gregorianMonthData(month).title
+    // The sample drives every calendar from its language selection, which defaults to "en"; the
+    // expectations below must use the same label locale instead of the platform formatter.
+    private fun caption(month: GregorianYearMonth): String =
+        gregorianMonthData(month, locale = CalendarLocale.English).title
 
     private fun showViewport() {
         compose.onNode(hasText("Window month ", substring = true)).performScrollTo()
@@ -139,7 +143,8 @@ class CalendarSampleUiTest {
     }
 
     private fun englishDescription(date: LocalDate): String =
-        gregorianMonthData(monthOf(date)).days.first { it.epochDay == date.toEpochDay() }.accessibilityLabel
+        gregorianMonthData(monthOf(date), locale = CalendarLocale.English)
+            .days.first { it.epochDay == date.toEpochDay() }.accessibilityLabel
 
     @Test
     fun homeShowcaseDisplaysAllCalendarModulesAndNavigatesToExplorer() {
@@ -161,7 +166,9 @@ class CalendarSampleUiTest {
         compose.onNodeWithText("Gregorian Module").assertIsDisplayed()
 
         click("2nd: Hijri")
-        val hijriSecondaryA11y = requireNotNull(hijriAccessibilityLabel(todayEpochDay))
+        val hijriSecondaryA11y = requireNotNull(
+            hijriAccessibilityLabel(todayEpochDay, locale = CalendarLocale.English),
+        )
         val cellWithHijri = compose.onNodeWithContentDescription(hijriSecondaryA11y, substring = true)
         cellWithHijri.performScrollTo()
         cellWithHijri.assertIsDisplayed()
@@ -309,19 +316,22 @@ class CalendarSampleUiTest {
         openPlayground()
         val today = LocalDate.now()
         for (tag in listOf("en", "de", "fa", "ar")) {
+            val locale = CalendarLocale(tag)
             click(tag)
             for (calendar in SampleCalendar.entries) {
                 click(calendar.name)
                 showViewport()
                 val title = when (calendar) {
-                    SampleCalendar.Gregorian -> gregorianMonthData(monthOf(today)).title
+                    SampleCalendar.Gregorian ->
+                        gregorianMonthData(monthOf(today), locale = locale).title
                     SampleCalendar.Hijri -> hijriMonthData(
                         UmmAlQuraHijriDateProvider.dateForEpochDay(today.toEpochDay()),
+                        locale = locale,
                     ).title
                     SampleCalendar.SolarHijri ->
-                        solarHijriMonthData(SolarHijriDate.fromEpochDay(today.toEpochDay())).title
+                        solarHijriMonthData(SolarHijriDate.fromEpochDay(today.toEpochDay()), locale = locale).title
                     SampleCalendar.SolarHijriNative ->
-                        solarHijriNativeMonthData(SolarHijriDate.fromEpochDay(today.toEpochDay())).title
+                        solarHijriNativeMonthData(SolarHijriDate.fromEpochDay(today.toEpochDay()), locale = locale).title
                     SampleCalendar.Chinese ->
                         chineseMonthData(ChineseMonth.fromEpochDay(today.toEpochDay())).title
                 }
@@ -338,7 +348,7 @@ class CalendarSampleUiTest {
         click("Gregorian")
         compose.onAllNodesWithText("Single")[1].performClick()
         compose.waitForIdle()
-        val title = gregorianMonthData(monthOf(today)).title
+        val title = caption(monthOf(today))
         showViewport()
         assertDisplayedInMainViewport(compose.onNodeWithText(title))
     }
