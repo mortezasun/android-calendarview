@@ -30,25 +30,30 @@ fun sampleMonthData(
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
 ): CalendarMonthData {
     val todayEpochDay = today.toEpochDay()
+    val calendarLocale = locale.asCalendarLocale()
     val localeFirstDay = WeekFields.of(locale).firstDayOfWeek.value
     return when (calendar) {
         SampleCalendar.Gregorian -> gregorianMonthData(
             month = GregorianYearMonth.fromEpochDay(anchorEpochDay),
             firstDayOfWeek = localeFirstDay,
             todayEpochDay = todayEpochDay,
+            locale = calendarLocale,
         )
         SampleCalendar.Hijri -> hijriMonthData(
             month = hijriDateProvider.dateForEpochDay(anchorEpochDay),
             todayEpochDay = todayEpochDay,
             dateProvider = hijriDateProvider,
+            locale = calendarLocale,
         )
         SampleCalendar.SolarHijri -> solarHijriMonthData(
             month = SolarHijriDate.fromEpochDay(anchorEpochDay),
             todayEpochDay = todayEpochDay,
+            locale = calendarLocale,
         )
         SampleCalendar.SolarHijriNative -> solarHijriNativeMonthData(
             month = SolarHijriDate.fromEpochDay(anchorEpochDay),
             todayEpochDay = todayEpochDay,
+            locale = calendarLocale,
         )
         SampleCalendar.Chinese -> chineseMonthData(
             month = ChineseMonth.fromEpochDay(anchorEpochDay),

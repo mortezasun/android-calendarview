@@ -37,6 +37,7 @@ fun sampleHeatmapYear(
 ): List<HeatmapMonthData> {
     val todayEpochDay = today.toEpochDay()
     val enabled = { epochDay: Long -> isDateEnabled(LocalDate.ofEpochDay(epochDay)) }
+    val calendarLocale = locale.asCalendarLocale()
     val localeFirstDay = (firstDayOfWeek ?: WeekFields.of(locale).firstDayOfWeek).value
     return when (calendar) {
         SampleCalendar.Gregorian -> (1..12).map { month ->
@@ -44,6 +45,7 @@ fun sampleHeatmapYear(
                 month = GregorianYearMonth(year, month),
                 firstDayOfWeek = localeFirstDay,
                 todayEpochDay = todayEpochDay,
+                locale = calendarLocale,
                 isDateEnabled = enabled,
             ).toHeatmap { sampleHeatmapIntensity(it) }
         }
@@ -53,6 +55,7 @@ fun sampleHeatmapYear(
                 firstDayOfWeek = (firstDayOfWeek ?: DayOfWeek.SATURDAY).value,
                 todayEpochDay = todayEpochDay,
                 dateProvider = hijriDateProvider,
+                locale = calendarLocale,
                 isDateEnabled = enabled,
             ).toHeatmap { sampleHeatmapIntensity(it) }
         }
@@ -61,6 +64,7 @@ fun sampleHeatmapYear(
                 month = SolarHijriDate(year, month, 1),
                 firstDayOfWeek = (firstDayOfWeek ?: DayOfWeek.SATURDAY).value,
                 todayEpochDay = todayEpochDay,
+                locale = calendarLocale,
                 isDateEnabled = enabled,
             ).toHeatmap { sampleHeatmapIntensity(it) }
         }
@@ -77,6 +81,7 @@ fun sampleHeatmapYear(
                 month = SolarHijriDate(year, month, 1),
                 firstDayOfWeek = (firstDayOfWeek ?: DayOfWeek.SATURDAY).value,
                 todayEpochDay = todayEpochDay,
+                locale = calendarLocale,
                 isDateEnabled = enabled,
             ).toHeatmap { sampleHeatmapIntensity(it) }
         }

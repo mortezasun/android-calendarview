@@ -217,18 +217,20 @@ private fun PlaygroundPane(
     } else {
         ui.secondaryCalendar
     }
-    val secondaryLabelProvider = remember(secondaryCalendar, hijriProvider, ui.chineseStyleName) {
+    val secondaryLabelProvider = remember(secondaryCalendar, hijriProvider, ui.chineseStyleName, ui.localeTag) {
         sampleSecondaryLabelProvider(
             secondary = secondaryCalendar,
             hijriDateProvider = hijriProvider,
             chineseStyle = ui.chineseStyle,
+            locale = ui.locale,
         )
     }
-    val secondaryAccessibilityProvider = remember(secondaryCalendar, hijriProvider, ui.chineseStyleName) {
+    val secondaryAccessibilityProvider = remember(secondaryCalendar, hijriProvider, ui.chineseStyleName, ui.localeTag) {
         sampleSecondaryAccessibilityProvider(
             secondary = secondaryCalendar,
             hijriDateProvider = hijriProvider,
             chineseStyle = ui.chineseStyle,
+            locale = ui.locale,
         )
     }
 
@@ -431,6 +433,7 @@ internal fun SampleMonth(
     secondaryAccessibilityLabel: ((Long) -> String?)? = null,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
+    val calendarLocale = locale.asCalendarLocale()
     val todayDescription = sampleTodayDescription(locale)
     val weekNumberProvider: ((Long) -> String?)? = if (showWeekNumbers) {
         { epochDay -> sampleWeekNumber(epochDay, locale) }
@@ -443,7 +446,7 @@ internal fun SampleMonth(
             onDateClick = { state.onDayClick(it) }, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             todayDescription = todayDescription, markers = sampleMarkers(date),
-            showHeader = showHeader, weekNumber = weekNumberProvider,
+            showHeader = showHeader, weekNumber = weekNumberProvider, locale = calendarLocale,
             secondaryLabel = secondaryLabel, secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         )
         SampleCalendar.Hijri -> HijriCalendarMonth(
@@ -454,6 +457,7 @@ internal fun SampleMonth(
             todayEpochDay = hijriProvider.epochDayFor(hijriToday),
             todayDescription = todayDescription, markers = sampleMarkers(date),
             showHeader = showHeader, weekNumber = weekNumberProvider, dateProvider = hijriProvider,
+            locale = calendarLocale,
             secondaryLabel = secondaryLabel, secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         )
         SampleCalendar.SolarHijri -> SolarHijriCalendarMonth(
@@ -461,7 +465,7 @@ internal fun SampleMonth(
             onDateClick = { state.onDayClick(it) }, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             todayDescription = todayDescription, markers = sampleMarkers(date),
-            showHeader = showHeader, weekNumber = weekNumberProvider,
+            showHeader = showHeader, weekNumber = weekNumberProvider, locale = calendarLocale,
             secondaryLabel = secondaryLabel, secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         )
         SampleCalendar.SolarHijriNative -> SolarHijriNativeCalendarMonth(
@@ -469,7 +473,7 @@ internal fun SampleMonth(
             onDateClick = { state.onDayClick(it) }, modifier = Modifier.fillMaxWidth(),
             showPreviousMonthDays = previousDays, showNextMonthDays = nextDays, fixedSixRows = fixedSixRows,
             todayDescription = todayDescription, markers = sampleMarkers(date),
-            showHeader = showHeader, weekNumber = weekNumberProvider,
+            showHeader = showHeader, weekNumber = weekNumberProvider, locale = calendarLocale,
             secondaryLabel = secondaryLabel, secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         )
         SampleCalendar.Chinese -> if (chineseGregorianGrid) {
@@ -508,15 +512,17 @@ internal fun SampleWeek(
     secondaryAccessibilityLabel: ((Long) -> String?)? = null,
 ) {
     val date = LocalDate.ofEpochDay(anchor)
+    val calendarLocale = locale.asCalendarLocale()
     val week: CalendarWeekData? = runCatching { when (calendar) {
-        SampleCalendar.Gregorian -> gregorianWeekData(anchor)
+        SampleCalendar.Gregorian -> gregorianWeekData(anchor, locale = calendarLocale)
         SampleCalendar.Hijri -> hijriWeekData(
             dateEpochDay = anchor,
             todayEpochDay = hijriProvider.epochDayFor(hijriToday),
             dateProvider = hijriProvider,
+            locale = calendarLocale,
         )
-        SampleCalendar.SolarHijri -> solarHijriWeekData(anchor)
-        SampleCalendar.SolarHijriNative -> solarHijriNativeWeekData(anchor)
+        SampleCalendar.SolarHijri -> solarHijriWeekData(anchor, locale = calendarLocale)
+        SampleCalendar.SolarHijriNative -> solarHijriNativeWeekData(anchor, locale = calendarLocale)
         SampleCalendar.Chinese -> chineseWeekData(
             epochDay = anchor,
             style = chineseStyle,

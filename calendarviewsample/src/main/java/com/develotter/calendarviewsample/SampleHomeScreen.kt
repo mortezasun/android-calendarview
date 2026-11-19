@@ -83,10 +83,11 @@ internal fun SampleHomeScreen(
     modifier: Modifier = Modifier,
 ) {
     val todayEpochDay = remember { LocalDate.now().toEpochDay() }
-    val todayConversions = remember(todayEpochDay, ui.chineseStyleName, ui.hijriOffset) {
+    val todayConversions = remember(todayEpochDay, ui.chineseStyleName, ui.hijriOffset, ui.localeTag) {
         sampleAllCalendarConversions(
             epochDay = todayEpochDay,
             chineseStyle = ui.chineseStyle,
+            locale = ui.locale,
         )
     }
 

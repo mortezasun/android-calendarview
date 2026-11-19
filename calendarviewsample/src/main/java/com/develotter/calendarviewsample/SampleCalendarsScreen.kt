@@ -65,27 +65,30 @@ internal fun SampleCalendarsScreen(
     } else {
         ui.secondaryCalendar
     }
-    val secondaryLabelProvider = remember(secondaryCalendar, hijriProvider, ui.chineseStyleName) {
+    val secondaryLabelProvider = remember(secondaryCalendar, hijriProvider, ui.chineseStyleName, ui.localeTag) {
         sampleSecondaryLabelProvider(
             secondary = secondaryCalendar,
             hijriDateProvider = hijriProvider,
             chineseStyle = ui.chineseStyle,
+            locale = ui.locale,
         )
     }
-    val secondaryAccessibilityProvider = remember(secondaryCalendar, hijriProvider, ui.chineseStyleName) {
+    val secondaryAccessibilityProvider = remember(secondaryCalendar, hijriProvider, ui.chineseStyleName, ui.localeTag) {
         sampleSecondaryAccessibilityProvider(
             secondary = secondaryCalendar,
             hijriDateProvider = hijriProvider,
             chineseStyle = ui.chineseStyle,
+            locale = ui.locale,
         )
     }
 
     val inspectedEpochDay = state.selection.selectedDays.firstOrNull() ?: ui.anchor
-    val conversions = remember(inspectedEpochDay, hijriProvider, ui.chineseStyleName) {
+    val conversions = remember(inspectedEpochDay, hijriProvider, ui.chineseStyleName, ui.localeTag) {
         sampleAllCalendarConversions(
             epochDay = inspectedEpochDay,
             hijriDateProvider = hijriProvider,
             chineseStyle = ui.chineseStyle,
+            locale = ui.locale,
         )
     }
 

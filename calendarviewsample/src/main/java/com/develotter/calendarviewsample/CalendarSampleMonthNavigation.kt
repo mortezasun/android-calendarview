@@ -31,8 +31,8 @@ internal data class SampleMonthNavigation(
  * viewport updates the state through [anchor]; header navigation reports the normalized first
  * day back to the sample, which keeps the grid, pager and dialog in sync.
  *
- * The labels come from the platform formatter of each engine, so [locale] is only kept as part
- * of the sample's public signature.
+ * The month titles come from the library label tables of each engine, which receive [locale]
+ * as a [com.develotter.calendarview.locale.CalendarLocale].
  */
 @Composable
 internal fun rememberSampleMonthNavigation(
@@ -46,6 +46,7 @@ internal fun rememberSampleMonthNavigation(
 ): SampleMonthNavigation {
     val onChanged by rememberUpdatedState(onMonthChanged)
     val currentAnchor by rememberUpdatedState(anchor)
+    val calendarLocale = locale.asCalendarLocale()
     return when (calendar) {
         SampleCalendar.Gregorian -> {
             // Keep the state initializer stable; the anchor effect below is the controlled input.
@@ -60,7 +61,7 @@ internal fun rememberSampleMonthNavigation(
                 val target = GregorianYearMonth.fromEpochDay(anchor)
                 if (state.month != target) state.goTo(target)
             }
-            SampleMonthNavigation(title = state.title(), state = state)
+            SampleMonthNavigation(title = state.title(calendarLocale), state = state)
         }
         SampleCalendar.Hijri -> {
             val initialMonth = remember(hijriDateProvider) {
@@ -80,7 +81,7 @@ internal fun rememberSampleMonthNavigation(
                 val target = hijriDateProvider.dateForEpochDay(anchor).copy(dayOfMonth = 1)
                 if (state.month != target) state.goTo(target)
             }
-            SampleMonthNavigation(title = state.title(), state = state)
+            SampleMonthNavigation(title = state.title(calendarLocale), state = state)
         }
         SampleCalendar.SolarHijri -> {
             val initialMonth = remember { SolarHijriDate.fromEpochDay(anchor) }
@@ -95,7 +96,7 @@ internal fun rememberSampleMonthNavigation(
                 val target = SolarHijriDate.fromEpochDay(anchor).withDayOfMonth(1)
                 if (state.month != target) state.goTo(target)
             }
-            SampleMonthNavigation(title = state.title(), state = state)
+            SampleMonthNavigation(title = state.title(calendarLocale), state = state)
         }
         SampleCalendar.Chinese -> if (chineseGregorianGrid) {
             // The overlay is a Gregorian month grid, including its header, previous/next and
@@ -111,7 +112,7 @@ internal fun rememberSampleMonthNavigation(
                 val target = GregorianYearMonth.fromEpochDay(anchor)
                 if (state.month != target) state.goTo(target)
             }
-            SampleMonthNavigation(title = state.title(), state = state)
+            SampleMonthNavigation(title = state.title(calendarLocale), state = state)
         } else {
             // A saved or externally supplied sample anchor may predate the Chinese range.
             // Clamp only this header's input and report the normalized month back; never call
@@ -155,7 +156,7 @@ internal fun rememberSampleMonthNavigation(
                 val target = SolarHijriDate.fromEpochDay(anchor).withDayOfMonth(1)
                 if (state.month != target) state.goTo(target)
             }
-            SampleMonthNavigation(title = state.title(), state = state)
+            SampleMonthNavigation(title = state.title(calendarLocale), state = state)
         }
     }
 }

@@ -15,6 +15,7 @@ import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriSecond
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeAccessibilityLabel
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeSecondaryLabel
+import java.util.Locale
 
 /**
  * Dynamic alternative calendar choice for secondary cell labels and accessibility descriptions.
@@ -108,26 +109,34 @@ internal fun sampleSecondaryLabelProvider(
     secondary: SampleSecondaryCalendar,
     hijriDateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
-): ((Long) -> String?)? = when (secondary) {
-    SampleSecondaryCalendar.None -> null
-    SampleSecondaryCalendar.Gregorian -> { epochDay -> gregorianSecondaryLabel(epochDay) }
-    SampleSecondaryCalendar.Hijri -> { epochDay -> hijriSecondaryLabel(epochDay, hijriDateProvider) }
-    SampleSecondaryCalendar.SolarHijri -> { epochDay -> solarHijriSecondaryLabel(epochDay) }
-    SampleSecondaryCalendar.SolarHijriNative -> { epochDay -> solarHijriNativeSecondaryLabel(epochDay) }
-    SampleSecondaryCalendar.Chinese -> { epochDay -> chineseSecondaryLabel(epochDay, chineseStyle) }
+    locale: Locale = Locale.getDefault(),
+): ((Long) -> String?)? {
+    val calendarLocale = locale.asCalendarLocale()
+    return when (secondary) {
+        SampleSecondaryCalendar.None -> null
+        SampleSecondaryCalendar.Gregorian -> { epochDay -> gregorianSecondaryLabel(epochDay, calendarLocale) }
+        SampleSecondaryCalendar.Hijri -> { epochDay -> hijriSecondaryLabel(epochDay, hijriDateProvider, calendarLocale) }
+        SampleSecondaryCalendar.SolarHijri -> { epochDay -> solarHijriSecondaryLabel(epochDay, calendarLocale) }
+        SampleSecondaryCalendar.SolarHijriNative -> { epochDay -> solarHijriNativeSecondaryLabel(epochDay, calendarLocale) }
+        SampleSecondaryCalendar.Chinese -> { epochDay -> chineseSecondaryLabel(epochDay, chineseStyle) }
+    }
 }
 
 internal fun sampleSecondaryAccessibilityProvider(
     secondary: SampleSecondaryCalendar,
     hijriDateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
-): ((Long) -> String?)? = when (secondary) {
-    SampleSecondaryCalendar.None -> null
-    SampleSecondaryCalendar.Gregorian -> { epochDay -> gregorianAccessibilityLabel(epochDay) }
-    SampleSecondaryCalendar.Hijri -> { epochDay -> hijriAccessibilityLabel(epochDay, hijriDateProvider) }
-    SampleSecondaryCalendar.SolarHijri -> { epochDay -> solarHijriAccessibilityLabel(epochDay) }
-    SampleSecondaryCalendar.SolarHijriNative -> { epochDay -> solarHijriNativeAccessibilityLabel(epochDay) }
-    SampleSecondaryCalendar.Chinese -> { epochDay -> chineseAccessibilityLabel(epochDay, chineseStyle) }
+    locale: Locale = Locale.getDefault(),
+): ((Long) -> String?)? {
+    val calendarLocale = locale.asCalendarLocale()
+    return when (secondary) {
+        SampleSecondaryCalendar.None -> null
+        SampleSecondaryCalendar.Gregorian -> { epochDay -> gregorianAccessibilityLabel(epochDay, calendarLocale) }
+        SampleSecondaryCalendar.Hijri -> { epochDay -> hijriAccessibilityLabel(epochDay, hijriDateProvider, calendarLocale) }
+        SampleSecondaryCalendar.SolarHijri -> { epochDay -> solarHijriAccessibilityLabel(epochDay, calendarLocale) }
+        SampleSecondaryCalendar.SolarHijriNative -> { epochDay -> solarHijriNativeAccessibilityLabel(epochDay, calendarLocale) }
+        SampleSecondaryCalendar.Chinese -> { epochDay -> chineseAccessibilityLabel(epochDay, chineseStyle) }
+    }
 }
 
 /** Converts a single absolute epoch day into readable representations across all engines. */
@@ -135,10 +144,13 @@ internal fun sampleAllCalendarConversions(
     epochDay: Long,
     hijriDateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
     chineseStyle: ChineseTextStyle = ChineseTextStyle.English,
+    locale: Locale = Locale.getDefault(),
 ): List<SampleCalendarConversion> {
-    val gregorianText = gregorianAccessibilityLabel(epochDay)
-    val hijriText = hijriAccessibilityLabel(epochDay, hijriDateProvider) ?: "Outside supported range"
-    val solarNativeText = solarHijriNativeAccessibilityLabel(epochDay)
+    val calendarLocale = locale.asCalendarLocale()
+    val gregorianText = gregorianAccessibilityLabel(epochDay, calendarLocale)
+    val hijriText = hijriAccessibilityLabel(epochDay, hijriDateProvider, calendarLocale)
+        ?: "Outside supported range"
+    val solarNativeText = solarHijriNativeAccessibilityLabel(epochDay, calendarLocale)
     val solarLeapDetail = runCatching {
         val date = SolarHijriDate.fromEpochDay(epochDay)
         if (date.isLeapYear()) "Leap year (${date.year} SH)" else "Common year (${date.year} SH)"

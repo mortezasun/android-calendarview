@@ -43,6 +43,9 @@ Status: implemented, pushed identically to `master` and `kmp`, and verified both
   - `:kmp-sample` now selects its language from `SampleLanguages` (the library locales) and passes
     it to every calendar, so the Settings switch changes calendar content instead of only the
     shell; shell copy exists for `en`, `de`, `fa` and `ar`.
+  - `:calendarviewsample` bridges its existing `Locale` selection to the library locale, so the
+    Android demo's language chips change month titles, weekday labels, day numbers, secondary
+    labels and accessibility descriptions too; the Chinese module keeps `ChineseTextStyle`.
 - **Multiplatform target expansion & shared actuals:**
   - All six Compose modules (`:library`, `:calendar-gregorian`, `:calendar-hijri`,
     `:calendar-solarHijri`, `:calendar-solarHijri-native`, `:calendar-chinese-compose`) now target
