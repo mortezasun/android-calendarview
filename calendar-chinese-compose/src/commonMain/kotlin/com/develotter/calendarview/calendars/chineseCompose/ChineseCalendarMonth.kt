@@ -11,10 +11,13 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseFormat
 import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
+import com.develotter.calendarview.calendars.gregorian.compose.gregorianDayCell
+import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthData
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarDayMarker
 import com.develotter.calendarview.compose.CalendarMonthData
 import com.develotter.calendarview.compose.CalendarMonthGrid
+import com.develotter.calendarview.locale.CalendarLocale
 import com.develotter.calendarview.selection.CalendarSelection
 
 /** Localized Chinese month snapshot; lists are read-only. */
@@ -211,12 +214,12 @@ fun ChineseCalendarMonth(
 }
 
 /**
- * Gregorian grid with the Chinese calendar as a secondary label per day.
- *
- * The grid, weekday alignment, selection and markers follow the Gregorian month; day one of a
- * Chinese month additionally shows the Chinese month name, so leap months remain visible. Days
- * outside the Chinese engine range simply omit the secondary label.
+ * Binary-compatible overload for callers compiled against 3.0.0, which had no `locale` parameter.
  */
+@Deprecated(
+    message = "Binary compatibility overload for callers compiled against 3.0.0.",
+    level = DeprecationLevel.HIDDEN,
+)
 @Composable
 fun GregorianChineseCalendarMonth(
     month: GregorianYearMonth,
@@ -236,7 +239,59 @@ fun GregorianChineseCalendarMonth(
     markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
     weekNumber: ((Long) -> String?)? = null,
 ) {
-    val data = gregorianOverlayData(month, firstDayOfWeek, todayEpochDay)
+    GregorianChineseCalendarMonth(
+        month = month,
+        selection = selection,
+        onDateClick = onDateClick,
+        modifier = modifier,
+        style = style,
+        firstDayOfWeek = firstDayOfWeek,
+        showPreviousMonthDays = showPreviousMonthDays,
+        showNextMonthDays = showNextMonthDays,
+        todayEpochDay = todayEpochDay,
+        showHeader = showHeader,
+        showWeekdayLabels = showWeekdayLabels,
+        fixedSixRows = fixedSixRows,
+        todayBorderColor = todayBorderColor,
+        todayDescription = todayDescription,
+        markers = markers,
+        locale = null,
+        weekNumber = weekNumber,
+    )
+}
+
+/**
+ * Gregorian grid with the Chinese calendar as a secondary label per day.
+ *
+ * The grid, weekday alignment, selection and markers follow the Gregorian month; day one of a
+ * Chinese month additionally shows the Chinese month name, so leap months remain visible. Days
+ * outside the Chinese engine range simply omit the secondary label.
+ *
+ * [locale] localizes only the Gregorian primary layer (title, weekday labels, day numbers and
+ * accessibility labels) through the Gregorian label tables; `null` keeps the platform default
+ * locale. The Chinese secondary labels always follow [style], never [locale].
+ */
+@Composable
+fun GregorianChineseCalendarMonth(
+    month: GregorianYearMonth,
+    selection: CalendarSelection,
+    onDateClick: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    style: ChineseTextStyle = ChineseTextStyle.English,
+    firstDayOfWeek: Int = ChinesePlatform.defaultFirstDayOfWeek(),
+    showPreviousMonthDays: Boolean = false,
+    showNextMonthDays: Boolean = false,
+    todayEpochDay: Long = ChinesePlatform.currentEpochDay(),
+    showHeader: Boolean = true,
+    showWeekdayLabels: Boolean = true,
+    fixedSixRows: Boolean = false,
+    todayBorderColor: Color? = null,
+    todayDescription: String? = null,
+    markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
+    locale: CalendarLocale? = null,
+    weekNumber: ((Long) -> String?)? = null,
+) {
+    val data = gregorianOverlayData(month, firstDayOfWeek, todayEpochDay, locale)
     CalendarMonthGrid(
         title = data.title,
         weekdayLabels = data.weekdayLabels,
@@ -254,36 +309,54 @@ fun GregorianChineseCalendarMonth(
         todayDescription = todayDescription,
         markers = markers,
         weekNumber = weekNumber,
-        adjacentDayProvider = { epochDay -> gregorianDayCell(epochDay, todayEpochDay) },
+        adjacentDayProvider = { epochDay -> gregorianOverlayDayCell(epochDay, todayEpochDay, locale) },
         secondaryLabel = { epochDay -> chineseSecondaryLabel(epochDay, style) },
         secondaryAccessibilityLabel = { epochDay -> chineseAccessibilityLabel(epochDay, style) },
     )
 }
 
-private class GregorianOverlayData(
-    val title: String,
-    val weekdayLabels: List<String>,
-    val firstDayOffset: Int,
-    val days: List<CalendarDayCell>,
-)
-
-private fun gregorianOverlayData(
+/**
+ * Pure month data of the Gregorian overlay grid. With a [locale] the Gregorian tables supply the
+ * labels; without one the platform formatter keeps the behaviour of earlier versions.
+ */
+internal fun gregorianOverlayData(
     month: GregorianYearMonth,
     firstDayOfWeek: Int,
     todayEpochDay: Long,
-): GregorianOverlayData = GregorianOverlayData(
-    title = ChinesePlatform.formatMonthYear(month.year, month.month),
-    weekdayLabels = chineseWeekdayLabels(firstDayOfWeek),
-    firstDayOffset = chineseDayOfWeekOffset(month.atDay(1), firstDayOfWeek),
-    days = (1..month.lengthOfMonth()).map { day ->
-        gregorianDayCell(month.atDay(day), todayEpochDay)
-    },
-)
+    locale: CalendarLocale? = null,
+): CalendarMonthData {
+    if (locale != null) {
+        val gregorian = gregorianMonthData(month, firstDayOfWeek, todayEpochDay, locale)
+        return GregorianOverlayData(
+            title = gregorian.title,
+            weekdayLabels = gregorian.weekdayLabels,
+            firstDayOffset = gregorian.firstDayOffset,
+            days = gregorian.days,
+        )
+    }
+    return GregorianOverlayData(
+        title = ChinesePlatform.formatMonthYear(month.year, month.month),
+        weekdayLabels = chineseWeekdayLabels(firstDayOfWeek),
+        firstDayOffset = chineseDayOfWeekOffset(month.atDay(1), firstDayOfWeek),
+        days = (1..month.lengthOfMonth()).map { day ->
+            gregorianOverlayDayCell(month.atDay(day), todayEpochDay, null)
+        },
+    )
+}
 
-private fun gregorianDayCell(
+private class GregorianOverlayData(
+    override val title: String,
+    override val weekdayLabels: List<String>,
+    override val firstDayOffset: Int,
+    override val days: List<CalendarDayCell>,
+) : CalendarMonthData
+
+private fun gregorianOverlayDayCell(
     epochDay: Long,
     todayEpochDay: Long,
+    locale: CalendarLocale?,
 ): CalendarDayCell {
+    if (locale != null) return gregorianDayCell(epochDay, todayEpochDay, locale)
     val dayOfMonth = (epochDay - GregorianYearMonth.fromEpochDay(epochDay).atDay(1)).toInt() + 1
     return CalendarDayCell(
         epochDay = epochDay,
