@@ -1,6 +1,7 @@
 *.iml
 .gradle
 .kotlin/
+.idea
 kotlin-js-store/
 /local.properties
 /.idea/caches
