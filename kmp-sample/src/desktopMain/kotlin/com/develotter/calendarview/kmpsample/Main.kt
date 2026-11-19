@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 
 fun main() = application {
     Window(
@@ -29,3 +30,6 @@ fun main() = application {
         )
     }
 }
+
+/** Desktop anchor day: the first day of the current Gregorian month. */
+internal fun desktopTodayEpochDay(): Long = GregorianYearMonth.now().atDay(1)
