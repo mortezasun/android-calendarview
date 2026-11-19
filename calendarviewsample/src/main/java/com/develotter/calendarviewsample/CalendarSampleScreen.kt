@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -33,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -58,6 +60,7 @@ import com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijri
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeWeekData
 import com.develotter.calendarview.compose.CalendarAgenda
 import com.develotter.calendarview.compose.CalendarDayMarker
+import com.develotter.calendarview.locale.CalendarLocale
 import com.develotter.calendarview.compose.CalendarMonthHeader
 import com.develotter.calendarview.compose.CalendarSelectionState
 import com.develotter.calendarview.compose.CalendarStyle
@@ -66,6 +69,7 @@ import com.develotter.calendarview.compose.CalendarWeekGrid
 import com.develotter.calendarview.compose.LocalCalendarStyle
 import com.develotter.calendarview.compose.rememberCalendarSelectionState
 import com.develotter.calendarview.enums.TypeSelectDay
+import com.develotter.calendarview.locale.asCalendarLocale
 import com.develotter.calendarview.selection.CalendarRangePolicy
 import com.develotter.calendarview.selection.CalendarSelection
 import java.time.LocalDate
@@ -147,6 +151,7 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                                         )
                                     }
                                 },
+                                actions = { SampleLanguageSwitch(ui) },
                             )
                         },
                         bottomBar = {
@@ -190,6 +195,21 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                     }
                 }
             }
+        }
+    }
+}
+
+/** Global language switch in the top bar; it drives the same locale as the Playground chips. */
+@Composable
+private fun SampleLanguageSwitch(ui: CalendarSampleState) {
+    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+        CalendarLocale.supportedLanguages.forEach { tag ->
+            FilterChip(
+                selected = ui.localeTag == tag,
+                onClick = { ui.localeTag = tag },
+                label = { Text(tag.uppercase(), style = MaterialTheme.typography.labelSmall) },
+                modifier = Modifier.testTag("language-$tag"),
+            )
         }
     }
 }

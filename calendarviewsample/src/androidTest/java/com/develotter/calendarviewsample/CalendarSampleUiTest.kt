@@ -17,6 +17,7 @@ import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.click as touchClick
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -36,6 +37,7 @@ import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthD
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
 import com.develotter.calendarview.locale.CalendarLocale
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -336,6 +338,47 @@ class CalendarSampleUiTest {
                         chineseMonthData(ChineseMonth.fromEpochDay(today.toEpochDay())).title
                 }
                 compose.onNodeWithText(title).assertExists()
+            }
+        }
+    }
+
+    private fun selectHeaderLanguage(tag: String) {
+        compose.onNodeWithTag("language-$tag").performClick()
+        compose.waitForIdle()
+    }
+
+    private fun firstDayDescription(month: GregorianYearMonth, locale: CalendarLocale): String =
+        gregorianMonthData(month, locale = locale).days.first().accessibilityLabel
+
+    @Test
+    fun headerLanguageSwitchOnHomeLocalizesTheCalendarsExplorerTitle() {
+        val month = monthOf(LocalDate.now())
+        selectHeaderLanguage("de")
+        click("Calendars")
+        val germanTitle = gregorianMonthData(month, locale = CalendarLocale.German).title
+        compose.onAllNodesWithText(germanTitle)[0].assertExists()
+    }
+
+    @Test
+    fun headerLanguageSwitchLocalizesTitleAndDayDescriptions() {
+        val month = monthOf(LocalDate.now())
+        openPlayground()
+        for (tag in listOf("fa", "de", "ar")) {
+            val locale = CalendarLocale(tag)
+            selectHeaderLanguage(tag)
+            showViewport()
+            // Expectations come from the library tables, never from the platform formatter.
+            val title = gregorianMonthData(month, locale = locale).title
+            assertDisplayedInMainViewport(compose.onNodeWithText(title))
+            val firstDay = firstDayDescription(month, locale)
+            compose.onNodeWithContentDescription(firstDay, substring = true).assertExists()
+            when (tag) {
+                "fa" -> {
+                    assertTrue(title.any { it in '\u06F0'..'\u06F9' })
+                    assertTrue(firstDay.any { it in '\u06F0'..'\u06F9' })
+                }
+                "ar" -> assertTrue(firstDay.any { it in '\u0660'..'\u0669' })
+                "de" -> assertTrue(firstDay.contains("1. "))
             }
         }
     }
