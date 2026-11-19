@@ -23,6 +23,13 @@ plugins {
 subprojects {
     tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
         .configureEach { enabled = false }
+    pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+        extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
+            compilerOptions {
+                freeCompilerArgs.add("-Xexpect-actual-classes")
+            }
+        }
+    }
 }
 
 // Clear plugin-level Ivy URL registration so Kotlin/JS and Kotlin/Wasm use the repositories

@@ -18,6 +18,7 @@ kotlin {
             }
         }
         minSdk = 27
+        withHostTest {}
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -53,10 +54,8 @@ kotlin {
             implementation(kotlin("test"))
         }
 
-        val desktopMain by getting {
-            dependencies {
-                implementation(compose.desktop.currentOs)
-            }
+        getByName("desktopMain").dependencies {
+            implementation(compose.desktop.currentOs)
         }
 
         androidMain.dependencies {
