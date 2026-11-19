@@ -28,7 +28,7 @@ A **Kotlin Multiplatform** Jetpack Compose calendar library built around a share
 - **Stateless & Controlled** – Callers own selection state and visible month bounds via saveable engine `*MonthState` holders and `CalendarMonthHeader`.
 - **Rich Product Views** – `CalendarWeekGrid`, `CalendarAgenda`, `CalendarMonthList`, `CalendarMonthPager`, `CalendarMonthColumns`, event markers, optional week numbers, `LocalCalendarStyle`, custom `dayContent`, `CalendarMonthData` / `CalendarWeekData` overloads, and `toHeatmap()` adapters.
 - **Accessibility & RTL** – Localized date/marker descriptions (including merged secondary-calendar descriptions), collection/heading semantics, and automatic RTL mirroring via `LocalLayoutDirection`.
-- **Caller-Selected Locale** – `CalendarLocale` (`en`, `de`, `fa`, `ar`, or any tag that falls back to English) drives month titles, weekday labels, day numbers and accessibility labels in every engine; `null` keeps the platform default locale, so calendar content can follow an in-app language switch on every target ([ADR 0007](docs/decisions/0007-caller-selected-calendar-locale.md)).
+- **Caller-Selected Locale** – `CalendarLocale` (`en`, `de`, `fa`, `ar`, or any tag that falls back to English) drives month titles, weekday labels, day numbers and accessibility labels in every engine; `null` keeps the platform default locale, so calendar content can follow an in-app language switch on every target. Chinese labels stay on `ChineseTextStyle`, and layout direction stays a host decision (`CalendarLocale.isRightToLeft` and the opt-in `ProvideCalendarLocaleLayoutDirection` help derive it); see the [language guide](docs/USAGE_GUIDE.md#language-and-locale) and [ADR 0007](docs/decisions/0007-caller-selected-calendar-locale.md).
 
 ---
 

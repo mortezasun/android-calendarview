@@ -8,6 +8,23 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
 
 ### Added
 
+- Caller-selected label language (ADR 0007): `CalendarLocale` in `:library` with `English`, `German`,
+  `Persian` and `Arabic`, and an optional `locale: CalendarLocale? = null` on the month titles,
+  secondary and accessibility labels, day cells, month and week data, `*MonthState.title()` and the
+  month composables of every engine. `null` keeps the platform formatter, so earlier behaviour and
+  the `3.0.0` binary-compatibility overloads are unchanged. Labels come from pure Kotlin tables; other
+  languages render English labels and Western digits.
+- `GregorianChineseCalendarMonth` accepts `locale` for its Gregorian primary layer; the Chinese
+  secondary labels stay on `ChineseTextStyle`. The previous signature remains as a hidden
+  binary-compatibility overload.
+- `CalendarLocale.supportedLanguages`, `CalendarLocale.systemDefault()`, `CalendarLocale.isRightToLeft`,
+  the opt-in `ProvideCalendarLocaleLayoutDirection` helper and the JVM/Android extension
+  `java.util.Locale.asCalendarLocale()`. Layout direction stays a host decision unless the helper is used.
+- Golden and completeness tests for the Gregorian, Hijri, Solar Hijri and Solar Hijri native label
+  tables, English-fallback tests, and a string-parity test for `:kmp-sample`.
+- `:kmp-sample` selects its language from the library locales and passes it to every calendar;
+  `:calendarviewsample` shows a language switch in its top bar and drives all engines from the same
+  selection, with instrumentation tests whose expectations come from the library tables.
 - Shared `appleMain` and `webMain` (`jsMain` / `wasmJsMain`) platform formatters and `currentEpochDay`
   actuals across `:library`, `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri-native`,
   and `:calendar-chinese-compose`.
@@ -24,6 +41,9 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
 
 ### Changed
 
+- `:calendarviewsample` uses the library's `Locale.asCalendarLocale()` instead of its own copy.
+- ADR 0007 now allows hosts to derive `LayoutDirection` from the language through the opt-in helpers;
+  the calendar composables themselves still never change the direction.
 - Version prepared as `3.1.0-beta` across `build.gradle.kts`, `:calendarviewsample` (`versionCode`
   `30100`, `versionName` `"3.1.0-beta"`), and `tools/consumer-check` BOM references.
 - Updated `:calendarviewsample` header (`KMP 3.1.0-beta · All calendar modules` subtitle and

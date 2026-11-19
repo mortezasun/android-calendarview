@@ -24,10 +24,39 @@ Add one public value type, `CalendarLocale(languageTag)` in `:library`
   (`GregorianLabels`, `HijriLabels`, `SolarHijriLabels` and the existing `SolarHijriLocale`
   month lists), not by passing locale objects to platform formatters. This keeps the engine
   usable without Compose, Android or ICU, and gives JS, Wasm, Native and Apple the same labels.
-- Unknown language tags fall back to English. Labels never change layout direction; the caller
-  still provides `LayoutDirection`.
+- Unknown language tags fall back to English. A locale value never changes layout direction by
+  itself, and no calendar composable reads it for that purpose; the caller still provides
+  `LayoutDirection`. (Amended below by the opt-in RTL helpers.)
 - `:calendar-chinese-compose` keeps `ChineseTextStyle` as its language control because Chinese
   month and day labels are script choices, not translations.
+- `GregorianChineseCalendarMonth` also accepts `locale`. The overlay's primary grid is a plain
+  Gregorian month, so its title, weekday labels, day numbers and accessibility labels come from the
+  Gregorian label tables; the Chinese secondary labels stay on `ChineseTextStyle` because a
+  language tag cannot choose between Chinese scripts. `null` keeps the platform formatter that the
+  overlay used before.
+- Fallback semantics are deliberately simple: every unsupported tag (for example `es`, `sv` or an
+  empty tag) renders English labels and Western digits. There is no fallback chain and no regional
+  matching beyond the language subtag (`de-AT` is `de`); the only regional exception is Solar Hijri
+  month names, where `fa-AF` and `prs` select the Dari list.
+
+### Amendment: opt-in right-to-left derivation
+
+The original statement "labels never change layout direction" was too absolute for hosts that
+switch language at runtime: they had to maintain their own language-to-direction map. `:library`
+now offers `CalendarLocale.isRightToLeft` (a pure Kotlin check over a fixed language list) and the
+composable `ProvideCalendarLocaleLayoutDirection(locale) { ... }`, which overrides the ambient
+`LayoutDirection` for its content only. The rule that changes is *who may decide*: the calendar
+composables still never touch the direction, and the default is unchanged, but a host can opt in to
+deriving the direction from the language instead of duplicating the mapping. `null` leaves the
+ambient direction alone. The list ignores script subtags, so it is a language-level default, not a
+full BCP 47 script resolution; a host with other needs keeps providing `LayoutDirection` itself.
+
+### Amendment: convenience API
+
+`CalendarLocale.supportedLanguages` documents the languages that have tables,
+`CalendarLocale.systemDefault()` wraps the platform language (`Locale`, `NSLocale`, `Intl`), and
+`java.util.Locale.asCalendarLocale()` is a JVM/Android extension, so hosts no longer carry their own
+bridge. These add public API only; existing signatures are unchanged.
 
 ## Consequences
 

@@ -296,8 +296,35 @@ renders English labels. Each engine ships its own tables (`gregorianMonthTitle`,
 `hijriMonthData`, `solarHijriNativeMonthData`, `solarHijriMonthData`), so the labels do not depend
 on the operating system and work on every target. The Chinese engine keeps `ChineseTextStyle`
 because its labels are script choices rather than translations. A locale never changes layout
-direction: pass `LayoutDirection` from the host, for example through
-`CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl)`.
+direction by itself: pass `LayoutDirection` from the host, for example through
+`CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl)`, or opt in to
+deriving it from the language:
+
+```kotlin
+val locale = CalendarLocale.Persian
+ProvideCalendarLocaleLayoutDirection(locale) { // Rtl for fa/ar/..., Ltr otherwise; null = unchanged
+    GregorianCalendarMonth(month = month, selection = selection, onDateClick = onClick, locale = locale)
+}
+```
+
+`CalendarLocale.isRightToLeft` exposes the same decision as a plain boolean,
+`CalendarLocale.supportedLanguages` lists the languages with tables (`en`, `de`, `fa`, `ar`) and
+`CalendarLocale.systemDefault()` wraps the platform language. On the JVM and Android,
+`java.util.Locale.asCalendarLocale()` converts a `Locale`.
+
+Unsupported tags (for example `es`) render English labels and Western digits; there is no fallback
+chain, and only the language subtag is used (`de-AT` behaves like `de`).
+
+### Which argument controls what
+
+| Argument | Controls | Does not control |
+|----------|----------|------------------|
+| `CalendarLocale` | Gregorian, Hijri and Solar Hijri month titles, weekday labels, day numbers, accessibility labels; the Gregorian primary layer of `GregorianChineseCalendarMonth` | Chinese labels, layout direction, first day of week |
+| `ChineseTextStyle` | Chinese month and day labels, including Chinese secondary labels on other grids | Gregorian, Hijri or Solar Hijri labels |
+| `LayoutDirection` (host, or opt-in `ProvideCalendarLocaleLayoutDirection`) | Mirroring of the grid and header | Any label text |
+| `firstDayOfWeek` (host) | Weekday order and offset | Label language |
+
+So a Chinese calendar is not German when the locale is `de`: choose `ChineseTextStyle` for it.
 
 ---
 

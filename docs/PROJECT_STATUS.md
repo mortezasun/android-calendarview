@@ -46,6 +46,23 @@ Status: implemented, pushed identically to `master` and `kmp`, and verified both
   - `:calendarviewsample` bridges its existing `Locale` selection to the library locale, so the
     Android demo's language chips change month titles, weekday labels, day numbers, secondary
     labels and accessibility descriptions too; the Chinese module keeps `ChineseTextStyle`.
+  - Locale follow-up (verified on the Linux host by `jvmTest`, compile checks and the API/KLIB
+    guards only; no emulator or device run):
+    - `GregorianChineseCalendarMonth` accepts `locale` for its Gregorian layer (hidden overload keeps
+      the 3.0.0 signature); Chinese secondary labels remain `ChineseTextStyle`.
+    - `CalendarLocale.supportedLanguages`, `systemDefault()`, `isRightToLeft`, the opt-in
+      `ProvideCalendarLocaleLayoutDirection` and `java.util.Locale.asCalendarLocale()` (JVM/Android) were
+      added; ADR 0007 was amended (layout direction is still never changed by calendar composables).
+      `SampleLocale.kt` was removed in favour of the library extension.
+    - New golden/completeness/fallback tests for all four label tables, `CalendarLocale` normalization
+      tests, and `SampleStringsParityTest` in `:kmp-sample`.
+    - `:calendarviewsample` has a top-bar language switch (`language-<tag>` test tags) and two new
+      instrumentation tests in `CalendarSampleUiTest`; they are compiled here and have not run on an
+      emulator yet (CI-Instrumentation pending).
+    - Open observations (not fixed): `CalendarLocale.language` splits on `-` only, so an underscore tag
+      such as `de_DE` yields `de_de` and falls back to English; the Hijri `de` table reuses the English
+      transliterations; `GregorianChineseCalendarMonth` still has no `isDateEnabled`/`dayContent`
+      parameters unlike the other month composables.
 - **Multiplatform target expansion & shared actuals:**
   - All six Compose modules (`:library`, `:calendar-gregorian`, `:calendar-hijri`,
     `:calendar-solarHijri`, `:calendar-solarHijri-native`, `:calendar-chinese-compose`) now target
