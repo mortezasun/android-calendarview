@@ -39,7 +39,7 @@ MODULES=(
     calendar-chinese-native
     calendar-chinese-compose
 )
-INTERNAL_PLATFORM_CLASSES='HeatmapPlatformFormatter|GregorianPlatformFormatter|HijriPlatform|SolarHijriPlatform|ChinesePlatform'
+INTERNAL_PLATFORM_CLASSES='HeatmapPlatformFormatter|GregorianPlatformFormatter|HijriPlatform|SolarHijriPlatform|ChinesePlatform|CalendarLocalePlatform(_.*)?'
 
 status=0
 for module in "${MODULES[@]}"; do

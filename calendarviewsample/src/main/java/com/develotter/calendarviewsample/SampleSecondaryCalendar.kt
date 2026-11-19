@@ -15,6 +15,7 @@ import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriSecond
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeAccessibilityLabel
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeSecondaryLabel
+import com.develotter.calendarview.locale.asCalendarLocale
 import java.util.Locale
 
 /**

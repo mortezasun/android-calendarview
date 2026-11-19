@@ -12,6 +12,7 @@ import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriMonthD
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
 import com.develotter.calendarview.compose.CalendarMonthData
+import com.develotter.calendarview.locale.asCalendarLocale
 import java.time.LocalDate
 import java.time.temporal.WeekFields
 import java.util.Locale

@@ -46,7 +46,7 @@ fi
 MODULES=(library calendar-gregorian calendar-hijri calendar-solarHijri calendar-solarHijri-native calendar-chinese-compose)
 # The Kotlin Multiplatform engine publishes a JVM jar instead of an Android AAR.
 ENGINE_MODULE=calendar-chinese-native
-INTERNAL_PLATFORM_CLASSES='HeatmapPlatformFormatter|GregorianPlatformFormatter|HijriPlatform|SolarHijriPlatform|ChinesePlatform'
+INTERNAL_PLATFORM_CLASSES='HeatmapPlatformFormatter|GregorianPlatformFormatter|HijriPlatform|SolarHijriPlatform|ChinesePlatform|CalendarLocalePlatform(_.*)?'
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 

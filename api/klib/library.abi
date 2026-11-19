@@ -239,6 +239,8 @@ final enum class com.develotter.calendarview.enums/TypeSelectDay : kotlin/Enum<c
     enum entry Single // com.develotter.calendarview.enums/TypeSelectDay.Single|null[0]
 }
 final class com.develotter.calendarview.locale/CalendarLocale { // com.develotter.calendarview.locale/CalendarLocale|null[0]
+    final val isRightToLeft // com.develotter.calendarview.locale/CalendarLocale.isRightToLeft|{}isRightToLeft[0]
+        final fun <get-isRightToLeft>(): kotlin/Boolean // com.develotter.calendarview.locale/CalendarLocale.isRightToLeft.<get-isRightToLeft>|<get-isRightToLeft>(){}[0]
     final val language // com.develotter.calendarview.locale/CalendarLocale.language|{}language[0]
         final fun <get-language>(): kotlin/String // com.develotter.calendarview.locale/CalendarLocale.language.<get-language>|<get-language>(){}[0]
     final val languageTag // com.develotter.calendarview.locale/CalendarLocale.languageTag|{}languageTag[0]
@@ -258,6 +260,9 @@ final class com.develotter.calendarview.locale/CalendarLocale { // com.develotte
             final fun <get-German>(): com.develotter.calendarview.locale/CalendarLocale // com.develotter.calendarview.locale/CalendarLocale.Companion.German.<get-German>|<get-German>(){}[0]
         final val Persian // com.develotter.calendarview.locale/CalendarLocale.Companion.Persian|{}Persian[0]
             final fun <get-Persian>(): com.develotter.calendarview.locale/CalendarLocale // com.develotter.calendarview.locale/CalendarLocale.Companion.Persian.<get-Persian>|<get-Persian>(){}[0]
+        final val supportedLanguages // com.develotter.calendarview.locale/CalendarLocale.Companion.supportedLanguages|{}supportedLanguages[0]
+            final fun <get-supportedLanguages>(): kotlin.collections/List<kotlin/String> // com.develotter.calendarview.locale/CalendarLocale.Companion.supportedLanguages.<get-supportedLanguages>|<get-supportedLanguages>(){}[0]
+        final fun systemDefault(): com.develotter.calendarview.locale/CalendarLocale // com.develotter.calendarview.locale/CalendarLocale.Companion.systemDefault|systemDefault(){}[0]
     }
 }
 final class com.develotter.calendarview.selection/CalendarRangePolicy { // com.develotter.calendarview.selection/CalendarRangePolicy|null[0]
@@ -342,6 +347,7 @@ final fun com.develotter.calendarview.compose/rememberCalendarSelectionState(com
 final fun com.develotter.calendarview.compose/rememberCalendarSelectionState(com.develotter.calendarview.enums/TypeSelectDay?, kotlin.collections/List<kotlin/Long>?, com.develotter.calendarview.selection/CalendarRangePolicy?, androidx.compose.runtime/Composer?, kotlin/Int, kotlin/Int): com.develotter.calendarview.compose/CalendarSelectionState // com.develotter.calendarview.compose/rememberCalendarSelectionState|rememberCalendarSelectionState(com.develotter.calendarview.enums.TypeSelectDay?;kotlin.collections.List<kotlin.Long>?;com.develotter.calendarview.selection.CalendarRangePolicy?;androidx.compose.runtime.Composer?;kotlin.Int;kotlin.Int){}[0]
 final fun (com.develotter.calendarview.compose/CalendarMonthData).com.develotter.calendarview.compose/toHeatmap(kotlin.collections/Map<kotlin/Long, kotlin/Float>): com.develotter.calendarview.compose/HeatmapMonthData // com.develotter.calendarview.compose/toHeatmap|toHeatmap@com.develotter.calendarview.compose.CalendarMonthData(kotlin.collections.Map<kotlin.Long,kotlin.Float>){}[0]
 final fun (com.develotter.calendarview.compose/CalendarMonthData).com.develotter.calendarview.compose/toHeatmap(kotlin/Function1<kotlin/Long, kotlin/Float> = ...): com.develotter.calendarview.compose/HeatmapMonthData // com.develotter.calendarview.compose/toHeatmap|toHeatmap@com.develotter.calendarview.compose.CalendarMonthData(kotlin.Function1<kotlin.Long,kotlin.Float>){}[0]
+final fun com.develotter.calendarview.locale/ProvideCalendarLocaleLayoutDirection(com.develotter.calendarview.locale/CalendarLocale?, kotlin/Function2<androidx.compose.runtime/Composer, kotlin/Int, kotlin/Unit>, androidx.compose.runtime/Composer?, kotlin/Int) // com.develotter.calendarview.locale/ProvideCalendarLocaleLayoutDirection|ProvideCalendarLocaleLayoutDirection(com.develotter.calendarview.locale.CalendarLocale?;kotlin.Function2<androidx.compose.runtime.Composer,kotlin.Int,kotlin.Unit>;androidx.compose.runtime.Composer?;kotlin.Int){}[0]
 final fun com.develotter.calendarview.locale/com_develotter_calendarview_locale_CalendarLocale$stableprop_getter(): kotlin/Int // com.develotter.calendarview.locale/com_develotter_calendarview_locale_CalendarLocale$stableprop_getter|com_develotter_calendarview_locale_CalendarLocale$stableprop_getter(){}[0]
 final fun com.develotter.calendarview.selection/com_develotter_calendarview_selection_CalendarRangePolicy$stableprop_getter(): kotlin/Int // com.develotter.calendarview.selection/com_develotter_calendarview_selection_CalendarRangePolicy$stableprop_getter|com_develotter_calendarview_selection_CalendarRangePolicy$stableprop_getter(){}[0]
 final fun com.develotter.calendarview.selection/com_develotter_calendarview_selection_CalendarSelection$stableprop_getter(): kotlin/Int // com.develotter.calendarview.selection/com_develotter_calendarview_selection_CalendarSelection$stableprop_getter|com_develotter_calendarview_selection_CalendarSelection$stableprop_getter(){}[0]

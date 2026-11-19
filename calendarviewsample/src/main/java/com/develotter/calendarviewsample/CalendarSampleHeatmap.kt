@@ -14,6 +14,7 @@ import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeMonthData
 import com.develotter.calendarview.compose.HeatmapMonthData
 import com.develotter.calendarview.compose.toHeatmap
+import com.develotter.calendarview.locale.asCalendarLocale
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.WeekFields
