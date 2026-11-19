@@ -8,17 +8,21 @@ package com.develotter.calendarview.calendars.solarHijriNative
  * default locale, like the rest of the library.
  */
 object SolarHijriLocale {
-    private val ENGLISH = listOf(
+    internal val ENGLISH = listOf(
         "Farvardin", "Ordibehesht", "Khordad", "Tir", "Mordad", "Shahrivar",
         "Mehr", "Aban", "Azar", "Dey", "Bahman", "Esfand",
     )
-    private val PERSIAN = listOf(
+    internal val PERSIAN = listOf(
         "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
         "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند",
     )
-    private val DARI = listOf(
+    internal val DARI = listOf(
         "حمل", "ثور", "جوزا", "سرطان", "اسد", "سنبله",
         "میزان", "عقرب", "قوس", "جدی", "دلو", "حوت",
+    )
+    internal val ARABIC = listOf(
+        "فروردين", "ارديبهشت", "خرداد", "تير", "مرداد", "شهريور",
+        "مهر", "آبان", "آذر", "دي", "بهمن", "اسفند",
     )
 
     /** Name of [month] (`1..12`) for the default locale. */

@@ -17,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.develotter.calendarview.locale.CalendarLocale
 
 internal enum class DemoCalendarView { Month, Week, Agenda }
 internal enum class DemoChineseScript { Simplified, Traditional, Pinyin, Numeric }
@@ -29,6 +30,7 @@ internal data class CalendarExplorerOptions(
     val hijriOffset: Int,
     val chineseScript: DemoChineseScript,
     val chineseLeapMonthRequest: Int,
+    val locale: CalendarLocale? = null,
 )
 
 @Composable
@@ -36,6 +38,7 @@ internal fun SampleCalendarsScreen(
     calendar: DemoCalendar,
     onCalendarChange: (DemoCalendar) -> Unit,
     dateDetails: (Long) -> List<String>,
+    locale: CalendarLocale? = null,
     modifier: Modifier = Modifier,
     renderCalendar: @Composable (CalendarExplorerOptions, (Long) -> Unit) -> Unit,
 ) {
@@ -55,6 +58,7 @@ internal fun SampleCalendarsScreen(
         hijriOffset = hijriOffset,
         chineseScript = DemoChineseScript.valueOf(scriptName),
         chineseLeapMonthRequest = leapMonthRequest,
+        locale = locale,
     )
 
     Column(

@@ -7,12 +7,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriEngine
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLabels
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLocale
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriPlatform
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarDayMarker
 import com.develotter.calendarview.compose.CalendarMonthData
 import com.develotter.calendarview.compose.CalendarMonthGrid
+import com.develotter.calendarview.locale.CalendarLocale
 import com.develotter.calendarview.selection.CalendarSelection
 
 /** Localized month snapshot; treat lists as read-only. */
@@ -24,22 +26,28 @@ data class SolarHijriNativeMonthData(
     override val days: List<CalendarDayCell>,
 ) : CalendarMonthData
 
-/** Localized Solar Hijri month-year title, for example `Farvardin 1404`. */
-fun solarHijriNativeMonthTitle(month: SolarHijriDate): String =
-    SolarHijriLocale.formatMonthYear(month.year, month.month)
+/**
+ * Localized Solar Hijri month-year title, for example `Farvardin 1404`.
+ *
+ * [locale] selects the library's own label tables; `null` keeps the platform default locale.
+ */
+fun solarHijriNativeMonthTitle(month: SolarHijriDate, locale: CalendarLocale? = null): String =
+    locale?.let { SolarHijriLabels.monthYear(it, month.year, month.month) }
+        ?: SolarHijriLocale.formatMonthYear(month.year, month.month)
 
 /**
  * Compact Solar Hijri secondary label for another primary calendar grid: renders the localized
  * month name on the 1st of the Solar Hijri month and the localized day number on other days, or
  * `null` if [epochDay] is outside [SolarHijriEngine.MIN_EPOCH_DAY]..[SolarHijriEngine.MAX_EPOCH_DAY].
  */
-fun solarHijriNativeSecondaryLabel(epochDay: Long): String? {
+fun solarHijriNativeSecondaryLabel(epochDay: Long, locale: CalendarLocale? = null): String? {
     if (epochDay !in SolarHijriEngine.MIN_EPOCH_DAY..SolarHijriEngine.MAX_EPOCH_DAY) return null
     val date = SolarHijriDate.fromEpochDay(epochDay)
-    return if (date.day == 1) {
-        SolarHijriLocale.monthName(date.month)
-    } else {
-        SolarHijriLocale.formatNumber(date.day)
+    return when {
+        date.day == 1 && locale != null -> SolarHijriLabels.monthName(locale, date.month)
+        date.day == 1 -> SolarHijriLocale.monthName(date.month)
+        locale != null -> SolarHijriLabels.number(locale, date.day)
+        else -> SolarHijriLocale.formatNumber(date.day)
     }
 }
 
@@ -47,22 +55,26 @@ fun solarHijriNativeSecondaryLabel(epochDay: Long): String? {
  * Localized full Solar Hijri date description suitable for screen readers and date inspectors, or
  * `null` if [epochDay] is outside [SolarHijriEngine.MIN_EPOCH_DAY]..[SolarHijriEngine.MAX_EPOCH_DAY].
  */
-fun solarHijriNativeAccessibilityLabel(epochDay: Long): String? {
+fun solarHijriNativeAccessibilityLabel(epochDay: Long, locale: CalendarLocale? = null): String? {
     if (epochDay !in SolarHijriEngine.MIN_EPOCH_DAY..SolarHijriEngine.MAX_EPOCH_DAY) return null
-    return SolarHijriLocale.formatFullDate(SolarHijriDate.fromEpochDay(epochDay))
+    val date = SolarHijriDate.fromEpochDay(epochDay)
+    return locale?.let { SolarHijriLabels.fullDate(it, date) }
+        ?: SolarHijriLocale.formatFullDate(date)
 }
 
 /** Formats one Solar Hijri date; [isDateEnabled] receives the absolute epoch day. */
 fun solarHijriNativeDayCell(
     epochDay: Long,
     todayEpochDay: Long = SolarHijriPlatform.currentEpochDay(),
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ): CalendarDayCell {
     val date = SolarHijriDate.fromEpochDay(epochDay)
     return CalendarDayCell(
         epochDay = epochDay,
-        label = SolarHijriLocale.formatNumber(date.day),
-        accessibilityLabel = SolarHijriLocale.formatFullDate(date),
+        label = locale?.let { SolarHijriLabels.number(it, date.day) }
+            ?: SolarHijriLocale.formatNumber(date.day),
+        accessibilityLabel = solarHijriNativeAccessibilityLabel(epochDay, locale).orEmpty(),
         enabled = isDateEnabled(epochDay),
         isToday = epochDay == todayEpochDay,
     )
@@ -76,10 +88,16 @@ fun solarHijriNativeDayCell(
 internal fun solarHijriNativeDayCellForEpoch(
     epochDay: Long,
     todayEpochDay: Long,
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean,
 ): CalendarDayCell =
     if (epochDay in SolarHijriEngine.MIN_EPOCH_DAY..SolarHijriEngine.MAX_EPOCH_DAY) {
-        solarHijriNativeDayCell(epochDay, todayEpochDay, isDateEnabled)
+        solarHijriNativeDayCell(
+            epochDay = epochDay,
+            todayEpochDay = todayEpochDay,
+            locale = locale,
+            isDateEnabled = isDateEnabled,
+        )
     } else {
         CalendarDayCell(epochDay = epochDay, label = "", accessibilityLabel = "", enabled = false, isToday = false)
     }
@@ -89,19 +107,21 @@ fun solarHijriNativeMonthData(
     month: SolarHijriDate,
     firstDayOfWeek: Int = SolarHijriNativeDefaultFirstDayOfWeek,
     todayEpochDay: Long = SolarHijriPlatform.currentEpochDay(),
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ): SolarHijriNativeMonthData {
     val first = month.withDayOfMonth(1)
     val firstEpochDay = first.toEpochDay()
     return SolarHijriNativeMonthData(
-        title = solarHijriNativeMonthTitle(first),
-        weekdayLabels = solarHijriNativeWeekdayLabels(firstDayOfWeek),
+        title = solarHijriNativeMonthTitle(first, locale),
+        weekdayLabels = solarHijriNativeWeekdayLabels(firstDayOfWeek, locale),
         firstDayOffset = solarHijriNativeDayOfWeekOffset(firstEpochDay, firstDayOfWeek),
         days = (1..first.lengthOfMonth()).map { day ->
             solarHijriNativeDayCell(
                 epochDay = first.withDayOfMonth(day).toEpochDay(),
                 todayEpochDay = todayEpochDay,
                 isDateEnabled = isDateEnabled,
+                locale = locale,
             )
         },
     )
@@ -180,6 +200,7 @@ fun SolarHijriNativeCalendarMonth(
     isDateEnabled: (Long) -> Boolean = { true },
     secondaryLabel: ((Long) -> String?)? = null,
     secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+    locale: CalendarLocale? = null,
     dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
 ) {
     val data = solarHijriNativeMonthData(
@@ -187,6 +208,7 @@ fun SolarHijriNativeCalendarMonth(
         firstDayOfWeek = firstDayOfWeek,
         todayEpochDay = todayEpochDay,
         isDateEnabled = isDateEnabled,
+        locale = locale,
     )
     CalendarMonthGrid(
         title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
@@ -201,6 +223,13 @@ fun SolarHijriNativeCalendarMonth(
         weekNumber = weekNumber,
         secondaryLabel = secondaryLabel,
         secondaryAccessibilityLabel = secondaryAccessibilityLabel,
-        adjacentDayProvider = { solarHijriNativeDayCellForEpoch(it, todayEpochDay, isDateEnabled) },
+        adjacentDayProvider = { adjacentEpochDay ->
+            solarHijriNativeDayCellForEpoch(
+                epochDay = adjacentEpochDay,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+                isDateEnabled = isDateEnabled,
+            )
+        },
     )
 }

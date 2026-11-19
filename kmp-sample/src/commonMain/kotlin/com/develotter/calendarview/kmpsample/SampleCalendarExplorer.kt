@@ -40,6 +40,7 @@ import com.develotter.calendarview.compose.CalendarMonthHeader
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
 import com.develotter.calendarview.compose.CalendarWeekGrid
 import com.develotter.calendarview.enums.TypeSelectDay
+import com.develotter.calendarview.locale.CalendarLocale
 import com.develotter.calendarview.selection.CalendarSelection
 
 /**
@@ -57,8 +58,8 @@ internal fun SampleCalendarExplorer(
     val selection = remember(options.selectedEpochDay) {
         CalendarSelection.from(TypeSelectDay.Single, listOfNotNull(options.selectedEpochDay))
     }
-    val secondaryLabel = remember(options.secondaryCalendar, hijriProvider, chineseStyle) {
-        sampleSecondaryLabel(options.secondaryCalendar, hijriProvider, chineseStyle)
+    val secondaryLabel = remember(options.secondaryCalendar, options.locale, hijriProvider, chineseStyle) {
+        sampleSecondaryLabel(options.secondaryCalendar, hijriProvider, chineseStyle, options.locale)
     }
 
     Column(
@@ -103,12 +104,13 @@ internal fun sampleSecondaryLabel(
     calendar: DemoCalendar?,
     hijriDateProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle,
+    locale: CalendarLocale? = null,
 ): ((Long) -> String?)? = when (calendar) {
     null -> null
-    DemoCalendar.Gregorian -> ::gregorianSecondaryLabel
-    DemoCalendar.Hijri -> { epochDay -> hijriSecondaryLabel(epochDay, hijriDateProvider) }
-    DemoCalendar.SolarHijri -> ::solarHijriSecondaryLabel
-    DemoCalendar.SolarHijriNative -> ::solarHijriNativeSecondaryLabel
+    DemoCalendar.Gregorian -> { epochDay -> gregorianSecondaryLabel(epochDay, locale) }
+    DemoCalendar.Hijri -> { epochDay -> hijriSecondaryLabel(epochDay, hijriDateProvider, locale) }
+    DemoCalendar.SolarHijri -> { epochDay -> solarHijriSecondaryLabel(epochDay, locale) }
+    DemoCalendar.SolarHijriNative -> { epochDay -> solarHijriNativeSecondaryLabel(epochDay, locale) }
     DemoCalendar.Chinese -> { epochDay -> chineseSecondaryLabel(epochDay, chineseStyle) }
 }
 
@@ -127,7 +129,7 @@ private fun SampleMonthSection(
             val state = rememberGregorianMonthState(
                 initialMonth = GregorianYearMonth.fromEpochDay(todayEpochDay),
             )
-            SampleMonthFrame(title = state.title(), state = state) {
+            SampleMonthFrame(title = state.title(options.locale), state = state) {
                 GregorianCalendarMonth(
                     month = state.month,
                     selection = selection,
@@ -135,6 +137,7 @@ private fun SampleMonthSection(
                     todayEpochDay = todayEpochDay,
                     showHeader = false,
                     secondaryLabel = secondaryLabel,
+                    locale = options.locale,
                 )
             }
         }
@@ -144,7 +147,7 @@ private fun SampleMonthSection(
                 initialMonth = hijriProvider.dateForEpochDay(todayEpochDay),
                 dateProvider = hijriProvider,
             )
-            SampleMonthFrame(title = state.title(), state = state) {
+            SampleMonthFrame(title = state.title(options.locale), state = state) {
                 HijriCalendarMonth(
                     month = state.month,
                     selection = selection,
@@ -153,6 +156,7 @@ private fun SampleMonthSection(
                     showHeader = false,
                     dateProvider = hijriProvider,
                     secondaryLabel = secondaryLabel,
+                    locale = options.locale,
                 )
             }
         }
@@ -162,7 +166,7 @@ private fun SampleMonthSection(
                 initialMonth = SolarHijriDate.fromEpochDay(todayEpochDay),
                 currentEpochDay = { todayEpochDay },
             )
-            SampleMonthFrame(title = state.title(), state = state) {
+            SampleMonthFrame(title = state.title(options.locale), state = state) {
                 SolarHijriCalendarMonth(
                     month = state.month,
                     selection = selection,
@@ -170,6 +174,7 @@ private fun SampleMonthSection(
                     todayEpochDay = todayEpochDay,
                     showHeader = false,
                     secondaryLabel = secondaryLabel,
+                    locale = options.locale,
                 )
             }
         }
@@ -179,7 +184,7 @@ private fun SampleMonthSection(
                 initialMonth = SolarHijriDate.fromEpochDay(todayEpochDay),
                 currentEpochDay = { todayEpochDay },
             )
-            SampleMonthFrame(title = state.title(), state = state) {
+            SampleMonthFrame(title = state.title(options.locale), state = state) {
                 SolarHijriNativeCalendarMonth(
                     month = state.month,
                     selection = selection,
@@ -187,6 +192,7 @@ private fun SampleMonthSection(
                     todayEpochDay = todayEpochDay,
                     showHeader = false,
                     secondaryLabel = secondaryLabel,
+                    locale = options.locale,
                 )
             }
         }
@@ -226,9 +232,23 @@ private fun SampleWeekSection(
     secondaryLabel: ((Long) -> String?)?,
 ) {
     val anchorEpochDay = options.selectedEpochDay ?: todayEpochDay
-    val week = remember(options.calendar, anchorEpochDay, todayEpochDay, hijriProvider, chineseStyle) {
+    val week = remember(
+        options.calendar,
+        options.locale,
+        anchorEpochDay,
+        todayEpochDay,
+        hijriProvider,
+        chineseStyle,
+    ) {
         runCatching {
-            sampleWeekData(options.calendar, anchorEpochDay, todayEpochDay, hijriProvider, chineseStyle)
+            sampleWeekData(
+                options.calendar,
+                anchorEpochDay,
+                todayEpochDay,
+                hijriProvider,
+                chineseStyle,
+                options.locale,
+            )
         }
     }
     val data = week.getOrNull()
@@ -255,9 +275,23 @@ private fun SampleAgendaSection(
     chineseStyle: ChineseTextStyle,
 ) {
     val anchorEpochDay = options.selectedEpochDay ?: todayEpochDay
-    val month = remember(options.calendar, anchorEpochDay, todayEpochDay, hijriProvider, chineseStyle) {
+    val month = remember(
+        options.calendar,
+        options.locale,
+        anchorEpochDay,
+        todayEpochDay,
+        hijriProvider,
+        chineseStyle,
+    ) {
         runCatching {
-            sampleMonthData(options.calendar, anchorEpochDay, todayEpochDay, hijriProvider, chineseStyle)
+            sampleMonthData(
+                options.calendar,
+                anchorEpochDay,
+                todayEpochDay,
+                hijriProvider,
+                chineseStyle,
+                options.locale,
+            )
         }
     }
     val data = month.getOrNull()
@@ -304,7 +338,11 @@ private fun SampleMonthFrame(
 
 /** Single-month preview used inside the Playground dialog, without selection. */
 @Composable
-internal fun SampleDialogMonth(calendar: DemoCalendar, todayEpochDay: Long) {
+internal fun SampleDialogMonth(
+    calendar: DemoCalendar,
+    todayEpochDay: Long,
+    locale: CalendarLocale? = null,
+) {
     val selection = remember { CalendarSelection.from(TypeSelectDay.None, emptyList()) }
     val onDateClick: (Long) -> Unit = {}
 
@@ -321,6 +359,7 @@ internal fun SampleDialogMonth(calendar: DemoCalendar, todayEpochDay: Long) {
                     selection = selection,
                     onDateClick = onDateClick,
                     todayEpochDay = todayEpochDay,
+                    locale = locale,
                 )
 
                 DemoCalendar.Hijri -> HijriCalendarMonth(
@@ -328,6 +367,7 @@ internal fun SampleDialogMonth(calendar: DemoCalendar, todayEpochDay: Long) {
                     selection = selection,
                     onDateClick = onDateClick,
                     todayEpochDay = todayEpochDay,
+                    locale = locale,
                 )
 
                 DemoCalendar.SolarHijri -> SolarHijriCalendarMonth(
@@ -335,6 +375,7 @@ internal fun SampleDialogMonth(calendar: DemoCalendar, todayEpochDay: Long) {
                     selection = selection,
                     onDateClick = onDateClick,
                     todayEpochDay = todayEpochDay,
+                    locale = locale,
                 )
 
                 DemoCalendar.SolarHijriNative -> SolarHijriNativeCalendarMonth(
@@ -342,6 +383,7 @@ internal fun SampleDialogMonth(calendar: DemoCalendar, todayEpochDay: Long) {
                     selection = selection,
                     onDateClick = onDateClick,
                     todayEpochDay = todayEpochDay,
+                    locale = locale,
                 )
 
                 DemoCalendar.Chinese -> ChineseCalendarMonth(

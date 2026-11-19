@@ -24,6 +24,7 @@ import com.develotter.calendarview.compose.CalendarMonthData
 import com.develotter.calendarview.compose.CalendarWeekData
 import com.develotter.calendarview.compose.HeatmapMonthData
 import com.develotter.calendarview.compose.toHeatmap
+import com.develotter.calendarview.locale.CalendarLocale
 
 /** Hijri provider mirroring the selected day offset; zero keeps the Umm al-Qura default. */
 internal fun sampleHijriProvider(offsetDays: Int): HijriDateProvider = OffsetHijriDateProvider(offsetDays)
@@ -46,26 +47,31 @@ internal fun sampleMonthData(
     todayEpochDay: Long,
     hijriDateProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle,
+    locale: CalendarLocale? = null,
 ): CalendarMonthData = when (calendar) {
     DemoCalendar.Gregorian -> gregorianMonthData(
         month = GregorianYearMonth.fromEpochDay(anchorEpochDay),
         todayEpochDay = todayEpochDay,
+        locale = locale,
     )
 
     DemoCalendar.Hijri -> hijriMonthData(
         month = hijriDateProvider.dateForEpochDay(anchorEpochDay),
         todayEpochDay = todayEpochDay,
         dateProvider = hijriDateProvider,
+        locale = locale,
     )
 
     DemoCalendar.SolarHijri -> solarHijriMonthData(
         month = SolarHijriDate.fromEpochDay(anchorEpochDay),
         todayEpochDay = todayEpochDay,
+        locale = locale,
     )
 
     DemoCalendar.SolarHijriNative -> solarHijriNativeMonthData(
         month = SolarHijriDate.fromEpochDay(anchorEpochDay),
         todayEpochDay = todayEpochDay,
+        locale = locale,
     )
 
     DemoCalendar.Chinese -> chineseMonthData(
@@ -82,26 +88,31 @@ internal fun sampleWeekData(
     todayEpochDay: Long,
     hijriDateProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle,
+    locale: CalendarLocale? = null,
 ): CalendarWeekData = when (calendar) {
     DemoCalendar.Gregorian -> gregorianWeekData(
         dateEpochDay = anchorEpochDay,
         todayEpochDay = todayEpochDay,
+        locale = locale,
     )
 
     DemoCalendar.Hijri -> hijriWeekData(
         dateEpochDay = anchorEpochDay,
         todayEpochDay = todayEpochDay,
         dateProvider = hijriDateProvider,
+        locale = locale,
     )
 
     DemoCalendar.SolarHijri -> solarHijriWeekData(
         dateEpochDay = anchorEpochDay,
         todayEpochDay = todayEpochDay,
+        locale = locale,
     )
 
     DemoCalendar.SolarHijriNative -> solarHijriNativeWeekData(
         dateEpochDay = anchorEpochDay,
         todayEpochDay = todayEpochDay,
+        locale = locale,
     )
 
     DemoCalendar.Chinese -> chineseWeekData(
@@ -134,11 +145,13 @@ internal fun sampleHeatmapYear(
     todayEpochDay: Long,
     hijriDateProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle,
+    locale: CalendarLocale? = null,
 ): List<HeatmapMonthData> = when (calendar) {
     DemoCalendar.Gregorian -> (1..12).map { month ->
         gregorianMonthData(
             month = GregorianYearMonth(year, month),
             todayEpochDay = todayEpochDay,
+            locale = locale,
         ).toHeatmap(::sampleHeatmapIntensity)
     }
 
@@ -147,6 +160,7 @@ internal fun sampleHeatmapYear(
             month = HijriDate(year, month, 1),
             todayEpochDay = todayEpochDay,
             dateProvider = hijriDateProvider,
+            locale = locale,
         ).toHeatmap(::sampleHeatmapIntensity)
     }
 
@@ -154,6 +168,7 @@ internal fun sampleHeatmapYear(
         solarHijriMonthData(
             month = SolarHijriDate(year, month, 1),
             todayEpochDay = todayEpochDay,
+            locale = locale,
         ).toHeatmap(::sampleHeatmapIntensity)
     }
 
@@ -161,6 +176,7 @@ internal fun sampleHeatmapYear(
         solarHijriNativeMonthData(
             month = SolarHijriDate(year, month, 1),
             todayEpochDay = todayEpochDay,
+            locale = locale,
         ).toHeatmap(::sampleHeatmapIntensity)
     }
 
@@ -222,9 +238,17 @@ internal fun sampleMonthTitle(
     todayEpochDay: Long,
     hijriDateProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle,
+    locale: CalendarLocale? = null,
 ): String? = sampleShiftMonth(calendar, anchorEpochDay, monthOffset, hijriDateProvider)
     ?.let { shifted ->
         runCatching {
-            sampleMonthData(calendar, shifted, todayEpochDay, hijriDateProvider, chineseStyle).title
+            sampleMonthData(
+                calendar,
+                shifted,
+                todayEpochDay,
+                hijriDateProvider,
+                chineseStyle,
+                locale,
+            ).title
         }.getOrNull()
     }

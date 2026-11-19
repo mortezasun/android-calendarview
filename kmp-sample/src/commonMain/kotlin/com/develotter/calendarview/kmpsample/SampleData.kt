@@ -5,20 +5,29 @@ import com.develotter.calendarview.calendars.gregorian.compose.gregorianAccessib
 import com.develotter.calendarview.calendars.hijri.compose.hijriAccessibilityLabel
 import com.develotter.calendarview.calendars.solarHijri.compose.solarHijriAccessibilityLabel
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeAccessibilityLabel
+import com.develotter.calendarview.locale.CalendarLocale
 import com.develotter.calendarview.selection.CalendarRangePolicy
 
 /** Demo range limit: a day may be selected within one month around today. */
 private val SampleRangePolicy = CalendarRangePolicy(minRangeLength = 1, maxRangeLength = 31)
 
 /** Localized date of [todayEpochDay] in every supported calendar. */
-internal fun sampleTodayLabels(todayEpochDay: Long): Map<DemoCalendar, String> =
-    DemoCalendar.entries.associateWith { calendar -> sampleCalendarLabel(calendar, todayEpochDay) }
+internal fun sampleTodayLabels(
+    todayEpochDay: Long,
+    locale: CalendarLocale? = null,
+): Map<DemoCalendar, String> =
+    DemoCalendar.entries.associateWith { calendar ->
+        sampleCalendarLabel(calendar, todayEpochDay, locale)
+    }
 
 /** Date inspector lines for [epochDay], one per calendar that supports the day. */
-internal fun sampleDateDetails(epochDay: Long): List<String> = buildList {
-    add("Gregorian: ${gregorianAccessibilityLabel(epochDay)}")
-    hijriAccessibilityLabel(epochDay)?.let { add("Hijri: $it") }
-    solarHijriAccessibilityLabel(epochDay)?.let { add("Solar Hijri: $it") }
+internal fun sampleDateDetails(
+    epochDay: Long,
+    locale: CalendarLocale? = null,
+): List<String> = buildList {
+    add("Gregorian: ${gregorianAccessibilityLabel(epochDay, locale)}")
+    hijriAccessibilityLabel(epochDay, locale = locale)?.let { add("Hijri: $it") }
+    solarHijriAccessibilityLabel(epochDay, locale)?.let { add("Solar Hijri: $it") }
     chineseAccessibilityLabel(epochDay)?.let { add("Chinese: $it") }
 }
 
@@ -29,10 +38,16 @@ internal fun sampleDateDetails(epochDay: Long): List<String> = buildList {
 internal fun sampleRangePolicyAccepts(epochDay: Long, todayEpochDay: Long): Boolean =
     SampleRangePolicy.allows(epochDay, todayEpochDay)
 
-private fun sampleCalendarLabel(calendar: DemoCalendar, epochDay: Long): String = when (calendar) {
-    DemoCalendar.Gregorian -> gregorianAccessibilityLabel(epochDay)
-    DemoCalendar.Hijri -> hijriAccessibilityLabel(epochDay) ?: "Out of range"
-    DemoCalendar.SolarHijri -> solarHijriAccessibilityLabel(epochDay) ?: "Out of range"
-    DemoCalendar.SolarHijriNative -> solarHijriNativeAccessibilityLabel(epochDay) ?: "Out of range"
+private fun sampleCalendarLabel(
+    calendar: DemoCalendar,
+    epochDay: Long,
+    locale: CalendarLocale?,
+): String = when (calendar) {
+    DemoCalendar.Gregorian -> gregorianAccessibilityLabel(epochDay, locale)
+    DemoCalendar.Hijri -> hijriAccessibilityLabel(epochDay, locale = locale) ?: "Out of range"
+    DemoCalendar.SolarHijri -> solarHijriAccessibilityLabel(epochDay, locale) ?: "Out of range"
+    DemoCalendar.SolarHijriNative ->
+        solarHijriNativeAccessibilityLabel(epochDay, locale) ?: "Out of range"
+
     DemoCalendar.Chinese -> chineseAccessibilityLabel(epochDay) ?: "Out of range"
 }

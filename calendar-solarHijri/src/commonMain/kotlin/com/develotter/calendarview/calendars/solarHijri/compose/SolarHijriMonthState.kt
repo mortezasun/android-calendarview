@@ -10,6 +10,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.SolarHijriNativeMonthState
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
+import com.develotter.calendarview.locale.CalendarLocale
 
 /**
  * Observable Solar Hijri visible-month state with optional inclusive bounds.
@@ -67,8 +68,8 @@ class SolarHijriMonthState(
     /** Moves to an exact in-range month; the target is normalized to its first day. */
     fun goTo(target: SolarHijriDate) = delegate.goTo(target)
 
-    /** Localized month caption matching [solarHijriMonthData]. */
-    fun title(): String = delegate.title()
+    /** Localized month caption matching [solarHijriMonthData]; `null` keeps the platform locale. */
+    fun title(locale: CalendarLocale? = null): String = delegate.title(locale)
 }
 
 /**

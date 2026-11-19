@@ -22,6 +22,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
@@ -29,14 +30,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.develotter.calendarview.locale.CalendarLocale
 
 @Composable
 internal fun App(
-    todayLabels: Map<DemoCalendar, String>,
-    dateDetails: (Long) -> List<String>,
+    todayEpochDay: Long,
     renderCalendar: @Composable (CalendarExplorerOptions, (Long) -> Unit) -> Unit,
     renderViewport: @Composable (PlaygroundOptions, (Long) -> Unit, (Long) -> Boolean) -> Unit,
-    renderDialogMonth: @Composable (DemoCalendar) -> Unit,
+    renderDialogMonth: @Composable (DemoCalendar, CalendarLocale) -> Unit,
     rangePolicyAccepts: (Long) -> Boolean,
     renderHeatmap: @Composable (HeatmapOptions, (String) -> Unit) -> Unit,
 ) {
@@ -44,20 +45,27 @@ internal fun App(
     var calendarName by rememberSaveable { mutableStateOf(DemoCalendar.Gregorian.name) }
     var menuOpen by rememberSaveable { mutableStateOf(false) }
 
-    var languageName by rememberSaveable { mutableStateOf(AppLanguage.English.name) }
+    var languageTag by rememberSaveable { mutableStateOf(CalendarLocale.English.languageTag) }
     var themeModeName by rememberSaveable { mutableStateOf(AppThemeMode.System.name) }
     var paletteName by rememberSaveable { mutableStateOf(AppThemePalette.Blue.name) }
 
     val settings = AppSettings(
-        language = AppLanguage.valueOf(languageName),
+        language = CalendarLocale(languageTag),
         themeMode = AppThemeMode.valueOf(themeModeName),
         palette = AppThemePalette.valueOf(paletteName),
     )
 
     val onSettingsChange: (AppSettings) -> Unit = { newSettings ->
-        languageName = newSettings.language.name
+        languageTag = newSettings.language.languageTag
         themeModeName = newSettings.themeMode.name
         paletteName = newSettings.palette.name
+    }
+
+    val todayLabels = remember(todayEpochDay, settings.language) {
+        sampleTodayLabels(todayEpochDay, settings.language)
+    }
+    val dateDetails: (Long) -> List<String> = { epochDay ->
+        sampleDateDetails(epochDay, settings.language)
     }
 
     val screenStateHolder = rememberSaveableStateHolder()
@@ -126,16 +134,21 @@ internal fun App(
                                         calendar = calendar,
                                         onCalendarChange = { calendarName = it.name },
                                         dateDetails = dateDetails,
+                                        locale = settings.language,
                                         renderCalendar = renderCalendar,
                                     )
 
                                     DemoPage.Playground -> SamplePlaygroundScreen(
+                                        locale = settings.language,
                                         renderViewport = renderViewport,
-                                        renderDialogMonth = renderDialogMonth,
+                                        renderDialogMonth = { selected ->
+                                            renderDialogMonth(selected, settings.language)
+                                        },
                                         rangePolicyAccepts = rangePolicyAccepts,
                                     )
 
                                     DemoPage.Heatmaps -> SampleHeatmapsScreen(
+                                        locale = settings.language,
                                         renderHeatmap = renderHeatmap,
                                     )
 
@@ -174,7 +187,7 @@ internal fun App(
 private fun SampleNavigation(
     currentPage: DemoPage,
     onNavigate: (DemoPage) -> Unit,
-    language: AppLanguage,
+    language: CalendarLocale,
     modifier: Modifier = Modifier,
     onClose: (() -> Unit)? = null,
 ) {

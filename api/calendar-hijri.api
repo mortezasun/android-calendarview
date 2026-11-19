@@ -27,6 +27,19 @@ public final class com.develotter.calendarview.calendars.hijri.HijriJvmConversio
   public static final java.time.LocalDate toLocalDate(com.develotter.calendarview.calendars.hijri.HijriDate);
 }
 
+public final class com.develotter.calendarview.calendars.hijri.HijriLabels {
+  public static final com.develotter.calendarview.calendars.hijri.HijriLabels INSTANCE;
+  public final java.lang.String monthName(com.develotter.calendarview.locale.CalendarLocale, int);
+  public final java.lang.String shortMonthName(com.develotter.calendarview.locale.CalendarLocale, int);
+  public final java.lang.String monthYear(com.develotter.calendarview.locale.CalendarLocale, int, int);
+  public final java.lang.String fullDate(com.develotter.calendarview.locale.CalendarLocale, com.develotter.calendarview.calendars.hijri.HijriDate, long);
+  public final java.lang.String shortDayMonth(com.develotter.calendarview.locale.CalendarLocale, com.develotter.calendarview.calendars.hijri.HijriDate);
+  public final java.lang.String shortDayMonthYear(com.develotter.calendarview.locale.CalendarLocale, com.develotter.calendarview.calendars.hijri.HijriDate);
+  public final java.lang.String weekdayShort(com.develotter.calendarview.locale.CalendarLocale, int);
+  public final java.lang.String weekdayFull(com.develotter.calendarview.locale.CalendarLocale, int);
+  public final java.lang.String number(com.develotter.calendarview.locale.CalendarLocale, int);
+}
+
 public final class com.develotter.calendarview.calendars.hijri.HijriUtilKt {
   public static final int day(com.develotter.calendarview.calendars.hijri.HijriDate);
   public static final int year(com.develotter.calendarview.calendars.hijri.HijriDate);
@@ -48,13 +61,13 @@ public final class com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDat
 }
 
 public final class com.develotter.calendarview.calendars.hijri.compose.HijriCalendarMonthKt {
-  public static final java.lang.String hijriMonthTitle(com.develotter.calendarview.calendars.hijri.HijriDate);
-  public static final java.lang.String hijriSecondaryLabel(long, com.develotter.calendarview.calendars.hijri.HijriDateProvider);
-  public static final java.lang.String hijriAccessibilityLabel(long, com.develotter.calendarview.calendars.hijri.HijriDateProvider);
-  public static final com.develotter.calendarview.compose.CalendarDayCell hijriDayCell(long, com.develotter.calendarview.calendars.hijri.HijriDateProvider, long, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
-  public static final com.develotter.calendarview.calendars.hijri.compose.HijriMonthData hijriMonthData(com.develotter.calendarview.calendars.hijri.HijriDate, int, long, com.develotter.calendarview.calendars.hijri.HijriDateProvider, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
+  public static final java.lang.String hijriMonthTitle(com.develotter.calendarview.calendars.hijri.HijriDate, com.develotter.calendarview.locale.CalendarLocale);
+  public static final java.lang.String hijriSecondaryLabel(long, com.develotter.calendarview.calendars.hijri.HijriDateProvider, com.develotter.calendarview.locale.CalendarLocale);
+  public static final java.lang.String hijriAccessibilityLabel(long, com.develotter.calendarview.calendars.hijri.HijriDateProvider, com.develotter.calendarview.locale.CalendarLocale);
+  public static final com.develotter.calendarview.compose.CalendarDayCell hijriDayCell(long, com.develotter.calendarview.calendars.hijri.HijriDateProvider, long, com.develotter.calendarview.locale.CalendarLocale, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
+  public static final com.develotter.calendarview.calendars.hijri.compose.HijriMonthData hijriMonthData(com.develotter.calendarview.calendars.hijri.HijriDate, int, long, com.develotter.calendarview.calendars.hijri.HijriDateProvider, com.develotter.calendarview.locale.CalendarLocale, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
   public static final void HijriCalendarMonth(com.develotter.calendarview.calendars.hijri.HijriDate, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1, androidx.compose.ui.Modifier, int, boolean, boolean, long, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map, kotlin.jvm.functions.Function1, com.develotter.calendarview.calendars.hijri.HijriDateProvider, kotlin.jvm.functions.Function1, androidx.compose.runtime.Composer, int, int, int);
-  public static final void HijriCalendarMonth(com.develotter.calendarview.calendars.hijri.HijriDate, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super java.lang.Long, kotlin.Unit>, androidx.compose.ui.Modifier, int, boolean, boolean, long, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map<java.lang.Long, ? extends java.util.List<com.develotter.calendarview.compose.CalendarDayMarker>>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, com.develotter.calendarview.calendars.hijri.HijriDateProvider, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, kotlin.jvm.functions.Function5<? super com.develotter.calendarview.compose.CalendarDayCell, ? super java.lang.Boolean, ? super java.lang.Boolean, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int, int);
+  public static final void HijriCalendarMonth(com.develotter.calendarview.calendars.hijri.HijriDate, com.develotter.calendarview.selection.CalendarSelection, kotlin.jvm.functions.Function1<? super java.lang.Long, kotlin.Unit>, androidx.compose.ui.Modifier, int, boolean, boolean, long, boolean, boolean, boolean, androidx.compose.ui.graphics.Color, java.lang.String, java.util.Map<java.lang.Long, ? extends java.util.List<com.develotter.calendarview.compose.CalendarDayMarker>>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, com.develotter.calendarview.calendars.hijri.HijriDateProvider, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.String>, com.develotter.calendarview.locale.CalendarLocale, kotlin.jvm.functions.Function5<? super com.develotter.calendarview.compose.CalendarDayCell, ? super java.lang.Boolean, ? super java.lang.Boolean, ? super androidx.compose.runtime.Composer, ? super java.lang.Integer, kotlin.Unit>, androidx.compose.runtime.Composer, int, int, int, int);
 }
 
 public final class com.develotter.calendarview.calendars.hijri.compose.HijriMonthData implements com.develotter.calendarview.compose.CalendarMonthData {
@@ -86,7 +99,7 @@ public final class com.develotter.calendarview.calendars.hijri.compose.HijriMont
   public void next();
   public void goToToday();
   public final void goTo(com.develotter.calendarview.calendars.hijri.HijriDate);
-  public final java.lang.String title();
+  public final java.lang.String title(com.develotter.calendarview.locale.CalendarLocale);
 }
 
 public final class com.develotter.calendarview.calendars.hijri.compose.HijriMonthStateKt {
@@ -112,8 +125,8 @@ public final class com.develotter.calendarview.calendars.hijri.compose.HijriWeek
 
 public final class com.develotter.calendarview.calendars.hijri.compose.HijriWeekDataKt {
   public static final int HijriDefaultFirstDayOfWeek;
-  public static final com.develotter.calendarview.calendars.hijri.compose.HijriWeekData hijriWeekData(long, int, long, com.develotter.calendarview.calendars.hijri.HijriDateProvider, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
-  public static final java.util.List<java.lang.String> hijriWeekdayLabels(int);
+  public static final com.develotter.calendarview.calendars.hijri.compose.HijriWeekData hijriWeekData(long, int, long, com.develotter.calendarview.calendars.hijri.HijriDateProvider, com.develotter.calendarview.locale.CalendarLocale, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
+  public static final java.util.List<java.lang.String> hijriWeekdayLabels(int, com.develotter.calendarview.locale.CalendarLocale);
   public static final int hijriDayOfWeekOffset(long, int);
   public static final int isoWeekday(long);
 }

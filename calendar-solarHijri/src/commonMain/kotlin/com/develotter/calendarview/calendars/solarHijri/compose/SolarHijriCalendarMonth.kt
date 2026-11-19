@@ -16,6 +16,7 @@ import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijri
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarDayMarker
 import com.develotter.calendarview.compose.CalendarMonthData
+import com.develotter.calendarview.locale.CalendarLocale
 import com.develotter.calendarview.selection.CalendarSelection
 
 /** Saturday-first is configurable. */
@@ -30,32 +31,42 @@ data class SolarHijriMonthData(
     override val days: List<CalendarDayCell>,
 ) : CalendarMonthData
 
-/** Localized Solar Hijri month-year title, for example `Farvardin 1404`. */
-fun solarHijriMonthTitle(month: SolarHijriDate): String =
-    solarHijriNativeMonthTitle(month)
+/**
+ * Localized Solar Hijri month-year title, for example `Farvardin 1404`.
+ *
+ * [locale] selects the library's own label tables; `null` keeps the platform default locale.
+ */
+fun solarHijriMonthTitle(month: SolarHijriDate, locale: CalendarLocale? = null): String =
+    solarHijriNativeMonthTitle(month, locale)
 
 /**
  * Compact Solar Hijri secondary label for another primary calendar grid, or `null` if [epochDay]
  * falls outside the supported Solar Hijri range.
  */
-fun solarHijriSecondaryLabel(epochDay: Long): String? =
-    solarHijriNativeSecondaryLabel(epochDay)
+fun solarHijriSecondaryLabel(epochDay: Long, locale: CalendarLocale? = null): String? =
+    solarHijriNativeSecondaryLabel(epochDay, locale)
 
 /**
  * Localized full Solar Hijri date description suitable for screen readers and date inspectors, or
  * `null` if [epochDay] falls outside the supported Solar Hijri range.
  */
-fun solarHijriAccessibilityLabel(epochDay: Long): String? =
-    solarHijriNativeAccessibilityLabel(epochDay)
+fun solarHijriAccessibilityLabel(epochDay: Long, locale: CalendarLocale? = null): String? =
+    solarHijriNativeAccessibilityLabel(epochDay, locale)
 
 /** Formats one Solar Hijri date; [isDateEnabled] receives the absolute epoch day. */
 fun solarHijriDayCell(
     epochDay: Long,
     todayEpochDay: Long = SolarHijriDate.now().toEpochDay(),
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ): CalendarDayCell =
     if (epochDay in SolarHijriEngine.MIN_EPOCH_DAY..SolarHijriEngine.MAX_EPOCH_DAY) {
-        solarHijriNativeDayCell(epochDay, todayEpochDay, isDateEnabled)
+        solarHijriNativeDayCell(
+            epochDay = epochDay,
+            todayEpochDay = todayEpochDay,
+            locale = locale,
+            isDateEnabled = isDateEnabled,
+        )
     } else {
         CalendarDayCell(epochDay = epochDay, label = "", accessibilityLabel = "", enabled = false, isToday = false)
     }
@@ -65,9 +76,16 @@ fun solarHijriMonthData(
     month: SolarHijriDate,
     firstDayOfWeek: Int = DEFAULT_FIRST_DAY_OF_WEEK,
     todayEpochDay: Long = SolarHijriDate.now().toEpochDay(),
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ): SolarHijriMonthData {
-    val native = solarHijriNativeMonthData(month, firstDayOfWeek, todayEpochDay, isDateEnabled)
+    val native = solarHijriNativeMonthData(
+        month = month,
+        firstDayOfWeek = firstDayOfWeek,
+        todayEpochDay = todayEpochDay,
+        locale = locale,
+        isDateEnabled = isDateEnabled,
+    )
     return SolarHijriMonthData(
         title = native.title,
         weekdayLabels = native.weekdayLabels,
@@ -148,6 +166,7 @@ fun SolarHijriCalendarMonth(
     isDateEnabled: (Long) -> Boolean = { true },
     secondaryLabel: ((Long) -> String?)? = null,
     secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+    locale: CalendarLocale? = null,
     dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
 ) {
     SolarHijriNativeCalendarMonth(
@@ -169,6 +188,7 @@ fun SolarHijriCalendarMonth(
         isDateEnabled = isDateEnabled,
         secondaryLabel = secondaryLabel,
         secondaryAccessibilityLabel = secondaryAccessibilityLabel,
+        locale = locale,
         dayContent = dayContent,
     )
 }

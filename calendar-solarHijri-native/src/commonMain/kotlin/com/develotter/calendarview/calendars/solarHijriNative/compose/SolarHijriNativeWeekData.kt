@@ -3,11 +3,13 @@ package com.develotter.calendarview.calendars.solarHijriNative.compose
 import androidx.compose.runtime.Immutable
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriEngine
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLabels
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLocale
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriPlatform
 import com.develotter.calendarview.calendars.solarHijriNative.isoWeekdayOfEpochDay
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
+import com.develotter.calendarview.locale.CalendarLocale
 
 /** Saturday is the default first day of the Solar Hijri week. */
 internal const val SolarHijriNativeDefaultFirstDayOfWeek: Int = 6
@@ -31,24 +33,40 @@ fun solarHijriNativeWeekData(
     dateEpochDay: Long,
     firstDayOfWeek: Int = SolarHijriNativeDefaultFirstDayOfWeek,
     todayEpochDay: Long = SolarHijriPlatform.currentEpochDay(),
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ): SolarHijriNativeWeekData {
     val start = dateEpochDay - solarHijriNativeDayOfWeekOffset(dateEpochDay, firstDayOfWeek)
     val first = captionDate(start)
     val last = captionDate(start + 6)
     return SolarHijriNativeWeekData(
-        title = "${SolarHijriLocale.formatMonthYear(first.year, first.month)} – " +
-            SolarHijriLocale.formatMonthYear(last.year, last.month),
-        weekdayLabels = solarHijriNativeWeekdayLabels(firstDayOfWeek),
+        title = if (locale == null) {
+            "${SolarHijriLocale.formatMonthYear(first.year, first.month)} – " +
+                SolarHijriLocale.formatMonthYear(last.year, last.month)
+        } else {
+            "${SolarHijriLabels.monthYear(locale, first.year, first.month)} – " +
+                SolarHijriLabels.monthYear(locale, last.year, last.month)
+        },
+        weekdayLabels = solarHijriNativeWeekdayLabels(firstDayOfWeek, locale),
         days = List(7) { offset ->
-            solarHijriNativeDayCellForEpoch(start + offset, todayEpochDay, isDateEnabled)
+            solarHijriNativeDayCellForEpoch(
+                epochDay = start + offset,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+                isDateEnabled = isDateEnabled,
+            )
         },
     )
 }
 
 /** Seven localized short weekday labels in grid order starting at [firstDayOfWeek]. */
-internal fun solarHijriNativeWeekdayLabels(firstDayOfWeek: Int): List<String> = List(7) { offset ->
-    SolarHijriPlatform.weekdayShortLabel((firstDayOfWeek - 1 + offset) % 7 + 1)
+internal fun solarHijriNativeWeekdayLabels(
+    firstDayOfWeek: Int,
+    locale: CalendarLocale? = null,
+): List<String> = List(7) { offset ->
+    val isoWeekday = (firstDayOfWeek - 1 + offset) % 7 + 1
+    locale?.let { SolarHijriLabels.weekdayShort(it, isoWeekday) }
+        ?: SolarHijriPlatform.weekdayShortLabel(isoWeekday)
 }
 
 /** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek]. */

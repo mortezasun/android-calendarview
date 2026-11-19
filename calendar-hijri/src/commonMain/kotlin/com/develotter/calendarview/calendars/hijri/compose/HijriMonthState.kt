@@ -13,6 +13,7 @@ import com.develotter.calendarview.calendars.hijri.HijriDateProvider
 import com.develotter.calendarview.calendars.hijri.HijriPlatform
 import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
+import com.develotter.calendarview.locale.CalendarLocale
 
 /**
  * Observable Hijri visible-month state with optional inclusive bounds.
@@ -89,7 +90,7 @@ class HijriMonthState(
     }
 
     /** Localized month caption matching [hijriMonthData]. */
-    fun title(): String = HijriPlatform.formatMonthYear(month.year, month.month)
+    fun title(locale: CalendarLocale? = null): String = hijriMonthTitle(month, locale)
 
     private fun todayMonth(): HijriDate =
         firstDayOfMonth(dateProvider.dateForEpochDay(HijriPlatform.currentEpochDay()))

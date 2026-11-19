@@ -30,6 +30,19 @@ Status: implemented, pushed identically to `master` and `kmp`, and verified both
     selected/today week when switching to Week view), replaced nested `horizontalScroll` chip strips
     with wrapping `FlowRow` layouts, and hardened `CalendarSampleUiTest` viewport assertions.
   - Added `kotlin-js-store/` to `.gitignore` so local JS/Wasm Yarn lockfiles remain untracked.
+- **Caller-selected locale (ADR 0007):**
+  - `:library` gained `CalendarLocale(languageTag)` with `English`, `German`, `Persian` and
+    `Arabic`; every engine accepts an optional `locale` on `*MonthTitle`, `*SecondaryLabel`,
+    `*AccessibilityLabel`, `*DayCell`, `*MonthData`, `*WeekData`, `*MonthState.title()` and the
+    month composables. `null` keeps the platform formatter, so earlier behaviour and the 3.0.0
+    binary-compatibility overloads are unchanged.
+  - Labels come from pure Kotlin tables (`GregorianLabels`, `HijriLabels`, `SolarHijriLabels`,
+    `SolarHijriLocale` month lists), which gives JS, Wasm, Native and Apple the same month names,
+    weekday labels and digits without ICU or platform locale objects. Unknown tags fall back to
+    English; `:calendar-chinese-compose` keeps `ChineseTextStyle` as its language control.
+  - `:kmp-sample` now selects its language from `SampleLanguages` (the library locales) and passes
+    it to every calendar, so the Settings switch changes calendar content instead of only the
+    shell; shell copy exists for `en`, `de`, `fa` and `ar`.
 - **Multiplatform target expansion & shared actuals:**
   - All six Compose modules (`:library`, `:calendar-gregorian`, `:calendar-hijri`,
     `:calendar-solarHijri`, `:calendar-solarHijri-native`, `:calendar-chinese-compose`) now target

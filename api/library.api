@@ -265,6 +265,25 @@ public final class com.develotter.calendarview.enums.TypeSelectDay extends java.
   public static kotlin.enums.EnumEntries<com.develotter.calendarview.enums.TypeSelectDay> getEntries();
 }
 
+public final class com.develotter.calendarview.locale.CalendarLocale {
+  public static final com.develotter.calendarview.locale.CalendarLocale$Companion Companion;
+  public com.develotter.calendarview.locale.CalendarLocale(java.lang.String);
+  public final java.lang.String getLanguageTag();
+  public final java.lang.String getLanguage();
+  public final java.lang.String component1();
+  public final com.develotter.calendarview.locale.CalendarLocale copy(java.lang.String);
+  public java.lang.String toString();
+  public int hashCode();
+  public boolean equals(java.lang.Object);
+}
+
+public final class com.develotter.calendarview.locale.CalendarLocale$Companion {
+  public final com.develotter.calendarview.locale.CalendarLocale getEnglish();
+  public final com.develotter.calendarview.locale.CalendarLocale getGerman();
+  public final com.develotter.calendarview.locale.CalendarLocale getPersian();
+  public final com.develotter.calendarview.locale.CalendarLocale getArabic();
+}
+
 public final class com.develotter.calendarview.selection.CalendarRangePolicy {
   public com.develotter.calendarview.selection.CalendarRangePolicy(int, java.lang.Integer);
   public final int getMinRangeLength();

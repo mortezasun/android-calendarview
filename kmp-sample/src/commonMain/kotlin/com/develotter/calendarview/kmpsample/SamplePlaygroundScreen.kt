@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.compose.rememberCalendarSelectionState
 import com.develotter.calendarview.enums.TypeSelectDay
+import com.develotter.calendarview.locale.CalendarLocale
 
 internal enum class DemoMonthLayout {
     Single, VerticalList, HorizontalList, HorizontalPager, VerticalPager, AdaptiveColumns,
@@ -38,11 +39,13 @@ internal data class PlaygroundOptions(
     val showMarkers: Boolean,
     val customStyle: Boolean,
     val limitRange: Boolean,
+    val locale: CalendarLocale? = null,
 )
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun SamplePlaygroundScreen(
+    locale: CalendarLocale? = null,
     modifier: Modifier = Modifier,
     renderViewport: @Composable (PlaygroundOptions, (Long) -> Unit, (Long) -> Boolean) -> Unit,
     renderDialogMonth: @Composable (DemoCalendar) -> Unit,
@@ -64,6 +67,7 @@ internal fun SamplePlaygroundScreen(
         showMarkers = markers,
         customStyle = customStyle,
         limitRange = limitRange,
+        locale = locale,
     )
     val selection = key(options.selectionMode, limitRange) {
         rememberCalendarSelectionState(mode = options.selectionMode)

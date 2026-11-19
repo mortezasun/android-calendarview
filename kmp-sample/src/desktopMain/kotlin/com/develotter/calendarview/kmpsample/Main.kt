@@ -14,17 +14,17 @@ fun main() = application {
         state = rememberWindowState(width = 1200.dp, height = 860.dp),
     ) {
         val todayEpochDay = remember { desktopTodayEpochDay() }
-        val todayLabels = remember(todayEpochDay) { sampleTodayLabels(todayEpochDay) }
         App(
-            todayLabels = todayLabels,
-            dateDetails = ::sampleDateDetails,
+            todayEpochDay = todayEpochDay,
             renderCalendar = { options, onSelect ->
                 SampleCalendarExplorer(options, onSelect, todayEpochDay)
             },
             renderViewport = { options, onDayClick, isSelected ->
                 SamplePlaygroundViewport(options, onDayClick, isSelected, todayEpochDay)
             },
-            renderDialogMonth = { calendar -> SampleDialogMonth(calendar, todayEpochDay) },
+            renderDialogMonth = { calendar, locale ->
+                SampleDialogMonth(calendar, todayEpochDay, locale)
+            },
             rangePolicyAccepts = { day -> sampleRangePolicyAccepts(day, todayEpochDay) },
             renderHeatmap = { options, onDetails -> SampleHeatmap(options, onDetails, todayEpochDay) },
         )

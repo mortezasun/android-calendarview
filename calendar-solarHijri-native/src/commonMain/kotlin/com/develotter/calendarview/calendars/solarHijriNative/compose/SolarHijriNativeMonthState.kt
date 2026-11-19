@@ -11,11 +11,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriEngine
+import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLabels
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLocale
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriPlatform
 import com.develotter.calendarview.calendars.solarHijriNative.floorDiv
 import com.develotter.calendarview.calendars.solarHijriNative.floorMod
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
+import com.develotter.calendarview.locale.CalendarLocale
 
 /**
  * Observable Solar Hijri visible-month state with optional inclusive bounds.
@@ -99,7 +101,9 @@ class SolarHijriNativeMonthState(
     }
 
     /** Localized month caption matching [solarHijriNativeMonthData]. */
-    fun title(): String = SolarHijriLocale.formatMonthYear(year, monthNumber)
+    fun title(locale: CalendarLocale? = null): String =
+        locale?.let { SolarHijriLabels.monthYear(it, year, monthNumber) }
+            ?: SolarHijriLocale.formatMonthYear(year, monthNumber)
 
     /** Month index of today, or null when the platform clock is outside the supported years. */
     private fun todayIndex(): Int? =

@@ -5,6 +5,7 @@ import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriDate
 import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijriNativeWeekData
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
+import com.develotter.calendarview.locale.CalendarLocale
 
 /** Saturday-first is configurable. */
 private const val DEFAULT_FIRST_DAY_OF_WEEK = 6
@@ -27,9 +28,16 @@ fun solarHijriWeekData(
     dateEpochDay: Long,
     firstDayOfWeek: Int = DEFAULT_FIRST_DAY_OF_WEEK,
     todayEpochDay: Long = SolarHijriDate.now().toEpochDay(),
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ): SolarHijriWeekData {
-    val native = solarHijriNativeWeekData(dateEpochDay, firstDayOfWeek, todayEpochDay, isDateEnabled)
+    val native = solarHijriNativeWeekData(
+        dateEpochDay = dateEpochDay,
+        firstDayOfWeek = firstDayOfWeek,
+        todayEpochDay = todayEpochDay,
+        locale = locale,
+        isDateEnabled = isDateEnabled,
+    )
     return SolarHijriWeekData(
         title = native.title,
         weekdayLabels = native.weekdayLabels,

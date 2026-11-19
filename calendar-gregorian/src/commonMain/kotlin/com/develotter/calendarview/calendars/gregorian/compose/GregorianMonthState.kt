@@ -11,6 +11,7 @@ import androidx.compose.runtime.setValue
 import com.develotter.calendarview.calendars.gregorian.GregorianPlatformFormatter
 import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
+import com.develotter.calendarview.locale.CalendarLocale
 
 /**
  * Observable Gregorian visible-month state with optional inclusive bounds.
@@ -64,8 +65,8 @@ class GregorianMonthState(
         month = target
     }
 
-    /** Localized month caption matching [gregorianMonthData]. */
-    fun title(): String = GregorianPlatformFormatter.formatMonthYear(month.year, month.month)
+    /** Localized month caption matching [gregorianMonthData]; `null` keeps the platform locale. */
+    fun title(locale: CalendarLocale? = null): String = gregorianMonthTitle(month, locale)
 
     private fun inRange(value: GregorianYearMonth): Boolean =
         (minMonth == null || value >= minMonth) && (maxMonth == null || value <= maxMonth)

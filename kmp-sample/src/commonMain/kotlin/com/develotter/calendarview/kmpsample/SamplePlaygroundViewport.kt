@@ -39,6 +39,7 @@ import com.develotter.calendarview.compose.CalendarScrollAxis
 import com.develotter.calendarview.compose.CalendarStyle
 import com.develotter.calendarview.compose.LocalCalendarStyle
 import com.develotter.calendarview.compose.rememberCalendarSelectionState
+import com.develotter.calendarview.locale.CalendarLocale
 import com.develotter.calendarview.selection.CalendarSelection
 
 /** Number of months the list, pager and grid containers expose around the current month. */
@@ -128,6 +129,7 @@ internal fun SamplePlaygroundViewport(
                     showMarkers = options.showMarkers,
                     hijriProvider = hijriProvider,
                     chineseStyle = chineseStyle,
+                    locale = options.locale,
                 )
             }
 
@@ -154,6 +156,7 @@ internal fun SamplePlaygroundViewport(
                     showMarkers = options.showMarkers,
                     hijriProvider = hijriProvider,
                     chineseStyle = chineseStyle,
+                    locale = options.locale,
                 )
             }
 
@@ -173,6 +176,7 @@ internal fun SamplePlaygroundViewport(
                     showMarkers = options.showMarkers,
                     hijriProvider = hijriProvider,
                     chineseStyle = chineseStyle,
+                    locale = options.locale,
                 )
             }
         }
@@ -207,6 +211,7 @@ private fun SampleSingleMonth(
         todayEpochDay = todayEpochDay,
         hijriDateProvider = hijriProvider,
         chineseStyle = chineseStyle,
+        locale = options.locale,
     ) ?: "Unsupported month"
 
     Column(
@@ -239,6 +244,7 @@ private fun SampleSingleMonth(
                 showMarkers = options.showMarkers,
                 hijriProvider = hijriProvider,
                 chineseStyle = chineseStyle,
+                locale = options.locale,
             )
         }
     }
@@ -255,6 +261,7 @@ private fun SamplePlaygroundMonth(
     showMarkers: Boolean,
     hijriProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle,
+    locale: CalendarLocale? = null,
 ) {
     if (monthAnchor == null) {
         Text("Month outside the supported range of ${calendar.label}.")
@@ -265,7 +272,14 @@ private fun SamplePlaygroundMonth(
             emptyMap()
         } else {
             runCatching {
-                sampleMonthData(calendar, monthAnchor, todayEpochDay, hijriProvider, chineseStyle).days
+                sampleMonthData(
+                    calendar,
+                    monthAnchor,
+                    todayEpochDay,
+                    hijriProvider,
+                    chineseStyle,
+                    locale,
+                ).days
                     .filter { day -> day.epochDay % 5L == 0L }
                     .associate { day ->
                         day.epochDay to listOf(CalendarDayMarker(SampleMarkerColor, "Reminder"))
@@ -281,6 +295,7 @@ private fun SamplePlaygroundMonth(
             onDateClick = onDayTap,
             todayEpochDay = todayEpochDay,
             markers = markers,
+            locale = locale,
         )
 
         DemoCalendar.Hijri -> HijriCalendarMonth(
@@ -290,6 +305,7 @@ private fun SamplePlaygroundMonth(
             todayEpochDay = todayEpochDay,
             markers = markers,
             dateProvider = hijriProvider,
+            locale = locale,
         )
 
         DemoCalendar.SolarHijri -> SolarHijriCalendarMonth(
@@ -298,6 +314,7 @@ private fun SamplePlaygroundMonth(
             onDateClick = onDayTap,
             todayEpochDay = todayEpochDay,
             markers = markers,
+            locale = locale,
         )
 
         DemoCalendar.SolarHijriNative -> SolarHijriNativeCalendarMonth(
@@ -306,6 +323,7 @@ private fun SamplePlaygroundMonth(
             onDateClick = onDayTap,
             todayEpochDay = todayEpochDay,
             markers = markers,
+            locale = locale,
         )
 
         DemoCalendar.Chinese -> ChineseCalendarMonth(

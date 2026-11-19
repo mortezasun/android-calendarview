@@ -33,9 +33,16 @@ internal fun SampleHeatmap(
     val year = remember(options.calendar, todayEpochDay) {
         sampleYear(options.calendar, todayEpochDay, hijriProvider)
     }
-    val months = remember(options.calendar, year, todayEpochDay) {
+    val months = remember(options.calendar, options.locale, year, todayEpochDay) {
         runCatching {
-            sampleHeatmapYear(options.calendar, year, todayEpochDay, hijriProvider, chineseStyle)
+            sampleHeatmapYear(
+                options.calendar,
+                year,
+                todayEpochDay,
+                hijriProvider,
+                chineseStyle,
+                options.locale,
+            )
         }.getOrDefault(emptyList())
     }
     if (months.isEmpty()) {

@@ -15,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.develotter.calendarview.locale.CalendarLocale
 
 internal enum class DemoHeatmapOrientation { WeeksAsColumns, WeeksAsRows }
 internal enum class DemoHeatmapPalette { Green, Blue, Amber }
@@ -25,10 +26,12 @@ internal data class HeatmapOptions(
     val orientation: DemoHeatmapOrientation,
     val palette: DemoHeatmapPalette,
     val cells: DemoHeatmapCells,
+    val locale: CalendarLocale? = null,
 )
 
 @Composable
 internal fun SampleHeatmapsScreen(
+    locale: CalendarLocale? = null,
     modifier: Modifier = Modifier,
     renderHeatmap: @Composable (HeatmapOptions, (String) -> Unit) -> Unit,
 ) {
@@ -49,6 +52,7 @@ internal fun SampleHeatmapsScreen(
         orientation = DemoHeatmapOrientation.valueOf(orientationName),
         palette = DemoHeatmapPalette.valueOf(paletteName),
         cells = DemoHeatmapCells.valueOf(cellsName),
+        locale = locale,
     )
 
     Column(

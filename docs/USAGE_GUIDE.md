@@ -271,6 +271,36 @@ strings. Tapping previous/next at a bound is a no-op; `goTo(...)` rejects out-of
 
 ---
 
+## Language and locale
+
+Calendar labels follow the platform default locale until the caller selects one. Every engine
+accepts a `CalendarLocale` from `:library`; the same value drives the month title, weekday
+labels, day numbers and accessibility labels:
+
+```kotlin
+val data = gregorianMonthData(
+    month = month,
+    locale = CalendarLocale.German, // null keeps the platform default locale
+)
+
+GregorianCalendarMonth(
+    month = month,
+    selection = state.selection,
+    onDateClick = { state.onDayClick(it) },
+    locale = CalendarLocale.German,
+)
+```
+
+The predefined languages are `English`, `German`, `Persian` and `Arabic`; any other language tag
+renders English labels. Each engine ships its own tables (`gregorianMonthTitle`,
+`hijriMonthData`, `solarHijriNativeMonthData`, `solarHijriMonthData`), so the labels do not depend
+on the operating system and work on every target. The Chinese engine keeps `ChineseTextStyle`
+because its labels are script choices rather than translations. A locale never changes layout
+direction: pass `LayoutDirection` from the host, for example through
+`CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl)`.
+
+---
+
 ## Week and Agenda
 
 `CalendarWeekGrid` renders a seven-day row backed by engine `*WeekData` builders

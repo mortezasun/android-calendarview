@@ -1,89 +1,70 @@
 package com.develotter.calendarview.kmpsample
 
+import com.develotter.calendarview.locale.CalendarLocale
+
 /**
- * Localized labels of the sample shell. Screen contents stay in English because they are
- * library examples; the shell navigation follows [AppLanguage].
+ * Localized labels of the sample shell. Screen contents come from the library engines, which
+ * receive the same [CalendarLocale].
  */
 internal object SampleStrings {
-    fun appTitle(language: AppLanguage): String = "CalendarView"
+    fun appTitle(language: CalendarLocale): String = "CalendarView"
 
-    fun menu(language: AppLanguage): String = when (language) {
-        AppLanguage.English -> "Menu"
-        AppLanguage.German -> "Menü"
+    fun menu(language: CalendarLocale): String =
+        pick(language, en = "Menu", de = "Menü", fa = "منو", ar = "القائمة")
+
+    fun close(language: CalendarLocale): String =
+        pick(language, en = "Close", de = "Schließen", fa = "بستن", ar = "إغلاق")
+
+    fun pageTitle(page: DemoPage, language: CalendarLocale): String = when (page) {
+        DemoPage.Home -> pick(language, "Home", "Start", "خانه", "الرئيسية")
+        DemoPage.Calendars -> pick(language, "Calendars", "Kalender", "تقویم‌ها", "التقاويم")
+        DemoPage.Playground -> pick(language, "Playground", "Spielwiese", "زمین بازی", "الملعب")
+        DemoPage.Heatmaps -> pick(language, "Heatmaps", "Heatmaps", "نقشه حرارتی", "الخرائط الحرارية")
+        DemoPage.Settings -> pick(language, "Settings", "Einstellungen", "تنظیمات", "الإعدادات")
     }
 
-    fun close(language: AppLanguage): String = when (language) {
-        AppLanguage.English -> "Close"
-        AppLanguage.German -> "Schließen"
+    fun settingsTitle(language: CalendarLocale): String =
+        pick(language, en = "Settings", de = "Einstellungen", fa = "تنظیمات", ar = "الإعدادات")
+
+    fun languageLabel(language: CalendarLocale): String =
+        pick(language, en = "Language", de = "Sprache", fa = "زبان", ar = "اللغة")
+
+    /** Endonym of [value]; the same in every UI language. */
+    fun languageName(value: CalendarLocale): String = when (value.language) {
+        "de" -> "Deutsch"
+        "fa" -> "فارسی"
+        "ar" -> "العربية"
+        else -> "English"
     }
 
-    fun pageTitle(page: DemoPage, language: AppLanguage): String = when (language) {
-        AppLanguage.English -> page.label
-        AppLanguage.German -> when (page) {
-            DemoPage.Home -> "Start"
-            DemoPage.Calendars -> "Kalender"
-            DemoPage.Playground -> "Spielwiese"
-            DemoPage.Heatmaps -> "Heatmaps"
-            DemoPage.Settings -> "Einstellungen"
-        }
+    fun themeLabel(language: CalendarLocale): String =
+        pick(language, en = "Theme", de = "Design", fa = "پوسته", ar = "المظهر")
+
+    fun themeModeName(mode: AppThemeMode, language: CalendarLocale): String = when (mode) {
+        AppThemeMode.System -> pick(language, "System", "System", "سیستم", "النظام")
+        AppThemeMode.Light -> pick(language, "Light", "Hell", "روشن", "فاتح")
+        AppThemeMode.Dark -> pick(language, "Dark", "Dunkel", "تیره", "داكن")
     }
 
-    fun settingsTitle(language: AppLanguage): String = when (language) {
-        AppLanguage.English -> "Settings"
-        AppLanguage.German -> "Einstellungen"
+    fun paletteLabel(language: CalendarLocale): String =
+        pick(language, en = "Accent", de = "Akzentfarbe", fa = "رنگ تأکیدی", ar = "لون التمييز")
+
+    fun paletteName(palette: AppThemePalette, language: CalendarLocale): String = when (palette) {
+        AppThemePalette.Blue -> pick(language, "Blue", "Blau", "آبی", "أزرق")
+        AppThemePalette.Green -> pick(language, "Green", "Grün", "سبز", "أخضر")
+        AppThemePalette.Amber -> pick(language, "Amber", "Bernstein", "کهربایی", "كهرماني")
     }
 
-    fun languageLabel(language: AppLanguage): String = when (language) {
-        AppLanguage.English -> "Language"
-        AppLanguage.German -> "Sprache"
-    }
-
-    fun languageName(value: AppLanguage, language: AppLanguage): String = when (value) {
-        AppLanguage.English -> "English"
-        AppLanguage.German -> "Deutsch"
-    }
-
-    fun themeLabel(language: AppLanguage): String = when (language) {
-        AppLanguage.English -> "Theme"
-        AppLanguage.German -> "Design"
-    }
-
-    fun themeModeName(mode: AppThemeMode, language: AppLanguage): String = when (mode) {
-        AppThemeMode.System -> when (language) {
-            AppLanguage.English -> "System"
-            AppLanguage.German -> "System"
-        }
-
-        AppThemeMode.Light -> when (language) {
-            AppLanguage.English -> "Light"
-            AppLanguage.German -> "Hell"
-        }
-
-        AppThemeMode.Dark -> when (language) {
-            AppLanguage.English -> "Dark"
-            AppLanguage.German -> "Dunkel"
-        }
-    }
-
-    fun paletteLabel(language: AppLanguage): String = when (language) {
-        AppLanguage.English -> "Accent"
-        AppLanguage.German -> "Akzentfarbe"
-    }
-
-    fun paletteName(palette: AppThemePalette, language: AppLanguage): String = when (palette) {
-        AppThemePalette.Blue -> when (language) {
-            AppLanguage.English -> "Blue"
-            AppLanguage.German -> "Blau"
-        }
-
-        AppThemePalette.Green -> when (language) {
-            AppLanguage.English -> "Green"
-            AppLanguage.German -> "Grün"
-        }
-
-        AppThemePalette.Amber -> when (language) {
-            AppLanguage.English -> "Amber"
-            AppLanguage.German -> "Bernstein"
-        }
+    private fun pick(
+        language: CalendarLocale,
+        en: String,
+        de: String,
+        fa: String,
+        ar: String,
+    ): String = when (language.language) {
+        "de" -> de
+        "fa" -> fa
+        "ar" -> ar
+        else -> en
     }
 }

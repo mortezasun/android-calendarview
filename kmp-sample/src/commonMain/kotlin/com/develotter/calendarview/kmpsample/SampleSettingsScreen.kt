@@ -31,9 +31,9 @@ internal fun SampleSettingsScreen(
 
         DemoChoices(
             title = SampleStrings.languageLabel(language),
-            items = AppLanguage.entries,
+            items = SampleLanguages,
             selected = settings.language,
-            label = { SampleStrings.languageName(it, language) },
+            label = { SampleStrings.languageName(it) },
         ) { selected -> onSettingsChange(settings.copy(language = selected)) }
 
         DemoChoices(

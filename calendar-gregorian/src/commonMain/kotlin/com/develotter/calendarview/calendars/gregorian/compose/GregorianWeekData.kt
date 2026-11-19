@@ -1,10 +1,12 @@
 package com.develotter.calendarview.calendars.gregorian.compose
 
 import androidx.compose.runtime.Immutable
+import com.develotter.calendarview.calendars.gregorian.GregorianLabels
 import com.develotter.calendarview.calendars.gregorian.GregorianPlatformFormatter
 import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
+import com.develotter.calendarview.locale.CalendarLocale
 
 /** Localized Gregorian seven-day snapshot; treat lists as read-only. */
 @Immutable
@@ -25,30 +27,42 @@ fun gregorianWeekData(
     dateEpochDay: Long,
     firstDayOfWeek: Int = GregorianPlatformFormatter.defaultFirstDayOfWeek(),
     todayEpochDay: Long = GregorianPlatformFormatter.currentEpochDay(),
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ): GregorianWeekData {
     val start = startOfWeek(dateEpochDay, firstDayOfWeek)
     val end = start + 6
+    val weekNumber = weekOfWeekBasedYear(start, firstDayOfWeek)
     return GregorianWeekData(
-        title = "${GregorianPlatformFormatter.formatShortDayMonth(start)} – " +
-            GregorianPlatformFormatter.formatShortDayMonthYear(end),
-        weekdayLabels = gregorianWeekdayLabels(firstDayOfWeek),
+        title = if (locale == null) {
+            "${GregorianPlatformFormatter.formatShortDayMonth(start)} – " +
+                GregorianPlatformFormatter.formatShortDayMonthYear(end)
+        } else {
+            "${GregorianLabels.shortDayMonth(locale, start)} – " +
+                GregorianLabels.shortDayMonthYear(locale, end)
+        },
+        weekdayLabels = gregorianWeekdayLabels(firstDayOfWeek, locale),
         days = List(7) { offset ->
             gregorianDayCell(
                 epochDay = start + offset,
                 todayEpochDay = todayEpochDay,
                 isDateEnabled = isDateEnabled,
+                locale = locale,
             )
         },
-        weekNumber = GregorianPlatformFormatter.formatDayNumber(
-            weekOfWeekBasedYear(start, firstDayOfWeek),
-        ),
+        weekNumber = locale?.let { GregorianLabels.number(it, weekNumber) }
+            ?: GregorianPlatformFormatter.formatDayNumber(weekNumber),
     )
 }
 
 /** Seven localized short weekday labels in grid order starting at [firstDayOfWeek]. */
-internal fun gregorianWeekdayLabels(firstDayOfWeek: Int): List<String> = List(7) { offset ->
-    GregorianPlatformFormatter.weekdayShortLabel((firstDayOfWeek - 1 + offset) % 7 + 1)
+internal fun gregorianWeekdayLabels(
+    firstDayOfWeek: Int,
+    locale: CalendarLocale? = null,
+): List<String> = List(7) { offset ->
+    val isoWeekday = (firstDayOfWeek - 1 + offset) % 7 + 1
+    locale?.let { GregorianLabels.weekdayShort(it, isoWeekday) }
+        ?: GregorianPlatformFormatter.weekdayShortLabel(isoWeekday)
 }
 
 /** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek]. */

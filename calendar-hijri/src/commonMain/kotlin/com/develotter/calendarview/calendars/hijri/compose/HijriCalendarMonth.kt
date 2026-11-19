@@ -7,12 +7,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.develotter.calendarview.calendars.hijri.HijriDate
 import com.develotter.calendarview.calendars.hijri.HijriDateProvider
+import com.develotter.calendarview.calendars.hijri.HijriLabels
 import com.develotter.calendarview.calendars.hijri.HijriPlatform
 import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarDayMarker
 import com.develotter.calendarview.compose.CalendarMonthData
 import com.develotter.calendarview.compose.CalendarMonthGrid
+import com.develotter.calendarview.locale.CalendarLocale
 import com.develotter.calendarview.selection.CalendarSelection
 
 /** Localized month snapshot; treat lists as read-only. */
@@ -24,9 +26,14 @@ data class HijriMonthData(
     override val days: List<CalendarDayCell>,
 ) : CalendarMonthData
 
-/** Localized Hijri month-year title, for example `Shawwal 1447`. */
-fun hijriMonthTitle(month: HijriDate): String =
-    HijriPlatform.formatMonthYear(month.year, month.month)
+/**
+ * Localized Hijri month-year title, for example `Shawwal 1447`.
+ *
+ * [locale] selects the library's own label tables; `null` keeps the platform default locale.
+ */
+fun hijriMonthTitle(month: HijriDate, locale: CalendarLocale? = null): String =
+    locale?.let { HijriLabels.monthYear(it, month.month, month.year) }
+        ?: HijriPlatform.formatMonthYear(month.year, month.month)
 
 /**
  * Compact Hijri secondary label for another primary calendar grid: renders the short month name
@@ -36,12 +43,14 @@ fun hijriMonthTitle(month: HijriDate): String =
 fun hijriSecondaryLabel(
     epochDay: Long,
     dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+    locale: CalendarLocale? = null,
 ): String? = runCatching {
     val date = dateProvider.dateForEpochDay(epochDay)
-    if (date.dayOfMonth == 1) {
-        HijriPlatform.formatShortMonth(date.year, date.month)
-    } else {
-        HijriPlatform.formatDayNumber(date.dayOfMonth)
+    when {
+        date.dayOfMonth == 1 && locale != null -> HijriLabels.shortMonthName(locale, date.month)
+        date.dayOfMonth == 1 -> HijriPlatform.formatShortMonth(date.year, date.month)
+        locale != null -> HijriLabels.number(locale, date.dayOfMonth)
+        else -> HijriPlatform.formatDayNumber(date.dayOfMonth)
     }
 }.getOrNull()
 
@@ -52,9 +61,11 @@ fun hijriSecondaryLabel(
 fun hijriAccessibilityLabel(
     epochDay: Long,
     dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+    locale: CalendarLocale? = null,
 ): String? = runCatching {
     val date = dateProvider.dateForEpochDay(epochDay)
-    HijriPlatform.formatFullDate(date, epochDay)
+    locale?.let { HijriLabels.fullDate(it, date, epochDay) }
+        ?: HijriPlatform.formatFullDate(date, epochDay)
 }.getOrNull()
 
 /** Formats a Hijri day with its own chronology, including dates in adjacent months. */
@@ -62,12 +73,14 @@ fun hijriDayCell(
     epochDay: Long,
     dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
     todayEpochDay: Long = HijriPlatform.currentEpochDay(),
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ): CalendarDayCell = hijriDayCellForEpoch(
     date = dateProvider.dateForEpochDay(epochDay),
     epochDay = epochDay,
     todayEpochDay = todayEpochDay,
     isDateEnabled = isDateEnabled,
+    locale = locale,
 )
 
 /** Variant for providers whose displayed date differs from the canonical epoch day. */
@@ -75,11 +88,14 @@ internal fun hijriDayCellForEpoch(
     date: HijriDate,
     epochDay: Long,
     todayEpochDay: Long,
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean,
 ): CalendarDayCell = CalendarDayCell(
     epochDay = epochDay,
-    label = HijriPlatform.formatDayNumber(date.dayOfMonth),
-    accessibilityLabel = HijriPlatform.formatFullDate(date, epochDay),
+    label = locale?.let { HijriLabels.number(it, date.dayOfMonth) }
+        ?: HijriPlatform.formatDayNumber(date.dayOfMonth),
+    accessibilityLabel = locale?.let { HijriLabels.fullDate(it, date, epochDay) }
+        ?: HijriPlatform.formatFullDate(date, epochDay),
     enabled = isDateEnabled(epochDay),
     isToday = epochDay == todayEpochDay,
 )
@@ -94,13 +110,14 @@ fun hijriMonthData(
     firstDayOfWeek: Int = HijriDefaultFirstDayOfWeek,
     todayEpochDay: Long = HijriPlatform.currentEpochDay(),
     dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ): HijriMonthData {
     val first = month.copy(dayOfMonth = 1)
     val firstEpochDay = dateProvider.epochDayFor(first)
     return HijriMonthData(
-        title = hijriMonthTitle(first),
-        weekdayLabels = hijriWeekdayLabels(firstDayOfWeek),
+        title = hijriMonthTitle(first, locale),
+        weekdayLabels = hijriWeekdayLabels(firstDayOfWeek, locale),
         // The displayed Hijri date may be offset from its absolute timeline weekday.
         firstDayOffset = hijriDayOfWeekOffset(firstEpochDay, firstDayOfWeek),
         days = List(HijriPlatform.lengthOfMonth(first.year, first.month)) { offset ->
@@ -109,6 +126,7 @@ fun hijriMonthData(
                 epochDay = firstEpochDay + offset,
                 todayEpochDay = todayEpochDay,
                 isDateEnabled = isDateEnabled,
+                locale = locale,
             )
         },
     )
@@ -190,6 +208,7 @@ fun HijriCalendarMonth(
     isDateEnabled: (Long) -> Boolean = { true },
     secondaryLabel: ((Long) -> String?)? = null,
     secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+    locale: CalendarLocale? = null,
     dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
 ) {
     val data = hijriMonthData(
@@ -198,6 +217,7 @@ fun HijriCalendarMonth(
         todayEpochDay = todayEpochDay,
         dateProvider = dateProvider,
         isDateEnabled = isDateEnabled,
+        locale = locale,
     )
     CalendarMonthGrid(
         title = data.title, weekdayLabels = data.weekdayLabels, firstDayOffset = data.firstDayOffset,
@@ -218,6 +238,7 @@ fun HijriCalendarMonth(
                 epochDay = adjacentEpochDay,
                 todayEpochDay = todayEpochDay,
                 isDateEnabled = isDateEnabled,
+                locale = locale,
             )
         },
     )
