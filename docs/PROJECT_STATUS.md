@@ -1,8 +1,204 @@
 # Project status
 
-Last updated: 2026-11-17 (UTC)
+Last updated: 2026-11-20 (UTC)
 Version: `3.1.0-beta` pre-release preparation (latest tagged release: `3.0.0` at `a0c686e`; `master`/`kmp` base `a116b81`)
 Branches: `master` and `kmp` synced at `c8b1287` (following `e5e7c73`); `3.1.0-beta` tag and GitHub Pre-Release await manual debug APK verification and explicit release approval.
+
+## Library extension batch (T1-T6, `kmp`, 2026-11-20)
+
+Status: implemented and verified locally on Linux; not committed, tagged, merged or run in CI.
+Step 0 of the plan (commit the locale review and the F1 work, then wait for CI) is still open
+because this host has no repository credentials and GitHub Actions logs are not readable
+anonymously; the features below therefore sit on top of an uncommitted working tree.
+
+- T1 keyboard forwarding: `keyboardNavigation` and `onMonthStep` are now parameters of
+  `GregorianCalendarMonth`, `HijriCalendarMonth`, `SolarHijriCalendarMonth`,
+  `SolarHijriNativeCalendarMonth`, `ChineseCalendarMonth` and `GregorianChineseCalendarMonth`,
+  placed before the trailing `dayContent` slot. The hidden 3.0.0 overloads are untouched.
+- T2 selection presets: `CalendarSelection.presets(firstDayOfWeek, todayEpochDay)` and
+  `CalendarSelectionPresets` (`today`, `thisWeek`, `thisMonth`, `lastSevenDays`). `thisWeek`
+  honours `firstDayOfWeek`, `thisMonth` is the civil Gregorian month, `lastSevenDays` ends on
+  `today`. No platform date access and no change to `CalendarRangePolicy`.
+- T3 ISO week numbers: `isoWeekNumber` and `isoWeekYear` in `:library` `selection`; every
+  `*WeekData` builder takes `useIsoWeekNumber` (default `false`) before `isDateEnabled`, so
+  trailing-lambda calls keep compiling. Digits come from the engine label tables and the Chinese
+  builder writes Western digits. The Solar Hijri facade now forwards the native `weekNumber` it
+  previously dropped.
+- T4 heatmap buckets and legend: `HeatmapBuckets`, a `buckets` parameter on all three heatmaps
+  (before `colorForIntensity`) and `HeatmapLegend`. Drawn colors use the bucket's lower bound;
+  intensities, selection and accessibility text keep the exact value.
+- T5 month picker: `CalendarMonthPicker` and ADR 0008. One year of `selectable` month cells with
+  `CollectionInfo`/`CollectionItemInfo`, optional year stepping, no internal state and
+  caller-supplied labels.
+- T6 adaptive column cap: `CalendarMonthColumns(maxColumns = Int.MAX_VALUE)` caps the derived
+  column count and wraps the remaining months into further rows; `calendarMonthColumns(width,
+  minMonthWidth, spacing, maxColumns)` exposes the same rule as a pure 4-argument overload, and
+  the internal `calendarMonthRows` helper is covered in `commonTest`. The default keeps the
+  previous unbounded layout, so existing `LazyGridState` positions are unchanged. No new
+  dependency and no foldable-window API: only the column cap.
+- Samples: `:kmp-sample` drives its Gregorian month from `CalendarMonthPicker` (jump-to-month
+  button, year stepping, localized month titles) and renders `HeatmapLegend` from the same
+  `HeatmapBuckets` its heatmap uses; the new labels go through `SampleStrings` and its parity
+  test. The Playground forwards `keyboardNavigation`/`onMonthStep` to every engine month.
+- Tests: `CalendarSelectionPresetsTest`, `CalendarWeekNumberingTest`, `HeatmapBucketsTest`,
+  `CalendarMonthPickerContractTest`, extended `CalendarMonthColumnsTest` (cap, wrap rows across
+  month counts and differing day counts, unchanged default, invalid caps), one week-numbering
+  test class per engine module, and `CalendarMonthPickerComposeTest` / `HeatmapLegendComposeTest`
+  (compiled only).
+- Verification (one pass, `-Duser.language=en -Duser.country=US`): `245` `jvmTest`, `227`
+  `testAndroidHostTest`, `68` sample unit tests, `2` `:kmp-sample` host tests, `lint`,
+  `api-check` and `klib-api-check` without `--update`, `check-commonmain-purity.sh`,
+  `:library:compileAndroidDeviceTest`, `:calendarviewsample:compileDebugAndroidTestKotlin`,
+  `:calendarviewsample:assembleDebug`, `:kmp-sample:compileKotlinDesktop` and
+  `:kmp-sample:compileAndroidMain`.
+- Open: step 0 (commit + CI) remains with the user. Foldable-window/windowing integration is not
+  implemented: it would need a new dependency and an explicit product decision, so only the
+  `maxColumns` cap from step 6 is in place.
+
+## Locale review acceptance and keyboard navigation (`kmp`, 2026-11-19)
+
+Status: review points R1-R10 addressed and the next feature (opt-in keyboard navigation in
+`CalendarMonthGrid`) implemented as an additive `3.1` API. Verified locally on Linux; the CI run for
+the new commit is still pending because this host has no repository credentials.
+
+### R1 - CI failure on `ddb482c`
+
+- `ddb482c` contains only `.github/workflows/*` renames (10 files, no content change), so its build
+  inputs are identical to its parent `cc5087c`.
+- [Run 44625861323](https://github.com/mortezasun/android-calendarview/actions/runs/44625861323)
+  failed only in two of the five jobs (`assemble`, `native-engine`); `unit-tests`, `lint` and
+  `klib-api` succeeded on the same commit.
+- Each failing job stopped 16 seconds into its Gradle step (22:09:52-22:10:08 and
+  22:09:54-22:10:10) and uploaded no build output. Configuring this multi-module build takes longer
+  even with a warm cache, and a Kotlin or Kotlin/Native compilation error cannot occur that early,
+  so the failure happened before the project was configured.
+- The public job page exposes only the annotation `Process completed with exit code 1`. Raw logs sit
+  behind GitHub sign-in and this host has no token, so the runner message itself could not be read;
+  the classification is inferred from timings, missing artifacts and the unchanged build inputs.
+- HEAD `3254379` has a complete green run set: `Android verification`
+  [44632297629](https://github.com/mortezasun/android-calendarview/actions/runs/44632297629),
+  `Android instrumentation`
+  [44632285522](https://github.com/mortezasun/android-calendarview/actions/runs/44632285522),
+  `Android tablet verification`
+  [44632285173](https://github.com/mortezasun/android-calendarview/actions/runs/44632285173),
+  `Android publishing verification`
+  [44632287875](https://github.com/mortezasun/android-calendarview/actions/runs/44632287875) and
+  `API documentation`
+  [44632285179](https://github.com/mortezasun/android-calendarview/actions/runs/44632285179); the
+  release workflow was skipped by its trigger conditions. Contrary to the session hand-off, `3254379`
+  did get a CI run.
+- Conclusion: runner/infrastructure failure on `ddb482c`, no code involvement, superseded by the
+  all-green `3254379` run. Open: a `workflow_dispatch` re-run of `ddb482c` was not possible without
+  repository credentials.
+- Workflow defect found while diagnosing and not changed: the `Upload reports and available APK`
+  step lists `.ci-diagnostics/toolchain.txt`, but `upload-artifact` v4+ skips hidden paths by
+  default, so the diagnostics file is never uploaded. Adding `include-hidden-files: true` would make
+  that file available for future triage.
+
+### R2 - unreported commit `3254379`
+
+- Reproduced: without the flag, `:library:compileKotlinJvm` warns `'expect'/'actual' classes ... are
+  in Beta` on both `HeatmapPlatformFormatter` and its JVM actual. The opt-in is genuinely required
+  by the five `internal expect object` declarations under Kotlin `2.5.0-RC`.
+- It was applied to every KMP module through `subprojects {}`. It is now scoped to the five modules
+  that declare those adapters (`:library`, `:calendar-gregorian`, `:calendar-hijri`,
+  `:calendar-solarHijri-native`, `:calendar-chinese-compose`), which keeps the warning active for a
+  new expect/actual class in any other module. Documented in
+  [DEVELOPMENT.md](DEVELOPMENT.md#build-conventions).
+- `withHostTest {}` on `:kmp-sample` matches the other modules and lets the parity test run on the
+  Android host. The `desktopMain` accessor rewrite is behaviour-neutral. No other content in the
+  commit.
+
+### R3 - RTL helper without usage or test
+
+- `:kmp-sample` now wraps its theme in `ProvideCalendarLocaleLayoutDirection(settings.language)`, so
+  the language switch drives the reading direction; the Playground RTL switch stays a narrower inner
+  override. `:calendarviewsample` keeps its own explicit switch.
+- New device test `CalendarLocaleLayoutDirectionComposeTest` in `:library` covers `fa`/`ar` (Rtl),
+  `de`/`en` (Ltr) and `null` (ambient direction unchanged, both directions).
+
+### R4 - internal declaration in the JVM dump
+
+- `gregorianOverlayData` is `internal` but appeared in `api/calendar-chinese-compose.api` because
+  Kotlin does not mangle internal top-level function names. `scripts/api-check.sh` now filters that
+  exact name and rejects it if it reappears; the KLIB dump never listed it. Documented in
+  [DEVELOPMENT.md](DEVELOPMENT.md#public-api-guard).
+
+### R5 - hidden compatibility overload for `GregorianChineseCalendarMonth`
+
+- `locale` was inserted before `weekNumber` because `weekNumber` has to stay directly ahead of the
+  trailing `weekNumberContent` slot; appending `locale` would invert that order. The old parameter
+  list keeps its own JVM signature as a `@Deprecated(HIDDEN)` overload forwarding with `locale =
+  null`. Rationale is in the overload KDoc and the [ADR 0007](decisions/0007-caller-selected-calendar-locale.md)
+  amendment; the API dump lists both signatures.
+
+### R6 - test gaps
+
+- `:library` gained `unsupportedTagIsOutsideTheSupportedLanguages`. The label/digit half stays in
+  `GregorianLabelTablesTest.unsupportedLanguageFallsBackToEnglishLabelsAndWesternDigits`, because
+  `:library` ships no label table; a library-level label assertion would duplicate an engine table or
+  invert the dependency direction. This split is intentional and documented here.
+- `CalendarLocaleJavaTest` now covers `fa-AF` (tag, language, RTL), `de-AT`, `Locale.ROOT` (both
+  report `und`) and `systemDefault()` against `Locale.GERMANY` and `Locale.ROOT` in addition to `ar`.
+
+### R7 - parity-test exceptions
+
+- `SampleStringsParityTest` names both exceptions with a reason: `appTitle` is the product name and
+  stays untranslated in every language; `page.Heatmaps` and `mode.System` are German homographs of
+  the English words and are translated rather than skipped.
+
+### R8 - language chips at 320 dp
+
+- The `:calendarviewsample` top-bar switch is now an internal `SampleLanguageSwitch(localeTag,
+  onLocaleTagChange)` with a horizontally scrolling row inside a `widthIn(max = 224.dp)` cap, so the
+  title keeps room and chips stay reachable instead of being clipped.
+- New device test `SampleLanguageSwitchTest` composes the switch at exactly 320 dp, scrolls to every
+  supported chip, asserts it is displayed and checks the click callback.
+
+### R9 - right-to-left list
+
+- Documentation only: ADR 0007 now states how a host overrides the mapping (own `LayoutDirection`
+  around the calendar) and that the list ignores script subtags, so `ckb`, `az-Arab` and `pa-Arab`
+  report `false` unless the host decides otherwise.
+
+### R10 - documentation matrix
+
+- `ARCHITECTURE.md` gained the locale data flow (`null` = platform formatter, non-null = engine
+  tables, Chinese = style, direction opt-in, platform `expect` glue) and the opt-in keyboard focus
+  step. `DEVELOPMENT.md` gained the recurring locale-parameter pattern, the scoped build flag and the
+  internal-top-level-function guard note. README, USAGE_GUIDE, CHANGELOG and ADR 0007 were extended
+  for the new keyboard feature and the review fixes.
+
+### Next feature - keyboard navigation (F1)
+
+- `CalendarMonthGrid` accepts `keyboardNavigation: Boolean = false` and `onMonthStep: ((Int) -> Unit)?
+  = null` on both its data and cell overloads. Arrow keys move one day or one week (horizontal
+  direction follows `LocalLayoutDirection`), Page Up/Down call `onMonthStep`, Enter/Space report the
+  focused day, and the focused cell draws a border. Selection, `CollectionInfo` semantics and the
+  default behaviour are unchanged.
+- A key that leaves the rendered cells requests the matching month step, because the grid does not
+  know the month identity.
+- Device tests in `:library` (`CalendarMonthGridKeyboardTest`) cover day/week movement, month steps,
+  Enter and RTL. They compile here and run in the CI emulator jobs.
+- Tests, API dumps and docs were updated together. Local results: `208` `jvmTest` and `188`
+  `testAndroidHostTest` across the seven modules, `68` sample unit tests, `2` `:kmp-sample` tests per
+  host runner, `lint` green, `api-check`/`klib-api-check` green after regeneration, `commonMain`
+  purity green, `:calendarviewsample:compileDebugAndroidTestKotlin` and
+  `:library:compileAndroidDeviceTest` green (compile only).
+- Deliberate-break check: emptying `RIGHT_TO_LEFT_LANGUAGES` makes
+  `CalendarLocaleTest.rightToLeftFollowsTheLanguageList` fail; restoring it makes the suite pass
+  again. The device tests could not be executed here, so their failure-on-break is not verified.
+
+### Open points from this session
+
+- CI for the new commit is not started (no repository credentials on this host).
+- The `ddb482c` `workflow_dispatch` re-run and its log text remain unavailable.
+- `upload-artifact` hidden-file exclusion for `.ci-diagnostics` is diagnosed but not changed.
+- `:library` cannot assert engine labels/digits itself; that assertion lives in `:calendar-gregorian`.
+- Found and not fixed (outside this task): `CalendarSampleHeatmapTest.firstDayOfWeekOverrideChangesTheWeekdayOrder`
+  fails on a JVM whose default locale is German (`de_DE.UTF-8`), because the Chinese heatmap weekday
+  labels come from the platform formatter and ignore `CalendarLocale` (`Sun` becomes `So`). The test
+  passes with `-Duser.language=en`, which the suites above used.
 
 ## `3.1.0-beta` pre-release preparation (`Kotlin 2.5.0-RC` & multiplatform target expansion)
 

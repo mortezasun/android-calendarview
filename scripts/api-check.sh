@@ -18,6 +18,10 @@
 # rejection rule.
 set -euo pipefail
 
+# Pin the C locale: `sort` orders class names differently under e.g. de_DE, which would rewrite
+# every dump on a differently configured host. The checked-in dumps use this collation.
+export LC_ALL=C
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
@@ -47,6 +51,10 @@ MODULES=(library calendar-gregorian calendar-hijri calendar-solarHijri calendar-
 # The Kotlin Multiplatform engine publishes a JVM jar instead of an Android AAR.
 ENGINE_MODULE=calendar-chinese-native
 INTERNAL_PLATFORM_CLASSES='HeatmapPlatformFormatter|GregorianPlatformFormatter|HijriPlatform|SolarHijriPlatform|ChinesePlatform|CalendarLocalePlatform(_.*)?'
+# Kotlin does not mangle the names of internal top-level functions (only internal members), so
+# they stay public static methods on the file facade class. This one exists for the Gregorian
+# overlay tests in :calendar-chinese-compose and is filtered by its exact name.
+INTERNAL_TOP_LEVEL_FUNCTIONS='gregorianOverlayData'
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -124,6 +132,7 @@ for module in "${MODULES[@]}" "$ENGINE_MODULE"; do
         grep -E '^(public |  |\})' <<<"$output" \
             | grep -vE '\$stable|DefaultConstructorMarker|\$default|access\$|synthetic' \
             | grep -vE 'hijriDayCellForEpoch|solarHijriNativeDayCellForEpoch|defaultChineseMonth' \
+            | grep -vE "[ .](${INTERNAL_TOP_LEVEL_FUNCTIONS})\\(" \
             | grep -v '\$com_github_mortezasun_' \
             | sed -E 's/([A-Za-z0-9_]+)-[A-Za-z0-9_]+\(/\1(/' \
             >> "$dump"
@@ -151,6 +160,10 @@ for module in "${MODULES[@]}" "$ENGINE_MODULE"; do
 
     if grep -qE "^public (final )?class .*\.(${INTERNAL_PLATFORM_CLASSES})( |$)" "$dump"; then
         echo "Internal platform adapter leaked into $dump." >&2
+        exit 1
+    fi
+    if grep -qE "[ .](${INTERNAL_TOP_LEVEL_FUNCTIONS})\\(" "$dump"; then
+        echo "Internal top-level function leaked into $dump." >&2
         exit 1
     fi
 done

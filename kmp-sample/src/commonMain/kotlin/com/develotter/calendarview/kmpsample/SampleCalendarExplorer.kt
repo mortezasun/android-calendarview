@@ -9,8 +9,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.develotter.calendarview.calendars.chineseCompose.ChineseCalendarMonth
@@ -21,6 +25,7 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.calendars.gregorian.compose.GregorianCalendarMonth
+import com.develotter.calendarview.calendars.gregorian.compose.gregorianMonthTitle
 import com.develotter.calendarview.calendars.gregorian.compose.gregorianSecondaryLabel
 import com.develotter.calendarview.calendars.gregorian.compose.rememberGregorianMonthState
 import com.develotter.calendarview.calendars.hijri.HijriDateProvider
@@ -38,6 +43,7 @@ import com.develotter.calendarview.calendars.solarHijriNative.compose.solarHijri
 import com.develotter.calendarview.compose.CalendarAgenda
 import com.develotter.calendarview.compose.CalendarMonthHeader
 import com.develotter.calendarview.compose.CalendarMonthNavigationState
+import com.develotter.calendarview.compose.CalendarMonthPicker
 import com.develotter.calendarview.compose.CalendarWeekGrid
 import com.develotter.calendarview.enums.TypeSelectDay
 import com.develotter.calendarview.locale.CalendarLocale
@@ -126,19 +132,53 @@ private fun SampleMonthSection(
 ) {
     when (options.calendar) {
         DemoCalendar.Gregorian -> {
+            val language = options.locale ?: CalendarLocale.English
             val state = rememberGregorianMonthState(
                 initialMonth = GregorianYearMonth.fromEpochDay(todayEpochDay),
             )
-            SampleMonthFrame(title = state.title(options.locale), state = state) {
-                GregorianCalendarMonth(
-                    month = state.month,
-                    selection = selection,
-                    onDateClick = onSelect,
-                    todayEpochDay = todayEpochDay,
-                    showHeader = false,
-                    secondaryLabel = secondaryLabel,
-                    locale = options.locale,
-                )
+            var showPicker by remember { mutableStateOf(false) }
+            Column {
+                TextButton(onClick = { showPicker = !showPicker }) {
+                    Text(SampleStrings.jumpToMonth(language))
+                }
+                if (showPicker) {
+                    CalendarMonthPicker(
+                        yearRange = (state.month.year - 50)..(state.month.year + 50),
+                        selectedYear = state.month.year,
+                        selectedMonth = state.month.month,
+                        onMonthSelected = { year, month ->
+                            state.goTo(GregorianYearMonth(year, month))
+                            showPicker = false
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        onYearChange = { year ->
+                            state.goTo(GregorianYearMonth(year, state.month.month))
+                        },
+                        monthLabel = { month ->
+                            Text(
+                                gregorianMonthTitle(
+                                    GregorianYearMonth(state.month.year, month),
+                                    language,
+                                ),
+                            )
+                        },
+                        previousYearContentDescription = SampleStrings.previousYear(language),
+                        nextYearContentDescription = SampleStrings.nextYear(language),
+                    )
+                }
+                SampleMonthFrame(title = state.title(options.locale), state = state) {
+                    GregorianCalendarMonth(
+                        month = state.month,
+                        selection = selection,
+                        onDateClick = onSelect,
+                        todayEpochDay = todayEpochDay,
+                        showHeader = false,
+                        secondaryLabel = secondaryLabel,
+                        locale = options.locale,
+                        keyboardNavigation = true,
+                        onMonthStep = { step -> state.goTo(state.month.plusMonths(step)) },
+                    )
+                }
             }
         }
 

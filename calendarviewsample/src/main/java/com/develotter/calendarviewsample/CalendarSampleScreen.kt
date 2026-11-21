@@ -2,6 +2,8 @@ package com.develotter.calendarviewsample
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -151,7 +154,12 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
                                         )
                                     }
                                 },
-                                actions = { SampleLanguageSwitch(ui) },
+                                actions = {
+                                    SampleLanguageSwitch(
+                                        localeTag = ui.localeTag,
+                                        onLocaleTagChange = { ui.localeTag = it },
+                                    )
+                                },
                             )
                         },
                         bottomBar = {
@@ -199,14 +207,27 @@ internal fun CalendarSample(onHeatmap: () -> Unit) {
     }
 }
 
-/** Global language switch in the top bar; it drives the same locale as the Playground chips. */
+/**
+ * Global language switch in the top bar; it drives the same locale as the Playground chips. The
+ * chips scroll horizontally inside a width cap, so a 320 dp app bar keeps room for its title
+ * instead of clipping the last chip.
+ */
 @Composable
-private fun SampleLanguageSwitch(ui: CalendarSampleState) {
-    Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
+internal fun SampleLanguageSwitch(
+    localeTag: String,
+    onLocaleTagChange: (String) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .widthIn(max = 224.dp)
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         CalendarLocale.supportedLanguages.forEach { tag ->
             FilterChip(
-                selected = ui.localeTag == tag,
-                onClick = { ui.localeTag = tag },
+                selected = localeTag == tag,
+                onClick = { onLocaleTagChange(tag) },
                 label = { Text(tag.uppercase(), style = MaterialTheme.typography.labelSmall) },
                 modifier = Modifier.testTag("language-$tag"),
             )

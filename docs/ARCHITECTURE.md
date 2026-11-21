@@ -54,6 +54,34 @@ The architecture follows standard Compose state and rendering patterns:
    Day cells display their localized labels. Current days have a primary-colored border focus indicator (`day.isToday`). Clicks pass the cell's `epochDay` to `onDayClick`. Disabled dates reject interactions.
 5. **RTL Support:**
    Compose layout automatically reflects the ambient `LocalLayoutDirection`. In RTL layouts (e.g., Persian or Arabic), columns are positioned from right to left without custom arithmetic.
+6. **Keyboard Focus (opt-in):**
+   `keyboardNavigation = true` adds a focus position and key handling to the day cells: arrow keys move focus by one day or one week (horizontal direction follows the ambient layout direction) and report the new day through `onDayClick`, Page Up/Down delegate month changes to the caller's `onMonthStep` because the grid does not know the month identity, and Enter/Space report the focused day through `onDayClick`. The grid still owns no selection and no month, and the focus border disappears when focus leaves the grid.
+
+---
+
+## Locale and label data flow
+
+`CalendarLocale` is a value type in `:library` that only normalizes the language subtag and exposes
+`supportedLanguages`, `isRightToLeft` and `systemDefault()`; it holds no labels.
+
+- **`null` means the platform.** Every `locale` parameter defaults to `null`, which keeps the
+  platform formatter (`java.time` on JVM/Android, `NSDateFormatter` on Apple, `Intl` on the web)
+  and therefore the pre-locale behaviour, including the `3.0.0` binary-compatibility overloads.
+- **A non-null locale means the engine tables.** Each engine owns pure Kotlin tables
+  (`GregorianLabels`, `HijriLabels`, `SolarHijriLabels`, the `SolarHijriLocale` month lists) and
+  formats month titles, weekday labels, day numbers and accessibility labels from them. Unknown
+  tags fall back to English and Western digits; there is no fallback chain beyond the language
+  subtag, so `de-AT` behaves like `de`.
+- **Chinese stays a style.** `:calendar-chinese-compose` keeps `ChineseTextStyle` because its
+  labels are script choices, not translations. `GregorianChineseCalendarMonth` localizes only its
+  Gregorian primary layer and keeps the Chinese secondary labels on the style.
+- **Direction is not a locale side effect.** Calendar composables never change `LayoutDirection`.
+  `isRightToLeft` and `ProvideCalendarLocaleLayoutDirection` are an opt-in helper for hosts that
+  want the language to decide; `null` leaves the ambient direction untouched.
+- **Platform glue stays in platform source sets.** `platformLanguageTag()` is an `internal expect`
+  function with `jvmMain`/`androidMain`, `appleMain`, `jsMain` and `wasmJsMain` actuals, so
+  `commonMain` never imports `java.util.Locale`; `asCalendarLocale()` is a JVM/Android extension in
+  those two source sets.
 
 ---
 
@@ -69,6 +97,8 @@ State is managed declaratively and cleanly separated from UI rendering:
   - `Range`: An ordered contiguous range bounded by start and end epoch days. Intermediate days are computed immutably.
 - **State Preservation:**
   `rememberCalendarSelectionState` uses `rememberSaveable` with `CalendarSelectionSnapshot` saver, ensuring selections survive activity recreation and configuration changes (e.g., screen rotation, dark/light theme toggle).
+- **Picker and legend in the samples:** `:kmp-sample` wires `CalendarMonthPicker` to its Gregorian month state (jump-to-month, year stepping) and renders `HeatmapLegend` from the same `HeatmapBuckets` its heatmap uses, so the shipped demos exercise both APIs.
+- **Derived presets:** `CalendarSelection.presets(firstDayOfWeek, todayEpochDay)` returns today, the aligned seven-day week, the civil Gregorian month and the last seven days as epoch-day ranges. The function is pure: the caller passes the clock value and first weekday, so `:library` never reaches a platform date API and `CalendarRangePolicy` keeps its existing role.
 
 ---
 
@@ -78,6 +108,7 @@ State is managed declaratively and cleanly separated from UI rendering:
 - **Hijri method:** `HijriDateProvider` maps an absolute epoch day to the displayed `HijriDate` and back. `UmmAlQuraHijriDateProvider` is the default; `OffsetHijriDateProvider` shifts a local method by whole days. Month/week builders derive the cell epoch from the provider's reverse mapping, so labels and selection identity stay consistent. The provider-aware `HijriMonthState` constructor and `rememberHijriMonthState` overload use the same mapping for today; the three-argument API keeps the Umm al-Qura default.
 - **View model states:** `GregorianMonthState`, `HijriMonthState`, `SolarHijriMonthState`, `SolarHijriNativeMonthState` and `ChineseMonthState` are observable, saveable state holders that keep the visible month, normalize it to the first day, enforce inclusive `minMonth`/`maxMonth` bounds and expose `previous()`, `next()`, `goToToday()` and an engine-specific `goTo(...)`. They live in the calendar modules because month arithmetic is calendar-specific.
 - **Header:** `CalendarMonthHeader` is calendar-independent and stateless. It renders the title as a heading, exposes optional today/previous/next actions, and takes localized content descriptions from the caller because the library ships no UI strings.
+- **Picker:** `CalendarMonthPicker` is the one month-grid container the library owns. It renders twelve `selectable` cells for a caller-supplied year, exposes grid semantics, keeps no internal state and takes all labels as slots; the host keeps the dialog frame and the year state ([ADR 0008](decisions/0008-calendar-month-picker.md)).
 - **Semantics:** month titles are headings; the week container exposes one `CollectionInfo` and each day or optional week-number cell exposes `CollectionItemInfo`, so screen readers can announce one grid position. `todayDescription` is an optional caller-localized suffix for today's accessibility label; the default keeps the date-only label.
 
 ---
@@ -94,8 +125,8 @@ State is managed declaratively and cleanly separated from UI rendering:
 - **Week view:** `CalendarWeekData` is the seven-day contract; each engine has a `*WeekData` builder that aligns to the configured first day and returns consecutive cells. `CalendarWeekGrid` accepts explicit fields or a `CalendarWeekData` snapshot directly and reuses the month grid's styling, markers, week numbers, `secondaryLabel` / `secondaryAccessibilityLabel`, and accessibility rules.
 - **Agenda:** `CalendarAgenda` is a bounded `LazyColumn` over `CalendarDayCell` values. It keeps selection and markers caller-owned, supports optional `secondaryLabel` / `secondaryAccessibilityLabel` subtitles, and appends marker/today/secondary descriptions to the accessible day label.
 - **Markers:** `CalendarDayMarker` is keyed by epoch day in a caller-owned map. The renderer draws at most four decorative dots; content descriptions are merged into the day label, so markers add information without creating noisy focus targets.
-- **Week numbers:** an optional callback on `CalendarMonthGrid` receives the first epoch day of each week. The library deliberately does not choose a week-numbering convention; engines and hosts localize it.
-- **Adaptive months:** `CalendarMonthColumns` derives one or more columns from the available width and inter-column spacing, so each month keeps its minimum width, and exposes `LazyGridState`. It is a layout container, not a new calendar engine. Width rules, active-month definition and state contract: [ADAPTIVE_LAYOUT.md](ADAPTIVE_LAYOUT.md).
+- **Week numbers:** an optional callback on `CalendarMonthGrid` receives the first epoch day of each week. The library ships ISO-8601 arithmetic (`isoWeekNumber`, `isoWeekYear`) but selects no convention by default: each `*WeekData` builder exposes `useIsoWeekNumber = false`, and the Gregorian builder keeps its week-based-year number. Digits come from the engine's label table.
+- **Adaptive months:** `CalendarMonthColumns` derives one or more columns from the available width and inter-column spacing, so each month keeps its minimum width, and exposes `LazyGridState`. The optional `maxColumns` caps that derived count and wraps the remaining months into further rows (the default `Int.MAX_VALUE` keeps the unbounded layout), with the same rule available as the pure `calendarMonthColumns` helper. It is a layout container, not a new calendar engine. Width rules, active-month definition and state contract: [ADAPTIVE_LAYOUT.md](ADAPTIVE_LAYOUT.md).
 - **Styling:** `LocalCalendarStyle` carries optional selected/surface/content/today colors and marker geometry. Null colors fall back to MaterialTheme; explicit `todayBorderColor` arguments still take precedence.
 - **Range policy:** `CalendarRangePolicy` validates complete ranges by inclusive length. `CalendarSelectionState` applies it to taps, external ranges, construction and saved-state restoration; it exposes `selectRange` for a caller-owned drag layer and does not install a gesture or enumerate range interiors.
 - **Hijri provider:** `HijriDateProvider`, `UmmAlQuraHijriDateProvider` and `OffsetHijriDateProvider` live in `:calendar-hijri` (not `:library`), because they map the platform Hijri chronology to the shared epoch-day identity. The view, month data and week data take the provider as a defaulted parameter; no provider state is hidden in a composition local.
@@ -124,6 +155,13 @@ The heatmap is decoupled from month grid calculations but shares its configurati
   (48dp) in height, and on both edges in `WeeksAsColumns`, so smaller cells keep a full-size touch
   target. `WeeksAsRows` has to fit seven columns and shares the row width instead, so below roughly
   `7 * 48dp + spacing` of viewport width its columns drop under 48dp.
+- `HeatmapBuckets` is an immutable, validated value type (finite, ascending thresholds inside
+  `0..1`). It maps a normalized intensity to a step and hands the step's lower bound to
+  `colorForIntensity`, so a stepped palette needs no branching in the caller. The stored
+  `HeatmapDayData` intensity, selection and accessibility descriptions keep the exact value.
+- `HeatmapLegend` renders one swatch per step with the same `HeatmapBuckets`,
+  `colorForIntensity` and `HeatmapStyle` as the grid, so cells and legend cannot diverge. Labels
+  and content descriptions are slots, and the legend adds no touch targets.
 - Colors: `colorForIntensity` maps the normalized intensity (0..1) to the cell fill; selected
   cells get a `selectedBorderColor` border, which takes precedence over the today border.
 - Layout follows the ambient `LayoutDirection`, so RTL works without extra parameters.

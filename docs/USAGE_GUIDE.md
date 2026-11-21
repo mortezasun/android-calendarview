@@ -233,6 +233,29 @@ state.clear()
 `CalendarSelection` is a plain, immutable value class that can also be held in an external state
 holder and updated directly with `selection.onDayClick(epochDay)`.
 
+### Selection presets
+
+`presets(...)` derives the usual quick ranges without touching the platform clock or the selection
+itself. Both inputs are explicit, so the same code runs unchanged on every target and in tests:
+
+```kotlin
+val presets = state.selection.presets(
+    firstDayOfWeek = 1,          // ISO Monday; use 7 for Sunday-first screens
+    todayEpochDay = todayEpochDay,
+)
+
+presets.today           // the passed epoch day
+presets.thisWeek        // the seven days from firstDayOfWeek that contain today
+presets.thisMonth       // civil Gregorian month of today
+presets.lastSevenDays   // today - 6 .. today
+```
+
+`thisWeek` is a seven-day window aligned to `firstDayOfWeek` and may cross a month or year
+boundary. `thisMonth` is the civil Gregorian month because epoch days are on the ISO timeline;
+a non-Gregorian month range stays the engine's job (`*MonthState` plus the month data days).
+`lastSevenDays` is relative to `today`, not to the configured first weekday. `CalendarRangePolicy`
+is unaffected, so apply it yourself when a preset must be rejected for a screen's limits.
+
 ---
 
 ## Month Navigation
@@ -332,7 +355,9 @@ So a Chinese calendar is not German when the locale is `de`: choose `ChineseText
 
 `CalendarWeekGrid` renders a seven-day row backed by engine `*WeekData` builders
 (`gregorianWeekData`, `hijriWeekData`, `solarHijriNativeWeekData`, `solarHijriWeekData`,
-`chineseWeekData`):
+`chineseWeekData`). Each builder takes `useIsoWeekNumber = true` (default `false`) to fill
+`weekNumber` with the ISO-8601 week of the configured week start, written with the selected
+language's digits:
 
 ```kotlin
 val week = gregorianWeekData(todayEpochDay, firstDayOfWeek = 1)
@@ -386,6 +411,11 @@ GregorianCalendarMonth(
 ```
 
 `weekNumber` receives the first epoch day of each rendered week; return `null` to hide a row label.
+`solarHijriWeekData(..., useIsoWeekNumber = true)` and its engine siblings fill the same slot from
+`:library`'s ISO arithmetic instead of a host callback, so the label matches the week start the
+grid actually renders. The Chinese builder writes Western digits because its text style has no
+digit table. The default keeps the previous behaviour: Gregorian keeps its week-based-year
+convention, the other engines keep `null`.
 
 ---
 
@@ -407,6 +437,20 @@ CalendarMonthColumns(
         onDateClick = { state.onDayClick(it) },
     )
 }
+```
+
+`maxColumns` caps how many months share a row; further months wrap into additional rows instead of
+stretching the grid across a wide window. The default `Int.MAX_VALUE` keeps the previous unbounded
+layout, and the pure `calendarMonthColumns(width, minMonthWidth, spacing, maxColumns)` helper
+exposes the same rule for hosts that compute their own layout:
+
+```kotlin
+CalendarMonthColumns(
+    monthCount = 12,
+    minMonthWidth = 336.dp,
+    maxColumns = 3,          // three columns, four rows for a year
+    modifier = Modifier.height(720.dp),
+) { index -> GregorianCalendarMonth(month = GregorianYearMonth(2026, index + 1), ...) }
 ```
 
 See [ADAPTIVE_LAYOUT.md](ADAPTIVE_LAYOUT.md) for responsive pane and fold notes.
@@ -526,6 +570,39 @@ See [COMPOSE_MONTH_CONTAINERS.md](COMPOSE_MONTH_CONTAINERS.md) for container det
 
 ---
 
+## Month Picker
+
+`CalendarMonthPicker` renders one year of selectable month cells. It is stateless: the host owns
+the visible year and the dialog frame, and the picker only reports the chosen month.
+
+```kotlin
+var year by rememberSaveable { mutableIntStateOf(2026) }
+var month by rememberSaveable { mutableIntStateOf(11) }
+
+CalendarMonthPicker(
+    yearRange = 2000..2100,
+    selectedYear = year,
+    selectedMonth = month,
+    onMonthSelected = { selectedYear, selectedMonth ->
+        year = selectedYear
+        month = selectedMonth
+        monthState.goTo(GregorianYearMonth(selectedYear, selectedMonth))
+    },
+    onYearChange = { year = it },          // optional year-step buttons
+    monthLabel = { Text(monthNames[it - 1]) },   // host-localized names
+    yearLabel = { Text(it.toString()) },
+)
+```
+
+Cells are `selectable`, so they are focusable and activate with Enter/Space, and they expose
+`CollectionInfo`/`CollectionItemInfo` for screen readers. Year buttons disable at the range edges,
+and everything mirrors with `LocalLayoutDirection` like the month grid. `:library` ships no UI
+strings: month names, year labels and the button descriptions come from the caller. Month numbers
+are `1..12`, so the same picker works for a non-Gregorian calendar by passing that calendar's month
+names. See [ADR 0008](decisions/0008-calendar-month-picker.md).
+
+---
+
 ## Heatmaps
 
 Use `CalendarYearHeatmap` / `CalendarQuarterHeatmap` for Gregorian heatmaps, or pass
@@ -555,6 +632,31 @@ CalendarYearHeatmap(
 
 `HeatmapStyle.cellSize` controls only the drawn cell; layout touch slots stay at least `48.dp` in
 `WeeksAsColumns` (both axes) and at least `48.dp` tall in `WeeksAsRows`.
+
+For a stepped scale, pass `HeatmapBuckets` and reuse the same object for the legend:
+
+```kotlin
+val buckets = HeatmapBuckets(listOf(0.25f, 0.5f, 0.75f))
+
+CalendarYearHeatmap(
+    months = months,
+    buckets = buckets,
+    colorForIntensity = { lerp(Color(0xFFEBEDF0), Color(0xFF216E39), it) },
+    onDayClick = { day -> state.onDayClick(day.epochDay) },
+)
+
+HeatmapLegend(
+    buckets = buckets,
+    colorForIntensity = { lerp(Color(0xFFEBEDF0), Color(0xFF216E39), it) },
+    label = { bucket -> Text("$bucket") },
+    contentDescription = { bucket -> "Level ${bucket + 1}" },
+)
+```
+
+Thresholds must be finite, inside `0..1` and strictly ascending. An intensity equal to a threshold
+stays in the lower step; the drawn color uses that step's lower bound, while `HeatmapDayData`,
+selection and accessibility descriptions keep the real value. `buckets = null` (the default) keeps
+the continuous `colorForIntensity` lookup.
 
 ---
 
@@ -592,3 +694,35 @@ fun MiniMonthGrid() {
     )
 }
 ```
+
+### Keyboard navigation
+
+Desktop (JVM), web and keyboard-driven Android hosts can opt in to grid keyboard handling. It is
+off by default, so focus and accessibility semantics of existing screens stay unchanged:
+
+```kotlin
+CalendarMonthGrid(
+    title = data.title,
+    weekdayLabels = data.weekdayLabels,
+    firstDayOffset = data.firstDayOffset,
+    days = data.days,
+    selection = state.selection,
+    onDayClick = { state.onDayClick(it) },
+    keyboardNavigation = true,
+    onMonthStep = { monthDelta ->
+        // The grid does not know the month identity, so the host moves the visible month.
+        if (monthDelta > 0) monthState.next() else monthState.previous()
+    },
+)
+```
+
+- Arrow keys move the focused day by one day (horizontal direction follows
+  `LocalLayoutDirection`) or one week, and report the new day through `onDayClick`; the caller still
+  owns the selection.
+- Page Up / Page Down call `onMonthStep` with `-1` or `1` because only the host knows the month.
+  Without `onMonthStep` the keys are ignored, and an arrow key that leaves the rendered cells also
+  requests the matching month step.
+- Enter and Space report the focused day through `onDayClick`. The focused cell draws a border; a
+  today cell keeps its today border.
+- The grid keeps a focus position as view state only. It adds no `StateFlow`, no internal selection
+  and no collection semantics change.

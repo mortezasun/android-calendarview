@@ -51,6 +51,27 @@ deriving the direction from the language instead of duplicating the mapping. `nu
 ambient direction alone. The list ignores script subtags, so it is a language-level default, not a
 full BCP 47 script resolution; a host with other needs keeps providing `LayoutDirection` itself.
 
+### Amendment: parameter placement and the `3.0.0` overload
+
+`GregorianChineseCalendarMonth` takes `locale` directly before `weekNumber`. `weekNumber` must
+stay ahead of the trailing `weekNumberContent` composable slot, and the repository rule places new
+defaulted options before trailing lambdas so existing trailing-lambda calls keep compiling;
+appending `locale` after the slot would invert that order. Because the insertion changes the JVM
+signature that `3.0.0` callers were compiled against, the previous parameter list stays available
+as a `@Deprecated(HIDDEN)` overload that forwards with `locale = null`. Kotlin callers resolve to
+the current function whether they pass arguments positionally or by name, and
+`api/calendar-chinese-compose.api` lists both JVM signatures; the hidden overload exists only for
+binary compatibility and is removed in `4.0`.
+
+### Amendment: host-provided layout direction
+
+A host that needs a different mapping than [isRightToLeft] simply keeps providing
+`LayoutDirection` around the calendar itself (as both samples did before the helper existed) and
+does not call `ProvideCalendarLocaleLayoutDirection`; the two mechanisms compose, and the inner
+call wins. The helper is a language-level default, not a script resolver: it deliberately ignores
+the script subtag, so `ckb` (Sorani), `az-Arab` or `pa-Arab` report `false` unless the host adds
+its own direction.
+
 ### Amendment: convenience API
 
 `CalendarLocale.supportedLanguages` documents the languages that have tables,

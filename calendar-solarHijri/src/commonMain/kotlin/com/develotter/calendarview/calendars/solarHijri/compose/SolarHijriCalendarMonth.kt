@@ -167,6 +167,8 @@ fun SolarHijriCalendarMonth(
     secondaryLabel: ((Long) -> String?)? = null,
     secondaryAccessibilityLabel: ((Long) -> String?)? = null,
     locale: CalendarLocale? = null,
+    keyboardNavigation: Boolean = false,
+    onMonthStep: ((Int) -> Unit)? = null,
     dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
 ) {
     SolarHijriNativeCalendarMonth(
@@ -189,6 +191,8 @@ fun SolarHijriCalendarMonth(
         secondaryLabel = secondaryLabel,
         secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         locale = locale,
+        keyboardNavigation = keyboardNavigation,
+        onMonthStep = onMonthStep,
         dayContent = dayContent,
     )
 }

@@ -245,6 +245,8 @@ private fun SampleSingleMonth(
                 hijriProvider = hijriProvider,
                 chineseStyle = chineseStyle,
                 locale = options.locale,
+                keyboardNavigation = true,
+                onMonthStep = { step -> monthOffset.intValue += step },
             )
         }
     }
@@ -262,6 +264,8 @@ private fun SamplePlaygroundMonth(
     hijriProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle,
     locale: CalendarLocale? = null,
+    keyboardNavigation: Boolean = false,
+    onMonthStep: ((Int) -> Unit)? = null,
 ) {
     if (monthAnchor == null) {
         Text("Month outside the supported range of ${calendar.label}.")
@@ -296,6 +300,8 @@ private fun SamplePlaygroundMonth(
             todayEpochDay = todayEpochDay,
             markers = markers,
             locale = locale,
+            keyboardNavigation = keyboardNavigation,
+            onMonthStep = onMonthStep,
         )
 
         DemoCalendar.Hijri -> HijriCalendarMonth(
@@ -306,6 +312,8 @@ private fun SamplePlaygroundMonth(
             markers = markers,
             dateProvider = hijriProvider,
             locale = locale,
+            keyboardNavigation = keyboardNavigation,
+            onMonthStep = onMonthStep,
         )
 
         DemoCalendar.SolarHijri -> SolarHijriCalendarMonth(
@@ -315,6 +323,8 @@ private fun SamplePlaygroundMonth(
             todayEpochDay = todayEpochDay,
             markers = markers,
             locale = locale,
+            keyboardNavigation = keyboardNavigation,
+            onMonthStep = onMonthStep,
         )
 
         DemoCalendar.SolarHijriNative -> SolarHijriNativeCalendarMonth(
@@ -324,6 +334,8 @@ private fun SamplePlaygroundMonth(
             todayEpochDay = todayEpochDay,
             markers = markers,
             locale = locale,
+            keyboardNavigation = keyboardNavigation,
+            onMonthStep = onMonthStep,
         )
 
         DemoCalendar.Chinese -> ChineseCalendarMonth(
@@ -333,6 +345,8 @@ private fun SamplePlaygroundMonth(
             style = chineseStyle,
             todayEpochDay = todayEpochDay,
             markers = markers,
+            keyboardNavigation = keyboardNavigation,
+            onMonthStep = onMonthStep,
         )
     }
 }

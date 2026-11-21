@@ -16,9 +16,23 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.CollectionItemInfo
 import androidx.compose.ui.semantics.Role
@@ -27,6 +41,7 @@ import androidx.compose.ui.semantics.collectionItemInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -171,6 +186,8 @@ fun CalendarMonthGrid(
     weekNumberContent: @Composable (String) -> Unit = { Text(it) },
     secondaryLabel: ((Long) -> String?)? = null,
     secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+    keyboardNavigation: Boolean = false,
+    onMonthStep: ((Int) -> Unit)? = null,
 ) {
     CalendarMonthGrid(
         title = data.title,
@@ -196,6 +213,8 @@ fun CalendarMonthGrid(
         weekNumberContent = weekNumberContent,
         secondaryLabel = secondaryLabel,
         secondaryAccessibilityLabel = secondaryAccessibilityLabel,
+        keyboardNavigation = keyboardNavigation,
+        onMonthStep = onMonthStep,
     )
 }
 
@@ -219,6 +238,15 @@ fun CalendarMonthGrid(
  * system's day or month name) beneath [dayContent] without coupling `:library` to any calendar
  * engine; [secondaryAccessibilityLabel] appends that secondary date description for screen readers.
  * [LocalCalendarStyle] supplies optional colors; null colors fall back to MaterialTheme.
+ *
+ * [keyboardNavigation] is opt-in and off by default, so focus and accessibility behaviour of
+ * earlier versions stays unchanged. When enabled, arrow keys move focus by one day or one week
+ * (the horizontal direction follows the ambient layout direction) and report the new day through
+ * [onDayClick], so selection can follow focus as in a single-select grid; an arrow that leaves the
+ * rendered cells calls [onMonthStep] instead. Page Up and Page Down call [onMonthStep] because the
+ * grid does not know the month identity, Enter or Space report the focused day through
+ * [onDayClick], and a focus border marks the focused cell only while the grid holds focus. The
+ * grid still only renders and reports; it keeps no selection of its own.
  */
 @Composable
 fun CalendarMonthGrid(
@@ -245,6 +273,8 @@ fun CalendarMonthGrid(
     weekNumberContent: @Composable (String) -> Unit = { Text(it) },
     secondaryLabel: ((Long) -> String?)? = null,
     secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+    keyboardNavigation: Boolean = false,
+    onMonthStep: ((Int) -> Unit)? = null,
 ) {
     require(weekdayLabels.size == 7) { "Exactly seven weekday labels are required" }
     val cells = buildCalendarMonthCells(
@@ -260,6 +290,45 @@ fun CalendarMonthGrid(
         ?: style.todayBorderColor
         ?: MaterialTheme.colorScheme.tertiary
     val showWeekNumbers = weekNumber != null
+
+    // Focus is view state, not selection: the caller still owns which day is selected. Every cell
+    // remembers its own requester, so a move only changes this state value.
+    var focusedEpochDay by remember { mutableStateOf<Long?>(null) }
+    val layoutDirection = LocalLayoutDirection.current
+
+    fun moveFocus(fromEpochDay: Long, dayDelta: Int): Boolean {
+        val targetEpochDay = fromEpochDay + dayDelta
+        val target = cells.firstOrNull { it?.epochDay == targetEpochDay }
+        if (target == null) {
+            // The neighbouring day is outside the rendered cells, so the caller decides the month.
+            val monthStep = if (dayDelta > 0) 1 else -1
+            return onMonthStep?.let { step -> step(monthStep); true } ?: false
+        }
+        if (!target.enabled) return false
+        focusedEpochDay = targetEpochDay
+        onDayClick(targetEpochDay)
+        return true
+    }
+
+    fun handleKey(epochDay: Long, key: Key): Boolean = when (key) {
+        Key.DirectionLeft -> moveFocus(
+            epochDay,
+            if (layoutDirection == LayoutDirection.Rtl) 1 else -1,
+        )
+        Key.DirectionRight -> moveFocus(
+            epochDay,
+            if (layoutDirection == LayoutDirection.Rtl) -1 else 1,
+        )
+        Key.DirectionUp -> moveFocus(epochDay, -7)
+        Key.DirectionDown -> moveFocus(epochDay, 7)
+        Key.PageUp -> onMonthStep?.let { step -> step(-1); true } ?: false
+        Key.PageDown -> onMonthStep?.let { step -> step(1); true } ?: false
+        Key.Enter, Key.NumPadEnter, Key.Spacebar -> {
+            onDayClick(epochDay)
+            true
+        }
+        else -> false
+    }
     Column(modifier) {
         if (showHeader) {
             Box(Modifier.semantics(mergeDescendants = true) { heading() }) {
@@ -312,6 +381,34 @@ fun CalendarMonthGrid(
                         if (day == null) {
                             Box(cellModifier)
                         } else {
+                            val cellFocusRequester = remember(day.epochDay) { FocusRequester() }
+                            if (keyboardNavigation) {
+                                LaunchedEffect(focusedEpochDay, day.epochDay) {
+                                    if (focusedEpochDay == day.epochDay) {
+                                        cellFocusRequester.requestFocus()
+                                    }
+                                }
+                            }
+                            val keyboardModifier = if (keyboardNavigation) {
+                                Modifier
+                                    .focusRequester(cellFocusRequester)
+                                    .onFocusChanged { state ->
+                                        // Clearing only the cell that still owns the position means
+                                        // moving focus between two cells converges in either event
+                                        // order, while leaving the grid drops the focus border.
+                                        if (state.isFocused) {
+                                            focusedEpochDay = day.epochDay
+                                        } else if (focusedEpochDay == day.epochDay) {
+                                            focusedEpochDay = null
+                                        }
+                                    }
+                                    .onKeyEvent { event ->
+                                        event.type == KeyEventType.KeyDown &&
+                                            handleKey(day.epochDay, event.key)
+                                    }
+                            } else {
+                                Modifier
+                            }
                             val selected = day.epochDay in selection
                             val dayMarkers = markers[day.epochDay].orEmpty()
                             val secondaryDescription = if (day.label.isNotEmpty()) {
@@ -333,6 +430,7 @@ fun CalendarMonthGrid(
                             }
                             Surface(
                                 modifier = cellModifier
+                                    .then(keyboardModifier)
                                     .semantics {
                                         contentDescription = description
                                         collectionItemInfo = CollectionItemInfo(
@@ -358,10 +456,11 @@ fun CalendarMonthGrid(
                                         ?: MaterialTheme.colorScheme.onSurfaceVariant
                                     else -> style.contentColor ?: MaterialTheme.colorScheme.onSurface
                                 },
-                                border = if (day.isToday) {
-                                    BorderStroke(1.5.dp, effectiveTodayBorderColor)
-                                } else {
-                                    null
+                                border = when {
+                                    day.isToday -> BorderStroke(1.5.dp, effectiveTodayBorderColor)
+                                    keyboardNavigation && focusedEpochDay == day.epochDay ->
+                                        BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+                                    else -> null
                                 },
                                 shape = RoundedCornerShape(8.dp),
                             ) {

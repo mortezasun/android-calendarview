@@ -69,6 +69,40 @@ are controlled and stateless. To add an option:
    `CalendarRangePolicy`; a drag gesture remains the host's responsibility and calls
    `CalendarSelectionState.selectRange`.
 
+### New calendar-independent core helper
+
+Logic that needs no Compose and no calendar engine goes into `:library`'s `selection` package
+(`EpochDayMath`, `CalendarWeekNumbering`, `CalendarSelectionPresets`). Keep it pure:
+
+1. Take every platform value as a parameter (`todayEpochDay`, `firstDayOfWeek`) instead of reading
+   a clock or a system locale; `:library` `commonMain` must stay free of `java.*` and `expect`
+   platform date APIs.
+2. Keep Gregorian arithmetic internal to `:library` and validate inputs with `require`, so the
+   failure is testable in `commonTest` without composition.
+3. Engine modules may call the public helpers (`isoWeekNumber`, `isoWeekYear`) and format digits
+   with their own label tables; `:library` must never import a calendar engine.
+4. Cover month, year and leap boundaries in `commonTest`. Do not add a preset or a helper that
+   duplicates a container's layout logic.
+
+### New locale-aware parameter or label table
+
+The locale work repeats a three-part shape, and a new localized option follows it:
+
+1. Add a defaulted `locale: CalendarLocale? = null` before the trailing lambda and forward it
+   through the engine wrapper, the `*MonthData`/`*WeekData` builder and `*MonthState`. `null` must
+   keep the platform formatter so existing calls and tests stay unchanged, and a new *option* that
+   changes interaction behaviour stays opt-in (`= false`).
+2. Put the labels in the engine's `commonMain` tables (`GregorianLabels`, `HijriLabels`,
+   `SolarHijriLabels`) and let unknown tags fall back to English; never read `java.util.Locale` in
+   `commonMain`. Only the platform language lookup is an `internal expect` function with one actual
+   per source set (`jvmMain`/`androidMain`, `appleMain`, `jsMain`, `wasmJsMain`).
+3. Update every checked-in API surface with `bash scripts/api-check.sh --update` and
+   `bash scripts/klib-api-check.sh --update`, then rerun both without `--update` and review
+   `git diff api/`.
+4. Cover the table in the engine's `commonTest` (completeness, digits, fallback) and keep the
+   library-level contract in `CalendarLocaleTest`; `:library` ships no label table, so label and
+   digit assertions belong to the engine that owns them.
+
 ### Error handling and logging
 
 The library is deliberately small:
@@ -133,6 +167,11 @@ CI runs the same check in the `assemble` job. The dump is generated with `javap`
 AARs: it covers public JVM classes, constructors, methods and fields, but not Kotlin default
 values, annotations or source compatibility. Review `git diff api/` together with the public KDoc.
 
+`gregorianOverlayData` is `internal` for the Gregorian-overlay tests. Kotlin mangles internal
+*members* but not internal *top-level functions*, so it appears as a public static method on the
+file facade class in JVM bytecode. The guard filters that exact name and rejects it if it appears
+again; the KLIB dump does not list it at all.
+
 The five platform adapter objects (`HeatmapPlatformFormatter`, `GregorianPlatformFormatter`,
 `HijriPlatform`, `SolarHijriPlatform` and `ChinesePlatform`) are `internal` implementation
 details. Kotlin `internal` is still public JVM bytecode, and the repository does not apply the
@@ -155,6 +194,18 @@ bash scripts/klib-api-check.sh --update # regenerates api/klib/*.abi after an in
 ```
 
 CI runs both guards across the `assemble`, `native-engine`, and `klib-api` jobs.
+
+### Build conventions
+
+- `-Xexpect-actual-classes` is applied only to the five modules that declare `internal expect
+  object` platform adapters (`:library`, `:calendar-gregorian`, `:calendar-hijri`,
+  `:calendar-solarHijri-native`, `:calendar-chinese-compose`). Kotlin 2.5.0-RC reports expect/actual
+  classes as a Beta feature on both the expect and the actual declaration. Scoping the opt-in to
+  the declaring modules keeps the warning active for any new expect/actual class elsewhere;
+  removing it from a declaring module brings the warning back.
+- Compose modules keep `binaries.executable()` and `useChromeHeadlessNoSandbox()` for JS/Wasm
+  browser tests; the root build disables the device-test Compose resource copy task because
+  Compose Multiplatform `1.13.0-beta02` leaves its output unconfigured.
 
 ## Documentation and benchmarks
 
@@ -216,6 +267,12 @@ place it before the trailing `colorForIntensity` / `dayContent` parameters so ex
 trailing-lambda calls keep compiling, forward it in the Gregorian year overload and pass it to
 the private renderer through `HeatmapRenderConfig`. Cell geometry belongs in `HeatmapStyle`
 (with validation in its `init`), per-day state in `HeatmapDayData` with a default value.
+
+A stepped scale is a value type, not a callback: extend `HeatmapBuckets` (with validation in its
+`init`) and forward it through `HeatmapRenderConfig` to `HeatmapCell`, where only the color lookup
+is derived from the bucket. Never replace `HeatmapDayData.intensity`, selection or accessibility
+text with the bucket bound. A legend reuses the same `HeatmapBuckets`, `HeatmapStyle` and
+`colorForIntensity`; keep its labels as slots because `:library` ships no UI strings.
 
 Keep the touch-target contract: `HeatmapCell` draws the visible cell from `visualModifier` and the
 interactive slot from `slotModifier`, which is sized to at least

@@ -126,6 +126,90 @@ data class HeatmapStyle(
 fun normalizeHeatmapIntensity(value: Float): Float = if (value.isFinite()) value.coerceIn(0f, 1f) else 0f
 
 /**
+ * Stepped intensity scale for heatmaps: [thresholds] are ascending upper bounds inside `0..1`
+ * (for example `listOf(0.25f, 0.5f, 0.75f)` for four steps). Each intensity is snapped down to the
+ * lower bound of its bucket before it reaches `colorForIntensity`, so a stepped palette needs no
+ * per-call branching, and [HeatmapLegend] can render exactly the same steps.
+ *
+ * The value does not change intensities stored in the data or the accessibility labels; it only
+ * changes the color lookup and the legend.
+ */
+@Immutable
+data class HeatmapBuckets(val thresholds: List<Float> = emptyList()) {
+    init {
+        require(thresholds.all { it.isFinite() && it in 0f..1f }) {
+            "Heatmap thresholds must be finite and inside 0..1"
+        }
+        require(thresholds.zipWithNext().all { (left, right) -> left < right }) {
+            "Heatmap thresholds must be strictly ascending"
+        }
+    }
+
+    /** Number of steps: one more than the number of thresholds. */
+    val bucketCount: Int get() = thresholds.size + 1
+
+    /** Lower bound of the step that contains [intensity]. */
+    fun intensityForBucket(bucket: Int): Float {
+        require(bucket in 0 until bucketCount) { "bucket must be in 0 until $bucketCount" }
+        return if (bucket == 0) 0f else thresholds[bucket - 1]
+    }
+
+    /**
+     * Zero-based step index of a normalized intensity. A value equal to a threshold stays in the
+     * step that threshold bounds, so the steps are closed on their upper edge; NaN and infinities
+     * are normalized to zero first.
+     */
+    fun bucketOf(intensity: Float): Int {
+        val normalized = normalizeHeatmapIntensity(intensity)
+        return thresholds.indexOfFirst { normalized <= it }.let { if (it < 0) thresholds.size else it }
+    }
+
+    /** Intensity passed to `colorForIntensity` for a point on the normalized scale. */
+    fun colorIntensityFor(intensity: Float): Float = intensityForBucket(bucketOf(intensity))
+}
+
+/**
+ * Horizontal legend for a stepped heatmap scale.
+ *
+ * One swatch per bucket, coloured with the same `colorForIntensity` the heatmap uses, so legend and
+ * cells cannot drift apart. The host supplies [label] and [contentDescription] because `:library`
+ * ships no UI strings; without a label the swatches still render for a purely visual legend.
+ * The legend is not interactive and adds no touch targets.
+ */
+@Composable
+fun HeatmapLegend(
+    buckets: HeatmapBuckets,
+    modifier: Modifier = Modifier,
+    style: HeatmapStyle = HeatmapStyle(),
+    colorForIntensity: (Float) -> Color = { lerp(Color.Red, Color.Green, it) },
+    label: @Composable (Int) -> Unit = {},
+    contentDescription: ((Int) -> String)? = null,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(style.cellSpacing),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        for (bucket in 0 until buckets.bucketCount) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Box(
+                    Modifier
+                        .size(style.cellSize)
+                        .clip(style.cellShape)
+                        .background(colorForIntensity(buckets.intensityForBucket(bucket)))
+                        .then(
+                            if (contentDescription == null) Modifier else Modifier.semantics {
+                                this.contentDescription = contentDescription(bucket)
+                            },
+                        ),
+                )
+                label(bucket)
+            }
+        }
+    }
+}
+
+/**
  * Gregorian quarter data independent of composition and platform date APIs.
  * Missing intensities become zero; out-of-quarter keys are ignored. Inputs are not mutated.
  * [firstDayOfWeek] uses ISO-8601 numbering (1 = Monday .. 7 = Sunday).
@@ -179,6 +263,7 @@ fun CalendarQuarterHeatmap(
     selectedBorderColor: Color = MaterialTheme.colorScheme.primary,
     header: @Composable (String) -> Unit = { Text(it) },
     weekdayContent: @Composable (String) -> Unit = { Text(it) },
+    buckets: HeatmapBuckets? = null,
     colorForIntensity: (Float) -> Color = { lerp(Color.Red, Color.Green, it) },
     dayContent: @Composable (HeatmapDay) -> Unit = {},
 ) {
@@ -193,6 +278,7 @@ fun CalendarQuarterHeatmap(
         selectedBorderColor = selectedBorderColor,
         header = header,
         weekdayContent = weekdayContent,
+        buckets = buckets,
         colorForIntensity = colorForIntensity,
     )
     HeatmapBlock(
@@ -241,6 +327,7 @@ fun CalendarYearHeatmap(
     selectedBorderColor: Color = MaterialTheme.colorScheme.primary,
     header: @Composable (String) -> Unit = { Text(it) },
     weekdayContent: @Composable (String) -> Unit = { Text(it) },
+    buckets: HeatmapBuckets? = null,
     colorForIntensity: (Float) -> Color = { lerp(Color.Red, Color.Green, it) },
     dayContent: @Composable (HeatmapDay) -> Unit = {},
 ) {
@@ -263,6 +350,7 @@ fun CalendarYearHeatmap(
                 selectedBorderColor = selectedBorderColor,
                 header = header,
                 weekdayContent = weekdayContent,
+                buckets = buckets,
                 colorForIntensity = colorForIntensity,
                 dayContent = dayContent,
             )
@@ -294,6 +382,7 @@ fun CalendarYearHeatmap(
     selectedBorderColor: Color = MaterialTheme.colorScheme.primary,
     header: @Composable (String) -> Unit = { Text(it) },
     weekdayContent: @Composable (String) -> Unit = { Text(it) },
+    buckets: HeatmapBuckets? = null,
     colorForIntensity: (Float) -> Color = { lerp(Color.Red, Color.Green, it) },
     dayContent: @Composable (HeatmapDayData) -> Unit = {},
 ) {
@@ -311,6 +400,7 @@ fun CalendarYearHeatmap(
         selectedBorderColor = selectedBorderColor,
         header = header,
         weekdayContent = weekdayContent,
+        buckets = buckets,
         colorForIntensity = colorForIntensity,
     )
     Column(modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -349,6 +439,7 @@ private class HeatmapRenderConfig(
     val selectedBorderColor: Color,
     val header: @Composable (String) -> Unit,
     val weekdayContent: @Composable (String) -> Unit,
+    val buckets: HeatmapBuckets?,
     val colorForIntensity: (Float) -> Color,
 )
 
@@ -488,7 +579,11 @@ private fun <T : Any> HeatmapCell(
             visualModifier
                 .alpha(if (info.enabled) 1f else style.disabledAlpha)
                 .clip(style.cellShape)
-                .background(config.colorForIntensity(info.intensity))
+                .background(
+                    config.colorForIntensity(
+                        config.buckets?.colorIntensityFor(info.intensity) ?: info.intensity,
+                    ),
+                )
                 .then(border),
             contentAlignment = Alignment.Center,
         ) { dayContent(day) }

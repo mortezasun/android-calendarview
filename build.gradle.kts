@@ -20,13 +20,27 @@ plugins {
 // Compose Multiplatform 1.13.0-beta02 still leaves `outputDirectory` unconfigured for the resource
 // copy task of KMP device-test compilations. The instrumentation tests do not use Compose resources,
 // so the task is disabled instead of failing every `compileAndroidDeviceTest` run.
+
+// The five modules below declare `internal expect object` platform adapters. Kotlin 2.5.0-RC still
+// reports expect/actual classes as a Beta feature and recommends -Xexpect-actual-classes on both
+// the expect and the actual declaration. The opt-in is scoped to those modules instead of every
+// KMP module so that a new expect/actual class elsewhere keeps reporting the warning.
+val expectActualClassModules = setOf(
+    "library",
+    "calendar-gregorian",
+    "calendar-hijri",
+    "calendar-solarHijri-native",
+    "calendar-chinese-compose",
+)
 subprojects {
     tasks.matching { it.name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets" }
         .configureEach { enabled = false }
-    pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
-        extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
-            compilerOptions {
-                freeCompilerArgs.add("-Xexpect-actual-classes")
+    if (name in expectActualClassModules) {
+        pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+            extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xexpect-actual-classes")
+                }
             }
         }
     }

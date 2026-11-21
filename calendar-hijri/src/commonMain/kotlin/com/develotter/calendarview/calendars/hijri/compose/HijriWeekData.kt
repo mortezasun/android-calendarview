@@ -9,6 +9,7 @@ import com.develotter.calendarview.calendars.hijri.UmmAlQuraHijriDateProvider
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
 import com.develotter.calendarview.locale.CalendarLocale
+import com.develotter.calendarview.selection.isoWeekNumber
 
 /** Saturday is the default first day of the Hijri week. */
 internal const val HijriDefaultFirstDayOfWeek: Int = 6
@@ -26,7 +27,9 @@ data class HijriWeekData(
  * Builds a Hijri week around [dateEpochDay], aligned to [firstDayOfWeek] (ISO 1..7, Monday
  * first) on the absolute timeline before mapping the days back to displayed dates. Local
  * moon-sighting adjustments come from [dateProvider]. No Hijri week-number convention is
- * assumed, so `weekNumber` is null.
+ * assumed, so `weekNumber` is null. [useIsoWeekNumber] opts in to the ISO-8601 week number of the
+ * week start on the absolute timeline, formatted with the selected language's digits; the default
+ * keeps the previous null.
  */
 fun hijriWeekData(
     dateEpochDay: Long,
@@ -34,10 +37,17 @@ fun hijriWeekData(
     todayEpochDay: Long = HijriPlatform.currentEpochDay(),
     dateProvider: HijriDateProvider = UmmAlQuraHijriDateProvider,
     locale: CalendarLocale? = null,
+    useIsoWeekNumber: Boolean = false,
     isDateEnabled: (Long) -> Boolean = { true },
 ): HijriWeekData {
     val startEpochDay = dateEpochDay - hijriDayOfWeekOffset(dateEpochDay, firstDayOfWeek)
     val dates = List(7) { offset -> dateProvider.dateForEpochDay(startEpochDay + offset) }
+    val weekNumber = if (useIsoWeekNumber) {
+        val iso = isoWeekNumber(startEpochDay)
+        locale?.let { HijriLabels.number(it, iso) } ?: iso.toString()
+    } else {
+        null
+    }
     return HijriWeekData(
         title = "${displayedShortDate(dates.first(), locale)} – " +
             displayedShortDate(dates.last(), locale),
@@ -51,6 +61,7 @@ fun hijriWeekData(
                 locale = locale,
             )
         },
+        weekNumber = weekNumber,
     )
 }
 

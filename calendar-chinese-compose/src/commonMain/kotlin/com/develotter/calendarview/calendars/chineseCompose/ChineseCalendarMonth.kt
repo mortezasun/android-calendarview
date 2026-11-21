@@ -174,6 +174,8 @@ fun ChineseCalendarMonth(
     isDateEnabled: (Long) -> Boolean = { true },
     secondaryLabel: ((Long) -> String?)? = null,
     secondaryAccessibilityLabel: ((Long) -> String?)? = null,
+    keyboardNavigation: Boolean = false,
+    onMonthStep: ((Int) -> Unit)? = null,
     dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
 ) {
     val data = chineseMonthData(
@@ -201,6 +203,8 @@ fun ChineseCalendarMonth(
         todayDescription = todayDescription,
         markers = markers,
         weekNumber = weekNumber,
+        keyboardNavigation = keyboardNavigation,
+        onMonthStep = onMonthStep,
         secondaryLabel = secondaryLabel,
         secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         adjacentDayProvider = { epochDay ->
@@ -215,6 +219,10 @@ fun ChineseCalendarMonth(
 
 /**
  * Binary-compatible overload for callers compiled against 3.0.0, which had no `locale` parameter.
+ *
+ * [locale] was inserted before `weekNumber` rather than appended, because `weekNumber` has to stay
+ * directly ahead of the trailing `weekNumberContent` slot. The old parameter list therefore keeps
+ * its own JVM signature and forwards with `locale = null`, which is the 3.0.0 behaviour.
  */
 @Deprecated(
     message = "Binary compatibility overload for callers compiled against 3.0.0.",
@@ -290,6 +298,8 @@ fun GregorianChineseCalendarMonth(
     markers: Map<Long, List<CalendarDayMarker>> = emptyMap(),
     locale: CalendarLocale? = null,
     weekNumber: ((Long) -> String?)? = null,
+    keyboardNavigation: Boolean = false,
+    onMonthStep: ((Int) -> Unit)? = null,
 ) {
     val data = gregorianOverlayData(month, firstDayOfWeek, todayEpochDay, locale)
     CalendarMonthGrid(
@@ -309,6 +319,8 @@ fun GregorianChineseCalendarMonth(
         todayDescription = todayDescription,
         markers = markers,
         weekNumber = weekNumber,
+        keyboardNavigation = keyboardNavigation,
+        onMonthStep = onMonthStep,
         adjacentDayProvider = { epochDay -> gregorianOverlayDayCell(epochDay, todayEpochDay, locale) },
         secondaryLabel = { epochDay -> chineseSecondaryLabel(epochDay, style) },
         secondaryAccessibilityLabel = { epochDay -> chineseAccessibilityLabel(epochDay, style) },

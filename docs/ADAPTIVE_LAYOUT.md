@@ -45,8 +45,8 @@ content (the grid itself adds none between day cells).
 - The default is not changed silently because it alters visible behaviour of existing callers.
   Hosts that want 48 dp-wide days pass `minMonthWidth = 336.dp` (or `376.dp` with week numbers).
   The sample app implements this policy explicitly via `sampleTargetMonthWidth(showWeekNumbers)`.
-  Any future opt-in preset must be an additive defaulted parameter placed before the trailing
-  content lambda.
+  New layout options stay additive defaulted parameters placed before the trailing content lambda;
+  `maxColumns` follows that rule.
 
 ### Narrow containers (documented fallback)
 
@@ -57,9 +57,14 @@ at least that width (scroll horizontally, change pane layout, or use the pager).
 
 ### Maximum columns
 
-On very wide windows the column count grows with width. An optional `maxColumns` limit is **not**
-part of this contract yet; it is added only if the sample demonstrates the need, as an additive
-defaulted parameter. Until then hosts constrain width with `Modifier.widthIn(max = …)`.
+On very wide windows the column count grows with width. `CalendarMonthColumns` therefore takes
+`maxColumns: Int = Int.MAX_VALUE`: the derived column count is capped at that value and the
+remaining months wrap into further rows, so a twelve-month year folds into rows instead of
+stretching across the whole window. The cap never adds columns beyond what fits, `1` is the
+smallest allowed value, and the default keeps the previous unbounded layout (existing
+`LazyGridState` positions are unchanged). `calendarMonthColumns(width, minMonthWidth, spacing,
+maxColumns)` exposes the same rule as a pure function; `Modifier.widthIn(max = …)` remains the
+right tool when a host wants to constrain the container itself.
 
 ## Active month
 

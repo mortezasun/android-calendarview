@@ -7,6 +7,7 @@ import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
 import com.develotter.calendarview.locale.CalendarLocale
+import com.develotter.calendarview.selection.isoWeekNumber
 
 /** Localized Gregorian seven-day snapshot; treat lists as read-only. */
 @Immutable
@@ -22,17 +23,26 @@ data class GregorianWeekData(
  * Monday first). The week number uses a locale-independent week-based year with one minimal
  * leading day; callers that need ISO or another convention can pass their own week-number
  * callback to the grid instead. Date-range errors propagate.
+ *
+ * [useIsoWeekNumber] switches the snapshot's `weekNumber` to the ISO-8601 week of the same week
+ * start, still formatted with the selected language's digits. The default keeps the previous
+ * week-based-year convention, so existing screens and tests are unchanged.
  */
 fun gregorianWeekData(
     dateEpochDay: Long,
     firstDayOfWeek: Int = GregorianPlatformFormatter.defaultFirstDayOfWeek(),
     todayEpochDay: Long = GregorianPlatformFormatter.currentEpochDay(),
     locale: CalendarLocale? = null,
+    useIsoWeekNumber: Boolean = false,
     isDateEnabled: (Long) -> Boolean = { true },
 ): GregorianWeekData {
     val start = startOfWeek(dateEpochDay, firstDayOfWeek)
     val end = start + 6
-    val weekNumber = weekOfWeekBasedYear(start, firstDayOfWeek)
+    val weekNumber = if (useIsoWeekNumber) {
+        isoWeekNumber(start)
+    } else {
+        weekOfWeekBasedYear(start, firstDayOfWeek)
+    }
     return GregorianWeekData(
         title = if (locale == null) {
             "${GregorianPlatformFormatter.formatShortDayMonth(start)} – " +

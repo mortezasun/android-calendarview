@@ -209,6 +209,8 @@ fun HijriCalendarMonth(
     secondaryLabel: ((Long) -> String?)? = null,
     secondaryAccessibilityLabel: ((Long) -> String?)? = null,
     locale: CalendarLocale? = null,
+    keyboardNavigation: Boolean = false,
+    onMonthStep: ((Int) -> Unit)? = null,
     dayContent: @Composable (CalendarDayCell, Boolean, Boolean) -> Unit = { day, _, _ -> Text(day.label) },
 ) {
     val data = hijriMonthData(
@@ -230,6 +232,8 @@ fun HijriCalendarMonth(
         todayDescription = todayDescription,
         markers = markers,
         weekNumber = weekNumber,
+        keyboardNavigation = keyboardNavigation,
+        onMonthStep = onMonthStep,
         secondaryLabel = secondaryLabel,
         secondaryAccessibilityLabel = secondaryAccessibilityLabel,
         adjacentDayProvider = { adjacentEpochDay ->

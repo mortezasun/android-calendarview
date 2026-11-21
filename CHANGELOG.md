@@ -8,6 +8,32 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
 
 ### Added
 
+- Keyboard navigation reaches the engine facades: `keyboardNavigation` (default `false`) and
+  `onMonthStep` are parameters of all five engine month composables and
+  `GregorianChineseCalendarMonth`, forwarded to `CalendarMonthGrid`.
+- Selection presets: `CalendarSelection.presets(firstDayOfWeek, todayEpochDay)` returns
+  `CalendarSelectionPresets` (`today`, `thisWeek`, `thisMonth`, `lastSevenDays`) on the shared
+  epoch-day identity. `thisWeek` honours `firstDayOfWeek`, `thisMonth` is the civil Gregorian
+  month and `lastSevenDays` ends on `today`; no platform clock is read and `CalendarRangePolicy`
+  is unchanged.
+- ISO-8601 week numbers: `isoWeekNumber` / `isoWeekYear` in `:library`, plus an opt-in
+  `useIsoWeekNumber` (default `false`, placed before `isDateEnabled`) on every `*WeekData`
+  builder. Digits follow the selected language; the Gregorian default keeps its week-based-year
+  number and the other engines keep `null` unless the option is enabled.
+- Heatmap buckets and legend: `HeatmapBuckets(thresholds)` snaps `colorForIntensity` lookups to
+  ascending steps, a `buckets` parameter is available on all three heatmaps, and
+  `HeatmapLegend` draws the same steps with caller-supplied labels. Intensities, selection and
+  accessibility descriptions keep the exact value.
+- `CalendarMonthPicker`: stateless, keyboard-operable and RTL-aware month grid with optional year
+  stepping and caller-supplied labels (ADR 0008).
+- `CalendarMonthColumns(maxColumns = Int.MAX_VALUE)`: caps the width-derived column count and wraps
+  the remaining months into further rows, so a wide window shows a readable number of columns
+  instead of stretching the grid. The pure `calendarMonthColumns(width, minMonthWidth, spacing,
+  maxColumns)` overload exposes the same rule; the default keeps the previous unbounded layout.
+- `:kmp-sample` demonstrates the new APIs: the Calendars page opens a `CalendarMonthPicker` that
+  drives its Gregorian month state, and the Heatmaps page renders a `HeatmapLegend` from the same
+  `HeatmapBuckets` its heatmap uses. Its Playground forwards keyboard navigation to every engine
+  month.
 - Caller-selected label language (ADR 0007): `CalendarLocale` in `:library` with `English`, `German`,
   `Persian` and `Arabic`, and an optional `locale: CalendarLocale? = null` on the month titles,
   secondary and accessibility labels, day cells, month and week data, `*MonthState.title()` and the
@@ -22,6 +48,10 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
   `java.util.Locale.asCalendarLocale()`. Layout direction stays a host decision unless the helper is used.
 - Golden and completeness tests for the Gregorian, Hijri, Solar Hijri and Solar Hijri native label
   tables, English-fallback tests, and a string-parity test for `:kmp-sample`.
+- Opt-in keyboard navigation on `CalendarMonthGrid`: `keyboardNavigation` (default `false`) and
+  `onMonthStep`. Arrow keys move one day or one week in the ambient layout direction, Page Up/Down
+  request a month step, Enter/Space activate the focused day, and the focused cell draws a border.
+  The grid keeps only a focus position; selection, semantics and the default behaviour are unchanged.
 - `:kmp-sample` selects its language from the library locales and passes it to every calendar;
   `:calendarviewsample` shows a language switch in its top bar and drives all engines from the same
   selection, with instrumentation tests whose expectations come from the library tables.
@@ -42,6 +72,13 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
 ### Changed
 
 - `:calendarviewsample` uses the library's `Locale.asCalendarLocale()` instead of its own copy.
+- `-Xexpect-actual-classes` is scoped to the five modules that declare `internal expect object`
+  platform adapters instead of every KMP module, so a new expect/actual class elsewhere still
+  reports the Beta warning.
+- `:kmp-sample` derives the layout direction from the selected language through
+  `ProvideCalendarLocaleLayoutDirection`; the Playground RTL switch remains a narrower override.
+- The `:calendarviewsample` top-bar language chips scroll inside a width cap, so a 320 dp app bar
+  keeps its title and no chip is clipped.
 - ADR 0007 now allows hosts to derive `LayoutDirection` from the language through the opt-in helpers;
   the calendar composables themselves still never change the direction.
 - Version prepared as `3.1.0-beta` across `build.gradle.kts`, `:calendarviewsample` (`versionCode`
@@ -72,6 +109,10 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
   via `rememberUpdatedState` so replacing the provider does not reset visible month navigation.
 - Filtered internal platform adapter bytecode names cleanly in `scripts/api-check.sh` and aligned
   platform test assertions and container KDoc.
+- `scripts/api-check.sh` also filters and rejects the internal top-level `gregorianOverlayData`
+  function, so the JVM dump no longer lists a declaration that is not public API.
+- `SampleStringsParityTest` documents each non-English exception (product name, German homographs)
+  instead of skipping it without a reason.
 
 ### Verification
 
@@ -83,6 +124,18 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
   `commonMain` purity check, 60-module isolated publication verification + `:jvm-consumer:run` +
   `:android-consumer:assembleRelease`, `:dokkaGenerate`, and `:benchmarks:mainBenchmark` (results in
   [docs/BENCHMARKS.md](docs/BENCHMARKS.md)).
+- Locale-review and keyboard-navigation session on `kmp`: `208` `jvmTest` and `188`
+  `testAndroidHostTest` tests across the seven modules (including the new locale fallback and JVM
+  bridge cases), `68` sample unit tests, `2` `:kmp-sample` tests per host runner, `lint` without
+  errors, `api-check` and `klib-api-check` after regenerating both surfaces, and
+  `check-commonmain-purity.sh`. The new Compose device tests (`CalendarMonthGridKeyboardTest`,
+  `CalendarLocaleLayoutDirectionComposeTest`, `SampleLanguageSwitchTest`) are compiled only.
+- Library-extension batch (T1-T6) on `kmp`: `245` `jvmTest` and `227` `testAndroidHostTest` tests
+  across the seven modules (selection presets, ISO weeks and localized digits, heatmap buckets,
+  picker contract and one week-numbering class per engine), `68` sample unit tests, `2`
+  `:kmp-sample` host tests, `lint` without errors, both API surfaces regenerated and re-checked,
+  and `check-commonmain-purity.sh`. The new Compose device tests (`CalendarMonthPickerComposeTest`,
+  `HeatmapLegendComposeTest`) are compiled only because no emulator is available on this host.
 
 ## 3.0.0 - 2026-11-16
 

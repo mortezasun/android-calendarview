@@ -6,8 +6,13 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.develotter.calendarview.locale.ProvideCalendarLocaleLayoutDirection
 
-/** Applies the selected palette and light/dark mode around the sample shell. */
+/**
+ * Applies the selected palette and light/dark mode around the sample shell. The selected language
+ * also decides the reading direction, so Persian and Arabic flip the whole sample; the Playground's
+ * own RTL switch stays a narrower, inner override.
+ */
 @Composable
 internal fun SampleTheme(
     settings: AppSettings,
@@ -19,14 +24,16 @@ internal fun SampleTheme(
         AppThemeMode.Dark -> true
     }
     val accent = settings.palette.accentColor()
-    MaterialTheme(
-        colorScheme = if (darkTheme) {
-            darkColorScheme(primary = accent)
-        } else {
-            lightColorScheme(primary = accent)
-        },
-        content = content,
-    )
+    ProvideCalendarLocaleLayoutDirection(settings.language) {
+        MaterialTheme(
+            colorScheme = if (darkTheme) {
+                darkColorScheme(primary = accent)
+            } else {
+                lightColorScheme(primary = accent)
+            },
+            content = content,
+        )
+    }
 }
 
 private fun AppThemePalette.accentColor(): Color = when (this) {

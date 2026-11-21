@@ -79,7 +79,8 @@ is not part of your task and never reset, stash or overwrite it without explicit
   calendar-independent in `:library`.
 - Marker, week, agenda and adaptive-month APIs are calendar-independent product views in
   `:library`. `CalendarWeekData` is implemented by each engine's `*WeekData`; range validation
-  belongs in `CalendarRangePolicy`, while drag gestures and picker dialogs stay host concerns.
+  belongs in `CalendarRangePolicy`, while drag gestures and picker dialogs stay host concerns; the
+  month grid inside such a dialog is `CalendarMonthPicker` (see `docs/decisions/0008-calendar-month-picker.md`).
 - The Hijri method hook is engine-local: `HijriDateProvider` maps epoch days to `HijriDate` and
   back. Keep the Umm-al-Qura default and forward a caller-supplied provider through month data,
   week data, `HijriCalendarMonth` and the provider-aware `HijriMonthState`/`rememberHijriMonthState`;

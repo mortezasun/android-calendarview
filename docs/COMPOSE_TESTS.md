@@ -147,7 +147,8 @@ Remaining limits:
 - API 29 on the hosted emulator is not a physical-device acceptance test or a full API,
   locale, form-factor or rotation matrix.
 - The main-viewport tests use the actual launcher callbacks and real day nodes, but they
-  do not test drag-range selection or a user-opened date picker.
+  do not test drag-range selection or a host-owned dialog; the picker grid itself is covered by
+  `CalendarMonthPickerComposeTest` in `:library`.
 - Pager/list gestures are covered only by the existing navigation and dialog tests.
 - The workflow uses action major-version refs, not pinned commit SHAs.
 

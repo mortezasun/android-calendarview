@@ -10,6 +10,7 @@ import com.develotter.calendarview.calendars.solarHijriNative.isoWeekdayOfEpochD
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
 import com.develotter.calendarview.locale.CalendarLocale
+import com.develotter.calendarview.selection.isoWeekNumber
 
 /** Saturday is the default first day of the Solar Hijri week. */
 internal const val SolarHijriNativeDefaultFirstDayOfWeek: Int = 6
@@ -26,17 +27,25 @@ data class SolarHijriNativeWeekData(
 /**
  * Builds a Solar Hijri week around [dateEpochDay], aligned to [firstDayOfWeek] (ISO 1..7,
  * Monday first). No Solar Hijri week-number convention is assumed, so
- * [SolarHijriNativeWeekData.weekNumber] is null. Days beyond the supported years are blank,
- * disabled cells.
+ * [SolarHijriNativeWeekData.weekNumber] is null by default. [useIsoWeekNumber] opts in to the
+ * ISO-8601 week number of the week start on the absolute timeline, formatted with the selected
+ * language's digits. Days beyond the supported years are blank, disabled cells.
  */
 fun solarHijriNativeWeekData(
     dateEpochDay: Long,
     firstDayOfWeek: Int = SolarHijriNativeDefaultFirstDayOfWeek,
     todayEpochDay: Long = SolarHijriPlatform.currentEpochDay(),
     locale: CalendarLocale? = null,
+    useIsoWeekNumber: Boolean = false,
     isDateEnabled: (Long) -> Boolean = { true },
 ): SolarHijriNativeWeekData {
     val start = dateEpochDay - solarHijriNativeDayOfWeekOffset(dateEpochDay, firstDayOfWeek)
+    val weekNumber = if (useIsoWeekNumber) {
+        val iso = isoWeekNumber(start)
+        locale?.let { SolarHijriLabels.number(it, iso) } ?: iso.toString()
+    } else {
+        null
+    }
     val first = captionDate(start)
     val last = captionDate(start + 6)
     return SolarHijriNativeWeekData(
@@ -56,6 +65,7 @@ fun solarHijriNativeWeekData(
                 isDateEnabled = isDateEnabled,
             )
         },
+        weekNumber = weekNumber,
     )
 }
 

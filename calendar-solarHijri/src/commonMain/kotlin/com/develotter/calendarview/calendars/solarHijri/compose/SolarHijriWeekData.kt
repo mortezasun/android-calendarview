@@ -22,13 +22,15 @@ data class SolarHijriWeekData(
 /**
  * Builds a Solar Hijri week around [dateEpochDay], aligned to [firstDayOfWeek] (ISO 1..7,
  * Monday first). Conversion goes through the checked absolute-day bridge; no Solar Hijri
- * week-number convention is assumed, so `weekNumber` is null.
+ * week-number convention is assumed, so `weekNumber` is null unless [useIsoWeekNumber] asks for
+ * the ISO-8601 week of the week start.
  */
 fun solarHijriWeekData(
     dateEpochDay: Long,
     firstDayOfWeek: Int = DEFAULT_FIRST_DAY_OF_WEEK,
     todayEpochDay: Long = SolarHijriDate.now().toEpochDay(),
     locale: CalendarLocale? = null,
+    useIsoWeekNumber: Boolean = false,
     isDateEnabled: (Long) -> Boolean = { true },
 ): SolarHijriWeekData {
     val native = solarHijriNativeWeekData(
@@ -37,10 +39,12 @@ fun solarHijriWeekData(
         todayEpochDay = todayEpochDay,
         locale = locale,
         isDateEnabled = isDateEnabled,
+        useIsoWeekNumber = useIsoWeekNumber,
     )
     return SolarHijriWeekData(
         title = native.title,
         weekdayLabels = native.weekdayLabels,
         days = native.days,
+        weekNumber = native.weekNumber,
     )
 }

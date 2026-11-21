@@ -34,6 +34,20 @@ class CalendarLocaleTest {
         )
     }
 
+    /**
+     * The label tables live in the engine modules, so this is the only fallback statement `:library`
+     * itself can make: an unsupported tag is outside [CalendarLocale.supportedLanguages] and every
+     * engine therefore renders English labels and Western digits for it.
+     */
+    @Test
+    fun unsupportedTagIsOutsideTheSupportedLanguages() {
+        val spanish = CalendarLocale("es")
+        assertEquals("es", spanish.language)
+        assertFalse(spanish.language in CalendarLocale.supportedLanguages)
+        assertFalse(spanish.isRightToLeft)
+        assertEquals("es", CalendarLocale("es-ES").language)
+    }
+
     @Test
     fun systemDefaultReturnsAPlatformTag() {
         assertTrue(CalendarLocale.systemDefault().languageTag.isNotBlank())

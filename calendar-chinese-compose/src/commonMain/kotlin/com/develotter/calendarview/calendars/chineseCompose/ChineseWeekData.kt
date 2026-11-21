@@ -8,6 +8,7 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseFormat
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
+import com.develotter.calendarview.selection.isoWeekNumber
 
 /** Chinese seven-day snapshot; lists are read-only and [days] are consecutive epoch days. */
 @Immutable
@@ -15,6 +16,7 @@ data class ChineseWeekData(
     override val title: String,
     override val weekdayLabels: List<String>,
     override val days: List<CalendarDayCell>,
+    override val weekNumber: String? = null,
 ) : CalendarWeekData
 
 /**
@@ -23,13 +25,15 @@ data class ChineseWeekData(
  * Unlike a month, a week cannot be partially rendered at the data-set boundaries: if any of its
  * seven days is outside the supported range this function throws
  * [ChineseDateOutOfRangeException] instead of inventing or clamping dates. The week number is
- * deliberately omitted; the host decides which week-number convention to show.
+ * deliberately omitted unless [useIsoWeekNumber] opts in to the ISO-8601 week of the week start;
+ * that number is written with Western digits because the Chinese text style has no digit table.
  */
 fun chineseWeekData(
     epochDay: Long,
     style: ChineseTextStyle = ChineseTextStyle.English,
     firstDayOfWeek: Int = ChinesePlatform.defaultFirstDayOfWeek(),
     todayEpochDay: Long = ChinesePlatform.currentEpochDay(),
+    useIsoWeekNumber: Boolean = false,
     isDateEnabled: (Long) -> Boolean = { true },
 ): ChineseWeekData {
     val start = epochDay - chineseDayOfWeekOffset(epochDay, firstDayOfWeek)
@@ -53,5 +57,6 @@ fun chineseWeekData(
                 isDateEnabled = isDateEnabled,
             )
         },
+        weekNumber = if (useIsoWeekNumber) isoWeekNumber(start).toString() else null,
     )
 }

@@ -14,6 +14,10 @@ class SampleStringsParityTest {
         put("appTitle", SampleStrings.appTitle(language))
         put("menu", SampleStrings.menu(language))
         put("close", SampleStrings.close(language))
+        put("jumpToMonth", SampleStrings.jumpToMonth(language))
+        put("previousYear", SampleStrings.previousYear(language))
+        put("nextYear", SampleStrings.nextYear(language))
+        put("heatmapLevel", SampleStrings.heatmapLevel(language, 2))
         put("settingsTitle", SampleStrings.settingsTitle(language))
         put("languageLabel", SampleStrings.languageLabel(language))
         put("themeLabel", SampleStrings.themeLabel(language))
@@ -40,14 +44,16 @@ class SampleStringsParityTest {
 
     @Test
     fun nonEnglishLanguagesTranslateTheShellCopy() {
-        // Words that are spelled the same in German and English.
-        val sameInGerman = setOf("appTitle", "page.Heatmaps", "mode.System")
+        // The app title is the product name, which stays untranslated in every language.
+        val brandNames = setOf("appTitle")
+        // German spells these words exactly like English; they are translated, not forgotten.
+        val sameInGerman = setOf("page.Heatmaps", "mode.System")
         val englishStrings = allStrings(english)
         for (tag in listOf("de", "fa", "ar")) {
             allStrings(CalendarLocale(tag)).forEach { (key, value) ->
                 if (key.startsWith("languageName.")) return@forEach
+                if (key in brandNames) return@forEach
                 if (tag == "de" && key in sameInGerman) return@forEach
-                if (tag != "de" && key == "appTitle") return@forEach
                 assertNotEquals(englishStrings.getValue(key), value, "$key is untranslated for $tag")
             }
         }

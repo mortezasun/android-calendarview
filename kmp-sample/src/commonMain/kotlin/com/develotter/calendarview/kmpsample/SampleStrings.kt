@@ -15,6 +15,23 @@ internal object SampleStrings {
     fun close(language: CalendarLocale): String =
         pick(language, en = "Close", de = "Schließen", fa = "بستن", ar = "إغلاق")
 
+    fun jumpToMonth(language: CalendarLocale): String =
+        pick(language, en = "Jump to month", de = "Zum Monat springen", fa = "پرش به ماه", ar = "الانتقال إلى الشهر")
+
+    fun previousYear(language: CalendarLocale): String =
+        pick(language, en = "Previous year", de = "Vorheriges Jahr", fa = "سال قبل", ar = "السنة السابقة")
+
+    fun nextYear(language: CalendarLocale): String =
+        pick(language, en = "Next year", de = "Nächstes Jahr", fa = "سال بعد", ar = "السنة التالية")
+
+    fun heatmapLevel(language: CalendarLocale, level: Int): String = pick(
+        language,
+        en = "Level $level",
+        de = "Stufe $level",
+        fa = "سطح $level",
+        ar = "المستوى $level",
+    )
+
     fun pageTitle(page: DemoPage, language: CalendarLocale): String = when (page) {
         DemoPage.Home -> pick(language, "Home", "Start", "خانه", "الرئيسية")
         DemoPage.Calendars -> pick(language, "Calendars", "Kalender", "تقویم‌ها", "التقاويم")
