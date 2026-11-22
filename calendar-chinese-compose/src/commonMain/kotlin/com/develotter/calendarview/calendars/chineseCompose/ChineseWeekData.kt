@@ -21,6 +21,7 @@ data class ChineseWeekData(
 
 /**
  * Builds the week containing [epochDay], aligned to [firstDayOfWeek] (ISO 1..7, Monday first).
+ * Values outside that range are rejected.
  *
  * Unlike a month, a week cannot be partially rendered at the data-set boundaries: if any of its
  * seven days is outside the supported range this function throws
@@ -36,6 +37,7 @@ fun chineseWeekData(
     useIsoWeekNumber: Boolean = false,
     isDateEnabled: (Long) -> Boolean = { true },
 ): ChineseWeekData {
+    require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
     val start = epochDay - chineseDayOfWeekOffset(epochDay, firstDayOfWeek)
     val end = start + 6
     if (!ChineseCalendarEngine.isSupported(start) || !ChineseCalendarEngine.isSupported(end)) {
