@@ -20,9 +20,9 @@ data class GregorianWeekData(
 
 /**
  * Builds a Gregorian week around [dateEpochDay], aligned to [firstDayOfWeek] (ISO 1..7,
- * Monday first). The week number uses a locale-independent week-based year with one minimal
- * leading day; callers that need ISO or another convention can pass their own week-number
- * callback to the grid instead. Date-range errors propagate.
+ * Monday first). Values outside that range are rejected. The week number uses a locale-independent
+ * week-based year with one minimal leading day; callers that need ISO or another convention can
+ * pass their own week-number callback to the grid instead. Date-range errors propagate.
  *
  * [useIsoWeekNumber] switches the snapshot's `weekNumber` to the ISO-8601 week of the same week
  * start, still formatted with the selected language's digits. The default keeps the previous
@@ -36,12 +36,13 @@ fun gregorianWeekData(
     useIsoWeekNumber: Boolean = false,
     isDateEnabled: (Long) -> Boolean = { true },
 ): GregorianWeekData {
-    val start = startOfWeek(dateEpochDay, firstDayOfWeek)
+    val layout = GregorianWeekLayout(firstDayOfWeek)
+    val start = layout.startOfWeek(dateEpochDay)
     val end = start + 6
     val weekNumber = if (useIsoWeekNumber) {
         isoWeekNumber(start)
     } else {
-        weekOfWeekBasedYear(start, firstDayOfWeek)
+        weekOfWeekBasedYear(start, layout)
     }
     return GregorianWeekData(
         title = if (locale == null) {
@@ -51,7 +52,7 @@ fun gregorianWeekData(
             "${GregorianLabels.shortDayMonth(locale, start)} – " +
                 GregorianLabels.shortDayMonthYear(locale, end)
         },
-        weekdayLabels = gregorianWeekdayLabels(firstDayOfWeek, locale),
+        weekdayLabels = layout.weekdayLabels(locale),
         days = List(7) { offset ->
             gregorianDayCell(
                 epochDay = start + offset,
@@ -69,33 +70,40 @@ fun gregorianWeekData(
 internal fun gregorianWeekdayLabels(
     firstDayOfWeek: Int,
     locale: CalendarLocale? = null,
-): List<String> = List(7) { offset ->
-    val isoWeekday = (firstDayOfWeek - 1 + offset) % 7 + 1
-    locale?.let { GregorianLabels.weekdayShort(it, isoWeekday) }
-        ?: GregorianPlatformFormatter.weekdayShortLabel(isoWeekday)
-}
+): List<String> = GregorianWeekLayout(firstDayOfWeek).weekdayLabels(locale)
 
 /** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek]. */
 internal fun gregorianDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int =
-    (GregorianYearMonth.isoWeekdayFromEpochDay(epochDay) - firstDayOfWeek + 7) % 7
+    GregorianWeekLayout(firstDayOfWeek).offsetFor(epochDay)
 
-private fun startOfWeek(epochDay: Long, firstDayOfWeek: Int): Long =
-    epochDay - gregorianDayOfWeekOffset(epochDay, firstDayOfWeek)
+private class GregorianWeekLayout(private val firstDayOfWeek: Int) {
+    init {
+        require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
+    }
+
+    fun offsetFor(epochDay: Long): Int =
+        (GregorianYearMonth.isoWeekdayFromEpochDay(epochDay) - firstDayOfWeek).mod(7)
+
+    fun startOfWeek(epochDay: Long): Long = epochDay - offsetFor(epochDay)
+
+    fun weekdayLabels(locale: CalendarLocale?): List<String> = List(7) { offset ->
+        val isoWeekday = (firstDayOfWeek - 1 + offset).mod(7) + 1
+        locale?.let { GregorianLabels.weekdayShort(it, isoWeekday) }
+            ?: GregorianPlatformFormatter.weekdayShortLabel(isoWeekday)
+    }
+}
 
 /**
  * Week of the week-based year with one minimal leading day, matching the previous
  * `WeekFields.of(firstDayOfWeek, 1)` behaviour without java.time.
  */
-private fun weekOfWeekBasedYear(epochDay: Long, firstDayOfWeek: Int): Int {
+private fun weekOfWeekBasedYear(epochDay: Long, layout: GregorianWeekLayout): Int {
     val year = GregorianYearMonth.fromEpochDay(epochDay).year
-    val firstWeekStart = startOfWeek(GregorianYearMonth.gregorianToEpochDay(year, 1, 1), firstDayOfWeek)
+    val firstWeekStart = layout.startOfWeek(GregorianYearMonth.gregorianToEpochDay(year, 1, 1))
     return if (epochDay >= firstWeekStart) {
         ((epochDay - firstWeekStart) / 7).toInt() + 1
     } else {
-        val previousWeekStart = startOfWeek(
-            GregorianYearMonth.gregorianToEpochDay(year - 1, 1, 1),
-            firstDayOfWeek,
-        )
+        val previousWeekStart = layout.startOfWeek(GregorianYearMonth.gregorianToEpochDay(year - 1, 1, 1))
         ((epochDay - previousWeekStart) / 7).toInt() + 1
     }
 }
