@@ -25,11 +25,10 @@ data class HijriWeekData(
 
 /**
  * Builds a Hijri week around [dateEpochDay], aligned to [firstDayOfWeek] (ISO 1..7, Monday
- * first) on the absolute timeline before mapping the days back to displayed dates. Local
- * moon-sighting adjustments come from [dateProvider]. No Hijri week-number convention is
- * assumed, so `weekNumber` is null. [useIsoWeekNumber] opts in to the ISO-8601 week number of the
- * week start on the absolute timeline, formatted with the selected language's digits; the default
- * keeps the previous null.
+ * first) on the absolute timeline before mapping the days back to displayed dates. Values outside
+ * that range are rejected. Local moon-sighting adjustments come from [dateProvider]. No Hijri
+ * week-number convention is assumed, so `weekNumber` is null unless [useIsoWeekNumber] opts in
+ * to the ISO-8601 week number of the week start, formatted with the selected language's digits.
  */
 fun hijriWeekData(
     dateEpochDay: Long,
@@ -69,18 +68,27 @@ fun hijriWeekData(
 internal fun hijriWeekdayLabels(
     firstDayOfWeek: Int,
     locale: CalendarLocale? = null,
-): List<String> = List(7) { offset ->
-    val isoWeekday = (firstDayOfWeek - 1 + offset) % 7 + 1
-    locale?.let { HijriLabels.weekdayShort(it, isoWeekday) }
-        ?: HijriPlatform.weekdayShortLabel(isoWeekday)
+): List<String> {
+    requireValidFirstDayOfWeek(firstDayOfWeek)
+    return List(7) { offset ->
+        val isoWeekday = (firstDayOfWeek - 1 + offset).mod(7) + 1
+        locale?.let { HijriLabels.weekdayShort(it, isoWeekday) }
+            ?: HijriPlatform.weekdayShortLabel(isoWeekday)
+    }
 }
 
 /** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek]. */
-internal fun hijriDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int =
-    (isoWeekday(epochDay) - firstDayOfWeek + 7) % 7
+internal fun hijriDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int {
+    requireValidFirstDayOfWeek(firstDayOfWeek)
+    return (isoWeekday(epochDay) - firstDayOfWeek).mod(7)
+}
+
+private fun requireValidFirstDayOfWeek(firstDayOfWeek: Int) {
+    require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
+}
 
 /** ISO weekday (Monday 1 .. Sunday 7) of an absolute epoch day. */
-internal fun isoWeekday(epochDay: Long): Int = (((epochDay + 3) % 7 + 7) % 7).toInt() + 1
+internal fun isoWeekday(epochDay: Long): Int = (epochDay.mod(7L).toInt() + 3).mod(7) + 1
 
 /** Formats a provider date through its canonical epoch day so offset providers stay correct. */
 private fun displayedShortDate(date: HijriDate, locale: CalendarLocale?): String =
