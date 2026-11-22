@@ -26,10 +26,10 @@ data class SolarHijriNativeWeekData(
 
 /**
  * Builds a Solar Hijri week around [dateEpochDay], aligned to [firstDayOfWeek] (ISO 1..7,
- * Monday first). No Solar Hijri week-number convention is assumed, so
- * [SolarHijriNativeWeekData.weekNumber] is null by default. [useIsoWeekNumber] opts in to the
- * ISO-8601 week number of the week start on the absolute timeline, formatted with the selected
- * language's digits. Days beyond the supported years are blank, disabled cells.
+ * Monday first). Values outside that range are rejected. No Solar Hijri week-number convention
+ * is assumed, so [SolarHijriNativeWeekData.weekNumber] is null by default. [useIsoWeekNumber]
+ * opts in to the ISO-8601 week number of the week start on the absolute timeline, formatted with
+ * the selected language's digits. Days beyond the supported years are blank, disabled cells.
  */
 fun solarHijriNativeWeekData(
     dateEpochDay: Long,
@@ -73,15 +73,24 @@ fun solarHijriNativeWeekData(
 internal fun solarHijriNativeWeekdayLabels(
     firstDayOfWeek: Int,
     locale: CalendarLocale? = null,
-): List<String> = List(7) { offset ->
-    val isoWeekday = (firstDayOfWeek - 1 + offset) % 7 + 1
-    locale?.let { SolarHijriLabels.weekdayShort(it, isoWeekday) }
-        ?: SolarHijriPlatform.weekdayShortLabel(isoWeekday)
+): List<String> {
+    requireValidFirstDayOfWeek(firstDayOfWeek)
+    return List(7) { offset ->
+        val isoWeekday = (firstDayOfWeek - 1 + offset).mod(7) + 1
+        locale?.let { SolarHijriLabels.weekdayShort(it, isoWeekday) }
+            ?: SolarHijriPlatform.weekdayShortLabel(isoWeekday)
+    }
 }
 
 /** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek]. */
-internal fun solarHijriNativeDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int =
-    (isoWeekdayOfEpochDay(epochDay) - firstDayOfWeek + 7) % 7
+internal fun solarHijriNativeDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int {
+    requireValidFirstDayOfWeek(firstDayOfWeek)
+    return (isoWeekdayOfEpochDay(epochDay) - firstDayOfWeek).mod(7)
+}
+
+private fun requireValidFirstDayOfWeek(firstDayOfWeek: Int) {
+    require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
+}
 
 private fun captionDate(epochDay: Long): SolarHijriDate = SolarHijriDate.fromEpochDay(
     epochDay.coerceIn(SolarHijriEngine.MIN_EPOCH_DAY, SolarHijriEngine.MAX_EPOCH_DAY),
