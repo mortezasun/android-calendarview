@@ -6,8 +6,9 @@ internal data class CivilDate(
     val day: Int,
 )
 
+// Reduce the epoch day before adding the Thursday offset to avoid overflow on large values.
 internal fun isoWeekday(epochDay: Long): Int =
-    (((epochDay + 3) % 7 + 7) % 7).toInt() + 1
+    (epochDay.mod(7L).toInt() + 3).mod(7) + 1
 
 internal fun civilFromEpochDay(epochDay: Long): CivilDate {
     val z = epochDay + 719468

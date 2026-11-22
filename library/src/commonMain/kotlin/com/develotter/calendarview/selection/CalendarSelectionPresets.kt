@@ -25,10 +25,7 @@ fun CalendarSelection.presets(
     firstDayOfWeek: Int,
     todayEpochDay: Long,
 ): CalendarSelectionPresets {
-    require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
-    val todayWeekday = isoWeekday(todayEpochDay)
-    val offset = (todayWeekday - firstDayOfWeek).mod(7)
-    val weekStart = todayEpochDay - offset
+    val weekStart = weekStartFor(todayEpochDay, firstDayOfWeek)
     val thisWeek = weekStart..(weekStart + 6)
 
     val civil = civilFromEpochDay(todayEpochDay)
@@ -44,4 +41,10 @@ fun CalendarSelection.presets(
         thisMonth = thisMonth,
         lastSevenDays = lastSevenDays,
     )
+}
+
+/** Returns the first epoch day of the week containing [epochDay] for an explicit ISO weekday. */
+private fun weekStartFor(epochDay: Long, firstDayOfWeek: Int): Long {
+    require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
+    return epochDay - (isoWeekday(epochDay) - firstDayOfWeek).mod(7)
 }
