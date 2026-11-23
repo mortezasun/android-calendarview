@@ -1,6 +1,8 @@
 package com.develotter.calendarviewsample
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -9,11 +11,13 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.develotter.calendarview.compose.rememberCalendarSelectionState
 import com.develotter.calendarview.enums.TypeSelectDay
@@ -37,7 +41,7 @@ class CalendarSampleStateRestorationTest {
         restoration.setContent {
             MaterialTheme {
                 val ui = rememberCalendarSampleState()
-                Column {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
                     Text("calendar:${ui.calendarName}")
                     Text("mode:${ui.modeName}")
                     Text("locale:${ui.localeTag}")
@@ -93,7 +97,7 @@ class CalendarSampleStateRestorationTest {
         }
 
         compose.onNodeWithText("calendar:Gregorian").assertExists()
-        compose.onNodeWithText("modify").performClick()
+        compose.onNodeWithText("modify").performScrollTo().performClick()
         compose.onNodeWithText("calendar:Hijri").assertExists()
         compose.onNodeWithText("mode:Range").assertExists()
         compose.onNodeWithText("locale:de").assertExists()
