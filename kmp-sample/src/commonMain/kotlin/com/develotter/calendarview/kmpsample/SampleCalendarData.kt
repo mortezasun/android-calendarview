@@ -40,7 +40,10 @@ internal fun DemoChineseScript.textStyle(): ChineseTextStyle = when (this) {
     DemoChineseScript.Numeric -> ChineseTextStyle.Numeric
 }
 
-/** One month snapshot of [calendar] containing [anchorEpochDay]. */
+/**
+ * One month snapshot of [calendar] containing [anchorEpochDay]. [firstDayOfWeek] uses ISO-8601
+ * numbering (1 = Monday .. 7 = Sunday); `null` keeps the default of the calendar engine.
+ */
 internal fun sampleMonthData(
     calendar: DemoCalendar,
     anchorEpochDay: Long,
@@ -48,37 +51,99 @@ internal fun sampleMonthData(
     hijriDateProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle,
     locale: CalendarLocale? = null,
+    firstDayOfWeek: Int? = null,
 ): CalendarMonthData = when (calendar) {
-    DemoCalendar.Gregorian -> gregorianMonthData(
-        month = GregorianYearMonth.fromEpochDay(anchorEpochDay),
-        todayEpochDay = todayEpochDay,
-        locale = locale,
-    )
+    DemoCalendar.Gregorian -> {
+        val month = GregorianYearMonth.fromEpochDay(anchorEpochDay)
+        if (firstDayOfWeek == null) {
+            gregorianMonthData(
+                month = month,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        } else {
+            gregorianMonthData(
+                month = month,
+                firstDayOfWeek = firstDayOfWeek,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        }
+    }
 
-    DemoCalendar.Hijri -> hijriMonthData(
-        month = hijriDateProvider.dateForEpochDay(anchorEpochDay),
-        todayEpochDay = todayEpochDay,
-        dateProvider = hijriDateProvider,
-        locale = locale,
-    )
+    DemoCalendar.Hijri -> {
+        val month = hijriDateProvider.dateForEpochDay(anchorEpochDay)
+        if (firstDayOfWeek == null) {
+            hijriMonthData(
+                month = month,
+                todayEpochDay = todayEpochDay,
+                dateProvider = hijriDateProvider,
+                locale = locale,
+            )
+        } else {
+            hijriMonthData(
+                month = month,
+                firstDayOfWeek = firstDayOfWeek,
+                todayEpochDay = todayEpochDay,
+                dateProvider = hijriDateProvider,
+                locale = locale,
+            )
+        }
+    }
 
-    DemoCalendar.SolarHijri -> solarHijriMonthData(
-        month = SolarHijriDate.fromEpochDay(anchorEpochDay),
-        todayEpochDay = todayEpochDay,
-        locale = locale,
-    )
+    DemoCalendar.SolarHijri -> {
+        val month = SolarHijriDate.fromEpochDay(anchorEpochDay)
+        if (firstDayOfWeek == null) {
+            solarHijriMonthData(
+                month = month,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        } else {
+            solarHijriMonthData(
+                month = month,
+                firstDayOfWeek = firstDayOfWeek,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        }
+    }
 
-    DemoCalendar.SolarHijriNative -> solarHijriNativeMonthData(
-        month = SolarHijriDate.fromEpochDay(anchorEpochDay),
-        todayEpochDay = todayEpochDay,
-        locale = locale,
-    )
+    DemoCalendar.SolarHijriNative -> {
+        val month = SolarHijriDate.fromEpochDay(anchorEpochDay)
+        if (firstDayOfWeek == null) {
+            solarHijriNativeMonthData(
+                month = month,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        } else {
+            solarHijriNativeMonthData(
+                month = month,
+                firstDayOfWeek = firstDayOfWeek,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        }
+    }
 
-    DemoCalendar.Chinese -> chineseMonthData(
-        month = ChineseMonth.fromEpochDay(anchorEpochDay),
-        style = chineseStyle,
-        todayEpochDay = todayEpochDay,
-    )
+    DemoCalendar.Chinese -> {
+        val month = ChineseMonth.fromEpochDay(anchorEpochDay)
+        if (firstDayOfWeek == null) {
+            chineseMonthData(
+                month = month,
+                style = chineseStyle,
+                todayEpochDay = todayEpochDay,
+            )
+        } else {
+            chineseMonthData(
+                month = month,
+                style = chineseStyle,
+                firstDayOfWeek = firstDayOfWeek,
+                todayEpochDay = todayEpochDay,
+            )
+        }
+    }
 }
 
 /** One seven-day snapshot of [calendar] containing [anchorEpochDay]. */

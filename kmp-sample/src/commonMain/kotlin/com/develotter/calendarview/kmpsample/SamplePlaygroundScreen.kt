@@ -40,6 +40,7 @@ internal data class PlaygroundOptions(
     val customStyle: Boolean,
     val limitRange: Boolean,
     val locale: CalendarLocale? = null,
+    val firstDayOfWeek: Int? = null,
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -54,12 +55,14 @@ internal fun SamplePlaygroundScreen(
     var calendarName by rememberSaveable { mutableStateOf(DemoCalendar.Gregorian.name) }
     var layoutName by rememberSaveable { mutableStateOf(DemoMonthLayout.Single.name) }
     var modeName by rememberSaveable { mutableStateOf(TypeSelectDay.Range.name) }
+    var firstDayName by rememberSaveable { mutableStateOf(DemoFirstDayOfWeek.CalendarDefault.name) }
     var rtl by rememberSaveable { mutableStateOf(false) }
     var markers by rememberSaveable { mutableStateOf(true) }
     var customStyle by rememberSaveable { mutableStateOf(false) }
     var limitRange by rememberSaveable { mutableStateOf(false) }
     var showDialog by rememberSaveable { mutableStateOf(false) }
 
+    val firstDay = DemoFirstDayOfWeek.valueOf(firstDayName)
     val options = PlaygroundOptions(
         calendar = DemoCalendar.valueOf(calendarName),
         layout = DemoMonthLayout.valueOf(layoutName),
@@ -68,6 +71,7 @@ internal fun SamplePlaygroundScreen(
         customStyle = customStyle,
         limitRange = limitRange,
         locale = locale,
+        firstDayOfWeek = firstDay.iso,
     )
     val selection = key(options.selectionMode, limitRange) {
         rememberCalendarSelectionState(mode = options.selectionMode)
@@ -90,6 +94,14 @@ internal fun SamplePlaygroundScreen(
             DemoChoices("Selection", TypeSelectDay.entries, options.selectionMode, { it.name }) {
                 modeName = it.name
             }
+            DemoChoices("First day", DemoFirstDayOfWeek.entries, firstDay, { it.label }) {
+                firstDayName = it.name
+            }
+            Text(
+                text = sampleWeekdayOrderPreview(firstDay.iso)
+                    ?: "Each calendar uses its own default first day",
+                style = MaterialTheme.typography.bodySmall,
+            )
 
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 FilterChip(rtl, { rtl = !rtl }, { Text("RTL") })
