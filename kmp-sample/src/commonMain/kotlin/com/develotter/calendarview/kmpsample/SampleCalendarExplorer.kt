@@ -376,13 +376,17 @@ private fun SampleMonthFrame(
     }
 }
 
-/** Single-month preview used inside the Playground dialog, without selection. */
+/**
+ * Single-month preview used inside the Playground dialog, without selection. The month follows
+ * [LocalPlaygroundFirstDayOfWeek]; `null` keeps the default of each calendar engine.
+ */
 @Composable
 internal fun SampleDialogMonth(
     calendar: DemoCalendar,
     todayEpochDay: Long,
     locale: CalendarLocale? = null,
 ) {
+    val firstDayOfWeek = LocalPlaygroundFirstDayOfWeek.current
     val selection = remember { CalendarSelection.from(TypeSelectDay.None, emptyList()) }
     val onDateClick: (Long) -> Unit = {}
 
@@ -394,44 +398,113 @@ internal fun SampleDialogMonth(
     ) {
         Box(Modifier.fillMaxWidth()) {
             when (calendar) {
-                DemoCalendar.Gregorian -> GregorianCalendarMonth(
-                    month = GregorianYearMonth.fromEpochDay(todayEpochDay),
-                    selection = selection,
-                    onDateClick = onDateClick,
-                    todayEpochDay = todayEpochDay,
-                    locale = locale,
-                )
+                DemoCalendar.Gregorian -> {
+                    val month = GregorianYearMonth.fromEpochDay(todayEpochDay)
+                    if (firstDayOfWeek == null) {
+                        GregorianCalendarMonth(
+                            month = month,
+                            selection = selection,
+                            onDateClick = onDateClick,
+                            todayEpochDay = todayEpochDay,
+                            locale = locale,
+                        )
+                    } else {
+                        GregorianCalendarMonth(
+                            month = month,
+                            selection = selection,
+                            onDateClick = onDateClick,
+                            firstDayOfWeek = firstDayOfWeek,
+                            todayEpochDay = todayEpochDay,
+                            locale = locale,
+                        )
+                    }
+                }
 
-                DemoCalendar.Hijri -> HijriCalendarMonth(
-                    month = UmmAlQuraHijriDateProvider.dateForEpochDay(todayEpochDay),
-                    selection = selection,
-                    onDateClick = onDateClick,
-                    todayEpochDay = todayEpochDay,
-                    locale = locale,
-                )
+                DemoCalendar.Hijri -> {
+                    val month = UmmAlQuraHijriDateProvider.dateForEpochDay(todayEpochDay)
+                    if (firstDayOfWeek == null) {
+                        HijriCalendarMonth(
+                            month = month,
+                            selection = selection,
+                            onDateClick = onDateClick,
+                            todayEpochDay = todayEpochDay,
+                            locale = locale,
+                        )
+                    } else {
+                        HijriCalendarMonth(
+                            month = month,
+                            selection = selection,
+                            onDateClick = onDateClick,
+                            firstDayOfWeek = firstDayOfWeek,
+                            todayEpochDay = todayEpochDay,
+                            locale = locale,
+                        )
+                    }
+                }
 
-                DemoCalendar.SolarHijri -> SolarHijriCalendarMonth(
-                    month = SolarHijriDate.fromEpochDay(todayEpochDay),
-                    selection = selection,
-                    onDateClick = onDateClick,
-                    todayEpochDay = todayEpochDay,
-                    locale = locale,
-                )
+                DemoCalendar.SolarHijri -> {
+                    val month = SolarHijriDate.fromEpochDay(todayEpochDay)
+                    if (firstDayOfWeek == null) {
+                        SolarHijriCalendarMonth(
+                            month = month,
+                            selection = selection,
+                            onDateClick = onDateClick,
+                            todayEpochDay = todayEpochDay,
+                            locale = locale,
+                        )
+                    } else {
+                        SolarHijriCalendarMonth(
+                            month = month,
+                            selection = selection,
+                            onDateClick = onDateClick,
+                            firstDayOfWeek = firstDayOfWeek,
+                            todayEpochDay = todayEpochDay,
+                            locale = locale,
+                        )
+                    }
+                }
 
-                DemoCalendar.SolarHijriNative -> SolarHijriNativeCalendarMonth(
-                    month = SolarHijriDate.fromEpochDay(todayEpochDay),
-                    selection = selection,
-                    onDateClick = onDateClick,
-                    todayEpochDay = todayEpochDay,
-                    locale = locale,
-                )
+                DemoCalendar.SolarHijriNative -> {
+                    val month = SolarHijriDate.fromEpochDay(todayEpochDay)
+                    if (firstDayOfWeek == null) {
+                        SolarHijriNativeCalendarMonth(
+                            month = month,
+                            selection = selection,
+                            onDateClick = onDateClick,
+                            todayEpochDay = todayEpochDay,
+                            locale = locale,
+                        )
+                    } else {
+                        SolarHijriNativeCalendarMonth(
+                            month = month,
+                            selection = selection,
+                            onDateClick = onDateClick,
+                            firstDayOfWeek = firstDayOfWeek,
+                            todayEpochDay = todayEpochDay,
+                            locale = locale,
+                        )
+                    }
+                }
 
-                DemoCalendar.Chinese -> ChineseCalendarMonth(
-                    month = ChineseMonth.fromEpochDay(todayEpochDay),
-                    selection = selection,
-                    onDateClick = onDateClick,
-                    todayEpochDay = todayEpochDay,
-                )
+                DemoCalendar.Chinese -> {
+                    val month = ChineseMonth.fromEpochDay(todayEpochDay)
+                    if (firstDayOfWeek == null) {
+                        ChineseCalendarMonth(
+                            month = month,
+                            selection = selection,
+                            onDateClick = onDateClick,
+                            todayEpochDay = todayEpochDay,
+                        )
+                    } else {
+                        ChineseCalendarMonth(
+                            month = month,
+                            selection = selection,
+                            onDateClick = onDateClick,
+                            firstDayOfWeek = firstDayOfWeek,
+                            todayEpochDay = todayEpochDay,
+                        )
+                    }
+                }
             }
         }
     }

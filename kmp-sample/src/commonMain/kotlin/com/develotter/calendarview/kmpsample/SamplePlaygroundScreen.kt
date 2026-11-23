@@ -124,14 +124,16 @@ internal fun SamplePlaygroundScreen(
             }
         }
         if (showDialog) {
-            AlertDialog(
-                onDismissRequest = { showDialog = false },
-                title = { Text("Calendar preview") },
-                text = { renderDialogMonth(options.calendar) },
-                confirmButton = {
-                    TextButton(onClick = { showDialog = false }) { Text("Close") }
-                },
-            )
+            CompositionLocalProvider(LocalPlaygroundFirstDayOfWeek provides firstDay.iso) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = { Text("Calendar preview") },
+                    text = { renderDialogMonth(options.calendar) },
+                    confirmButton = {
+                        TextButton(onClick = { showDialog = false }) { Text("Close") }
+                    },
+                )
+            }
         }
     }
 }

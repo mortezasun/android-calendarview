@@ -1,5 +1,7 @@
 package com.develotter.calendarview.kmpsample
 
+import androidx.compose.runtime.compositionLocalOf
+
 /**
  * First-day-of-week choice of the Playground. [iso] uses ISO-8601 numbering (1 = Monday ..
  * 7 = Sunday); `null` keeps the default of each calendar engine.
@@ -14,6 +16,13 @@ internal enum class DemoFirstDayOfWeek(val iso: Int?, val label: String) {
     Saturday(6, "Saturday"),
     Sunday(7, "Sunday"),
 }
+
+/**
+ * First day of the week (ISO 1..7) that the Playground dialog preview follows. `null` keeps the
+ * default of each calendar engine. The Playground provides it around its dialog so the platform
+ * entry points do not need to forward it.
+ */
+internal val LocalPlaygroundFirstDayOfWeek = compositionLocalOf<Int?> { null }
 
 private val ShortWeekdayNames = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
 
