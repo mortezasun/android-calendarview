@@ -5,6 +5,7 @@ import com.develotter.calendarview.locale.CalendarLocale
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class SampleFirstDayOfWeekTest {
     private val anchor = 20_000L // Friday, 2024-10-04.
@@ -39,13 +40,75 @@ class SampleFirstDayOfWeekTest {
     }
 
     @Test
+    fun explicitStartAlignsWeekSnapshotsForEveryDemoCalendar() {
+        val provider = sampleHijriProvider(0)
+        for (calendar in DemoCalendar.entries) {
+            fun week(firstDay: Int?) = sampleWeekData(
+                calendar,
+                anchor,
+                anchor,
+                provider,
+                ChineseTextStyle.English,
+                CalendarLocale.English,
+                firstDay,
+            )
+            val mondayLabels = week(1).weekdayLabels
+            for (firstDay in 1..7) {
+                val data = week(firstDay)
+                val expectedLabels = mondayLabels.drop(firstDay - 1) + mondayLabels.take(firstDay - 1)
+                val epochDays = data.days.map { it.epochDay }
+                assertEquals(expectedLabels, data.weekdayLabels, "$calendar labels for $firstDay")
+                assertEquals(firstDay, isoWeekday(epochDays.first()), "$calendar week start for $firstDay")
+                assertEquals(List(7) { epochDays.first() + it }, epochDays, "$calendar consecutive days for $firstDay")
+                assertTrue(anchor in epochDays, "$calendar week contains the anchor for $firstDay")
+            }
+        }
+    }
+
+    @Test
+    fun explicitStartAlignsHeatmapMonthsForEveryDemoCalendar() {
+        val provider = sampleHijriProvider(0)
+        for (calendar in DemoCalendar.entries) {
+            val year = sampleYear(calendar, anchor, provider)
+            fun months(firstDay: Int?) = sampleHeatmapYear(
+                calendar,
+                year,
+                anchor,
+                provider,
+                ChineseTextStyle.English,
+                CalendarLocale.English,
+                firstDay,
+            )
+            val mondayLabels = months(1).first().weekdayLabels
+            for (firstDay in 1..7) {
+                val expectedLabels = mondayLabels.drop(firstDay - 1) + mondayLabels.take(firstDay - 1)
+                for (month in months(firstDay)) {
+                    assertEquals(expectedLabels, month.weekdayLabels, "$calendar labels for $firstDay")
+                    val firstWeek = month.weeks.first()
+                    val offset = firstWeek.indexOfFirst { it != null }
+                    assertEquals(
+                        (isoWeekday(firstWeek[offset]!!.epochDay) - firstDay).mod(7),
+                        offset,
+                        "$calendar heatmap offset for $firstDay",
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
     fun omittedAndNullStartKeepTheCalendarDefault() {
         val provider = sampleHijriProvider(0)
         for (calendar in DemoCalendar.entries) {
             assertEquals(
                 sampleMonthData(calendar, anchor, anchor, provider, ChineseTextStyle.English, CalendarLocale.English),
                 sampleMonthData(calendar, anchor, anchor, provider, ChineseTextStyle.English, CalendarLocale.English, null),
-                "$calendar default",
+                "$calendar month default",
+            )
+            assertEquals(
+                sampleWeekData(calendar, anchor, anchor, provider, ChineseTextStyle.English, CalendarLocale.English),
+                sampleWeekData(calendar, anchor, anchor, provider, ChineseTextStyle.English, CalendarLocale.English, null),
+                "$calendar week default",
             )
         }
     }

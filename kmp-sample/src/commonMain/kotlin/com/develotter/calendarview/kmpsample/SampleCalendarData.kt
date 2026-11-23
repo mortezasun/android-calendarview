@@ -146,7 +146,10 @@ internal fun sampleMonthData(
     }
 }
 
-/** One seven-day snapshot of [calendar] containing [anchorEpochDay]. */
+/**
+ * One seven-day snapshot of [calendar] containing [anchorEpochDay]. [firstDayOfWeek] uses
+ * ISO-8601 numbering (1 = Monday .. 7 = Sunday); `null` keeps the default of the calendar engine.
+ */
 internal fun sampleWeekData(
     calendar: DemoCalendar,
     anchorEpochDay: Long,
@@ -154,37 +157,84 @@ internal fun sampleWeekData(
     hijriDateProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle,
     locale: CalendarLocale? = null,
+    firstDayOfWeek: Int? = null,
 ): CalendarWeekData = when (calendar) {
-    DemoCalendar.Gregorian -> gregorianWeekData(
-        dateEpochDay = anchorEpochDay,
-        todayEpochDay = todayEpochDay,
-        locale = locale,
-    )
+    DemoCalendar.Gregorian -> if (firstDayOfWeek == null) {
+        gregorianWeekData(
+            dateEpochDay = anchorEpochDay,
+            todayEpochDay = todayEpochDay,
+            locale = locale,
+        )
+    } else {
+        gregorianWeekData(
+            dateEpochDay = anchorEpochDay,
+            firstDayOfWeek = firstDayOfWeek,
+            todayEpochDay = todayEpochDay,
+            locale = locale,
+        )
+    }
 
-    DemoCalendar.Hijri -> hijriWeekData(
-        dateEpochDay = anchorEpochDay,
-        todayEpochDay = todayEpochDay,
-        dateProvider = hijriDateProvider,
-        locale = locale,
-    )
+    DemoCalendar.Hijri -> if (firstDayOfWeek == null) {
+        hijriWeekData(
+            dateEpochDay = anchorEpochDay,
+            todayEpochDay = todayEpochDay,
+            dateProvider = hijriDateProvider,
+            locale = locale,
+        )
+    } else {
+        hijriWeekData(
+            dateEpochDay = anchorEpochDay,
+            firstDayOfWeek = firstDayOfWeek,
+            todayEpochDay = todayEpochDay,
+            dateProvider = hijriDateProvider,
+            locale = locale,
+        )
+    }
 
-    DemoCalendar.SolarHijri -> solarHijriWeekData(
-        dateEpochDay = anchorEpochDay,
-        todayEpochDay = todayEpochDay,
-        locale = locale,
-    )
+    DemoCalendar.SolarHijri -> if (firstDayOfWeek == null) {
+        solarHijriWeekData(
+            dateEpochDay = anchorEpochDay,
+            todayEpochDay = todayEpochDay,
+            locale = locale,
+        )
+    } else {
+        solarHijriWeekData(
+            dateEpochDay = anchorEpochDay,
+            firstDayOfWeek = firstDayOfWeek,
+            todayEpochDay = todayEpochDay,
+            locale = locale,
+        )
+    }
 
-    DemoCalendar.SolarHijriNative -> solarHijriNativeWeekData(
-        dateEpochDay = anchorEpochDay,
-        todayEpochDay = todayEpochDay,
-        locale = locale,
-    )
+    DemoCalendar.SolarHijriNative -> if (firstDayOfWeek == null) {
+        solarHijriNativeWeekData(
+            dateEpochDay = anchorEpochDay,
+            todayEpochDay = todayEpochDay,
+            locale = locale,
+        )
+    } else {
+        solarHijriNativeWeekData(
+            dateEpochDay = anchorEpochDay,
+            firstDayOfWeek = firstDayOfWeek,
+            todayEpochDay = todayEpochDay,
+            locale = locale,
+        )
+    }
 
-    DemoCalendar.Chinese -> chineseWeekData(
-        epochDay = anchorEpochDay,
-        style = chineseStyle,
-        todayEpochDay = todayEpochDay,
-    )
+    DemoCalendar.Chinese -> if (firstDayOfWeek == null) {
+        chineseWeekData(
+            epochDay = anchorEpochDay,
+            style = chineseStyle,
+            todayEpochDay = todayEpochDay,
+        )
+    } else {
+        chineseWeekData(
+            epochDay = anchorEpochDay,
+            style = chineseStyle,
+            firstDayOfWeek = firstDayOfWeek,
+            todayEpochDay = todayEpochDay,
+        )
+    }
 }
 
 /** Calendar year that contains [todayEpochDay] in [calendar]. */
@@ -202,7 +252,8 @@ internal fun sampleYear(
 
 /**
  * All months of [year] in [calendar] as generic heatmap snapshots. The synthetic intensity is
- * deterministic so the demo renders the same pattern on every platform.
+ * deterministic so the demo renders the same pattern on every platform. [firstDayOfWeek] uses
+ * ISO-8601 numbering (1 = Monday .. 7 = Sunday); `null` keeps the default of the calendar engine.
  */
 internal fun sampleHeatmapYear(
     calendar: DemoCalendar,
@@ -211,46 +262,102 @@ internal fun sampleHeatmapYear(
     hijriDateProvider: HijriDateProvider,
     chineseStyle: ChineseTextStyle,
     locale: CalendarLocale? = null,
+    firstDayOfWeek: Int? = null,
 ): List<HeatmapMonthData> = when (calendar) {
     DemoCalendar.Gregorian -> (1..12).map { month ->
-        gregorianMonthData(
-            month = GregorianYearMonth(year, month),
-            todayEpochDay = todayEpochDay,
-            locale = locale,
-        ).toHeatmap(::sampleHeatmapIntensity)
+        val yearMonth = GregorianYearMonth(year, month)
+        val data = if (firstDayOfWeek == null) {
+            gregorianMonthData(
+                month = yearMonth,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        } else {
+            gregorianMonthData(
+                month = yearMonth,
+                firstDayOfWeek = firstDayOfWeek,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        }
+        data.toHeatmap(::sampleHeatmapIntensity)
     }
 
     DemoCalendar.Hijri -> (1..12).map { month ->
-        hijriMonthData(
-            month = HijriDate(year, month, 1),
-            todayEpochDay = todayEpochDay,
-            dateProvider = hijriDateProvider,
-            locale = locale,
-        ).toHeatmap(::sampleHeatmapIntensity)
+        val hijriMonth = HijriDate(year, month, 1)
+        val data = if (firstDayOfWeek == null) {
+            hijriMonthData(
+                month = hijriMonth,
+                todayEpochDay = todayEpochDay,
+                dateProvider = hijriDateProvider,
+                locale = locale,
+            )
+        } else {
+            hijriMonthData(
+                month = hijriMonth,
+                firstDayOfWeek = firstDayOfWeek,
+                todayEpochDay = todayEpochDay,
+                dateProvider = hijriDateProvider,
+                locale = locale,
+            )
+        }
+        data.toHeatmap(::sampleHeatmapIntensity)
     }
 
     DemoCalendar.SolarHijri -> (1..12).map { month ->
-        solarHijriMonthData(
-            month = SolarHijriDate(year, month, 1),
-            todayEpochDay = todayEpochDay,
-            locale = locale,
-        ).toHeatmap(::sampleHeatmapIntensity)
+        val solarMonth = SolarHijriDate(year, month, 1)
+        val data = if (firstDayOfWeek == null) {
+            solarHijriMonthData(
+                month = solarMonth,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        } else {
+            solarHijriMonthData(
+                month = solarMonth,
+                firstDayOfWeek = firstDayOfWeek,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        }
+        data.toHeatmap(::sampleHeatmapIntensity)
     }
 
     DemoCalendar.SolarHijriNative -> (1..12).map { month ->
-        solarHijriNativeMonthData(
-            month = SolarHijriDate(year, month, 1),
-            todayEpochDay = todayEpochDay,
-            locale = locale,
-        ).toHeatmap(::sampleHeatmapIntensity)
+        val solarMonth = SolarHijriDate(year, month, 1)
+        val data = if (firstDayOfWeek == null) {
+            solarHijriNativeMonthData(
+                month = solarMonth,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        } else {
+            solarHijriNativeMonthData(
+                month = solarMonth,
+                firstDayOfWeek = firstDayOfWeek,
+                todayEpochDay = todayEpochDay,
+                locale = locale,
+            )
+        }
+        data.toHeatmap(::sampleHeatmapIntensity)
     }
 
-    DemoCalendar.Chinese -> chineseYearHeatmap(
-        year = year,
-        style = chineseStyle,
-        todayEpochDay = todayEpochDay,
-        intensity = ::sampleHeatmapIntensity,
-    )
+    DemoCalendar.Chinese -> if (firstDayOfWeek == null) {
+        chineseYearHeatmap(
+            year = year,
+            style = chineseStyle,
+            todayEpochDay = todayEpochDay,
+            intensity = ::sampleHeatmapIntensity,
+        )
+    } else {
+        chineseYearHeatmap(
+            year = year,
+            style = chineseStyle,
+            firstDayOfWeek = firstDayOfWeek,
+            todayEpochDay = todayEpochDay,
+            intensity = ::sampleHeatmapIntensity,
+        )
+    }
 }
 
 /** Deterministic demo intensity in `0f..0.909f`. */

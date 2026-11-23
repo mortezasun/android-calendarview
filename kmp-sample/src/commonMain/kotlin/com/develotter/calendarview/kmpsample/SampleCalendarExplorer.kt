@@ -130,6 +130,7 @@ private fun SampleMonthSection(
     chineseStyle: ChineseTextStyle,
     secondaryLabel: ((Long) -> String?)?,
 ) {
+    val firstDay = options.firstDayOfWeek
     when (options.calendar) {
         DemoCalendar.Gregorian -> {
             val language = options.locale ?: CalendarLocale.English
@@ -167,17 +168,32 @@ private fun SampleMonthSection(
                     )
                 }
                 SampleMonthFrame(title = state.title(options.locale), state = state) {
-                    GregorianCalendarMonth(
-                        month = state.month,
-                        selection = selection,
-                        onDateClick = onSelect,
-                        todayEpochDay = todayEpochDay,
-                        showHeader = false,
-                        secondaryLabel = secondaryLabel,
-                        locale = options.locale,
-                        keyboardNavigation = true,
-                        onMonthStep = { step -> state.goTo(state.month.plusMonths(step)) },
-                    )
+                    if (firstDay == null) {
+                        GregorianCalendarMonth(
+                            month = state.month,
+                            selection = selection,
+                            onDateClick = onSelect,
+                            todayEpochDay = todayEpochDay,
+                            showHeader = false,
+                            secondaryLabel = secondaryLabel,
+                            locale = options.locale,
+                            keyboardNavigation = true,
+                            onMonthStep = { step -> state.goTo(state.month.plusMonths(step)) },
+                        )
+                    } else {
+                        GregorianCalendarMonth(
+                            month = state.month,
+                            selection = selection,
+                            onDateClick = onSelect,
+                            firstDayOfWeek = firstDay,
+                            todayEpochDay = todayEpochDay,
+                            showHeader = false,
+                            secondaryLabel = secondaryLabel,
+                            locale = options.locale,
+                            keyboardNavigation = true,
+                            onMonthStep = { step -> state.goTo(state.month.plusMonths(step)) },
+                        )
+                    }
                 }
             }
         }
@@ -188,16 +204,30 @@ private fun SampleMonthSection(
                 dateProvider = hijriProvider,
             )
             SampleMonthFrame(title = state.title(options.locale), state = state) {
-                HijriCalendarMonth(
-                    month = state.month,
-                    selection = selection,
-                    onDateClick = onSelect,
-                    todayEpochDay = todayEpochDay,
-                    showHeader = false,
-                    dateProvider = hijriProvider,
-                    secondaryLabel = secondaryLabel,
-                    locale = options.locale,
-                )
+                if (firstDay == null) {
+                    HijriCalendarMonth(
+                        month = state.month,
+                        selection = selection,
+                        onDateClick = onSelect,
+                        todayEpochDay = todayEpochDay,
+                        showHeader = false,
+                        dateProvider = hijriProvider,
+                        secondaryLabel = secondaryLabel,
+                        locale = options.locale,
+                    )
+                } else {
+                    HijriCalendarMonth(
+                        month = state.month,
+                        selection = selection,
+                        onDateClick = onSelect,
+                        firstDayOfWeek = firstDay,
+                        todayEpochDay = todayEpochDay,
+                        showHeader = false,
+                        dateProvider = hijriProvider,
+                        secondaryLabel = secondaryLabel,
+                        locale = options.locale,
+                    )
+                }
             }
         }
 
@@ -207,15 +237,28 @@ private fun SampleMonthSection(
                 currentEpochDay = { todayEpochDay },
             )
             SampleMonthFrame(title = state.title(options.locale), state = state) {
-                SolarHijriCalendarMonth(
-                    month = state.month,
-                    selection = selection,
-                    onDateClick = onSelect,
-                    todayEpochDay = todayEpochDay,
-                    showHeader = false,
-                    secondaryLabel = secondaryLabel,
-                    locale = options.locale,
-                )
+                if (firstDay == null) {
+                    SolarHijriCalendarMonth(
+                        month = state.month,
+                        selection = selection,
+                        onDateClick = onSelect,
+                        todayEpochDay = todayEpochDay,
+                        showHeader = false,
+                        secondaryLabel = secondaryLabel,
+                        locale = options.locale,
+                    )
+                } else {
+                    SolarHijriCalendarMonth(
+                        month = state.month,
+                        selection = selection,
+                        onDateClick = onSelect,
+                        firstDayOfWeek = firstDay,
+                        todayEpochDay = todayEpochDay,
+                        showHeader = false,
+                        secondaryLabel = secondaryLabel,
+                        locale = options.locale,
+                    )
+                }
             }
         }
 
@@ -225,15 +268,28 @@ private fun SampleMonthSection(
                 currentEpochDay = { todayEpochDay },
             )
             SampleMonthFrame(title = state.title(options.locale), state = state) {
-                SolarHijriNativeCalendarMonth(
-                    month = state.month,
-                    selection = selection,
-                    onDateClick = onSelect,
-                    todayEpochDay = todayEpochDay,
-                    showHeader = false,
-                    secondaryLabel = secondaryLabel,
-                    locale = options.locale,
-                )
+                if (firstDay == null) {
+                    SolarHijriNativeCalendarMonth(
+                        month = state.month,
+                        selection = selection,
+                        onDateClick = onSelect,
+                        todayEpochDay = todayEpochDay,
+                        showHeader = false,
+                        secondaryLabel = secondaryLabel,
+                        locale = options.locale,
+                    )
+                } else {
+                    SolarHijriNativeCalendarMonth(
+                        month = state.month,
+                        selection = selection,
+                        onDateClick = onSelect,
+                        firstDayOfWeek = firstDay,
+                        todayEpochDay = todayEpochDay,
+                        showHeader = false,
+                        secondaryLabel = secondaryLabel,
+                        locale = options.locale,
+                    )
+                }
             }
         }
 
@@ -247,15 +303,28 @@ private fun SampleMonthSection(
                 today = { todayEpochDay },
             )
             SampleMonthFrame(title = state.title(chineseStyle), state = state) {
-                ChineseCalendarMonth(
-                    month = state.month,
-                    selection = selection,
-                    onDateClick = onSelect,
-                    style = chineseStyle,
-                    todayEpochDay = todayEpochDay,
-                    showHeader = false,
-                    secondaryLabel = secondaryLabel,
-                )
+                if (firstDay == null) {
+                    ChineseCalendarMonth(
+                        month = state.month,
+                        selection = selection,
+                        onDateClick = onSelect,
+                        style = chineseStyle,
+                        todayEpochDay = todayEpochDay,
+                        showHeader = false,
+                        secondaryLabel = secondaryLabel,
+                    )
+                } else {
+                    ChineseCalendarMonth(
+                        month = state.month,
+                        selection = selection,
+                        onDateClick = onSelect,
+                        style = chineseStyle,
+                        firstDayOfWeek = firstDay,
+                        todayEpochDay = todayEpochDay,
+                        showHeader = false,
+                        secondaryLabel = secondaryLabel,
+                    )
+                }
             }
         }
     }
@@ -275,6 +344,7 @@ private fun SampleWeekSection(
     val week = remember(
         options.calendar,
         options.locale,
+        options.firstDayOfWeek,
         anchorEpochDay,
         todayEpochDay,
         hijriProvider,
@@ -288,6 +358,7 @@ private fun SampleWeekSection(
                 hijriProvider,
                 chineseStyle,
                 options.locale,
+                options.firstDayOfWeek,
             )
         }
     }

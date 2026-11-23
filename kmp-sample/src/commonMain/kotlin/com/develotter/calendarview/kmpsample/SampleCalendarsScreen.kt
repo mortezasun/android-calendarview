@@ -31,6 +31,7 @@ internal data class CalendarExplorerOptions(
     val chineseScript: DemoChineseScript,
     val chineseLeapMonthRequest: Int,
     val locale: CalendarLocale? = null,
+    val firstDayOfWeek: Int? = null,
 )
 
 @Composable
@@ -44,12 +45,14 @@ internal fun SampleCalendarsScreen(
 ) {
     var secondaryName by rememberSaveable { mutableStateOf<String?>(null) }
     var viewName by rememberSaveable { mutableStateOf(DemoCalendarView.Month.name) }
+    var firstDayName by rememberSaveable { mutableStateOf(DemoFirstDayOfWeek.CalendarDefault.name) }
     var selectedDay by rememberSaveable { mutableStateOf<Long?>(null) }
     var hijriOffset by rememberSaveable { mutableStateOf(0) }
     var scriptName by rememberSaveable { mutableStateOf(DemoChineseScript.Simplified.name) }
     var leapMonthRequest by rememberSaveable { mutableStateOf(0) }
 
     val secondary = secondaryName?.let(DemoCalendar::valueOf)?.takeUnless { it == calendar }
+    val firstDay = DemoFirstDayOfWeek.valueOf(firstDayName)
     val options = CalendarExplorerOptions(
         calendar = calendar,
         secondaryCalendar = secondary,
@@ -59,6 +62,7 @@ internal fun SampleCalendarsScreen(
         chineseScript = DemoChineseScript.valueOf(scriptName),
         chineseLeapMonthRequest = leapMonthRequest,
         locale = locale,
+        firstDayOfWeek = firstDay.iso,
     )
 
     Column(
@@ -75,6 +79,14 @@ internal fun SampleCalendarsScreen(
             onSelect = { secondaryName = it?.name },
         )
         DemoChoices("View", DemoCalendarView.entries, options.view, { it.name }) { viewName = it.name }
+        DemoChoices("First day", DemoFirstDayOfWeek.entries, firstDay, { it.label }) {
+            firstDayName = it.name
+        }
+        Text(
+            text = sampleWeekdayOrderPreview(firstDay.iso)
+                ?: "Each calendar uses its own default first day",
+            style = MaterialTheme.typography.bodySmall,
+        )
 
         if (calendar == DemoCalendar.Hijri) {
             DemoChoices("Hijri day offset", listOf(-1, 0, 1), hijriOffset, Int::toString) {
