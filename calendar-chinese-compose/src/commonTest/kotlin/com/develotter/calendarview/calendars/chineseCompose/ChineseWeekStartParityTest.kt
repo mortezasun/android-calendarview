@@ -50,4 +50,24 @@ class ChineseWeekStartParityTest {
             }
         }
     }
+
+    @Test
+    fun monthHeatmapAndOverlayRejectInvalidIsoStartDays() {
+        val month = ChineseMonth.of(2023, 2, true)
+        val anchor = month.startEpochDay()
+        for (firstDay in listOf(0, 8)) {
+            assertFailsWith<IllegalArgumentException> {
+                chineseMonthData(month, ChineseTextStyle.English, firstDay, anchor)
+            }
+            assertFailsWith<IllegalArgumentException> {
+                chineseMonthHeatmap(2023, 2, true, ChineseTextStyle.English, firstDay, anchor)
+            }
+            assertFailsWith<IllegalArgumentException> {
+                chineseYearHeatmap(2023, ChineseTextStyle.English, firstDay, anchor)
+            }
+            assertFailsWith<IllegalArgumentException> {
+                gregorianOverlayData(GregorianYearMonth(2023, 3), firstDay, anchor)
+            }
+        }
+    }
 }

@@ -415,13 +415,22 @@ fun chineseMonthOfOrNull(month: GregorianYearMonth): ChineseMonth? {
 }
 
 /** Seven localized short weekday labels in grid order starting at [firstDayOfWeek] (ISO 1..7). */
-internal fun chineseWeekdayLabels(firstDayOfWeek: Int): List<String> = List(7) { offset ->
-    ChinesePlatform.weekdayShortLabel((firstDayOfWeek - 1 + offset) % 7 + 1)
+internal fun chineseWeekdayLabels(firstDayOfWeek: Int): List<String> {
+    requireValidChineseFirstDayOfWeek(firstDayOfWeek)
+    return List(7) { offset ->
+        ChinesePlatform.weekdayShortLabel((firstDayOfWeek - 1 + offset) % 7 + 1)
+    }
 }
 
-/** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek]. */
-internal fun chineseDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int =
-    (GregorianYearMonth.isoWeekdayFromEpochDay(epochDay) - firstDayOfWeek + 7) % 7
+/** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek] (ISO 1..7). */
+internal fun chineseDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int {
+    requireValidChineseFirstDayOfWeek(firstDayOfWeek)
+    return (GregorianYearMonth.isoWeekdayFromEpochDay(epochDay) - firstDayOfWeek).mod(7)
+}
+
+private fun requireValidChineseFirstDayOfWeek(firstDayOfWeek: Int) {
+    require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
+}
 
 /** ISO `yyyy-MM-dd` rendering of an epoch day for screen-reader labels. */
 internal fun chineseIsoDate(epochDay: Long): String {
