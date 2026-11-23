@@ -27,6 +27,7 @@ internal data class HeatmapOptions(
     val palette: DemoHeatmapPalette,
     val cells: DemoHeatmapCells,
     val locale: CalendarLocale? = null,
+    val firstDayOfWeek: Int? = null,
 )
 
 @Composable
@@ -45,14 +46,17 @@ internal fun SampleHeatmapsScreen(
     var orientationName by rememberSaveable { mutableStateOf(DemoHeatmapOrientation.WeeksAsColumns.name) }
     var paletteName by rememberSaveable { mutableStateOf(DemoHeatmapPalette.Green.name) }
     var cellsName by rememberSaveable { mutableStateOf(DemoHeatmapCells.Rounded.name) }
+    var firstDayName by rememberSaveable { mutableStateOf(DemoFirstDayOfWeek.CalendarDefault.name) }
     var details by rememberSaveable(calendarName) { mutableStateOf<String?>(null) }
 
+    val firstDay = DemoFirstDayOfWeek.valueOf(firstDayName)
     val options = HeatmapOptions(
         calendar = DemoCalendar.valueOf(calendarName),
         orientation = DemoHeatmapOrientation.valueOf(orientationName),
         palette = DemoHeatmapPalette.valueOf(paletteName),
         cells = DemoHeatmapCells.valueOf(cellsName),
         locale = locale,
+        firstDayOfWeek = firstDay.iso,
     )
 
     Column(
@@ -73,6 +77,14 @@ internal fun SampleHeatmapsScreen(
         DemoChoices("Cells", DemoHeatmapCells.entries, options.cells, { it.name }) {
             cellsName = it.name
         }
+        DemoChoices("First day", DemoFirstDayOfWeek.entries, firstDay, { it.label }) {
+            firstDayName = it.name
+        }
+        Text(
+            text = sampleWeekdayOrderPreview(firstDay.iso)
+                ?: "Each calendar uses its own default first day",
+            style = MaterialTheme.typography.bodySmall,
+        )
 
         renderHeatmap(options) { details = it }
         Text(details ?: "Select a cell to inspect its activity.")
