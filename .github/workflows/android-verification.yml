@@ -26,7 +26,7 @@ jobs:
           - check: assemble
             tasks: ':calendarviewsample:assembleDebug assembleAndroidMain :calendar-chinese-native:jvmJar :calendar-bom:generatePomFileForCalendarBomPublication'
           - check: unit-tests
-            tasks: 'jvmTest testAndroidHostTest :calendarviewsample:testDebugUnitTest jsNodeTest jsBrowserTest :calendar-chinese-native:wasmJsNodeTest wasmJsBrowserTest'
+            tasks: 'jvmTest :kmp-sample:desktopTest testAndroidHostTest :calendarviewsample:testDebugUnitTest jsNodeTest jsBrowserTest :calendar-chinese-native:wasmJsNodeTest wasmJsBrowserTest'
           - check: native-engine
             tasks: ':calendar-chinese-native:linuxX64Test :calendar-chinese-native:linuxArm64MainKlibrary :calendar-chinese-native:mingwX64MainKlibrary'
           - check: lint

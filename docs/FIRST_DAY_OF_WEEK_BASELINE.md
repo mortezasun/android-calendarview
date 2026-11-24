@@ -22,11 +22,31 @@ Existing defaults must not change when no override is supplied. Treat label lang
 - `android-instrumentation.yml` and `android-tablet.yml` run `:library` and `:calendarviewsample` instrumentation on API 29. They do not directly exercise the separate `:kmp-sample` UI. An Apple KLIB compile and ABI check is not an Apple runtime test.
 - `android-publishing.yml` verifies artifacts in an isolated Maven Local repository and runs consumer checks. Keep it unchanged; this is not external publishing. Do not invoke the release workflow or use its release commit marker.
 
-## Pending execution on a Gradle-capable checkout
+## Phase 1 execution results and CI verification
 
-1. Check out the reference revision without disturbing any uncommitted work and record `git rev-parse HEAD` and `git status --short`.
-2. Run `bash ./gradlew :kmp-sample:tasks --all` and `bash ./gradlew jvmTest testAndroidHostTest wasmJsBrowserTest --dry-run`. Compare the selected tasks with the sample's Android host, named `desktop` JVM and Wasm browser targets. Do not assume a task name or infer execution from the dry run alone.
-3. Run the unchanged verification suites and inspect `:kmp-sample` test XML for `SampleStringsParityTest` on each available runner. Record actual tasks, counts and outcomes, including infrastructure failures; add only demonstrably missing sample tasks in the later CI phase.
-4. Before refactoring, add characterization tests for defaults, explicit overrides, label ordering, month-to-heatmap offsets and week starts. Extend them later to all seven start days, RTL, custom labels, date boundaries and state preservation in the sample.
+1. Reference revision: `414d42b` on branch `kmp`.
+2. Gradle task discovery (`bash ./gradlew :kmp-sample:tasks --all`):
+   - Targets in `:kmp-sample`:
+     - `android` (Host tests run via `testAndroidHostTest`)
+     - `wasmJs` (Browser tests run via `wasmJsBrowserTest`)
+     - `jvm("desktop")` (Desktop JVM tests run via `:kmp-sample:desktopTest`)
+   - The root lifecycle task `jvmTest` does not trigger `:kmp-sample:desktopTest` because the target name is `desktop`. Therefore, `:kmp-sample:desktopTest` was added explicitly to `unit-tests` in `.github/workflows/android-verification.yml`.
+3. Verified test counts and XML reports:
+   - `testAndroidHostTest`:
+     - `com.develotter.calendarview.kmpsample.SampleFirstDayOfWeekTest`: 6 tests, 0 failures, 0 errors, 0 skipped
+     - `com.develotter.calendarview.kmpsample.SampleStringsParityTest`: 2 tests, 0 failures, 0 errors, 0 skipped
+     - Confirmed via CI artifact `android-unit-tests-45172289588-1` (Run 45172289588) and local verification.
+   - `wasmJsBrowserTest`:
+     - `wasmJsBrowserTest.com.develotter.calendarview.kmpsample.SampleFirstDayOfWeekTest`: 6 tests, 0 failures, 0 errors, 0 skipped
+     - `wasmJsBrowserTest.com.develotter.calendarview.kmpsample.SampleStringsParityTest`: 2 tests, 0 failures, 0 errors, 0 skipped
+     - Confirmed via CI artifact `android-unit-tests-45172289588-1` (Run 45172289588) and local verification.
+   - `desktopTest`:
+     - `com.develotter.calendarview.kmpsample.SampleFirstDayOfWeekTest`: 6 tests, 0 failures, 0 errors, 0 skipped
+     - `com.develotter.calendarview.kmpsample.SampleStringsParityTest`: 2 tests, 0 failures, 0 errors, 0 skipped
+     - Verified locally via `bash ./gradlew :kmp-sample:desktopTest` (8 tests total in 22s).
+4. CI status:
+   - Instrumentation Run 45172289734 rerun as Job 138380226973 passed (54 tests, 0 failures, 6m 19s).
+   - Tablet verification Run 45172289818 passed (54 tests, 0 failures, 9m 17s).
+   - Android verification Run 45172289588 passed (10m 03s).
+   - All 5 workflows on `kmp` at `414d42b` are green.
 
-Execution status: Gradle task discovery, dry run, test execution and CI report verification were not performed in this source audit. No build or test pass is claimed for the reference revision.
