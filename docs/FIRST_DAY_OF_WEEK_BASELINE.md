@@ -49,4 +49,19 @@ Existing defaults must not change when no override is supplied. Treat label lang
    - Tablet verification Run 45172289818 passed (54 tests, 0 failures, 9m 17s).
    - Android verification Run 45172289588 passed (10m 03s).
    - All 5 workflows on `kmp` at `414d42b` are green.
+   - Commit `e854e1b` confirmed all 5 workflows green, including `:kmp-sample:desktopTest` in CI.
+
+## Phase 2: Audit of views and week arithmetic
+
+| File / Component | Current behavior regarding week start / offsets | Action required / Impact |
+| --- | --- | --- |
+| `library/src/commonMain/kotlin/com/develotter/calendarview/compose/CalendarWeekGrid.kt` | Renders 7 consecutive `CalendarDayCell` items with `firstDayOffset = 0` via `CalendarMonthGrid`. Requires `days.size == 7`. Does not compute week bounds or offsets itself. | None. Delegates layout to `CalendarMonthGrid` with zero offset; caller/engine provides the pre-computed week cells. |
+| `library/src/commonMain/kotlin/com/develotter/calendarview/compose/CalendarAgenda.kt` | Vertical `LazyColumn` of `CalendarDayCell` items. No columns, weekday labels, or week offsets. | None. Pure day list without weekday grid alignment. |
+| `library/src/commonMain/kotlin/com/develotter/calendarview/compose/CalendarMonthPicker.kt` | 4x3 month selector grid (months 1..12) for a given year. No day cells, weekday labels, or week offsets. | None. Pure month-level selector. |
+| `library/src/commonMain/kotlin/com/develotter/calendarview/compose/CalendarMonthGrid.kt` / `CalendarMonthCells.kt` | Stateless month grid consuming caller-supplied `weekdayLabels: List<String>` (size 7) and `firstDayOffset: Int` (0..6). Does not calculate offsets or reorder labels independently. | None in rendering. Offsets and label ordering remain supplied by the calendar engine month snapshots (`CalendarMonthData`). |
+| `library/src/commonMain/kotlin/com/develotter/calendarview/compose/CalendarMonthColumns.kt` | Adaptive grid container (`calendarMonthColumns`) deriving column count from available width and `minMonthWidth`. Layout operates on whole month items. | None. Pure container layout on month level. |
+| `library/src/commonMain/kotlin/com/develotter/calendarview/selection/CalendarSelectionPresets.kt` | Derives `thisWeek` via private helper `weekStartFor(todayEpochDay, firstDayOfWeek) = epochDay - (isoWeekday(epochDay) - firstDayOfWeek).mod(7)` with `require(firstDayOfWeek in 1..7)`. | Needs shared API. Will replace private `weekStartFor` with the centralized `:library` week alignment helper in Phase 3. |
+| `library/src/commonMain/kotlin/com/develotter/calendarview/selection/CalendarWeekNumbering.kt` | Computes ISO-8601 week numbers and week years (`isoWeekNumber`, `isoWeekYear`). By ISO-8601 specification, week 1 contains the first Thursday and weeks strictly start on Monday. | None. ISO-8601 standard strictly defines Monday start; independent of user-configurable visual week starts. |
+| `library/src/commonMain/kotlin/com/develotter/calendarview/selection/EpochDayMath.kt` | Computes `isoWeekday(epochDay): Int` (1..7, Monday=1..Sunday=7) overflow-safely. | Serves as the mathematical foundation in `:library` for the shared public week start and offset helpers in Phase 3. |
+| Engine week & month data (`calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native`, `calendar-chinese-compose`) | Each module currently duplicates local copies of `dayOfWeekOffset(epochDay, firstDayOfWeek)` and `(firstDayOfWeek - 1 + offset).mod(7) + 1` label rotation. | Will be unified in Phase 3 to delegate to the shared public `:library` helpers once published in `:library`. |
 
