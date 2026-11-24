@@ -256,6 +256,12 @@ a non-Gregorian month range stays the engine's job (`*MonthState` plus the month
 `lastSevenDays` is relative to `today`, not to the configured first weekday. `CalendarRangePolicy`
 is unaffected, so apply it yourself when a preset must be rejected for a screen's limits.
 
+For custom calendar integrations or host wrappers that need the same ISO `1..7` week-start math,
+`:library` also exposes `requireValidFirstDayOfWeek(firstDayOfWeek)`,
+`firstDayOffset(epochDay, firstDayOfWeek)`, `weekStartEpochDay(epochDay, firstDayOfWeek)`,
+`orderedIsoWeekdays(firstDayOfWeek)`, and `weekdayLabelsStartingAt(firstDayOfWeek) { iso -> ... }`
+in `com.develotter.calendarview.selection`.
+
 ---
 
 ## Month Navigation

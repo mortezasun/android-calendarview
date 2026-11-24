@@ -376,6 +376,14 @@ public final class com.develotter.calendarview.selection.CalendarWeekNumberingKt
   public static final int isoWeekYear(long);
 }
 
+public final class com.develotter.calendarview.selection.CalendarWeekStartKt {
+  public static final int requireValidFirstDayOfWeek(int);
+  public static final int firstDayOffset(long, int);
+  public static final long weekStartEpochDay(long, int);
+  public static final java.util.List<java.lang.Integer> orderedIsoWeekdays(int);
+  public static final java.util.List<java.lang.String> weekdayLabelsStartingAt(int, kotlin.jvm.functions.Function1<? super java.lang.Integer, java.lang.String>);
+}
+
 public final class com.develotter.calendarview.selection.CivilDate {
   public com.develotter.calendarview.selection.CivilDate(int, int, int);
   public final int getYear();

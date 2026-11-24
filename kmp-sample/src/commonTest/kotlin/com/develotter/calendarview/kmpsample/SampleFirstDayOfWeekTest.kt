@@ -1,5 +1,6 @@
 package com.develotter.calendarview.kmpsample
 
+import com.develotter.calendarview.calendars.chineseNative.ChineseCalendarEngine
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.locale.CalendarLocale
 import kotlin.test.Test
@@ -130,5 +131,89 @@ class SampleFirstDayOfWeekTest {
             listOf<Int?>(null, 1, 2, 3, 4, 5, 6, 7),
             DemoFirstDayOfWeek.entries.map { it.iso },
         )
+        for (choice in DemoFirstDayOfWeek.entries) {
+            assertEquals(choice, DemoFirstDayOfWeek.valueOf(choice.name))
+        }
+    }
+
+    @Test
+    fun rtlAndNonEnglishLocalesPreserveWeekdayRotationAcrossAllSevenStarts() {
+        val provider = sampleHijriProvider(0)
+        val locales = listOf(
+            CalendarLocale.Arabic,
+            CalendarLocale.Persian,
+            CalendarLocale.German,
+        )
+        for (locale in locales) {
+            for (calendar in DemoCalendar.entries) {
+                val mondayLabels = sampleMonthData(
+                    calendar,
+                    anchor,
+                    anchor,
+                    provider,
+                    ChineseTextStyle.SimplifiedChinese,
+                    locale,
+                    1,
+                ).weekdayLabels
+                for (firstDay in 1..7) {
+                    val data = sampleMonthData(
+                        calendar,
+                        anchor,
+                        anchor,
+                        provider,
+                        ChineseTextStyle.SimplifiedChinese,
+                        locale,
+                        firstDay,
+                    )
+                    val expectedLabels = mondayLabels.drop(firstDay - 1) + mondayLabels.take(firstDay - 1)
+                    assertEquals(expectedLabels, data.weekdayLabels, "$calendar $locale labels for $firstDay")
+                    assertEquals(
+                        (isoWeekday(data.days.first().epochDay) - firstDay).mod(7),
+                        data.firstDayOffset,
+                        "$calendar $locale offset for $firstDay",
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
+    fun chineseBoundariesAndLeapMonthAlignAcrossAllSevenStarts() {
+        val provider = sampleHijriProvider(0)
+        // Lower boundary month, upper boundary month, and 2023-03-22 (Chinese leap 2nd month).
+        val boundaryAndLeapAnchors = listOf(
+            ChineseCalendarEngine.MIN_EPOCH_DAY,
+            ChineseCalendarEngine.MAX_EPOCH_DAY,
+            19_438L,
+        )
+        for (testAnchor in boundaryAndLeapAnchors) {
+            val mondayLabels = sampleMonthData(
+                DemoCalendar.Chinese,
+                testAnchor,
+                testAnchor,
+                provider,
+                ChineseTextStyle.English,
+                CalendarLocale.English,
+                1,
+            ).weekdayLabels
+            for (firstDay in 1..7) {
+                val data = sampleMonthData(
+                    DemoCalendar.Chinese,
+                    testAnchor,
+                    testAnchor,
+                    provider,
+                    ChineseTextStyle.English,
+                    CalendarLocale.English,
+                    firstDay,
+                )
+                val expectedLabels = mondayLabels.drop(firstDay - 1) + mondayLabels.take(firstDay - 1)
+                assertEquals(expectedLabels, data.weekdayLabels, "Chinese $testAnchor labels for $firstDay")
+                assertEquals(
+                    (isoWeekday(data.days.first().epochDay) - firstDay).mod(7),
+                    data.firstDayOffset,
+                    "Chinese $testAnchor offset for $firstDay",
+                )
+            }
+        }
     }
 }

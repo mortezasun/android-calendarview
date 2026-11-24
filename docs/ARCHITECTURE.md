@@ -98,7 +98,7 @@ State is managed declaratively and cleanly separated from UI rendering:
 - **State Preservation:**
   `rememberCalendarSelectionState` uses `rememberSaveable` with `CalendarSelectionSnapshot` saver, ensuring selections survive activity recreation and configuration changes (e.g., screen rotation, dark/light theme toggle).
 - **Picker and legend in the samples:** `:kmp-sample` wires `CalendarMonthPicker` to its Gregorian month state (jump-to-month, year stepping) and renders `HeatmapLegend` from the same `HeatmapBuckets` its heatmap uses, so the shipped demos exercise both APIs.
-- **Derived presets:** `CalendarSelection.presets(firstDayOfWeek, todayEpochDay)` returns today, the aligned seven-day week, the civil Gregorian month and the last seven days as epoch-day ranges. The function is pure: the caller passes the clock value and first weekday, so `:library` never reaches a platform date API and `CalendarRangePolicy` keeps its existing role.
+- **Derived presets & week alignment:** `CalendarSelection.presets(firstDayOfWeek, todayEpochDay)` returns today, the aligned seven-day week, the civil Gregorian month and the last seven days as epoch-day ranges. Shared week-start math (`requireValidFirstDayOfWeek`, `firstDayOffset`, `weekStartEpochDay`, `orderedIsoWeekdays`, `weekdayLabelsStartingAt`) lives in `:library` ([ADR 0009](decisions/0009-first-day-of-week-alignment-api.md)) and is delegated to by all Compose calendar modules without altering engine defaults or `:calendar-chinese-native` independence.
 
 ---
 

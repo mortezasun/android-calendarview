@@ -9,6 +9,7 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
 import com.develotter.calendarview.selection.isoWeekNumber
+import com.develotter.calendarview.selection.weekStartEpochDay
 
 /** Chinese seven-day snapshot; lists are read-only and [days] are consecutive epoch days. */
 @Immutable
@@ -37,8 +38,7 @@ fun chineseWeekData(
     useIsoWeekNumber: Boolean = false,
     isDateEnabled: (Long) -> Boolean = { true },
 ): ChineseWeekData {
-    require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
-    val start = epochDay - chineseDayOfWeekOffset(epochDay, firstDayOfWeek)
+    val start = weekStartEpochDay(epochDay, firstDayOfWeek)
     val end = start + 6
     if (!ChineseCalendarEngine.isSupported(start) || !ChineseCalendarEngine.isSupported(end)) {
         throw ChineseDateOutOfRangeException(

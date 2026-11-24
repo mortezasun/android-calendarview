@@ -1,8 +1,15 @@
 # Project status
 
-Last updated: 2026-11-20 (UTC)
+Last updated: 2026-11-24 (UTC)
 Version: `3.1.0-beta` pre-release preparation (latest tagged release: `3.0.0` at `a0c686e`; `master`/`kmp` base `a116b81`)
 Branches: `master` and `kmp` synced at `c8b1287` (following `e5e7c73`); `3.1.0-beta` tag and GitHub Pre-Release await manual debug APK verification and explicit release approval.
+
+## First-day-of-week unification & KMP sample configurability (`kmp`, 2026-11-24)
+
+- **Shared `:library` API ([ADR 0009](decisions/0009-first-day-of-week-alignment-api.md)):** Added `requireValidFirstDayOfWeek`, `firstDayOffset`, `weekStartEpochDay`, `orderedIsoWeekdays`, and `weekdayLabelsStartingAt` in `com.develotter.calendarview.selection` (`CalendarWeekStart.kt`).
+- **Engine delegation:** `CalendarSelectionPresets`, `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri-native` (and `:calendar-solarHijri` facade), and `:calendar-chinese-compose` delegate week-start, offset, and weekday-label rotation to `:library`, preserving all existing engine defaults and keeping `:calendar-chinese-native` pure and independent.
+- **KMP sample (`:kmp-sample`):** First day of week (`Calendar default` + ISO `Monday`..`Sunday`) is selectable across all 5 demo calendars (`Gregorian`, `Hijri`, `SolarHijri`, `SolarHijriNative`, `Chinese`) on Playground, Preview Dialog, Calendars, and Heatmaps, with `rememberSaveable` state persistence.
+- **Verification:** `jvmTest`, `:kmp-sample:desktopTest`, `testAndroidHostTest`, `:calendarviewsample:testDebugUnitTest`, `jsNodeTest`, `jsBrowserTest`, `:calendar-chinese-native:wasmJsNodeTest`, `wasmJsBrowserTest`, `:calendar-chinese-native:linuxX64Test`, `lint`, `:calendarviewsample:compileDebugAndroidTestKotlin`, `check-commonmain-purity.sh`, `api-check.sh --update`, and `klib-api-check.sh --update` all passed locally on Linux.
 
 ## Library extension batch (T1-T6, `kmp`, 2026-11-20)
 

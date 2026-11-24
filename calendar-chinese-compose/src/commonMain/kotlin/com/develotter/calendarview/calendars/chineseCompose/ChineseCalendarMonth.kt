@@ -19,6 +19,8 @@ import com.develotter.calendarview.compose.CalendarMonthData
 import com.develotter.calendarview.compose.CalendarMonthGrid
 import com.develotter.calendarview.locale.CalendarLocale
 import com.develotter.calendarview.selection.CalendarSelection
+import com.develotter.calendarview.selection.firstDayOffset
+import com.develotter.calendarview.selection.weekdayLabelsStartingAt
 
 /** Localized Chinese month snapshot; lists are read-only. */
 @Immutable
@@ -415,22 +417,14 @@ fun chineseMonthOfOrNull(month: GregorianYearMonth): ChineseMonth? {
 }
 
 /** Seven localized short weekday labels in grid order starting at [firstDayOfWeek] (ISO 1..7). */
-internal fun chineseWeekdayLabels(firstDayOfWeek: Int): List<String> {
-    requireValidChineseFirstDayOfWeek(firstDayOfWeek)
-    return List(7) { offset ->
-        ChinesePlatform.weekdayShortLabel((firstDayOfWeek - 1 + offset) % 7 + 1)
+internal fun chineseWeekdayLabels(firstDayOfWeek: Int): List<String> =
+    weekdayLabelsStartingAt(firstDayOfWeek) { isoWeekday ->
+        ChinesePlatform.weekdayShortLabel(isoWeekday)
     }
-}
 
 /** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek] (ISO 1..7). */
-internal fun chineseDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int {
-    requireValidChineseFirstDayOfWeek(firstDayOfWeek)
-    return (GregorianYearMonth.isoWeekdayFromEpochDay(epochDay) - firstDayOfWeek).mod(7)
-}
-
-private fun requireValidChineseFirstDayOfWeek(firstDayOfWeek: Int) {
-    require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
-}
+internal fun chineseDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int =
+    firstDayOffset(epochDay, firstDayOfWeek)
 
 /** ISO `yyyy-MM-dd` rendering of an epoch day for screen-reader labels. */
 internal fun chineseIsoDate(epochDay: Long): String {

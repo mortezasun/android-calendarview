@@ -65,3 +65,18 @@ Existing defaults must not change when no override is supplied. Treat label lang
 | `library/src/commonMain/kotlin/com/develotter/calendarview/selection/EpochDayMath.kt` | Computes `isoWeekday(epochDay): Int` (1..7, Monday=1..Sunday=7) overflow-safely. | Serves as the mathematical foundation in `:library` for the shared public week start and offset helpers in Phase 3. |
 | Engine week & month data (`calendar-gregorian`, `calendar-hijri`, `calendar-solarHijri`, `calendar-solarHijri-native`, `calendar-chinese-compose`) | Each module currently duplicates local copies of `dayOfWeekOffset(epochDay, firstDayOfWeek)` and `(firstDayOfWeek - 1 + offset).mod(7) + 1` label rotation. | Will be unified in Phase 3 to delegate to the shared public `:library` helpers once published in `:library`. |
 
+## Phases 3–5 completion & acceptance
+
+- **Phase 3 (Shared `:library` API & module migration):**
+  - Documented in `docs/decisions/0009-first-day-of-week-alignment-api.md`.
+  - Implemented `CalendarWeekStart.kt` (`requireValidFirstDayOfWeek`, `firstDayOffset`, `weekStartEpochDay`, `orderedIsoWeekdays`, `weekdayLabelsStartingAt`) and `CalendarWeekStartTest.kt`.
+  - Delegated `CalendarSelectionPresets`, `:calendar-gregorian`, `:calendar-hijri`, `:calendar-solarHijri-native`, and `:calendar-chinese-compose` to `:library` while keeping `:calendar-chinese-native` pure and all defaults unchanged.
+  - Updated `api/*.api` and `api/klib/*.abi` dumps (`scripts/api-check.sh --update`, `scripts/klib-api-check.sh --update`).
+- **Phase 4 (Sample hardening & edge cases):**
+  - Added RTL/non-English locale coverage (`Arabic`, `Persian`, `German`), Chinese boundary/leap-month coverage (`MIN_EPOCH_DAY`, `MAX_EPOCH_DAY`, leap 2nd month 2023), and `DemoFirstDayOfWeek` state-key round-trip checks in `SampleFirstDayOfWeekTest.kt`.
+  - Added `firstDayOfWeekSurvivesSavedStateRestoration` in `CalendarSampleStateRestorationTest.kt`.
+- **Phase 5 (Verification & acceptance checklist):**
+  - Defaults unchanged when `firstDayOfWeek` is omitted or `null`.
+  - All 7 ISO start days (`1..7`) selectable across all 5 demo calendars on Playground, Dialog, Calendars, and Heatmaps in `:kmp-sample`.
+  - All local verification suites (`jvmTest`, `:kmp-sample:desktopTest`, `testAndroidHostTest`, `:calendarviewsample:testDebugUnitTest`, `jsNodeTest`, `jsBrowserTest`, `:calendar-chinese-native:wasmJsNodeTest`, `wasmJsBrowserTest`, `:calendar-chinese-native:linuxX64Test`, `lint`, `:calendarviewsample:compileDebugAndroidTestKotlin`), purity check, and API/KLIB checks passed.
+

@@ -128,5 +128,4 @@ public final class com.develotter.calendarview.calendars.hijri.compose.HijriWeek
   public static final com.develotter.calendarview.calendars.hijri.compose.HijriWeekData hijriWeekData(long, int, long, com.develotter.calendarview.calendars.hijri.HijriDateProvider, com.develotter.calendarview.locale.CalendarLocale, boolean, kotlin.jvm.functions.Function1<? super java.lang.Long, java.lang.Boolean>);
   public static final java.util.List<java.lang.String> hijriWeekdayLabels(int, com.develotter.calendarview.locale.CalendarLocale);
   public static final int hijriDayOfWeekOffset(long, int);
-  public static final int isoWeekday(long);
 }

@@ -7,7 +7,11 @@ import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
 import com.develotter.calendarview.locale.CalendarLocale
+import com.develotter.calendarview.selection.firstDayOffset
 import com.develotter.calendarview.selection.isoWeekNumber
+import com.develotter.calendarview.selection.requireValidFirstDayOfWeek
+import com.develotter.calendarview.selection.weekStartEpochDay
+import com.develotter.calendarview.selection.weekdayLabelsStartingAt
 
 /** Localized Gregorian seven-day snapshot; treat lists as read-only. */
 @Immutable
@@ -36,13 +40,13 @@ fun gregorianWeekData(
     useIsoWeekNumber: Boolean = false,
     isDateEnabled: (Long) -> Boolean = { true },
 ): GregorianWeekData {
-    val layout = GregorianWeekLayout(firstDayOfWeek)
-    val start = layout.startOfWeek(dateEpochDay)
+    val validFirstDay = requireValidFirstDayOfWeek(firstDayOfWeek)
+    val start = weekStartEpochDay(dateEpochDay, validFirstDay)
     val end = start + 6
     val weekNumber = if (useIsoWeekNumber) {
         isoWeekNumber(start)
     } else {
-        weekOfWeekBasedYear(start, layout)
+        weekOfWeekBasedYear(start, validFirstDay)
     }
     return GregorianWeekData(
         title = if (locale == null) {
@@ -52,7 +56,7 @@ fun gregorianWeekData(
             "${GregorianLabels.shortDayMonth(locale, start)} – " +
                 GregorianLabels.shortDayMonthYear(locale, end)
         },
-        weekdayLabels = layout.weekdayLabels(locale),
+        weekdayLabels = gregorianWeekdayLabels(validFirstDay, locale),
         days = List(7) { offset ->
             gregorianDayCell(
                 epochDay = start + offset,
@@ -70,40 +74,26 @@ fun gregorianWeekData(
 internal fun gregorianWeekdayLabels(
     firstDayOfWeek: Int,
     locale: CalendarLocale? = null,
-): List<String> = GregorianWeekLayout(firstDayOfWeek).weekdayLabels(locale)
+): List<String> = weekdayLabelsStartingAt(firstDayOfWeek) { isoWeekday ->
+    locale?.let { GregorianLabels.weekdayShort(it, isoWeekday) }
+        ?: GregorianPlatformFormatter.weekdayShortLabel(isoWeekday)
+}
 
 /** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek]. */
 internal fun gregorianDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int =
-    GregorianWeekLayout(firstDayOfWeek).offsetFor(epochDay)
-
-private class GregorianWeekLayout(private val firstDayOfWeek: Int) {
-    init {
-        require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
-    }
-
-    fun offsetFor(epochDay: Long): Int =
-        (GregorianYearMonth.isoWeekdayFromEpochDay(epochDay) - firstDayOfWeek).mod(7)
-
-    fun startOfWeek(epochDay: Long): Long = epochDay - offsetFor(epochDay)
-
-    fun weekdayLabels(locale: CalendarLocale?): List<String> = List(7) { offset ->
-        val isoWeekday = (firstDayOfWeek - 1 + offset).mod(7) + 1
-        locale?.let { GregorianLabels.weekdayShort(it, isoWeekday) }
-            ?: GregorianPlatformFormatter.weekdayShortLabel(isoWeekday)
-    }
-}
+    firstDayOffset(epochDay, firstDayOfWeek)
 
 /**
  * Week of the week-based year with one minimal leading day, matching the previous
  * `WeekFields.of(firstDayOfWeek, 1)` behaviour without java.time.
  */
-private fun weekOfWeekBasedYear(epochDay: Long, layout: GregorianWeekLayout): Int {
+private fun weekOfWeekBasedYear(epochDay: Long, firstDayOfWeek: Int): Int {
     val year = GregorianYearMonth.fromEpochDay(epochDay).year
-    val firstWeekStart = layout.startOfWeek(GregorianYearMonth.gregorianToEpochDay(year, 1, 1))
+    val firstWeekStart = weekStartEpochDay(GregorianYearMonth.gregorianToEpochDay(year, 1, 1), firstDayOfWeek)
     return if (epochDay >= firstWeekStart) {
         ((epochDay - firstWeekStart) / 7).toInt() + 1
     } else {
-        val previousWeekStart = layout.startOfWeek(GregorianYearMonth.gregorianToEpochDay(year - 1, 1, 1))
+        val previousWeekStart = weekStartEpochDay(GregorianYearMonth.gregorianToEpochDay(year - 1, 1, 1), firstDayOfWeek)
         ((epochDay - previousWeekStart) / 7).toInt() + 1
     }
 }

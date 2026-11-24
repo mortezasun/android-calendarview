@@ -6,11 +6,13 @@ import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriEngine
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLabels
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriLocale
 import com.develotter.calendarview.calendars.solarHijriNative.SolarHijriPlatform
-import com.develotter.calendarview.calendars.solarHijriNative.isoWeekdayOfEpochDay
 import com.develotter.calendarview.compose.CalendarDayCell
 import com.develotter.calendarview.compose.CalendarWeekData
 import com.develotter.calendarview.locale.CalendarLocale
+import com.develotter.calendarview.selection.firstDayOffset
 import com.develotter.calendarview.selection.isoWeekNumber
+import com.develotter.calendarview.selection.weekStartEpochDay
+import com.develotter.calendarview.selection.weekdayLabelsStartingAt
 
 /** Saturday is the default first day of the Solar Hijri week. */
 internal const val SolarHijriNativeDefaultFirstDayOfWeek: Int = 6
@@ -39,7 +41,7 @@ fun solarHijriNativeWeekData(
     useIsoWeekNumber: Boolean = false,
     isDateEnabled: (Long) -> Boolean = { true },
 ): SolarHijriNativeWeekData {
-    val start = dateEpochDay - solarHijriNativeDayOfWeekOffset(dateEpochDay, firstDayOfWeek)
+    val start = weekStartEpochDay(dateEpochDay, firstDayOfWeek)
     val weekNumber = if (useIsoWeekNumber) {
         val iso = isoWeekNumber(start)
         locale?.let { SolarHijriLabels.number(it, iso) } ?: iso.toString()
@@ -73,24 +75,14 @@ fun solarHijriNativeWeekData(
 internal fun solarHijriNativeWeekdayLabels(
     firstDayOfWeek: Int,
     locale: CalendarLocale? = null,
-): List<String> {
-    requireValidFirstDayOfWeek(firstDayOfWeek)
-    return List(7) { offset ->
-        val isoWeekday = (firstDayOfWeek - 1 + offset).mod(7) + 1
-        locale?.let { SolarHijriLabels.weekdayShort(it, isoWeekday) }
-            ?: SolarHijriPlatform.weekdayShortLabel(isoWeekday)
-    }
+): List<String> = weekdayLabelsStartingAt(firstDayOfWeek) { isoWeekday ->
+    locale?.let { SolarHijriLabels.weekdayShort(it, isoWeekday) }
+        ?: SolarHijriPlatform.weekdayShortLabel(isoWeekday)
 }
 
 /** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek]. */
-internal fun solarHijriNativeDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int {
-    requireValidFirstDayOfWeek(firstDayOfWeek)
-    return (isoWeekdayOfEpochDay(epochDay) - firstDayOfWeek).mod(7)
-}
-
-private fun requireValidFirstDayOfWeek(firstDayOfWeek: Int) {
-    require(firstDayOfWeek in 1..7) { "firstDayOfWeek must be in 1..7: $firstDayOfWeek" }
-}
+internal fun solarHijriNativeDayOfWeekOffset(epochDay: Long, firstDayOfWeek: Int): Int =
+    firstDayOffset(epochDay, firstDayOfWeek)
 
 private fun captionDate(epochDay: Long): SolarHijriDate = SolarHijriDate.fromEpochDay(
     epochDay.coerceIn(SolarHijriEngine.MIN_EPOCH_DAY, SolarHijriEngine.MAX_EPOCH_DAY),

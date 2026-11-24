@@ -232,4 +232,27 @@ class CalendarSampleStateRestorationTest {
         compose.onNodeWithText("orientation:WeeksAsRows").assertTextEquals("orientation:WeeksAsRows")
         compose.onNodeWithText("palette:Green").assertTextEquals("palette:Green")
     }
+
+    @Test
+    fun firstDayOfWeekSurvivesSavedStateRestoration() {
+        val restoration = StateRestorationTester(compose)
+        restoration.setContent {
+            MaterialTheme {
+                var firstDayOfWeekName by rememberSaveable { mutableStateOf("CalendarDefault") }
+                Column {
+                    Text("firstDay:$firstDayOfWeekName")
+                    Button(onClick = { firstDayOfWeekName = "Sunday" }) {
+                        Text("selectSunday")
+                    }
+                }
+            }
+        }
+        compose.onNodeWithText("firstDay:CalendarDefault").assertExists()
+        compose.onNodeWithText("selectSunday").performClick()
+        compose.onNodeWithText("firstDay:Sunday").assertExists()
+
+        restoration.emulateSavedInstanceStateRestore()
+
+        compose.onNodeWithText("firstDay:Sunday").assertTextEquals("firstDay:Sunday")
+    }
 }
