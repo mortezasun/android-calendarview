@@ -337,7 +337,7 @@ ProvideCalendarLocaleLayoutDirection(locale) { // Rtl for fa/ar/..., Ltr otherwi
 ```
 
 `CalendarLocale.isRightToLeft` exposes the same decision as a plain boolean,
-`CalendarLocale.supportedLanguages` lists the languages with tables (`en`, `de`, `fa`, `ar`) and
+`CalendarLocale.supportedLanguages` lists the languages with tables (`en`, `de`, `fa`, `ar`, `fr`, `es`, `zh`) and
 `CalendarLocale.systemDefault()` wraps the platform language. On the JVM and Android,
 `java.util.Locale.asCalendarLocale()` converts a `Locale`.
 

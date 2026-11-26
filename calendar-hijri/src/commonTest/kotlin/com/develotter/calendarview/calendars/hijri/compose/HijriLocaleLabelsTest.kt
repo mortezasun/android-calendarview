@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class HijriLocaleLabelsTest {
-    private val languages = listOf("en", "de", "fa", "ar").map(::CalendarLocale)
+    private val languages = listOf("en", "de", "fa", "ar", "fr", "es", "zh").map(::CalendarLocale)
     private val rabiAlAwwal = HijriDate(1448, 3, 20)
     private val sundayEpochDay = 20758L // 2026-11-01
 
@@ -78,9 +78,29 @@ class HijriLocaleLabelsTest {
 
     @Test
     fun unsupportedLanguageFallsBackToEnglishLabelsAndWesternDigits() {
-        val spanish = CalendarLocale("es")
-        assertEquals("Ramadan", HijriLabels.monthName(spanish, 9))
-        assertEquals("Sun", HijriLabels.weekdayShort(spanish, 7))
-        assertEquals("1448", HijriLabels.number(spanish, 1448))
+        val turkish = CalendarLocale("tr")
+        assertEquals("Ramadan", HijriLabels.monthName(turkish, 9))
+        assertEquals("Sun", HijriLabels.weekdayShort(turkish, 7))
+        assertEquals("1448", HijriLabels.number(turkish, 1448))
+    }
+
+    @Test
+    fun frenchSpanishAndChineseFollowTheirDateConventions() {
+        assertEquals(
+            "dimanche 20 Rabia al awal 1448",
+            HijriLabels.fullDate(CalendarLocale.French, rabiAlAwwal, sundayEpochDay),
+        )
+        assertEquals(
+            "domingo, 20 de Rabi al-awwal de 1448",
+            HijriLabels.fullDate(CalendarLocale.Spanish, rabiAlAwwal, sundayEpochDay),
+        )
+        assertEquals(
+            "1448年赖比尔·敖外鲁月20日星期日",
+            HijriLabels.fullDate(CalendarLocale.Chinese, rabiAlAwwal, sundayEpochDay),
+        )
+        assertEquals("Rabi al-awwal de 1448", HijriLabels.monthYear(CalendarLocale.Spanish, 3, 1448))
+        assertEquals("1448年赖比尔·敖外鲁月", HijriLabels.monthYear(CalendarLocale.Chinese, 3, 1448))
+        assertEquals("20 Rab I", HijriLabels.shortDayMonth(CalendarLocale.French, rabiAlAwwal))
+        assertEquals("1448年赖比尔·敖外鲁月20日", HijriLabels.shortDayMonthYear(CalendarLocale.Chinese, rabiAlAwwal))
     }
 }

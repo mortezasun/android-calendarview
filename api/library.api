@@ -364,6 +364,9 @@ public final class com.develotter.calendarview.locale.CalendarLocale$Companion {
   public final com.develotter.calendarview.locale.CalendarLocale getGerman();
   public final com.develotter.calendarview.locale.CalendarLocale getPersian();
   public final com.develotter.calendarview.locale.CalendarLocale getArabic();
+  public final com.develotter.calendarview.locale.CalendarLocale getFrench();
+  public final com.develotter.calendarview.locale.CalendarLocale getSpanish();
+  public final com.develotter.calendarview.locale.CalendarLocale getChinese();
   public final java.util.List<java.lang.String> getSupportedLanguages();
   public final com.develotter.calendarview.locale.CalendarLocale systemDefault();
 }

@@ -8,6 +8,9 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
 
 ### Added
 
+- `CalendarLocale.French`, `Spanish` and `Chinese` (`fr`, `es`, `zh`) with self-written
+  Gregorian, Hijri and Solar Hijri tables and per-language date order; `supportedLanguages` lists
+  them. The sample apps keep their four translated languages.
 - `CalendarRangeDrag` (pure range-drag state) and `CalendarSelectionState.selectRange(drag, window)`;
   the pointer gesture stays a host concern.
 - `CalendarDayAppearance`, `calendarDayContent` and `calendarWeekendAppearance`: per-day styling

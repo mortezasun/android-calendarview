@@ -29,12 +29,16 @@ data class CalendarLocale(val languageTag: String) {
         val German = CalendarLocale("de")
         val Persian = CalendarLocale("fa")
         val Arabic = CalendarLocale("ar")
+        val French = CalendarLocale("fr")
+        val Spanish = CalendarLocale("es")
+        val Chinese = CalendarLocale("zh")
 
         /**
          * Language subtags with their own label tables in every engine, in the order `en`, `de`,
-         * `fa`, `ar`. Any other language renders English labels and Western digits.
+         * `fa`, `ar`, `fr`, `es`, `zh`. Any other language renders English labels and Western
+         * digits.
          */
-        val supportedLanguages: List<String> = listOf("en", "de", "fa", "ar")
+        val supportedLanguages: List<String> = listOf("en", "de", "fa", "ar", "fr", "es", "zh")
 
         /**
          * The platform's current language as a [CalendarLocale]. The value is read on each call;

@@ -224,7 +224,7 @@ internal fun SampleLanguageSwitch(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        CalendarLocale.supportedLanguages.forEach { tag ->
+        SampleLanguageTags.forEach { tag ->
             FilterChip(
                 selected = localeTag == tag,
                 onClick = { onLocaleTagChange(tag) },
@@ -686,3 +686,6 @@ private fun ChineseDetails(
         Text("Leap month: ${if (date.isLeapMonth) "yes (month ${date.monthNumber})" else "no"}")
     }
 }
+
+/** Languages the sample app ships translations for; the library supports more. */
+internal val SampleLanguageTags: List<String> = listOf("en", "de", "fa", "ar")

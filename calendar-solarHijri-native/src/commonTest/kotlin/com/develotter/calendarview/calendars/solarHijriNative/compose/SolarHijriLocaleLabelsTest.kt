@@ -36,7 +36,7 @@ class SolarHijriLocaleLabelsTest {
 
     @Test
     fun everyLanguageHasCompleteNonPlaceholderTables() {
-        for (tag in listOf("en", "de", "fa", "ar")) {
+        for (tag in listOf("en", "de", "fa", "ar", "fr", "es", "zh")) {
             val locale = CalendarLocale(tag)
             val labels = buildList {
                 for (month in 1..12) add(SolarHijriLabels.monthName(locale, month))
@@ -61,9 +61,23 @@ class SolarHijriLocaleLabelsTest {
 
     @Test
     fun unsupportedLanguageFallsBackToEnglishLabelsAndWesternDigits() {
-        val spanish = CalendarLocale("es")
-        assertEquals("Farvardin 1404", solarHijriNativeMonthTitle(farvardin1404, spanish))
-        assertEquals("Sun", SolarHijriLabels.weekdayShort(spanish, 7))
-        assertEquals("1404", SolarHijriLabels.number(spanish, 1404))
+        val turkish = CalendarLocale("tr")
+        assertEquals("Farvardin 1404", solarHijriNativeMonthTitle(farvardin1404, turkish))
+        assertEquals("Sun", SolarHijriLabels.weekdayShort(turkish, 7))
+        assertEquals("1404", SolarHijriLabels.number(turkish, 1404))
+    }
+
+    @Test
+    fun frenchSpanishAndChineseFollowTheirDateConventions() {
+        // 1 Farvardin 1404 is Friday, 2025-03-21.
+        assertEquals("Farvardin 1404", solarHijriNativeMonthTitle(farvardin1404, CalendarLocale.French))
+        assertEquals("Farvardin de 1404", solarHijriNativeMonthTitle(farvardin1404, CalendarLocale.Spanish))
+        assertEquals("1404年法尔瓦丁月", solarHijriNativeMonthTitle(farvardin1404, CalendarLocale.Chinese))
+        assertEquals("vendredi 1 Farvardin 1404", SolarHijriLabels.fullDate(CalendarLocale.French, farvardin1404))
+        assertEquals(
+            "viernes, 1 de Farvardin de 1404",
+            SolarHijriLabels.fullDate(CalendarLocale.Spanish, farvardin1404),
+        )
+        assertEquals("1404年法尔瓦丁月1日星期五", SolarHijriLabels.fullDate(CalendarLocale.Chinese, farvardin1404))
     }
 }

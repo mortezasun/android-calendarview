@@ -7,6 +7,9 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
 class SampleStringsParityTest {
+    /** Languages the samples translate; the library supports more. */
+    private val sampleLanguages = listOf("en", "de", "fa", "ar")
+
     private val english = CalendarLocale.English
 
     /** Every shell string for [language], keyed by a stable name. */
@@ -25,7 +28,7 @@ class SampleStringsParityTest {
         DemoPage.entries.forEach { put("page.${it.name}", SampleStrings.pageTitle(it, language)) }
         AppThemeMode.entries.forEach { put("mode.${it.name}", SampleStrings.themeModeName(it, language)) }
         AppThemePalette.entries.forEach { put("palette.${it.name}", SampleStrings.paletteName(it, language)) }
-        CalendarLocale.supportedLanguages.forEach {
+        sampleLanguages.forEach {
             put("languageName.$it", SampleStrings.languageName(CalendarLocale(it)))
         }
     }
@@ -33,7 +36,7 @@ class SampleStringsParityTest {
     @Test
     fun everySupportedLanguageHasTheSameNonBlankKeys() {
         val reference = allStrings(english).keys
-        for (tag in CalendarLocale.supportedLanguages) {
+        for (tag in sampleLanguages) {
             val strings = allStrings(CalendarLocale(tag))
             assertEquals(reference, strings.keys, "keys for $tag")
             strings.forEach { (key, value) ->

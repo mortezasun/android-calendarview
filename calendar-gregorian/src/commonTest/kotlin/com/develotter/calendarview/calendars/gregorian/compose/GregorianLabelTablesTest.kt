@@ -8,7 +8,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class GregorianLabelTablesTest {
-    private val languages = listOf("en", "de", "fa", "ar").map(::CalendarLocale)
+    private val languages = listOf("en", "de", "fa", "ar", "fr", "es", "zh").map(::CalendarLocale)
     private val sundayEpochDay = GregorianYearMonth(2026, 11).atDay(1)
 
     @Test
@@ -67,13 +67,49 @@ class GregorianLabelTablesTest {
 
     @Test
     fun unsupportedLanguageFallsBackToEnglishLabelsAndWesternDigits() {
-        val spanish = CalendarLocale("es")
-        assertEquals("November", GregorianLabels.monthName(spanish, 11))
-        assertEquals("Sun", GregorianLabels.weekdayShort(spanish, 7))
-        assertEquals("2026", GregorianLabels.number(spanish, 2026))
+        val turkish = CalendarLocale("tr")
+        assertEquals("November", GregorianLabels.monthName(turkish, 11))
+        assertEquals("Sun", GregorianLabels.weekdayShort(turkish, 7))
+        assertEquals("2026", GregorianLabels.number(turkish, 2026))
         assertEquals(
             "Sunday, 1 November 2026",
-            GregorianLabels.fullDate(spanish, sundayEpochDay),
+            GregorianLabels.fullDate(turkish, sundayEpochDay),
+        )
+    }
+
+    @Test
+    fun frenchSpanishAndChineseFollowTheirDateConventions() {
+        val french = CalendarLocale.French
+        val spanish = CalendarLocale.Spanish
+        val chinese = CalendarLocale.Chinese
+        assertEquals("dimanche 1 novembre 2026", GregorianLabels.fullDate(french, sundayEpochDay))
+        assertEquals("domingo, 1 de noviembre de 2026", GregorianLabels.fullDate(spanish, sundayEpochDay))
+        assertEquals("2026年11月1日星期日", GregorianLabels.fullDate(chinese, sundayEpochDay))
+        assertEquals("novembre 2026", GregorianLabels.monthYear(french, 11, 2026))
+        assertEquals("noviembre de 2026", GregorianLabels.monthYear(spanish, 11, 2026))
+        assertEquals("2026年11月", GregorianLabels.monthYear(chinese, 11, 2026))
+        assertEquals("1 nov.", GregorianLabels.shortDayMonth(french, sundayEpochDay))
+        assertEquals("1 nov 2026", GregorianLabels.shortDayMonthYear(spanish, sundayEpochDay))
+        assertEquals("11月1日", GregorianLabels.shortDayMonth(chinese, sundayEpochDay))
+        assertEquals("2026年11月1日", GregorianLabels.shortDayMonthYear(chinese, sundayEpochDay))
+    }
+
+    @Test
+    fun newLanguagesUseWesternDigits() {
+        listOf(CalendarLocale.French, CalendarLocale.Spanish, CalendarLocale.Chinese).forEach {
+            assertEquals("1234567890", GregorianLabels.number(it, 1234567890))
+        }
+    }
+
+    @Test
+    fun regionalTagsReuseTheLanguageTable() {
+        assertEquals(
+            GregorianLabels.fullDate(CalendarLocale.Spanish, sundayEpochDay),
+            GregorianLabels.fullDate(CalendarLocale("es-MX"), sundayEpochDay),
+        )
+        assertEquals(
+            GregorianLabels.fullDate(CalendarLocale.Chinese, sundayEpochDay),
+            GregorianLabels.fullDate(CalendarLocale("zh-Hant-TW"), sundayEpochDay),
         )
     }
 }

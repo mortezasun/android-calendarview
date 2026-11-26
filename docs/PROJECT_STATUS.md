@@ -256,7 +256,19 @@ the new commit is still pending because this host has no repository credentials.
 - Backlog now left: I (more locales), G (screenshot tests, needs a dependency decision) and H
   (hardware verification).
 
-## `3.1.0-beta` pre-release preparation (`Kotlin 2.5.0-RC` & multiplatform target expansion)
+### Feature: `fr`, `es` and `zh` locales
+
+- Tables and date formats for French, Spanish and Chinese in `:calendar-gregorian`, `:calendar-hijri`
+  and `:calendar-solarHijri-native`; `CalendarLocale` gained three constants and the supported list
+  now has seven entries. Sample apps use their own four-language lists so the strings parity test is
+  unchanged. Details and amendment: ADR 0007.
+- Tests: label-table, date-convention, regional-tag and fallback tests (fallback now uses `tr`).
+  `jvmTest`, `testAndroidHostTest` and the sample unit tests: 612 tests, 0 failures, with the JVM
+  default locale set to German.
+- Open: the non-Gregorian month names for the three languages are unverified and need native-speaker
+  review; no sample translations exist for them; no device test covers them.
+
+ (`Kotlin 2.5.0-RC` & multiplatform target expansion)
 
 Status: implemented, pushed identically to `master` and `kmp`, and verified both locally on Linux and across all five GitHub Actions workflows (including API 29 phone and tablet emulators) against **Kotlin `2.5.0-RC`**, **Compose Multiplatform `1.13.0-beta02`**, Android SDK Platform `37.1`, OpenJDK `17.0.21`, and Gradle `9.9.1`; ready for manual debug APK device testing prior to tagging `3.1.0-beta`.
 

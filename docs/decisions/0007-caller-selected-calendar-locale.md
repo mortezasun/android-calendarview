@@ -87,3 +87,22 @@ bridge. These add public API only; existing signatures are unchanged.
   until a table is added.
 - The library now ships label data for those languages, while the platform formatters remain the
   source for `null` and for anything not covered (for example first day of week, week numbers).
+
+## Amendment: `fr`, `es` and `zh` tables
+
+`CalendarLocale.supportedLanguages` now also lists `fr`, `es` and `zh`, with `French`, `Spanish` and
+`Chinese` constants. Each engine keeps its own self-written table; nothing was copied from an
+external source.
+
+- **Date order:** `fr` writes `dimanche 1 novembre 2026`; `es` writes `domingo, 1 de noviembre de
+  2026` and month captions as `noviembre de 2026`; `zh` writes `2026年11月1日星期日` and `2026年11月`.
+  Digits stay Western in all three.
+- **Hijri and Solar Hijri month names:** `fr` and `es` use Latin transliterations in each
+  language's usual spelling; `zh` uses Chinese transliterations. Solar Hijri keeps the shared
+  Latin transliteration (`Farvardin`, ...) for `fr` and `es`.
+- **Review needed:** the Hijri and Solar Hijri names for `fr`, `es` and `zh` could not be verified
+  against an authoritative source in this repository; a native speaker should review them before
+  the next release.
+- **Samples:** `:calendarviewsample` and `:kmp-sample` still ship their four translated languages
+  through their own language lists; the library supports more than the samples translate.
+- **Unsupported-tag tests:** the fallback tests now use `tr`, which remains outside the list.

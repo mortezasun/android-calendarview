@@ -30,6 +30,9 @@ class CalendarLocaleTest {
                 CalendarLocale.German,
                 CalendarLocale.Persian,
                 CalendarLocale.Arabic,
+                CalendarLocale.French,
+                CalendarLocale.Spanish,
+                CalendarLocale.Chinese,
             ).map { it.language },
         )
     }
@@ -41,11 +44,11 @@ class CalendarLocaleTest {
      */
     @Test
     fun unsupportedTagIsOutsideTheSupportedLanguages() {
-        val spanish = CalendarLocale("es")
-        assertEquals("es", spanish.language)
-        assertFalse(spanish.language in CalendarLocale.supportedLanguages)
-        assertFalse(spanish.isRightToLeft)
-        assertEquals("es", CalendarLocale("es-ES").language)
+        val turkish = CalendarLocale("tr")
+        assertEquals("tr", turkish.language)
+        assertFalse(turkish.language in CalendarLocale.supportedLanguages)
+        assertFalse(turkish.isRightToLeft)
+        assertEquals("tr", CalendarLocale("tr-TR").language)
     }
 
     @Test

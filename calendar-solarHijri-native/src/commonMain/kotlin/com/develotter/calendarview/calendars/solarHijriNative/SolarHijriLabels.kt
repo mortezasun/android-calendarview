@@ -7,7 +7,7 @@ import com.develotter.calendarview.locale.CalendarLocale
  *
  * Only used when the caller passes a locale; `null` keeps [SolarHijriLocale] and its platform
  * default. Month names are the Iranian set for `fa`, the Afghan set for `fa-AF`/`prs`, Arabic
- * script names for `ar`, and English transliterations for `de` and every other tag.
+ * script names for `ar`, and Chinese names for `zh`, and English transliterations for `de`, `fr`, `es` and every other tag.
  */
 internal object SolarHijriLabels {
     private val WEEKDAYS_SHORT: Map<String, List<String>> = mapOf(
@@ -15,6 +15,9 @@ internal object SolarHijriLabels {
         "de" to listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"),
         "fa" to listOf("د", "س", "چ", "پ", "ج", "ش", "ی"),
         "ar" to listOf("إث", "ثل", "أر", "خم", "جم", "سب", "أح"),
+        "fr" to listOf("lun.", "mar.", "mer.", "jeu.", "ven.", "sam.", "dim."),
+        "es" to listOf("lun", "mar", "mié", "jue", "vie", "sáb", "dom"),
+        "zh" to listOf("一", "二", "三", "四", "五", "六", "日"),
     )
 
     private val WEEKDAYS_FULL: Map<String, List<String>> = mapOf(
@@ -30,6 +33,9 @@ internal object SolarHijriLabels {
         "ar" to listOf(
             "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد",
         ),
+        "fr" to listOf("lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"),
+        "es" to listOf("lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"),
+        "zh" to listOf("星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"),
     )
 
     private val DIGITS: Map<String, String> = mapOf(
@@ -37,6 +43,14 @@ internal object SolarHijriLabels {
         "de" to "0123456789",
         "fa" to "۰۱۲۳۴۵۶۷۸۹",
         "ar" to "٠١٢٣٤٥٦٧٨٩",
+        "fr" to "0123456789",
+        "es" to "0123456789",
+        "zh" to "0123456789",
+    )
+
+    private val CHINESE_MONTHS = listOf(
+        "法尔瓦丁月", "奥尔迪贝赫什月", "霍尔达德月", "提尔月", "穆尔达德月", "沙赫里瓦尔月",
+        "梅赫尔月", "阿班月", "阿扎尔月", "代月", "巴赫曼月", "埃斯凡德月",
     )
 
     /** Full month name of [month] (`1..12`). */
@@ -45,9 +59,12 @@ internal object SolarHijriLabels {
         return months(locale)[month - 1]
     }
 
-    /** Month caption such as `Farvardin 1404`. */
-    fun monthYear(locale: CalendarLocale, year: Int, month: Int): String =
-        "${monthName(locale, month)} ${number(locale, year)}"
+    /** Month caption such as `Farvardin 1404`, `Farvardin de 1404` (`es`) or `1404年法尔瓦丁月` (`zh`). */
+    fun monthYear(locale: CalendarLocale, year: Int, month: Int): String = when (languageOf(locale)) {
+        "es" -> "${monthName(locale, month)} de ${number(locale, year)}"
+        "zh" -> "${number(locale, year)}年${monthName(locale, month)}"
+        else -> "${monthName(locale, month)} ${number(locale, year)}"
+    }
 
     /** Localized full date label including weekday, day, month name and year. */
     fun fullDate(locale: CalendarLocale, date: SolarHijriDate): String {
@@ -57,6 +74,9 @@ internal object SolarHijriLabels {
         val year = number(locale, date.year)
         return when (languageOf(locale)) {
             "de" -> "$weekday, $day. $monthName $year"
+            "fr" -> "$weekday $day $monthName $year"
+            "es" -> "$weekday, $day de $monthName de $year"
+            "zh" -> "${year}年$monthName${day}日$weekday"
             "fa", "ar" -> "$weekday، $day $monthName $year"
             else -> "$weekday, $day $monthName $year"
         }
@@ -87,6 +107,7 @@ internal object SolarHijriLabels {
 
         locale.language == "fa" -> SolarHijriLocale.PERSIAN
         locale.language == "ar" -> SolarHijriLocale.ARABIC
+        locale.language == "zh" -> CHINESE_MONTHS
         else -> SolarHijriLocale.ENGLISH
     }
 
