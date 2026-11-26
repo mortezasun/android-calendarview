@@ -207,6 +207,21 @@ the new commit is still pending because this host has no repository credentials.
   labels come from the platform formatter and ignore `CalendarLocale` (`Sun` becomes `So`). The test
   passes with `-Duser.language=en`, which the suites above used.
 
+### Fix: Chinese heatmap weekday labels and CI diagnostics upload
+
+- `chineseMonthData`, `chineseYearHeatmap` and `chineseMonthHeatmap` gained a defaulted
+  `locale: CalendarLocale? = null` before the trailing lambdas. A non-null locale takes the weekday
+  labels from the Gregorian tables; titles and day labels still follow `ChineseTextStyle`. Hidden
+  deprecated overloads keep the previous signatures; `api/calendar-chinese-compose.api` and the KLIB
+  dump were regenerated. `:calendarviewsample` forwards its locale, which fixes
+  `CalendarSampleHeatmapTest.firstDayOfWeekOverrideChangesTheWeekdayOrder` on a German default locale.
+- The four workflows that upload `.ci-diagnostics` now set `include-hidden-files: true`.
+- Checks (Linux, `-Duser.language=de`): `:calendar-chinese-compose:jvmTest` (new locale test, 12/12 in
+  `ChineseComposeDataTest`), `:calendarviewsample:testDebugUnitTest`,
+  `:calendar-chinese-compose:testAndroidHostTest`, `:kmp-sample:compileKotlinDesktop`, `api-check`,
+  `klib-api-check` (modules with a built KLIB), `commonMain` purity. Not run: the CI change itself
+  (needs a GitHub run), Apple/Windows runtime.
+
 ## `3.1.0-beta` pre-release preparation (`Kotlin 2.5.0-RC` & multiplatform target expansion)
 
 Status: implemented, pushed identically to `master` and `kmp`, and verified both locally on Linux and across all five GitHub Actions workflows (including API 29 phone and tablet emulators) against **Kotlin `2.5.0-RC`**, **Compose Multiplatform `1.13.0-beta02`**, Android SDK Platform `37.1`, OpenJDK `17.0.21`, and Gradle `9.9.1`; ready for manual debug APK device testing prior to tagging `3.1.0-beta`.

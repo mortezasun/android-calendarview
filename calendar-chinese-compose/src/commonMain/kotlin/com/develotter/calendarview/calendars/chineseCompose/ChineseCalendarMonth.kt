@@ -70,19 +70,23 @@ fun chineseDayCell(
 /**
  * Pure Chinese month data. Disabled days still render but reject taps; callers must not use
  * [ChineseDate.fromEpochDay] on adjacent positions outside the engine range.
+ *
+ * A non-null [locale] localizes only the weekday labels through the Gregorian label tables; the
+ * title and day labels always follow [style]. `null` keeps the platform formatter.
  */
 fun chineseMonthData(
     month: ChineseMonth,
     style: ChineseTextStyle = ChineseTextStyle.English,
     firstDayOfWeek: Int = ChinesePlatform.defaultFirstDayOfWeek(),
     todayEpochDay: Long = ChinesePlatform.currentEpochDay(),
+    locale: CalendarLocale? = null,
     isDateEnabled: (Long) -> Boolean = { true },
 ): ChineseMonthData {
     val firstEpochDay = month.startEpochDay()
     return ChineseMonthData(
         month = month,
         title = chineseMonthTitle(month, style),
-        weekdayLabels = chineseWeekdayLabels(firstDayOfWeek),
+        weekdayLabels = chineseWeekdayLabels(firstDayOfWeek, locale),
         firstDayOffset = chineseDayOfWeekOffset(firstEpochDay, firstDayOfWeek),
         days = List(month.lengthOfMonth) { index ->
             val epochDay = firstEpochDay + index
@@ -95,6 +99,19 @@ fun chineseMonthData(
         },
     )
 }
+
+/** Binary-compatible overload for callers compiled against 3.1.0-beta without `locale`. */
+@Deprecated(
+    message = "Binary compatibility overload without the locale parameter.",
+    level = DeprecationLevel.HIDDEN,
+)
+fun chineseMonthData(
+    month: ChineseMonth,
+    style: ChineseTextStyle = ChineseTextStyle.English,
+    firstDayOfWeek: Int = ChinesePlatform.defaultFirstDayOfWeek(),
+    todayEpochDay: Long = ChinesePlatform.currentEpochDay(),
+    isDateEnabled: (Long) -> Boolean = { true },
+): ChineseMonthData = chineseMonthData(month, style, firstDayOfWeek, todayEpochDay, null, isDateEnabled)
 
 /** Binary-compatible overload for callers compiled against 3.0.0. */
 @Deprecated(
@@ -416,10 +433,17 @@ fun chineseMonthOfOrNull(month: GregorianYearMonth): ChineseMonth? {
     return if (ChineseCalendarEngine.isSupported(epochDay)) ChineseMonth.fromEpochDay(epochDay) else null
 }
 
-/** Seven localized short weekday labels in grid order starting at [firstDayOfWeek] (ISO 1..7). */
-internal fun chineseWeekdayLabels(firstDayOfWeek: Int): List<String> =
-    weekdayLabelsStartingAt(firstDayOfWeek) { isoWeekday ->
-        ChinesePlatform.weekdayShortLabel(isoWeekday)
+/**
+ * Seven short weekday labels in grid order starting at [firstDayOfWeek] (ISO 1..7). A non-null
+ * [locale] takes them from the Gregorian label tables, `null` from the platform formatter.
+ */
+internal fun chineseWeekdayLabels(firstDayOfWeek: Int, locale: CalendarLocale? = null): List<String> =
+    if (locale != null) {
+        gregorianMonthData(GregorianYearMonth(2000, 1), firstDayOfWeek, 0L, locale).weekdayLabels
+    } else {
+        weekdayLabelsStartingAt(firstDayOfWeek) { isoWeekday ->
+            ChinesePlatform.weekdayShortLabel(isoWeekday)
+        }
     }
 
 /** Leading empty cells before [epochDay] for a grid that starts on [firstDayOfWeek] (ISO 1..7). */

@@ -7,6 +7,7 @@ import com.develotter.calendarview.calendars.chineseNative.ChineseFormat
 import com.develotter.calendarview.calendars.chineseNative.ChineseMonth
 import com.develotter.calendarview.calendars.chineseNative.ChineseTextStyle
 import com.develotter.calendarview.calendars.gregorian.GregorianYearMonth
+import com.develotter.calendarview.locale.CalendarLocale
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -145,5 +146,24 @@ class ChineseComposeDataTest {
         assertTrue(chineseAccessibilityLabel(leapFirst, ChineseTextStyle.English)!!.contains("Leap 2nd Month"))
         assertNull(chineseSecondaryLabel(ChineseCalendarEngine.MIN_EPOCH_DAY - 1))
         assertNull(chineseAccessibilityLabel(ChineseCalendarEngine.MAX_EPOCH_DAY + 1))
+    }
+
+    @Test
+    fun explicitLocaleLocalizesHeatmapAndMonthWeekdayLabelsOnly() {
+        val month = ChineseMonth.of(2023, 2, isLeapMonth = false)
+        val german = listOf("Mo", "Di", "Mi", "Do", "Fr", "Sa", "So")
+        val english = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+        val data = chineseMonthData(month, ChineseTextStyle.English, monday, todayEpochDay = 0L, locale = CalendarLocale.German)
+        assertEquals(german, data.weekdayLabels)
+        assertEquals(chineseMonthData(month, ChineseTextStyle.English, monday, todayEpochDay = 0L).title, data.title)
+        assertEquals(
+            german,
+            chineseYearHeatmap(2023, ChineseTextStyle.English, monday, todayEpochDay = 0L, locale = CalendarLocale.German)
+                .first().weekdayLabels,
+        )
+        assertEquals(
+            english,
+            chineseMonthHeatmap(2023, 2, false, ChineseTextStyle.English, monday, 0L, CalendarLocale.English).weekdayLabels,
+        )
     }
 }

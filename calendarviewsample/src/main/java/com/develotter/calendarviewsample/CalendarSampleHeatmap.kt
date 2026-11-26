@@ -74,6 +74,7 @@ fun sampleHeatmapYear(
             style = ChineseTextStyle.English,
             firstDayOfWeek = localeFirstDay,
             todayEpochDay = todayEpochDay,
+            locale = calendarLocale,
             isDateEnabled = enabled,
             intensity = { sampleHeatmapIntensity(it) },
         )
