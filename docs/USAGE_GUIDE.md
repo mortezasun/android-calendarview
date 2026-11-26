@@ -686,6 +686,34 @@ the continuous `colorForIntensity` lookup.
 
 ---
 
+## Day View
+
+`CalendarDayView` is a stateless, calendar-independent timeline with hour slots. Events use
+minutes since midnight of the displayed day, so no time zone or calendar system is involved; map
+your own instants to minutes at the edge. Overlapping events share the width through
+`layoutDayEvents`, which is public and pure.
+
+```kotlin
+val events = listOf(
+    CalendarDayEvent(id = "standup", startMinute = 9 * 60, endMinute = 9 * 60 + 30, title = "Stand-up"),
+    CalendarDayEvent(id = "review", startMinute = 9 * 60 + 15, endMinute = 11 * 60, title = "Review"),
+)
+
+CalendarDayView(
+    events = events,
+    hourLabel = { hour -> "%02d:00".format(hour) }, // caller-localized; the library ships no strings
+    firstHour = 7,
+    lastHour = 20,
+    nowMinute = 9 * 60 + 40,                         // optional "now" line
+    onEventClick = { event -> open(event.id) },      // null keeps events non-clickable
+)
+```
+
+The caller owns scrolling (`scrollState`) and the window; events outside `firstHour..lastHour` are
+skipped and events crossing its edge are clipped. `eventContent` replaces the default title text.
+
+---
+
 ## Build Your Own Calendar View
 
 The pieces compose in five steps. Each step uses only public API and keeps the caller in charge of

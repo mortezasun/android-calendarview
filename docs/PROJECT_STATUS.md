@@ -232,6 +232,17 @@ the new commit is still pending because this host has no repository credentials.
 - Checks: `:library:jvmTest`, `:library:testAndroidHostTest` (new `CalendarDateWindowTest`, 5 tests),
   `api-check`, `klib-api-check`, `commonMain` purity. Not run: emulator and Apple/Windows runtime.
 
+### Feature: `CalendarDayView`
+
+- New `CalendarDayView` in `:library` with public pure `layoutDayEvents` (overlap columns). Compose
+  rendering is covered only by compilation; the layout logic has 8 `commonTest` tests (all green on
+  `jvmTest`). No Compose UI test was added, so rendering, scrolling and click behaviour are not
+  device-verified.
+- `:library:compileAndroidDeviceTest` could not be resolved in this session because Maven Central
+  downloads failed (`hamcrest-library`, `error_prone_annotations`); `jvmTest`, `testAndroidHostTest`,
+  Apple KLIB builds, `api-check`, `klib-api-check` and the `commonMain` purity check passed.
+- Still open from the backlog: D (range-drag helper, logic only), E (day-style helper).
+
 ## `3.1.0-beta` pre-release preparation (`Kotlin 2.5.0-RC` & multiplatform target expansion)
 
 Status: implemented, pushed identically to `master` and `kmp`, and verified both locally on Linux and across all five GitHub Actions workflows (including API 29 phone and tablet emulators) against **Kotlin `2.5.0-RC`**, **Compose Multiplatform `1.13.0-beta02`**, Android SDK Platform `37.1`, OpenJDK `17.0.21`, and Gradle `9.9.1`; ready for manual debug APK device testing prior to tagging `3.1.0-beta`.

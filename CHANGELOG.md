@@ -8,6 +8,9 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
 
 ### Added
 
+- `CalendarDayView`, `CalendarDayEvent`, `PositionedDayEvent` and `layoutDayEvents`: stateless hour
+  timeline in `:library` with minute-based events, overlap columns, a visible hour window, an
+  optional "now" line and caller-supplied hour labels.
 - `CalendarDateWindow(minEpochDay, maxEpochDay)`: immutable inclusive selectable-day window with
   `contains`, `allows(start, end)` and an `isDateEnabled` adapter, complementing the length-only
   `CalendarRangePolicy` (which is unchanged).
