@@ -83,6 +83,7 @@ jobs:
           name: android-${{ matrix.check }}-${{ github.run_id }}-${{ github.run_attempt }}
           retention-days: 7
           if-no-files-found: warn
+          include-hidden-files: true
           path: |
             .ci-diagnostics/toolchain.txt
             **/build/reports/**
