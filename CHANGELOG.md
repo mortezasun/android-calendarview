@@ -8,6 +8,12 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
 
 ### Added
 
+- `CalendarDateWindow(minEpochDay, maxEpochDay)`: immutable inclusive selectable-day window with
+  `contains`, `allows(start, end)` and an `isDateEnabled` adapter, complementing the length-only
+  `CalendarRangePolicy` (which is unchanged).
+- `ChineseCalendarMonth` data builders and heatmaps accept `locale: CalendarLocale?` for weekday
+  labels (`chineseMonthData`, `chineseYearHeatmap`, `chineseMonthHeatmap`); titles and day labels
+  still follow `ChineseTextStyle`.
 - Keyboard navigation reaches the engine facades: `keyboardNavigation` (default `false`) and
   `onMonthStep` are parameters of all five engine month composables and
   `GregorianChineseCalendarMonth`, forwarded to `CalendarMonthGrid`.

@@ -540,6 +540,26 @@ val rangedSelection = rememberCalendarSelectionState(
 rangedSelection.selectRange(startEpochDay, endEpochDay)
 ```
 
+### `CalendarDateWindow`
+
+`CalendarRangePolicy` limits the *length* of a range; `CalendarDateWindow` limits *where* days may
+lie, with optional inclusive `minEpochDay` / `maxEpochDay` bounds. Pass its `isDateEnabled` adapter
+to any composable or data builder; disabled days still render but reject taps.
+
+```kotlin
+val window = CalendarDateWindow(minEpochDay = todayEpochDay, maxEpochDay = todayEpochDay + 90)
+
+GregorianCalendarMonth(
+    month = month,
+    selection = state.selection,
+    onDateClick = { state.onDayClick(it) },
+    isDateEnabled = window.isDateEnabled,
+)
+
+// For externally built ranges, check the window first; selectRange applies the length policy:
+if (window.allows(start, end)) state.selectRange(start, end)
+```
+
 ---
 
 ## Scrolling Containers
@@ -663,6 +683,59 @@ Thresholds must be finite, inside `0..1` and strictly ascending. An intensity eq
 stays in the lower step; the drawn color uses that step's lower bound, while `HeatmapDayData`,
 selection and accessibility descriptions keep the real value. `buckets = null` (the default) keeps
 the continuous `colorForIntensity` lookup.
+
+---
+
+## Build Your Own Calendar View
+
+The pieces compose in five steps. Each step uses only public API and keeps the caller in charge of
+state, so the same recipe works for every engine.
+
+1. **Pick the engine month.** `GregorianYearMonth.now()` (or `HijriDate`, `SolarHijriDate`,
+   `ChineseMonth`) is the visible month. Hold it in the engine's saveable `*MonthState`, for example
+   `rememberGregorianMonthState()`, so rotation and process death keep it.
+2. **Own the selection.** `rememberCalendarSelectionState(TypeSelectDay.Range)` stores epoch days
+   only; never key selection by formatted dates.
+3. **Render the month.** Call the engine composable (`GregorianCalendarMonth`) with the selection and
+   `onDateClick`. Add `markers`, `weekNumber`, `locale` and `isDateEnabled` as needed.
+4. **Add navigation.** Use `CalendarMonthHeader` for previous/next/today, `CalendarMonthPager` or
+   `CalendarMonthList` for swiping and scrolling, and `CalendarMonthPicker` inside your own dialog.
+5. **Limit and polish.** `CalendarRangePolicy` limits range length, `CalendarDateWindow` limits the
+   selectable days, `LocalCalendarStyle` themes the cells and `keyboardNavigation = true` enables
+   arrow-key movement.
+
+```kotlin
+@Composable
+fun BookingCalendar(todayEpochDay: Long) {
+    val monthState = rememberGregorianMonthState()
+    val selection = rememberCalendarSelectionState(
+        mode = TypeSelectDay.Range,
+        rangePolicy = CalendarRangePolicy(minRangeLength = 2, maxRangeLength = 14),
+    )
+    val window = CalendarDateWindow(minEpochDay = todayEpochDay)
+
+    Column {
+        CalendarMonthHeader(
+            title = monthState.title(),
+            state = monthState,
+            previousMonthContentDescription = "Previous month",
+            nextMonthContentDescription = "Next month",
+            todayLabel = "Today",
+        )
+        GregorianCalendarMonth(
+            month = monthState.month,
+            selection = selection.selection,
+            onDateClick = { selection.onDayClick(it) },
+            isDateEnabled = window.isDateEnabled,
+            keyboardNavigation = true,
+        )
+    }
+}
+```
+
+> [!NOTE]
+> Keep date arithmetic in epoch days and convert to a calendar date only at the edge. Day cells then
+> never depend on a time zone or daylight-saving change.
 
 ---
 

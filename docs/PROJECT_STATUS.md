@@ -222,6 +222,16 @@ the new commit is still pending because this host has no repository credentials.
   `klib-api-check` (modules with a built KLIB), `commonMain` purity. Not run: the CI change itself
   (needs a GitHub run), Apple/Windows runtime.
 
+### Feature: `CalendarDateWindow` and "Build your own calendar view" guide
+
+- New immutable `CalendarDateWindow(minEpochDay, maxEpochDay)` in `:library` (`contains`, `allows`,
+  `isDateEnabled`). `CalendarRangePolicy` is deliberately unchanged: adding constructor parameters to
+  that data class would break its binary `copy`/`componentN` signatures.
+- `docs/USAGE_GUIDE.md` gained the window section and a five-step tutorial; README and CHANGELOG
+  updated; `api/library.api` and `api/klib/library.abi` regenerated.
+- Checks: `:library:jvmTest`, `:library:testAndroidHostTest` (new `CalendarDateWindowTest`, 5 tests),
+  `api-check`, `klib-api-check`, `commonMain` purity. Not run: emulator and Apple/Windows runtime.
+
 ## `3.1.0-beta` pre-release preparation (`Kotlin 2.5.0-RC` & multiplatform target expansion)
 
 Status: implemented, pushed identically to `master` and `kmp`, and verified both locally on Linux and across all five GitHub Actions workflows (including API 29 phone and tablet emulators) against **Kotlin `2.5.0-RC`**, **Compose Multiplatform `1.13.0-beta02`**, Android SDK Platform `37.1`, OpenJDK `17.0.21`, and Gradle `9.9.1`; ready for manual debug APK device testing prior to tagging `3.1.0-beta`.
