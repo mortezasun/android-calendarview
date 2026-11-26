@@ -243,6 +243,19 @@ the new commit is still pending because this host has no repository credentials.
   Apple KLIB builds, `api-check`, `klib-api-check` and the `commonMain` purity check passed.
 - Still open from the backlog: D (range-drag helper, logic only), E (day-style helper).
 
+### Features: `CalendarRangeDrag` and per-day appearance
+
+- `CalendarRangeDrag` (logic only) and `CalendarSelectionState.selectRange(drag, window)` in
+  `:library`; `calendarDayContent`, `CalendarDayAppearance` and `calendarWeekendAppearance` as a
+  helper over the existing `dayContent` slot, so no composable signature changed. This honours the
+  AGENTS.md rule that drag gestures stay host concerns.
+- Tests: 7 drag and 3 appearance `commonTest` cases, green on `jvmTest`. The `calendarDayContent`
+  rendering is compile-verified only, with no Compose UI test, so it is not device-verified.
+- Checks: `jvmTest`, `testAndroidHostTest`, `api-check`, `klib-api-check`, `commonMain` purity.
+  `compileAndroidDeviceTest` was not re-run (Maven Central downloads failed earlier in the session).
+- Backlog now left: I (more locales), G (screenshot tests, needs a dependency decision) and H
+  (hardware verification).
+
 ## `3.1.0-beta` pre-release preparation (`Kotlin 2.5.0-RC` & multiplatform target expansion)
 
 Status: implemented, pushed identically to `master` and `kmp`, and verified both locally on Linux and across all five GitHub Actions workflows (including API 29 phone and tablet emulators) against **Kotlin `2.5.0-RC`**, **Compose Multiplatform `1.13.0-beta02`**, Android SDK Platform `37.1`, OpenJDK `17.0.21`, and Gradle `9.9.1`; ready for manual debug APK device testing prior to tagging `3.1.0-beta`.

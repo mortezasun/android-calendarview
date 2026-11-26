@@ -8,6 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.develotter.calendarview.enums.TypeSelectDay
+import com.develotter.calendarview.selection.CalendarDateWindow
+import com.develotter.calendarview.selection.CalendarRangeDrag
 import com.develotter.calendarview.selection.CalendarRangePolicy
 import com.develotter.calendarview.selection.CalendarSelection
 import com.develotter.calendarview.selection.CalendarSelectionSnapshot
@@ -56,6 +58,16 @@ class CalendarSelectionState(
         val next = CalendarSelection.from(TypeSelectDay.Range, listOf(startEpochDay, endEpochDay))
         val days = next.selectedDays
         if (days.size == 2 && rangePolicy.allows(days[0], days[1])) selection = next
+    }
+
+    /**
+     * Commits a finished [drag] as a range when the mode is Range, the endpoints lie in [window]
+     * and [rangePolicy] accepts the length. Returns whether the range was applied.
+     */
+    fun selectRange(drag: CalendarRangeDrag, window: CalendarDateWindow = CalendarDateWindow()): Boolean {
+        if (selection.mode != TypeSelectDay.Range || !drag.isAllowed(rangePolicy, window)) return false
+        selectRange(drag.startEpochDay, drag.endEpochDay)
+        return true
     }
 
     /** Clears selected days while retaining the selection mode. */

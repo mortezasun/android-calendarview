@@ -560,6 +560,49 @@ GregorianCalendarMonth(
 if (window.allows(start, end)) state.selectRange(start, end)
 ```
 
+### Per-day appearance (weekends, holidays)
+
+`calendarDayContent` turns an `appearanceFor` function into a `dayContent` lambda, so existing
+signatures stay unchanged. The library bundles no holiday data; the caller decides which days get a
+`CalendarDayAppearance`. Selected days keep the selection colors.
+
+```kotlin
+val weekend = CalendarDayAppearance(contentColor = Color(0xFFC62828), bold = true)
+val holidays = setOf(todayEpochDay + 3)
+val holiday = CalendarDayAppearance(containerColor = Color(0xFFFFE0B2))
+val weekendAppearance = calendarWeekendAppearance(weekend) // Saturday and Sunday; pass weekendDays to change
+
+GregorianCalendarMonth(
+    month = month,
+    selection = state.selection,
+    onDateClick = { state.onDayClick(it) },
+    dayContent = calendarDayContent { day ->
+        if (day.epochDay in holidays) holiday else weekendAppearance(day)
+    },
+)
+```
+
+### Range drag helper
+
+`CalendarRangeDrag` is the pure state of a range drag; the pointer gesture and the hit test that
+maps a position to an epoch day stay with the host. Call `moveTo` while dragging, render
+`toSelection()` as the live preview and commit through the state when the gesture ends.
+
+```kotlin
+var drag by remember { mutableStateOf<CalendarRangeDrag?>(null) }
+
+// onDragStart(epochDay):
+drag = CalendarRangeDrag(epochDay)
+// onDrag(epochDay):
+drag = drag?.moveTo(epochDay, isDateEnabled = window.isDateEnabled)
+// onDragEnd():
+drag?.let { rangedSelection.selectRange(it, window) } // false when policy or window reject it
+drag = null
+```
+
+`selectRange(drag, window)` returns whether the range was applied; it needs Range mode, both
+endpoints inside the window and a length accepted by the `CalendarRangePolicy`.
+
 ---
 
 ## Scrolling Containers

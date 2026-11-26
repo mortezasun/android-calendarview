@@ -8,6 +8,10 @@ expansion; tag `3.1.0-beta` awaits CI and manual debug-APK verification before r
 
 ### Added
 
+- `CalendarRangeDrag` (pure range-drag state) and `CalendarSelectionState.selectRange(drag, window)`;
+  the pointer gesture stays a host concern.
+- `CalendarDayAppearance`, `calendarDayContent` and `calendarWeekendAppearance`: per-day styling
+  through the existing `dayContent` slot, with no bundled holiday data and no signature changes.
 - `CalendarDayView`, `CalendarDayEvent`, `PositionedDayEvent` and `layoutDayEvents`: stateless hour
   timeline in `:library` with minute-based events, overlap columns, a visible hour window, an
   optional "now" line and caller-supplied hour labels.
